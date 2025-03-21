@@ -6,6 +6,7 @@
 `1.0.3`
 
 - In development.
+- `Reflection.findSubclass` no longer throws `IllegalStateException` it throws `ReflectionException` instead.
 
 ---
 

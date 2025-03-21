@@ -12,36 +12,41 @@
  */
 package org.morphix.reflection;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class {@link Reflection#getClassWithPrefix(Class, String)}
+ * Test class {@link Reflection#findSubclass(Class, Class)}
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionGetClassWithPrefixTest {
+class ReflectionFindSubclassTest {
 
-	public static class Int {
+	static class A {
 		// empty
 	}
 
-	public static class XInt {
+	static class B extends A {
+		// empty
+	}
+
+	static class C extends B {
 		// empty
 	}
 
 	@Test
-	void shouldReturnClassWithPrefix() {
-		Class<XInt> xIntClass = Reflection.getClassWithPrefix(Int.class, "X");
-		assertThat(xIntClass, equalTo(XInt.class));
+	void shouldFindSubclassForTheGivenChildAndExpectedParent() {
+		Class<?> child = Reflection.findSubclass(A.class, C.class);
+		assertThat(child, equalTo(B.class));
 	}
 
 	@Test
-	void shouldThrowExceptionIfClassWithPrefixDoesNotExist() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Reflection.getClassWithPrefix(Int.class, "P"));
-		assertThat(e.getMessage(), equalTo("Could not find class with prefix '" + ReflectionGetClassWithPrefixTest.class.getCanonicalName() + "$PInt'"));
+	void shouldThrowReflectionExceptionIfTheParentIsObject() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Reflection.findSubclass(String.class, A.class));
+		assertThat(e.getMessage(), equalTo("The parent of " + A.class.getCanonicalName() + " is not a " + String.class.getCanonicalName()));
 	}
+
 }

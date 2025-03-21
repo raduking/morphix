@@ -81,7 +81,14 @@ class ReflectionGetDeclaredConstructorWithParamsTest {
 
 	@Test
 	void shouldThrowExceptionIfNoConstructorIsFoundWithGivenParameters() {
-		assertThrows(ReflectionException.class, () -> Constructors.getDeclaredConstructor(B.class, String.class));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.getDeclaredConstructor(B.class, String.class));
+		assertThat(e.getMessage(), equalTo("No constructor found for class: " + B.class.getCanonicalName() + " with parameters: [class java.lang.String]"));
+	}
+
+	@Test
+	void shouldThrowExceptionIfNoConstructorIsFoundWithNullParameters() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.getDeclaredConstructor(B.class, (Class<?>[]) null));
+		assertThat(e.getMessage(), equalTo("No constructor found for class: " + B.class.getCanonicalName() + " with parameters: none"));
 	}
 
 	@Test

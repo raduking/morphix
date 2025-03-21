@@ -14,6 +14,8 @@ package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -107,6 +109,61 @@ class GenericClassTest {
 		Type result = gc.getGenericArgumentType();
 
 		assertThat(result.toString(), equalTo(expected.toString()));
+	}
+
+	@Test
+	void shouldBuildANewGenericClassWithFactoryMethod() {
+		GenericClass<String> gc = GenericClass.of(String.class);
+
+		assertThat(gc.toString(), equalTo("GenericClass<class java.lang.String>"));
+	}
+
+	@Test
+	void shouldReturnTrueOnEqualsWithTheSameObject() {
+		GenericClass<String> gc = GenericClass.of(String.class);
+
+		boolean result = gc.equals(gc);
+
+		assertTrue(result);
+	}
+
+	@Test
+	void shouldReturnTrueOnEqualsWithObjectsThatHaveTheSameUnderlyingType() {
+		GenericClass<String> gc1 = GenericClass.of(String.class);
+		GenericClass<String> gc2 = GenericClass.of(String.class);
+
+		boolean result = gc1.equals(gc2);
+
+		assertTrue(result);
+	}
+
+	@Test
+	void shouldReturnFalseOnEqualsWhenTheParameterIsNotAGenericClass() {
+		GenericClass<String> gc1 = GenericClass.of(String.class);
+
+		boolean result = gc1.equals("x");
+
+		assertFalse(result);
+	}
+
+	@Test
+	void shouldReturnFalseOnEqualsWithObjectsThatHaveDifferentUnderlyingTypes() {
+		GenericClass<String> gc1 = GenericClass.of(String.class);
+		GenericClass<String> gc2 = GenericClass.of(Integer.class);
+
+		boolean result = gc1.equals(gc2);
+
+		assertFalse(result);
+	}
+
+	@Test
+	void shouldReturnTheUnderlyingTypesHasCodeOnHasCode() {
+		GenericClass<String> gc = GenericClass.of(String.class);
+
+		int expected = String.class.hashCode();
+		int result = gc.hashCode();
+
+		assertThat(result, equalTo(expected));
 	}
 
 }
