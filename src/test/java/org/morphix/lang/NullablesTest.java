@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 class NullablesTest {
 
 	private static final String SOME_ERROR_MESSAGE = "Some error message";
+	private static final String SOME_OTHER_ERROR_MESSAGE = "Other error message";
 	private static final String MUMU = "mumu";
 	private static final String BIBI = "bibi";
 
@@ -109,6 +110,64 @@ class NullablesTest {
 					.andNotNull(A::getB)
 					.andNotNull(B::getS)
 					.valueOrError(SOME_ERROR_MESSAGE);
+		} catch (IllegalStateException e) {
+			exception = e;
+		}
+
+		assertThat(exception, notNullValue());
+		assertThat(exception.getMessage(), equalTo(SOME_ERROR_MESSAGE));
+	}
+
+	@SuppressWarnings("null")
+	@Test
+	void shouldFailFastWhenErrorMessageIsProvidedOnNestingWithAndNotNullWithErrorMessageProvided() {
+		A a = new A();
+		B b = new B();
+		a.b = b;
+
+		Exception exception = null;
+		try {
+			whenNotNull(a, SOME_OTHER_ERROR_MESSAGE)
+					.andNotNull(A::getB)
+					.andNotNull(B::getS)
+					.valueOrError(SOME_ERROR_MESSAGE);
+		} catch (IllegalStateException e) {
+			exception = e;
+		}
+
+		assertThat(exception, notNullValue());
+		assertThat(exception.getMessage(), equalTo(SOME_ERROR_MESSAGE));
+	}
+
+	@SuppressWarnings("null")
+	@Test
+	void shouldFailFastWhenErrorMessageIsProvidedOnNestingWithAndNotNullWithErrorMessageProvidedForNotNullAlias() {
+		A a = new A();
+		B b = new B();
+		a.b = b;
+
+		Exception exception = null;
+		try {
+			notNull(a, SOME_OTHER_ERROR_MESSAGE)
+					.andNotNull(A::getB)
+					.andNotNull(B::getS)
+					.valueOrError(SOME_ERROR_MESSAGE);
+		} catch (IllegalStateException e) {
+			exception = e;
+		}
+
+		assertThat(exception, notNullValue());
+		assertThat(exception.getMessage(), equalTo(SOME_ERROR_MESSAGE));
+	}
+
+	@SuppressWarnings("null")
+	@Test
+	void shouldFailFastWhenErrorMessageIsProvided() {
+		A a = null;
+
+		Exception exception = null;
+		try {
+			whenNotNull(a, SOME_ERROR_MESSAGE);
 		} catch (IllegalStateException e) {
 			exception = e;
 		}

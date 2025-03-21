@@ -146,7 +146,7 @@ public interface Reflection {
 	public static Class<?> findSubclass(final Class<?> expectedParent, final Class<?> child) {
 		Class<?> parent = child.getSuperclass();
 		if (Object.class == parent) {
-			throw new IllegalStateException("The parent is not a " + expectedParent);
+			throw new ReflectionException("The parent of " + child.getCanonicalName() + " is not a " + expectedParent.getCanonicalName());
 		}
 		if (expectedParent == parent) {
 			return child;
