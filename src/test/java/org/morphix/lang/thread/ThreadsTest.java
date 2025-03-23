@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
@@ -330,5 +331,37 @@ class ThreadsTest {
 		});
 
 		Threads.safeJoin(testingThread);
+	}
+
+	static class A {
+		// empty
+	}
+
+	@Test
+	void shouldReturnEmptyConsumerThatDoesNothing() {
+		Consumer<A> consumer = Threads.consumeNothing();
+
+		A a = mock(A.class);
+		consumer.accept(a);
+
+		verifyNoInteractions(a);
+	}
+
+	@Test
+	void shouldComposeARunnableWithASupplierAndRunThemSequentially() {
+		List<Integer> list = new ArrayList<>();
+
+		Runnable runnable = () -> {
+			list.add(1);
+		};
+		Supplier<String> supplier = () -> {
+			list.add(2);
+			return TEST_STRING;
+		};
+
+		String result = Threads.compose(runnable, supplier).get();
+
+		assertThat(result, equalTo(TEST_STRING));
+		assertThat(list, equalTo(List.of(1, 2)));
 	}
 }
