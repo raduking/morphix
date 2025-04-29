@@ -10,7 +10,7 @@
 - Added `Nullables.requireNull` for easier preconditions throwing an `IllegalArgumentException` if the parameter is not `null`.
 - Added `JavaObjects.max` that returns the maximum of two `Comparable`s
 - Added `JavaObjects.min` that returns the minimum of two `Comparable`s
-- Updated parent to `3.4.4`
+- Updated parent to `3.4.5`
 - Added `Methods.getCallerMethodName` with skipFrames parameter.
 - Added `Consumers` class with utility methods for consumers.
 - Added `Consumers.noBiConsumer` method that returns an empty `BiConsumer`.
