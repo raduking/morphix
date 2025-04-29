@@ -12,6 +12,10 @@
 - Added `JavaObjects.min` that returns the minimum of two `Comparable`s
 - Updated parent to `3.4.4`
 - Added `Methods.getCallerMethodName` with skipFrames parameter.
+- Added `Consumers` class with utility methods for consumers.
+- Added `Consumers.noBiConsumer` method that returns an empty `BiConsumer`.
+- Added `Runnables` class with utility methods for runnables.
+- Removed consumer and runnable methods from `Threads` class.
 
 ---
 

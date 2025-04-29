@@ -25,9 +25,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.morphix.lang.JavaObjects;
-import org.morphix.lang.Nullables;
 import org.morphix.lang.Unchecked;
+import org.morphix.lang.function.Runnables;
 
 /**
  * Utility methods for working with threads.
@@ -35,20 +34,6 @@ import org.morphix.lang.Unchecked;
  * @author Radu Sebastian LAZIN
  */
 public class Threads {
-
-	/**
-	 * An empty consumer.
-	 */
-	private static final Consumer<?> EMPTY_CONSUMER = t -> {
-		// empty
-	};
-
-	/**
-	 * An empty runnable.
-	 */
-	private static final Runnable EMPTY_RUNNABLE = () -> {
-		// empty
-	};
 
 	/**
 	 * Threads execution functional interface.
@@ -285,66 +270,6 @@ public class Threads {
 	}
 
 	/**
-	 * Returns a runnable that does nothing.
-	 *
-	 * @return a runnable that does nothing
-	 */
-	public static Runnable doNothing() {
-		return EMPTY_RUNNABLE;
-	}
-
-	/**
-	 * Returns a consumer that does nothing.
-	 *
-	 * @param <T> the type of the input to the operation
-	 *
-	 * @return a consumer that does nothing
-	 */
-	public static <T> Consumer<T> noConsumer() {
-		return JavaObjects.cast(EMPTY_CONSUMER);
-	}
-
-	/**
-	 * Alias for {@link #noConsumer()}.
-	 *
-	 * @param <T> the type of the input to the operation
-	 *
-	 * @return a consumer that does nothing
-	 */
-	public static <T> Consumer<T> consumeNothing() {
-		return noConsumer();
-	}
-
-	/**
-	 * Transforms a runnable to a supplier that returns null. This method is useful
-	 * when you need a streamlined way of handling suppliers and runnable-s in
-	 * functional calls.
-	 *
-	 * @param <T> supplier return type
-	 * @param runnable runnable to transform to supplier
-	 * @return null
-	 */
-	public static <T> Supplier<T> toSupplier(final Runnable runnable) {
-		return Nullables.supplyNull(runnable);
-	}
-
-	/**
-	 * Transforms a runnable and a supplier to another supplier that runs the runnable first
-	 * and the supplier second.
-	 *
-	 * @param <T> supplier return type
-	 * @param runnable runnable to run before the supplier
-	 * @param supplier supplier to run after the runnable
-	 * @return supplier
-	 */
-	public static <T> Supplier<T> compose(final Runnable runnable, final Supplier<T> supplier) {
-		return () -> {
-			runnable.run();
-			return supplier.get();
-		};
-	}
-
-	/**
 	 * Creates a list of {@link Runnable} tasks for each element in the given list.
 	 * The consumer determines what will be executed for each element. The resulting
 	 * can then be run with any of the {@code execute(...)} methods.
@@ -418,6 +343,6 @@ public class Threads {
 	 * @param runnable code to run
 	 */
 	public static final void execute(final Duration timeout, final Runnable runnable) {
-		execute(timeout, toSupplier(runnable));
+		execute(timeout, Runnables.toSupplier(runnable));
 	}
 }
