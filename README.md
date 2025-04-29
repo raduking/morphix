@@ -44,6 +44,14 @@ See [examples](src/test/java/org/morphix/examples) folder in unit tests for exam
 
 ### Getting Started
 
+For the latest development release you need to get the [develop](https://github.com/raduking/morphix/tree/develop) branch and build it yourself:
+
+```
+git clone git@github.com:raduking/morphix.git
+cd morphix
+mvn clean install
+```
+
 Maven: add this dependency to your `pom.xml`
 
 ```xml
