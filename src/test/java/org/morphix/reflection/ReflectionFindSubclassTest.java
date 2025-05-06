@@ -10,41 +10,43 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.lang;
+package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link JavaObjects}.
+ * Test class {@link Reflection#findSubclass(Class, Class)}
  *
  * @author Radu Sebastian LAZIN
  */
-class JavaObjectsTest {
+class ReflectionFindSubclassTest {
 
-	@Test
-	void shouldCastToInferredType() {
-		Object o = "Bubu";
+	static class A {
+		// empty
+	}
 
-		String bubu = JavaObjects.cast(o);
+	static class B extends A {
+		// empty
+	}
 
-		assertThat(bubu, notNullValue());
-		assertThat(bubu, equalTo("Bubu"));
+	static class C extends B {
+		// empty
 	}
 
 	@Test
-	void shouldThrowClassCastExceptionWhenObjectCannotBeCastToInferredType() {
-		String x = "Cucu";
-
-		ClassCastException e = assertThrows(ClassCastException.class, () -> {
-			@SuppressWarnings("unused")
-			Integer xi = JavaObjects.cast(x);
-		});
-
-		assertThat(e, notNullValue());
+	void shouldFindSubclassForTheGivenChildAndExpectedParent() {
+		Class<?> child = Reflection.findSubclass(A.class, C.class);
+		assertThat(child, equalTo(B.class));
 	}
+
+	@Test
+	void shouldThrowReflectionExceptionIfTheParentIsObject() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Reflection.findSubclass(String.class, A.class));
+		assertThat(e.getMessage(), equalTo("The parent of " + A.class.getCanonicalName() + " is not a " + String.class.getCanonicalName()));
+	}
+
 }

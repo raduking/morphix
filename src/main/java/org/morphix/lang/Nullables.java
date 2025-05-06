@@ -100,6 +100,18 @@ public final class Nullables {
 	}
 
 	/**
+	 * Throws an {@link IllegalArgumentException} if the given object is not {@code null}.
+	 *
+	 * @param obj reference to test for null
+	 * @param errorMessage the message for the exception thrown
+	 */
+	public static void requireNull(final Object obj, final String errorMessage) {
+		if (null != obj) {
+			throw new IllegalArgumentException(errorMessage);
+		}
+	}
+
+	/**
 	 * Calls the supplier method only if the parameter is not null.
 	 *
 	 * @param <T> supplied type

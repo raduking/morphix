@@ -40,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
@@ -50,8 +49,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.morphix.lang.function.Runnables;
 import org.morphix.lang.thread.Threads.ExecutionType;
-import org.morphix.reflection.Fields;
 
 /**
  * Test class for {@link Threads}.
@@ -204,7 +203,7 @@ class ThreadsTest {
 
 	@Test
 	void shouldNotThrowExeptionOnTimeoutWhenRunningRunnableWithTimeout() {
-		assertDoesNotThrow(() -> Threads.execute(Duration.ofSeconds(10), Threads.doNothing()));
+		assertDoesNotThrow(() -> Threads.execute(Duration.ofSeconds(10), Runnables.doNothing()));
 	}
 
 	@Test
@@ -279,16 +278,6 @@ class ThreadsTest {
 	}
 
 	@Test
-	void shouldConsumeNothing() {
-		Consumer<?> consumer = Fields.IgnoreAccess.getStatic(Threads.class, "EMPTY_CONSUMER");
-
-		Consumer<?> emptyConsumer = Threads.noConsumer();
-
-		assertThat(emptyConsumer, equalTo(Threads.consumeNothing()));
-		assertThat(consumer, equalTo(emptyConsumer));
-	}
-
-	@Test
 	void shouldInterruptCurrentThreadWhenHandlingInterruptedException() {
 		Thread thread = Thread.ofPlatform().start(Threads::handleInterruptedException);
 		Threads.safeJoin(thread);
@@ -331,4 +320,5 @@ class ThreadsTest {
 
 		Threads.safeJoin(testingThread);
 	}
+
 }

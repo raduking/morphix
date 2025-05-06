@@ -302,10 +302,26 @@ public interface Methods {
 	 */
 	static <T> Optional<String> getCallerMethodName(final Supplier<T> supplier,
 			final BiFunction<? super String, ? super String, String> nameFunction) {
+		// skip this and the below call to get above
+		return getCallerMethodName(supplier, 2, nameFunction);
+	}
+
+	/**
+	 * Returns the caller method name for a given supplier.
+	 *
+	 * @param <T> supplier return type
+	 *
+	 * @param supplier value supplier
+	 * @param skipFrames skips the given number of frames starting from the current frame
+	 * @param nameFunction function to build the name from the class name and method name
+	 * @return optional method name
+	 */
+	static <T> Optional<String> getCallerMethodName(final Supplier<T> supplier, final int skipFrames,
+			final BiFunction<? super String, ? super String, String> nameFunction) {
 		String packageName = supplier.getClass().getPackageName();
 		StackWalker walker = StackWalker.getInstance();
 		return walker.walk(frames -> frames
-				.skip(1) // skip this method
+				.skip(skipFrames) // skip frames
 				.filter(frame -> frame.getClassName().startsWith(packageName))
 				.findFirst())
 				.map(frame -> nameFunction.apply(frame.getClassName(), frame.getMethodName()));

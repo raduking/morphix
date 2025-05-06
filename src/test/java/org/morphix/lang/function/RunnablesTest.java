@@ -10,41 +10,42 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.lang;
+package org.morphix.lang.function;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link JavaObjects}.
+ * Test class for {@link Runnables}.
  *
  * @author Radu Sebastian LAZIN
  */
-class JavaObjectsTest {
+class RunnablesTest {
+
+	private static final String TEST_STRING = "testString";
 
 	@Test
-	void shouldCastToInferredType() {
-		Object o = "Bubu";
+	void shouldComposeARunnableWithASupplierAndRunThemSequentially() {
+		List<Integer> list = new ArrayList<>();
 
-		String bubu = JavaObjects.cast(o);
+		Runnable runnable = () -> {
+			list.add(1);
+		};
+		Supplier<String> supplier = () -> {
+			list.add(2);
+			return TEST_STRING;
+		};
 
-		assertThat(bubu, notNullValue());
-		assertThat(bubu, equalTo("Bubu"));
+		String result = Runnables.compose(runnable, supplier).get();
+
+		assertThat(result, equalTo(TEST_STRING));
+		assertThat(list, equalTo(List.of(1, 2)));
 	}
 
-	@Test
-	void shouldThrowClassCastExceptionWhenObjectCannotBeCastToInferredType() {
-		String x = "Cucu";
-
-		ClassCastException e = assertThrows(ClassCastException.class, () -> {
-			@SuppressWarnings("unused")
-			Integer xi = JavaObjects.cast(x);
-		});
-
-		assertThat(e, notNullValue());
-	}
 }

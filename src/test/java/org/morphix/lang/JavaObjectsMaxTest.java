@@ -12,39 +12,44 @@
  */
 package org.morphix.lang;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link JavaObjects}.
+ * Test class for {@link JavaObjects#max(Comparable, Comparable)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class JavaObjectsTest {
+class JavaObjectsMaxTest {
 
 	@Test
-	void shouldCastToInferredType() {
-		Object o = "Bubu";
+	void shouldReturnMaximum() {
+		Integer x = 10;
+		Integer y = 20;
 
-		String bubu = JavaObjects.cast(o);
+		Integer result = JavaObjects.max(x, y);
 
-		assertThat(bubu, notNullValue());
-		assertThat(bubu, equalTo("Bubu"));
+		assertThat(result, equalTo(y));
 	}
 
 	@Test
-	void shouldThrowClassCastExceptionWhenObjectCannotBeCastToInferredType() {
-		String x = "Cucu";
+	void shouldReturnMaximumSecondWhenFirstParamIsNull() {
+		Integer y = 20;
 
-		ClassCastException e = assertThrows(ClassCastException.class, () -> {
-			@SuppressWarnings("unused")
-			Integer xi = JavaObjects.cast(x);
-		});
+		Integer result = JavaObjects.max(null, y);
 
-		assertThat(e, notNullValue());
+		assertThat(result, equalTo(y));
 	}
+
+	@Test
+	void shouldReturnMaximumFirstWhenSecondParamIsNull() {
+		Integer x = 10;
+
+		Integer result = JavaObjects.max(x, null);
+
+		assertThat(result, equalTo(x));
+	}
+
 }

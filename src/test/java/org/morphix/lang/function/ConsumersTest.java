@@ -10,38 +10,47 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.reflection;
+package org.morphix.lang.function;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
+
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.reflection.Fields;
 
 /**
- * Test class {@link Reflection#getClassWithPrefix(Class, String)}
+ * Test class for {@link Consumers}.
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionGetClassWithPrefixTest {
+class ConsumersTest {
 
-	public static class Int {
-		// empty
+	@Test
+	void shouldConsumeNothing() {
+		Consumer<?> consumer = Fields.IgnoreAccess.getStatic(Consumers.class, "EMPTY_CONSUMER");
+
+		Consumer<?> emptyConsumer = Consumers.noConsumer();
+
+		assertThat(emptyConsumer, equalTo(Consumers.consumeNothing()));
+		assertThat(consumer, equalTo(emptyConsumer));
 	}
 
-	public static class XInt {
+	static class A {
 		// empty
 	}
 
 	@Test
-	void shouldReturnClassWithPrefix() {
-		Class<XInt> xIntClass = Reflection.getClassWithPrefix(Int.class, "X");
-		assertThat(xIntClass, equalTo(XInt.class));
+	void shouldReturnEmptyConsumerThatDoesNothing() {
+		Consumer<A> consumer = Consumers.consumeNothing();
+
+		A a = mock(A.class);
+		consumer.accept(a);
+
+		verifyNoInteractions(a);
 	}
 
-	@Test
-	void shouldThrowExceptionIfClassWithPrefixDoesNotExist() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Reflection.getClassWithPrefix(Int.class, "P"));
-		assertThat(e.getMessage(), equalTo("Could not find class with prefix '" + ReflectionGetClassWithPrefixTest.class.getCanonicalName() + "$PInt'"));
-	}
 }
