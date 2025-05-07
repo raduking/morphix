@@ -4,6 +4,8 @@
 
 `1.0.4`
 
+- Updated dependencies to latest versions.
+
 ---
 
 `1.0.3`

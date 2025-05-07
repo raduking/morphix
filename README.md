@@ -56,8 +56,8 @@ Maven: add this dependency to your `pom.xml`
 
 ```xml
 <dependency>
-	<groupId>io.github.raduking</groupId>
-	<artifactId>morphix-all</artifactId>
-	<version>1.0.4</version>
+    <groupId>io.github.raduking</groupId>
+    <artifactId>morphix-all</artifactId>
+    <version>1.0.4</version>
 </dependency>
 ```
