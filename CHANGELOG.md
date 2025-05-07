@@ -1,5 +1,10 @@
 ## Release Notes
 
+---
+
+`1.0.4`
+
+- Updated dependencies to latest versions.
 
 ---
 
