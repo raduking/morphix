@@ -50,14 +50,14 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		
+
 		<!-- Testing dependencies versions -->
 		<pitest.plugin.version>1.19.1</pitest.plugin.version>
 		<pitest.plugin.junit5.version>1.2.2</pitest.plugin.junit5.version>
 		<jacoco.plugin.version>0.8.13</jacoco.plugin.version>
 		<project.info.reports.plugin.version>3.9.0</project.info.reports.plugin.version>
 
-		<!-- Publishing dependencies versions -->		
+		<!-- Publishing dependencies versions -->
 		<gpg.plugin.version>3.2.7</gpg.plugin.version>
 		<central.publishing.plugin.version>0.7.0</central.publishing.plugin.version>
 
