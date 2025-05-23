@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.6</version>
+		<version>3.5.0</version>
 		<relativePath />
 	</parent>
 
@@ -52,8 +52,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- Testing dependencies versions -->
-		<pitest.plugin.version>1.19.1</pitest.plugin.version>
-		<pitest.plugin.junit5.version>1.2.2</pitest.plugin.junit5.version>
+		<pitest.plugin.version>1.19.4</pitest.plugin.version>
+		<pitest.plugin.junit5.version>1.2.3</pitest.plugin.junit5.version>
 		<jacoco.plugin.version>0.8.13</jacoco.plugin.version>
 		<project.info.reports.plugin.version>3.9.0</project.info.reports.plugin.version>
 
