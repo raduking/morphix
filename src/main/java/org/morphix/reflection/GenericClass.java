@@ -1,5 +1,6 @@
 package org.morphix.reflection;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
@@ -23,7 +24,7 @@ public abstract class GenericClass<T> {
 	/**
 	 * Captured generic type.
 	 */
-	private final Type type;
+	private Type type;
 
 	/**
 	 * Default protected constructor.
@@ -54,6 +55,27 @@ public abstract class GenericClass<T> {
 		return new GenericClass<>(type) {
 			// empty
 		};
+	}
+
+	/**
+	 * Sets the type.
+	 *
+	 * @param type type to set
+	 */
+	public void setType(final Type type) {
+		if (!(type instanceof ParameterizedType)) {
+			throw new ReflectionException("Type must be a " + ParameterizedType.class);
+		}
+		this.type = type;
+	}
+
+	/**
+	 * Alias for {@link #setType(Type)}.
+	 *
+	 * @param type type to set
+	 */
+	public void setGenericArgumentType(final Type type) {
+		setType(type);
 	}
 
 	/**

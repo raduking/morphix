@@ -15,8 +15,10 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
@@ -157,7 +159,7 @@ class GenericClassTest {
 	}
 
 	@Test
-	void shouldReturnTheUnderlyingTypesHasCodeOnHasCode() {
+	void shouldReturnTheUnderlyingTypesHashCodeOnHashCode() {
 		GenericClass<String> gc = GenericClass.of(String.class);
 
 		int expected = String.class.hashCode();
@@ -166,4 +168,32 @@ class GenericClassTest {
 		assertThat(result, equalTo(expected));
 	}
 
+	@Test
+	void shouldBeAbleToChenageTheType() {
+		GenericClass<List<String>> gc1 = new GenericClass<>() {
+			// empty
+		};
+		GenericClass<Map<Long, String>> gc2 = new GenericClass<>() {
+			// empty
+		};
+
+		gc1.setGenericArgumentType(gc2.getGenericArgumentType());
+
+		GenericType expected = GenericType.of(Map.class, new Type[] { Long.class, String.class }, null);
+
+		Type result = gc1.getGenericArgumentType();
+
+		assertThat(result.toString(), equalTo(expected.toString()));
+	}
+
+	@Test
+	void shouldThrowExceptionIfSetTypeTriesToChangeTheTypeToANonParameterizedType() {
+		GenericClass<List<String>> gc = new GenericClass<>() {
+			// empty
+		};
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> gc.setGenericArgumentType(String.class));
+
+		assertThat(e.getMessage(), equalTo("Type must be a " + ParameterizedType.class));
+	}
 }

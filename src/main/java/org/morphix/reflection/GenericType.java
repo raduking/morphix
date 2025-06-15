@@ -77,7 +77,7 @@ public class GenericType implements ParameterizedType {
 
 	/**
 	 * Builds a new {@link GenericType} object based on the generic argument of a generic class object.
-	 * If the generic argument type is not a parameterized type then an {@link IllegalArgumentException}
+	 * If the generic argument type is not a parameterized type then an {@link ReflectionException}
 	 * is thrown.
 	 *
 	 * @param <T> generic argument type
@@ -90,8 +90,8 @@ public class GenericType implements ParameterizedType {
 		if (genericArgumentType instanceof ParameterizedType parameterizedType) {
 			return of(parameterizedType);
 		}
-		throw new IllegalArgumentException("Cannot build GenericType from " + genericArgumentType +
-				" because it is not a ParameterizedType");
+		throw new ReflectionException("Cannot build GenericType from " + genericArgumentType +
+				" because it is not a " + ParameterizedType.class);
 	}
 
 	/**
@@ -158,21 +158,33 @@ public class GenericType implements ParameterizedType {
 		return type instanceof ParameterizedType;
 	}
 
+	/**
+	 * @see #getActualTypeArguments()
+	 */
 	@Override
 	public Type[] getActualTypeArguments() {
 		return arguments;
 	}
 
+	/**
+	 * @see #getRawType()
+	 */
 	@Override
 	public Type getRawType() {
 		return rawType;
 	}
 
+	/**
+	 * @see #getOwnerType()
+	 */
 	@Override
 	public Type getOwnerType() {
 		return ownerType;
 	}
 
+	/**
+	 * @see #equals(Object)
+	 */
 	@Override
 	public boolean equals(final Object o) {
 		if (o == this) {
@@ -186,6 +198,9 @@ public class GenericType implements ParameterizedType {
 		return false;
 	}
 
+	/**
+	 * @see #hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		return Arrays.hashCode(arguments) ^
@@ -193,6 +208,9 @@ public class GenericType implements ParameterizedType {
 	            Objects.hashCode(rawType);
 	}
 
+	/**
+	 * @see #hashCode()
+	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

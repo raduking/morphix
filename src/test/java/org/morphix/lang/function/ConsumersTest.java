@@ -14,13 +14,19 @@ package org.morphix.lang.function;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.lang.JavaObjects;
+import org.morphix.reflection.Constructors;
 import org.morphix.reflection.Fields;
+import org.morphix.reflection.ReflectionException;
 
 /**
  * Test class for {@link Consumers}.
@@ -39,6 +45,15 @@ class ConsumersTest {
 		assertThat(consumer, equalTo(emptyConsumer));
 	}
 
+	@Test
+	void shouldBiConsumeNothing() {
+		BiConsumer<?, ?> biConsumer = Fields.IgnoreAccess.getStatic(Consumers.class, "EMPTY_BI_CONSUMER");
+
+		BiConsumer<?, ?> emptyBiConsumer = Consumers.noBiConsumer();
+
+		assertThat(biConsumer, equalTo(emptyBiConsumer));
+	}
+
 	static class A {
 		// empty
 	}
@@ -51,6 +66,24 @@ class ConsumersTest {
 		consumer.accept(a);
 
 		verifyNoInteractions(a);
+	}
+
+	@Test
+	void shouldReturnEmptyBiConsumerThatDoesNothing() {
+		BiConsumer<A, A> consumer = Consumers.noBiConsumer();
+
+		A a = mock(A.class);
+		consumer.accept(a, a);
+
+		verifyNoInteractions(a);
+	}
+
+	@Test
+	void shouldThrowExceptionWhenTryingToInstantiateClass() {
+		ReflectionException reflectionException = assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(Consumers.class));
+		InvocationTargetException invocationTargetException = JavaObjects.cast(reflectionException.getCause());
+		UnsupportedOperationException unsupportedOperationException = JavaObjects.cast(invocationTargetException.getCause());
+		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 	}
 
 }
