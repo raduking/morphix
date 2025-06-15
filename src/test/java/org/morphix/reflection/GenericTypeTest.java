@@ -147,6 +147,9 @@ class GenericTypeTest {
 			// empty
 		};
 
-		assertThrows(IllegalArgumentException.class, () -> GenericType.of(gc));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> GenericType.of(gc));
+
+		assertThat(e.getMessage(), equalTo("Cannot build GenericType from " + String.class +
+				" because it is not a " + ParameterizedType.class));
 	}
 }

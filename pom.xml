@@ -11,13 +11,13 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.5</version>
+		<version>3.5.0</version>
 		<relativePath />
 	</parent>
 
 	<groupId>io.github.raduking</groupId>
 	<artifactId>morphix-all</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.4</version>
 	<packaging>jar</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -50,12 +50,17 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<pitest.plugin.version>1.18.2</pitest.plugin.version>
-		<pitest.plugin.junit5.version>1.2.1</pitest.plugin.junit5.version>
-		<jacoco.plugin.version>0.8.12</jacoco.plugin.version>
+
+		<!-- Testing dependencies versions -->
+		<pitest.plugin.version>1.19.4</pitest.plugin.version>
+		<pitest.plugin.junit5.version>1.2.3</pitest.plugin.junit5.version>
+		<jacoco.plugin.version>0.8.13</jacoco.plugin.version>
+		<project.info.reports.plugin.version>3.9.0</project.info.reports.plugin.version>
+
+		<!-- Publishing dependencies versions -->
 		<gpg.plugin.version>3.2.7</gpg.plugin.version>
-		<project.info.reports.plugin.version>3.7.0</project.info.reports.plugin.version>
-		<central.publishing.plugin.version>0.6.0</central.publishing.plugin.version>
+		<central.publishing.plugin.version>0.7.0</central.publishing.plugin.version>
+
 		<morphixArgLine>
 			-XX:+EnableDynamicAgentLoading
 			-Xshare:off
@@ -262,8 +267,8 @@
 						<extensions>true</extensions>
 						<configuration>
 							<autoPublish>true</autoPublish>
-							<deploymentName>release-${project.version}</deploymentName>
-							<publishingServerId>ossrh</publishingServerId>
+							<deploymentName>release-${project.artifactId}-${project.version}</deploymentName>
+							<publishingServerId>central</publishingServerId>
 						</configuration>
 					</plugin>
 
@@ -324,13 +329,13 @@
 
 	<distributionManagement>
 		<snapshotRepository>
-			<id>ossrh</id>
-			<name>Central Repository OSSRH Snapshots</name>
+			<id>central</id>
+			<name>Central Repository Snapshots</name>
 			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
   		<repository>
-			<id>ossrh</id>
-			<name>Central Repository OSSRH</name>
+			<id>central</id>
+			<name>Central Repository</name>
     		<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>

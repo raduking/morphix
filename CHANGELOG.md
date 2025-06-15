@@ -1,5 +1,12 @@
 ## Release Notes
 
+---
+
+`1.0.4`
+
+- Updated dependencies to latest versions.
+- Changed `GenericType.of` method to throw `ReflectionException` when the parameter is not of type `ParameterizedType`.
+- Changed `GenericClass` to be mutable so that the generic argument type can be set dynamically.
 
 ---
 
