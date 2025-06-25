@@ -121,21 +121,50 @@ public class ConstantPool<T> implements Iterable<Member> {
 	 */
 	static class ConstantPoolIterator<T> implements Iterator<Member> {
 
+		/**
+		 * The constant pool being iterated over.
+		 */
 		private final ConstantPool<T> constantPool;
+
+		/**
+		 * The size of the constant pool.
+		 */
 		private final int size;
+
+		/**
+		 * Current index position in the iteration.
+		 */
 		private int index;
 
+		/**
+		 * Constructs a new ConstantPoolIterator for the given constant pool. The iterator starts at the end of the pool and
+		 * moves backward.
+		 *
+		 * @param constantPool the constant pool to iterate over
+		 */
 		public ConstantPoolIterator(final ConstantPool<T> constantPool) {
 			this.constantPool = constantPool;
 			this.size = constantPool.getSize();
 			this.index = this.size - 1;
 		}
 
+		/**
+		 * Returns {@code true} if the iteration has more elements. (In other words, returns {@code true} if {@link #next} would
+		 * return an element rather than throwing an exception.)
+		 *
+		 * @return {@code true} if the iteration has more elements
+		 */
 		@Override
 		public boolean hasNext() {
 			return 0 <= index && index < size;
 		}
 
+		/**
+		 * Returns the next element in the iteration and moves the index backward.
+		 *
+		 * @return the next element in the iteration
+		 * @throws NoSuchElementException if the iteration has no more elements
+		 */
 		@Override
 		public Member next() {
 			Member result = constantPool.getMemberAt(index);
@@ -145,6 +174,11 @@ public class ConstantPool<T> implements Iterable<Member> {
 			return result;
 		}
 
+		/**
+		 * Decrements and returns the current index. This method is used internally to move the iteration backward.
+		 *
+		 * @return the updated index after decrementing
+		 */
 		int nextIndex() {
 			return --index;
 		}
