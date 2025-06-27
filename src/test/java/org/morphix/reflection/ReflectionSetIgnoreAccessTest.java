@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.morphix.reflection.testdata.A;
 
 /**
- * Test class for {@link Fields#set(Object, String, Object)} and {@link Fields#set(Object, Field, Object)}
+ * Test class for {@link Fields#set(Object, String, Object)} and {@link Fields#set(Object, Field, Object)}.
  *
  * @author Radu Sebastian LAZIN
  */

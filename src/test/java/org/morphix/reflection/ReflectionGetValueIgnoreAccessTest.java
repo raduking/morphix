@@ -21,7 +21,7 @@ import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#get(Object, Field)}
+ * Test class for {@link Fields#get(Object, Field)}.
  *
  * @author Radu Sebastian LAZIN
  */

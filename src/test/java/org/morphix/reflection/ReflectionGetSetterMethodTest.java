@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class {@link Reflection#getClassWithPrefix(Class, String)}
+ * Test class {@link Reflection#getClassWithPrefix(Class, String)}.
  *
  * @author Radu Sebastian LAZIN
  */

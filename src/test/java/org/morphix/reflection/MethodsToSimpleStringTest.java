@@ -19,6 +19,11 @@ import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Test class for {@link Methods#toSimpleString(Method)}.
+ *
+ * @author Radu Sebastian LAZIN
+ */
 class MethodsToSimpleStringTest {
 
 	@Test

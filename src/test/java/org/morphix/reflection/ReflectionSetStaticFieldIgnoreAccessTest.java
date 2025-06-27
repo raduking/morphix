@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#setStatic(Class, String, Object)}
+ * Test class for {@link Fields#setStatic(Class, String, Object)}.
  *
  * @author Radu Sebastian LAZIN
  */

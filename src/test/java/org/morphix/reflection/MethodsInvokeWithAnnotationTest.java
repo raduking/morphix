@@ -18,6 +18,11 @@ import static org.hamcrest.Matchers.equalTo;
 import org.junit.jupiter.api.Test;
 import org.morphix.convert.annotation.Expandable;
 
+/**
+ * Test class for {@link Methods.IgnoreAccess#invokeWithAnnotation(Object, Class)}.
+ *
+ * @author Radu Sebastian LAZIN
+ */
 class MethodsInvokeWithAnnotationTest {
 
 	private static final int I11 = 11;
@@ -42,7 +47,7 @@ class MethodsInvokeWithAnnotationTest {
 	void shouldInvokeMethods() {
 		A a = new A();
 
-		Methods.invokeMethodsWithAnnotation(a, Expandable.class);
+		Methods.IgnoreAccess.invokeWithAnnotation(a, Expandable.class);
 
 		assertThat(a.getX(), equalTo(I22));
 	}
@@ -66,7 +71,7 @@ class MethodsInvokeWithAnnotationTest {
 	void shouldInvokeMethodsInHierarchy() {
 		B b = new B();
 
-		Methods.invokeMethodsWithAnnotation(b, Expandable.class);
+		Methods.IgnoreAccess.invokeWithAnnotation(b, Expandable.class);
 
 		assertThat(b.getX(), equalTo(I22));
 		assertThat(b.getY(), equalTo(I22));

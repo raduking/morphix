@@ -89,9 +89,16 @@ public class Threads {
 		}),
 
 		/**
-		 * Will run each runnable using {@link CompletableFuture#runAsync(Runnable, Executor)}
-		 * and the executor supplied. If the executor is {@code null} a single thread
-		 * executor will be used by default.
+		 * Will run each runnable using {@link CompletableFuture#runAsync(Runnable, Executor)} and the executor supplied. If the
+		 * executor is {@code null} a single thread executor will be used by default.
+		 * <p>
+		 * By default when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be used.
+		 * <p>
+		 * If you want the runnables to run on a specific executor use:
+		 *
+		 * <pre>
+		 * Threads.execute(runnables, executor)
+		 * </pre>
 		 */
 		EXECUTOR((runnables, executor) -> {
 			if (null == executor) {
@@ -151,9 +158,8 @@ public class Threads {
 	}
 
 	/**
-	 * Puts the current thread to sleep for the given interval with the given
-	 * time unit. See {@link TimeUnit} for more details. If the interval is
-	 * zero no sleep will be done.
+	 * Puts the current thread to sleep for the given interval with the given time unit. See {@link TimeUnit} for more
+	 * details. If the interval is zero no sleep will be done.
 	 *
 	 * @param interval interval
 	 * @param timeUnit time unit
@@ -179,8 +185,8 @@ public class Threads {
 	}
 
 	/**
-	 * Helper method that calls {@link CountDownLatch#await()} on the given latch,
-	 * with {@link InterruptedException} handling.
+	 * Helper method that calls {@link CountDownLatch#await()} on the given latch, with {@link InterruptedException}
+	 * handling.
 	 *
 	 * @param latch latch
 	 */
@@ -193,8 +199,8 @@ public class Threads {
 	}
 
 	/**
-	 * Helper method that calls {@link CountDownLatch#await(long, TimeUnit)}
-	 * on the given latch and timeout, with {@link InterruptedException} handling.
+	 * Helper method that calls {@link CountDownLatch#await(long, TimeUnit)} on the given latch and timeout, with
+	 * {@link InterruptedException} handling.
 	 *
 	 * @param latch latch
 	 * @param duration timeout
@@ -210,8 +216,8 @@ public class Threads {
 	}
 
 	/**
-	 * Helper method that calls {@link CountDownLatch#await()} on the given latch,
-	 * with {@link InterruptedException} handling.
+	 * Helper method that calls {@link CountDownLatch#await()} on the given latch, with {@link InterruptedException}
+	 * handling.
 	 *
 	 * @param thread thread object
 	 */
@@ -224,8 +230,10 @@ public class Threads {
 	}
 
 	/**
-	 * Runs each runnable in the list with the given execution type.
-	 * It only returns after all threads have completed.
+	 * Runs each runnable in the list with the given execution type. It only returns after all threads have completed.<br/>
+	 * By default when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be used.
+	 * <p>
+	 * If you want the runnables to run on a specific executor use: {@link #execute(List, ExecutorService)}
 	 *
 	 * @param <T> runnable type
 	 *
@@ -237,8 +245,7 @@ public class Threads {
 	}
 
 	/**
-	 * Runs all runnables in the list in different threads. It only returns
-	 * after all threads have completed.
+	 * Runs all runnables in the list in different threads. It only returns after all threads have completed.
 	 *
 	 * @param <T> runnable type
 	 *
@@ -270,9 +277,8 @@ public class Threads {
 	}
 
 	/**
-	 * Creates a list of {@link Runnable} tasks for each element in the given list.
-	 * The consumer determines what will be executed for each element. The resulting
-	 * can then be run with any of the {@code execute(...)} methods.
+	 * Creates a list of {@link Runnable} tasks for each element in the given list. The consumer determines what will be
+	 * executed for each element. The resulting can then be run with any of the {@code execute(...)} methods.
 	 *
 	 * @param <T> element type
 	 *
@@ -311,8 +317,8 @@ public class Threads {
 	}
 
 	/**
-	 * Returns the value from the given supplier within the given timeout. If the timeout
-	 * passes before the supplier returns the value a {@link TimeoutException} is thrown.
+	 * Returns the value from the given supplier within the given timeout. If the timeout passes before the supplier returns
+	 * the value a {@link TimeoutException} is thrown.
 	 *
 	 * @param <T> the type of results supplied by the provided supplier
 	 *
@@ -336,8 +342,8 @@ public class Threads {
 	}
 
 	/**
-	 * Runs the given runnable within the given timeout. If the timeout passes before
-	 * the runnable finished execution a {@link TimeoutException} is thrown.
+	 * Runs the given runnable within the given timeout. If the timeout passes before the runnable finished execution a
+	 * {@link TimeoutException} is thrown.
 	 *
 	 * @param timeout timeout
 	 * @param runnable code to run
