@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.morphix.testdata.MethodName;
 
 /**
- * Test class for {@link Methods#getCallerMethodName(Supplier, BiFunction)}
+ * Test class for {@link Methods#getCallerMethodName(Supplier, BiFunction)}.
  *
  * @author Radu Sebastian LAZIN
  */

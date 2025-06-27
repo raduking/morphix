@@ -124,30 +124,6 @@ public interface Methods {
 	}
 
 	/**
-	 * Invokes the given method on the given object with parameters, throws just the original exception message when needed.
-	 *
-	 * @param <T> object type on which the method is invoked
-	 * @param <R> method return type
-	 *
-	 * @param obj object on which the method is invoked
-	 * @param method method to be invoked
-	 * @param args method arguments
-	 * @return result of the method invocation
-	 */
-	static <T, R> R invokeWithOriginalException(final Method method, final T obj, final Object... args) {
-		try (MemberAccessor<Method> methodAccessor = new MemberAccessor<>(obj, method)) {
-			return JavaObjects.cast(method.invoke(obj, args));
-		} catch (InvocationTargetException e) {
-			// e is just a wrapper on the real exception, escalate the real one
-			Throwable cause = Reflection.unwrapInvocationTargetException(e);
-			throw new ReflectionException(cause.getMessage(), e);
-		} catch (Exception e) {
-			// escalate any exception invoking the method
-			throw new ReflectionException(e.getMessage(), e);
-		}
-	}
-
-	/**
 	 * Returns the generic return type for a method.
 	 * <p>
 	 * Example: for the following method:
@@ -224,23 +200,6 @@ public interface Methods {
 		} catch (ClassCastException e) {
 			throw new ReflectionException("Could not infer actual generic return type argument from " + parameterizedType.getTypeName() +
 					" for method " + method.getDeclaringClass().getCanonicalName() + "." + method.getName(), e);
-		}
-	}
-
-	/**
-	 * Invokes all methods that are annotated with the given annotation. The annotated method should have no parameters and
-	 * should return <code>void</code>
-	 *
-	 * @param <T> object type
-	 * @param <A> annotation type
-	 *
-	 * @param obj object on which to invoke the methods
-	 * @param annotationClass annotation class
-	 */
-	static <T, A extends Annotation> void invokeMethodsWithAnnotation(final T obj, final Class<A> annotationClass) {
-		List<Method> methods = Methods.getDeclaredMethodsInHierarchy(obj.getClass(), withAnnotation(annotationClass));
-		for (Method method : methods) {
-			Methods.IgnoreAccess.invoke(method, obj);
 		}
 	}
 
@@ -394,6 +353,47 @@ public interface Methods {
 					className = obj instanceof Class ? ((Class<?>) obj).getCanonicalName() : obj.getClass().getCanonicalName();
 				}
 				throw new ReflectionException(e.getMessage() + ". Error invoking " + className + "." + method.getName(), e);
+			}
+		}
+
+		/**
+		 * Invokes all methods that are annotated with the given annotation. The annotated method should have no parameters and
+		 * should return <code>void</code>
+		 *
+		 * @param <T> object type
+		 * @param <A> annotation type
+		 *
+		 * @param obj object on which to invoke the methods
+		 * @param annotationClass annotation class
+		 */
+		static <T, A extends Annotation> void invokeWithAnnotation(final T obj, final Class<A> annotationClass) {
+			List<Method> methods = Methods.getDeclaredMethodsInHierarchy(obj.getClass(), withAnnotation(annotationClass));
+			for (Method method : methods) {
+				invoke(method, obj);
+			}
+		}
+
+		/**
+		 * Invokes the given method on the given object with parameters, throws just the original exception message when needed.
+		 *
+		 * @param <T> object type on which the method is invoked
+		 * @param <R> method return type
+		 *
+		 * @param obj object on which the method is invoked
+		 * @param method method to be invoked
+		 * @param args method arguments
+		 * @return result of the method invocation
+		 */
+		static <T, R> R invokeWithOriginalException(final Method method, final T obj, final Object... args) {
+			try (MemberAccessor<Method> methodAccessor = new MemberAccessor<>(obj, method)) {
+				return JavaObjects.cast(method.invoke(obj, args));
+			} catch (InvocationTargetException e) {
+				// e is just a wrapper on the real exception, escalate the real one
+				Throwable cause = Reflection.unwrapInvocationTargetException(e);
+				throw new ReflectionException(cause.getMessage(), e);
+			} catch (Exception e) {
+				// escalate any exception invoking the method
+				throw new ReflectionException(e.getMessage(), e);
 			}
 		}
 

@@ -5,6 +5,8 @@
 `1.0.5`
 
 - Upgraded parent to `3.5.3`.
+- Moved `Methods.invokeMethodsWithAnnotation` to `Methods.IgnoreAccess.invokeWithAnnotation`.
+- Moved `Methods.invokeWithOriginalException` to `Methods.IgnoreAccess.invokeWithOriginalException`.
 
 ---
 

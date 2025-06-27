@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.equalTo;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#get(Object, String)}
+ * Test class for {@link Fields#get(Object, String)}.
  *
  * @author Radu Sebastian LAZIN
  */

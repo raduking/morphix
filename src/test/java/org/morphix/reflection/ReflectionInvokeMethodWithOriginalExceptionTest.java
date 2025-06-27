@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.morphix.reflection.testdata.A;
 
 /**
- * Test class for {@link Methods#invokeWithOriginalException(Method, Object, Object...)}.
+ * Test class for {@link Methods.IgnoreAccess#invokeWithOriginalException(Method, Object, Object...)}.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -43,7 +43,7 @@ class ReflectionInvokeMethodWithOriginalExceptionTest {
 		A obj = new A();
 
 		Method method = A.class.getDeclaredMethod("foo", String.class);
-		Methods.invokeWithOriginalException(method, obj, TEST_STRING);
+		Methods.IgnoreAccess.invokeWithOriginalException(method, obj, TEST_STRING);
 
 		assertThat(obj.getS(), equalTo(TEST_STRING));
 	}
@@ -53,7 +53,7 @@ class ReflectionInvokeMethodWithOriginalExceptionTest {
 		A obj = new A();
 
 		Method method = A.class.getDeclaredMethod("fooPrivate", String.class);
-		Methods.invokeWithOriginalException(method, obj, TEST_STRING);
+		Methods.IgnoreAccess.invokeWithOriginalException(method, obj, TEST_STRING);
 
 		assertThat(method.canAccess(obj), equalTo(false));
 	}
@@ -61,7 +61,7 @@ class ReflectionInvokeMethodWithOriginalExceptionTest {
 	@Test
 	void shouldInvokeStaticMethod() throws Exception {
 		Method method = StaticA.class.getDeclaredMethod("foo", String.class);
-		Methods.invokeWithOriginalException(method, null, TEST_STRING);
+		Methods.IgnoreAccess.invokeWithOriginalException(method, null, TEST_STRING);
 
 		assertThat(StaticA.s, equalTo(TEST_STRING));
 	}
@@ -69,7 +69,7 @@ class ReflectionInvokeMethodWithOriginalExceptionTest {
 	@Test
 	void shouldInvokeClassMethod() throws Exception {
 		Method method = Class.class.getDeclaredMethod("getName");
-		String name = (String) Methods.invokeWithOriginalException(method, Class.class);
+		String name = (String) Methods.IgnoreAccess.invokeWithOriginalException(method, Class.class);
 
 		assertThat(name, equalTo(Class.class.getName()));
 	}
@@ -77,19 +77,19 @@ class ReflectionInvokeMethodWithOriginalExceptionTest {
 	@Test
 	void shouldThrowConverterExceptionWhenFailInvokeClassMethod() throws Exception {
 		Method method = Class.class.getDeclaredMethod("forName", String.class);
-		assertThrows(ReflectionException.class, () -> Methods.invokeWithOriginalException(method, Class.class, "$NonExistingClass$"));
+		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeWithOriginalException(method, Class.class, "$NonExistingClass$"));
 	}
 
 	@Test
 	void shouldThrowConverterExceptionWhenFailWithBadArgumentsInvokeClassMethod() throws Exception {
 		Method method = Class.class.getDeclaredMethod("forName", String.class);
-		assertThrows(ReflectionException.class, () -> Methods.invokeWithOriginalException(method, Class.class));
+		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeWithOriginalException(method, Class.class));
 	}
 
 	@Test
 	void shouldThrowConverterExceptionWhenInvokeStaticMethodWithInvalidArgument() throws Exception {
 		Method method = StaticA.class.getDeclaredMethod("foo", String.class);
-		assertThrows(ReflectionException.class, () -> Methods.invokeWithOriginalException(method, null, Class.class));
+		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeWithOriginalException(method, null, Class.class));
 	}
 
 	public static class B {
@@ -110,13 +110,13 @@ class ReflectionInvokeMethodWithOriginalExceptionTest {
 		B obj = new B();
 
 		Method method = B.class.getDeclaredMethod("foo");
-		assertThrows(ReflectionException.class, () -> Methods.invokeWithOriginalException(method, obj));
+		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeWithOriginalException(method, obj));
 	}
 
 	@Test
 	void shouldThrowConverterExceptionWhenInvokeStaticMethodFailsWithCause() throws Exception {
 		Method method = StaticB.class.getDeclaredMethod("foo", String.class);
-		assertThrows(ReflectionException.class, () -> Methods.invokeWithOriginalException(method, null, TEST_STRING));
+		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeWithOriginalException(method, null, TEST_STRING));
 	}
 
 }

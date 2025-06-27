@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class {@link Reflection#getClassWithPrefix(Class, String)}
+ * Test class {@link Reflection#getClassWithPrefix(Class, String)}.
  *
  * @author Radu Sebastian LAZIN
  */
