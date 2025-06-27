@@ -40,7 +40,7 @@ public interface Methods {
 	/**
 	 * Returns a method in the class given as parameter, also searching in all it's super classes.
 	 *
-	 * @param methodName name of the
+	 * @param methodName name of the method to find
 	 * @param cls class on which the fields are returned
 	 * @param parameterTypes types of the method parameters
 	 * @return found method
@@ -61,7 +61,7 @@ public interface Methods {
 	/**
 	 * Returns a method in the class given as parameter, also searching in all it's super classes.
 	 *
-	 * @param methodName name of the
+	 * @param methodName name of the method to find
 	 * @param cls class on which the fields are returned
 	 * @param parameterTypes types of the method parameters
 	 * @return found method, null otherwise
