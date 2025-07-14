@@ -52,4 +52,16 @@ class ReflectionSetStaticFieldIgnoreAccessTest {
 				equalTo("Could not find static field with name " + MISSING_FIELD_NAME + " on class " + B.class));
 	}
 
+	private static class C extends B {
+		// empty
+	}
+
+	@Test
+	void shouldSetStaticFieldIgnoringAccessFromDerivedClass() {
+		Fields.IgnoreAccess.setStatic(C.class, STATIC_FIELD_NAME, VALUE);
+
+		String result = B.getStaticField();
+		assertThat(result, equalTo(VALUE));
+	}
+
 }

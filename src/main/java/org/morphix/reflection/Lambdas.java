@@ -61,7 +61,7 @@ public class Lambdas {
 	}
 
 	/**
-	 * Returns the lambda method found in the constant pool. If the constant pool doesn't have the lambda then the returned
+	 * Returns the lambda method found in the constant pool. If the constant pool doesn't have the lambda, then the returned
 	 * value is null.
 	 *
 	 * @param <T> type for the constant pool

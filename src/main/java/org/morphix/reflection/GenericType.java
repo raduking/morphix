@@ -219,7 +219,7 @@ public class GenericType implements ParameterizedType {
 			sb.append(ownerType.getTypeName());
 			sb.append("$");
 			if (ownerType instanceof ParameterizedType ot) {
-				// Find simple name of nested type by removing the shared prefix with owner.
+				// Find simple name of the nested type by removing the shared prefix with an owner.
 				sb.append(rawType.getName().replace(((Class<?>) ot.getRawType()).getName() + "$", ""));
 			} else {
 				sb.append(rawType.getSimpleName());
@@ -233,7 +233,7 @@ public class GenericType implements ParameterizedType {
 		for (Type t : arguments) {
 			sj.add(t.getTypeName());
 		}
-		sb.append(sj.toString());
+		sb.append(sj);
 
 		return sb.toString();
 	}

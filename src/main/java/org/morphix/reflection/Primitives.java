@@ -82,10 +82,10 @@ public class Primitives {
 	}
 
 	/**
-	 * Returns true if the given class can be un-boxed to its primitive counterpart.
+	 * Returns true if the given class can be unboxed to its primitive counterpart.
 	 *
 	 * @param clsBoxed boxed class
-	 * @return true if the given class can be un-boxed to its primitive counterpart
+	 * @return true if the given class can be unboxed to its primitive counterpart
 	 */
 	public static boolean isUnboxable(final Class<?> clsBoxed) {
 		return CLASS_TO_PRIMITIVE_MAP.containsKey(clsBoxed);

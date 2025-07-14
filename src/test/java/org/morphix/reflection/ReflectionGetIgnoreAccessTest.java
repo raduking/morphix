@@ -100,4 +100,18 @@ public class ReflectionGetIgnoreAccessTest {
 		assertThat(field.canAccess(b), equalTo(false));
 	}
 
+	static class C extends B {
+		// empty
+	}
+
+	@Test
+	void shouldGetTheFieldValueInHierarchy() throws Exception {
+		C b = new C();
+		b.s = TEST_STRING;
+
+		String s = Fields.IgnoreAccess.get(b, B.class.getDeclaredField("s"));
+
+		assertThat(s, equalTo(TEST_STRING));
+	}
+
 }

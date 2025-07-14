@@ -183,7 +183,7 @@ public class ExtendedField {
 	}
 
 	/**
-	 * Returns the type of the field. If the object is present it returns it's class, otherwise the type of the field is
+	 * Returns the type of the field. If the object is present, it returns its class; otherwise the type of the field is
 	 * returned. If there is no field then {@link Object#getClass()} is returned.
 	 *
 	 * @return type of the field
@@ -220,7 +220,7 @@ public class ExtendedField {
 	}
 
 	/**
-	 * Returns the class of the field. If the object is present it returns it's class, otherwise the type of the field is
+	 * Returns the class of the field. If the object is present, it returns its class; otherwise the type of the field is
 	 * returned. If there is no field then {@link Object#getClass()} is returned.
 	 *
 	 * @return type of the field
@@ -253,7 +253,7 @@ public class ExtendedField {
 
 	/**
 	 * Returns true if it has a field associated, false otherwise. The field object pair object can have no object or field.
-	 * Whenever the field or the getter method is set the name of the field is also set.
+	 * Whenever the field or the getter method is set, the name of the field is also set.
 	 *
 	 * @return true if it has a field, false otherwise
 	 */

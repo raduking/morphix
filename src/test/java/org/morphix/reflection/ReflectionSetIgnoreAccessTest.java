@@ -65,4 +65,16 @@ class ReflectionSetIgnoreAccessTest {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.set(object, FIELD_NAME, other));
 		assertThat(e.getMessage(), equalTo("Could not set field " + FIELD_NAME));
 	}
+
+	static class B extends A {
+		// empty
+	}
+
+	@Test
+	void shouldSetIgnoreAccessOnBaseClassField() {
+		B object = new B();
+		Fields.IgnoreAccess.set(object, FIELD_NAME, VALUE);
+
+		assertThat(object.getField(), equalTo(VALUE));
+	}
 }

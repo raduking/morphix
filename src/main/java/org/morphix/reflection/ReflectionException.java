@@ -29,7 +29,7 @@ public class ReflectionException extends RuntimeException {
 	private static final long serialVersionUID = -4208205939967495183L;
 
 	/**
-	 * Constructor with message.
+	 * Constructor with the message.
 	 *
 	 * @param message exception message
 	 */

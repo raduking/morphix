@@ -44,4 +44,15 @@ class ReflectionGetStaticFieldsTest {
 		@SuppressWarnings("unused")
 		public static final String STATIC_FIELD = FIELD_VALUE;
 	}
+
+	private static class B extends A {
+		// empty
+	}
+
+	@Test
+	void shouldReturnStaticFieldValueFromDerivedClass() {
+		String staticField = Fields.IgnoreAccess.getStatic(B.class, "STATIC_FIELD");
+
+		assertThat(staticField, equalTo(FIELD_VALUE));
+	}
 }

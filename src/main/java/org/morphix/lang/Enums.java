@@ -146,8 +146,8 @@ public class Enums {
 	}
 
 	/**
-	 * Returns the result of calling {@link Enum#name()} by checking for null enum first. If the enum is null the result is
-	 * null.
+	 * Returns the result of calling {@link Enum#name()} by checking for null enum first. If the enum is {@code null}, the
+	 * result is {@code null}.
 	 *
 	 * @param <T> enum type
 	 *

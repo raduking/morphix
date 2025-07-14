@@ -206,7 +206,7 @@ public interface Fields {
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
-	public interface IgnoreAccess {
+	interface IgnoreAccess {
 
 		/**
 		 * Returns the value of the given field from the given object ignoring field access modifiers.
@@ -218,7 +218,7 @@ public interface Fields {
 		 * @return field value
 		 */
 		static <T> T get(final Object obj, final Field field) {
-			try (MemberAccessor<Field> fieldAccessor = new MemberAccessor<>(obj, field)) {
+			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
 				return getFieldValue(obj, field);
 			}
 		}
@@ -233,11 +233,9 @@ public interface Fields {
 		 * @return field value
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
-			Field field;
-			try {
-				field = obj.getClass().getDeclaredField(fieldName);
-			} catch (NoSuchFieldException e) {
-				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass(), e);
+			Field field = Fields.getDeclaredFieldInHierarchy(obj.getClass(), fieldName);
+			if (null == field) {
+				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass());
 			}
 			return get(obj, field);
 		}
@@ -252,7 +250,7 @@ public interface Fields {
 		 * @param value value to set
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
-			try (MemberAccessor<Field> fieldAccessor = new MemberAccessor<>(obj, field)) {
+			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
 				setFieldValue(obj, field, value);
 			}
 		}
@@ -267,11 +265,9 @@ public interface Fields {
 		 * @param value value to set
 		 */
 		static <T> void set(final Object obj, final String fieldName, final T value) {
-			Field field;
-			try {
-				field = obj.getClass().getDeclaredField(fieldName);
-			} catch (NoSuchFieldException e) {
-				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass(), e);
+			Field field = Fields.getDeclaredFieldInHierarchy(obj.getClass(), fieldName);
+			if (null == field) {
+				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass());
 			}
 			set(obj, field, value);
 		}
@@ -287,11 +283,9 @@ public interface Fields {
 		 * @param value value to set
 		 */
 		static <T, U> void setStatic(final Class<T> cls, final String fieldName, final U value) {
-			Field field;
-			try {
-				field = cls.getDeclaredField(fieldName);
-			} catch (NoSuchFieldException e) {
-				throw new ReflectionException("Could not find static field with name " + fieldName + " on class " + cls, e);
+			Field field = Fields.getDeclaredFieldInHierarchy(cls, fieldName);
+			if (null == field) {
+				throw new ReflectionException("Could not find static field with name " + fieldName + " on class " + cls);
 			}
 			set(null, field, value);
 		}
@@ -306,12 +300,11 @@ public interface Fields {
 		 * @return the value of the static field wit the given name
 		 */
 		static <T> T getStatic(final Class<?> cls, final String fieldName) {
-			try {
-				Field field = cls.getDeclaredField(fieldName);
-				return get(null, field);
-			} catch (NoSuchFieldException e) {
-				throw new ReflectionException("Could not find static field with name: " + fieldName + " on class" + cls, e);
+			Field field = Fields.getDeclaredFieldInHierarchy(cls, fieldName);
+			if (null == field) {
+				throw new ReflectionException("Could not find static field with name: " + fieldName + " on class" + cls);
 			}
+			return get(null, field);
 		}
 
 		/**

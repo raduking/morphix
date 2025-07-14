@@ -45,7 +45,7 @@ public interface AccessSetter<T extends AccessibleObject & Member> {
 	 * @param overrideSetter override setter
 	 * @return access setter
 	 */
-	public static <T extends AccessibleObject & Member> AccessSetter<T> ofOverride(final MethodHandle overrideSetter) {
+	static <T extends AccessibleObject & Member> AccessSetter<T> ofOverride(final MethodHandle overrideSetter) {
 		Objects.requireNonNull(overrideSetter, "overrideSetter");
 		return (object, value) -> {
 			try {

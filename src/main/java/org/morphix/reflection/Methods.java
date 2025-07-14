@@ -84,10 +84,10 @@ public interface Methods {
 	 * <ul>
 	 * <li>it is more efficient in terms of memory consumption</li>
 	 * <li>accessing the first and last has O(1) complexity</li>
-	 * <li>more often than not no random access is needed</li>
+	 * <li>more often than not, no random access is needed</li>
 	 * <li>profiling: ~2 times faster than using {@link java.util.ArrayList}</li>
 	 * </ul>
-	 * The returned order of the methods are: class -> super class -> ... -> base class and all methods in each class are
+	 * The returned order of the methods are: class -> super class -> ... -> base class, and all methods in each class are
 	 * returned in the declared order.
 	 *
 	 * @param cls class on which the fields are returned
@@ -104,7 +104,7 @@ public interface Methods {
 
 	/**
 	 * Returns a list with all the methods in the class given as parameter including the ones in all it's super classes
-	 * which verify the given method predicate.
+	 * that verify the given method predicate.
 	 *
 	 * @param cls class on which the fields are returned
 	 * @param predicate filter predicate for methods
@@ -139,7 +139,7 @@ public interface Methods {
 	 * @param <T> generic return type
 	 *
 	 * @param method method for which the generic return type is needed
-	 * @param index the zero based index of the type needed (for a Map the 2nd generic parameter has index 1)
+	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return type
 	 */
 	static <T extends Type> T getGenericReturnType(final Method method, final int index) {
@@ -153,12 +153,12 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns the generic return type for a method or null if method has no generic return type.
+	 * Returns the generic return type for a method or null if the method has no generic return type.
 	 *
 	 * @param <T> generic return type
 	 *
 	 * @param method method for which the generic return type is needed
-	 * @param index the zero based index of the type needed (for a Map the 2nd generic parameter has index 1)
+	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return type
 	 */
 	static <T extends Type> T getSafeGenericReturnType(final Method method, final int index) {
@@ -185,7 +185,7 @@ public interface Methods {
 	 * @param <T> generic return type
 	 *
 	 * @param method method for which the generic return type is needed
-	 * @param index the zero based index of the type needed (for a Map the 2nd generic parameter has index 1)
+	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return type
 	 */
 	static <T> Class<T> getGenericReturnClass(final Method method, final int index) {
@@ -218,7 +218,7 @@ public interface Methods {
 
 	/**
 	 * Returns the currently executing method name. The advantage of this method is that each {@link StackTraceElement} is
-	 * fetched lazily, so you don't actually construct the full stack trace before checking the first method.
+	 * fetched lazily, so you don't construct the full stack trace before checking the first method.
 	 *
 	 * @param withClassName flag to prepend class name
 	 * @return the currently executing method name
@@ -229,7 +229,7 @@ public interface Methods {
 
 	/**
 	 * Returns the currently executing method name. The advantage of this method is that each {@link StackTraceElement} is
-	 * fetched lazily, so you don't actually construct the full stack trace before checking the first method.
+	 * fetched lazily, so you don't construct the full stack trace before checking the first method.
 	 *
 	 * @param withClassName flag to prepend class name
 	 * @param depth the depth of the caller method, for the direct caller this should be 1
@@ -336,7 +336,7 @@ public interface Methods {
 		 * @return result of the method invocation
 		 */
 		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
-			try (MemberAccessor<Method> methodAccessor = new MemberAccessor<>(obj, method)) {
+			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
 				return JavaObjects.cast(method.invoke(obj, args));
 			} catch (InvocationTargetException e) {
 				// e is just a wrapper on the real exception, escalate the real one
@@ -385,7 +385,7 @@ public interface Methods {
 		 * @return result of the method invocation
 		 */
 		static <T, R> R invokeWithOriginalException(final Method method, final T obj, final Object... args) {
-			try (MemberAccessor<Method> methodAccessor = new MemberAccessor<>(obj, method)) {
+			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
 				return JavaObjects.cast(method.invoke(obj, args));
 			} catch (InvocationTargetException e) {
 				// e is just a wrapper on the real exception, escalate the real one
