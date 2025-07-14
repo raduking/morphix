@@ -8,6 +8,7 @@
 - Changed `Fields.IgnoreAccess.set` with field name as parameter to look for the field in the class hierarchy.
 - Changed `Fields.IgnoreAccess.getStatic` with field name as parameter to look for the field in the class hierarchy because they are accessible through derived classes too.
 - Changed `Fields.IgnoreAccess.setStatic` with field name as parameter to look for the field in the class hierarchy because they are accessible through derived classes too.
+- Added `ThrowingBiFunction` to wrap a `BiFunction` that throws without the need for a `try`/`catch`.
 
 ---
 
