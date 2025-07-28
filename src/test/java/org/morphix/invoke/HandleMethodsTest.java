@@ -30,6 +30,7 @@ import org.morphix.reflection.ReflectionException;
 class HandleMethodsTest {
 
 	private static final String SOME_STRING = "mumu";
+	private static final String UNKNOWN = "unknown";
 
 	public static class A {
 
@@ -101,4 +102,13 @@ class HandleMethodsTest {
 
 		assertThat(e.getMessage(), equalTo("Error invoking method " + method));
 	}
+
+	@Test
+	void shouldThrowExceptionForPrivateLookupInMethodDoesNotExist() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> HandleMethods.getMethod(A.class, UNKNOWN, String.class));
+
+		assertThat(e.getMessage(), equalTo("Method handle creation failed for " + A.class.getName() + "#" + UNKNOWN));
+		assertThat(e.getCause().getClass(), equalTo(NoSuchMethodException.class));
+	}
+
 }
