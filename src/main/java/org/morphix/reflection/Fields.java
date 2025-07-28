@@ -31,21 +31,25 @@ public interface Fields {
 	 * Returns a list with all the fields in the class given as parameter. This is different from
 	 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array.
 	 *
+	 * @param <T> type to get the fields from
+	 *
 	 * @param cls class on which the fields are returned
 	 * @return list of fields
 	 */
-	static List<Field> getDeclaredFields(final Class<?> cls) {
+	static <T> List<Field> getDeclaredFields(final Class<T> cls) {
 		return List.of(cls.getDeclaredFields());
 	}
 
 	/**
 	 * Returns a list with all the fields in the class, given as parameter and the field predicate.
 	 *
+	 * @param <T> type to get the fields from
+	 *
 	 * @param cls class on which the fields are returned
 	 * @param predicate predicate for fields
 	 * @return list of fields
 	 */
-	static List<Field> getDeclaredFields(final Class<?> cls, final Predicate<Field> predicate) {
+	static <T> List<Field> getDeclaredFields(final Class<T> cls, final Predicate<Field> predicate) {
 		return getDeclaredFields(cls).stream().filter(predicate).toList();
 	}
 
@@ -62,10 +66,12 @@ public interface Fields {
 	 * The returned order of the fields are: class -> super class -> ... -> base class and all fields in each class are
 	 * returned in the declared order.
 	 *
+	 * @param <T> type to get the fields from
+	 *
 	 * @param cls class on which the fields are returned
 	 * @return list of fields
 	 */
-	static List<Field> getDeclaredFieldsInHierarchy(final Class<?> cls) {
+	static <T> List<Field> getDeclaredFieldsInHierarchy(final Class<T> cls) {
 		if (null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
@@ -78,22 +84,26 @@ public interface Fields {
 	 * Returns a list with all the fields in the class, given as parameter and the field predicate, including the ones in
 	 * all it's super classes. The returned order of the fields are: class -> super class -> ... -> base class
 	 *
+	 * @param <T> type to get the fields from
+	 *
 	 * @param cls class on which the fields are returned
 	 * @param predicate predicate for fields
 	 * @return list of fields
 	 */
-	static List<Field> getDeclaredFieldsInHierarchy(final Class<?> cls, final Predicate<Field> predicate) {
+	static <T> List<Field> getDeclaredFieldsInHierarchy(final Class<T> cls, final Predicate<Field> predicate) {
 		return getDeclaredFieldsInHierarchy(cls).stream().filter(predicate).toList();
 	}
 
 	/**
 	 * Returns a field in the class and in all super classes of the class given as parameter.
 	 *
+	 * @param <T> type to get the fields from
+	 *
 	 * @param cls class on which the fields are returned
 	 * @param fieldName the name of the fields to get
 	 * @return existing field, null otherwise
 	 */
-	static Field getDeclaredFieldInHierarchy(final Class<?> cls, final String fieldName) {
+	static <T> Field getDeclaredFieldInHierarchy(final Class<T> cls, final String fieldName) {
 		if (null == cls) {
 			return null;
 		}
@@ -294,12 +304,14 @@ public interface Fields {
 		 * Returns the value of a static field ignoring access modifiers.
 		 *
 		 * @param <T> the type of the static field
+		 * @param <U> type to get the field from
+		 *
 		 *
 		 * @param cls the class that has the static field
 		 * @param fieldName the name of the static field
 		 * @return the value of the static field wit the given name
 		 */
-		static <T> T getStatic(final Class<?> cls, final String fieldName) {
+		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
 			Field field = Fields.getDeclaredFieldInHierarchy(cls, fieldName);
 			if (null == field) {
 				throw new ReflectionException("Could not find static field with name: " + fieldName + " on class" + cls);

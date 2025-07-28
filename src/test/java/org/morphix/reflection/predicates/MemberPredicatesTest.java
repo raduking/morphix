@@ -15,6 +15,7 @@ package org.morphix.reflection.predicates;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.morphix.reflection.predicates.MemberPredicates.hasName;
 import static org.morphix.reflection.predicates.MemberPredicates.nameIn;
@@ -104,6 +105,26 @@ class MemberPredicatesTest {
 		assertThat(methods.get(0).getName(), equalTo("foo"));
 	}
 
+	@Test
+	void shouldReturnTheCorrectPredicateForAbstractMethod() {
+		Method abstractMethod = Methods.getSafeDeclaredMethodInHierarchy("fooAbstract",  B.class);
+
+		boolean result = withModifiers(Modifier::isAbstract).test(abstractMethod);
+		assertTrue(result);
+
+		result = MemberPredicates.isAbstract().test(abstractMethod);
+		assertTrue(result);
+	}
+
+	@Test
+	void shouldReturnTheCorrectPredicateForNonAbstractMethod() {
+		Method abstractMethod = Methods.getSafeDeclaredMethodInHierarchy("fooNotAbstract",  B.class);
+
+		boolean result = withModifiers(Modifier::isAbstract).test(abstractMethod);
+
+		assertFalse(result);
+	}
+
 	public static class A {
 
 		public static void fooStatic() {
@@ -111,6 +132,16 @@ class MemberPredicatesTest {
 		}
 
 		public void foo() {
+			// empty
+		}
+
+	}
+
+	public abstract static class B {
+
+		public abstract void fooAbstract();
+
+		public void fooNotAbstract() {
 			// empty
 		}
 

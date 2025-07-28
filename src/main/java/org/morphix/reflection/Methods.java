@@ -18,6 +18,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.LinkedList;
@@ -40,13 +41,15 @@ public interface Methods {
 	/**
 	 * Returns a method in the class given as parameter, also searching in all it's super classes.
 	 *
+	 * @param <T> type to get the methods from
+	 *
 	 * @param methodName name of the method to find
 	 * @param cls class on which the fields are returned
 	 * @param parameterTypes types of the method parameters
 	 * @return found method
 	 * @throws NoSuchMethodException if the method was not found
 	 */
-	static Method getDeclaredMethodInHierarchy(final String methodName, final Class<?> cls, final Class<?>... parameterTypes)
+	static <T> Method getDeclaredMethodInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes)
 			throws NoSuchMethodException {
 		try {
 			return cls.getDeclaredMethod(methodName, parameterTypes);
@@ -61,12 +64,14 @@ public interface Methods {
 	/**
 	 * Returns a method in the class given as parameter, also searching in all it's super classes.
 	 *
+	 * @param <T> type to get the methods from
+	 *
 	 * @param methodName name of the method to find
 	 * @param cls class on which the fields are returned
 	 * @param parameterTypes types of the method parameters
 	 * @return found method, null otherwise
 	 */
-	static Method getSafeDeclaredMethodInHierarchy(final String methodName, final Class<?> cls, final Class<?>... parameterTypes) {
+	static <T> Method getSafeDeclaredMethodInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
 		try {
 			return cls.getDeclaredMethod(methodName, parameterTypes);
 		} catch (NoSuchMethodException e) {
@@ -90,10 +95,12 @@ public interface Methods {
 	 * The returned order of the methods are: class -> super class -> ... -> base class, and all methods in each class are
 	 * returned in the declared order.
 	 *
+	 * @param <T> type to get the methods from
+	 *
 	 * @param cls class on which the fields are returned
 	 * @return list of fields
 	 */
-	static List<Method> getDeclaredMethodsInHierarchy(final Class<?> cls) {
+	static <T> List<Method> getDeclaredMethodsInHierarchy(final Class<T> cls) {
 		if (null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
@@ -103,14 +110,16 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a list with all the methods in the class given as parameter including the ones in all it's super classes
-	 * that verify the given method predicate.
+	 * Returns a list with all the methods in the class given as parameter including the ones in all it's super classes that
+	 * verify the given method predicate.
+	 *
+	 * @param <T> type to get the methods from
 	 *
 	 * @param cls class on which the fields are returned
 	 * @param predicate filter predicate for methods
 	 * @return list of fields
 	 */
-	static List<Method> getDeclaredMethodsInHierarchy(final Class<?> cls, final Predicate<? super Method> predicate) {
+	static <T> List<Method> getDeclaredMethodsInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
 		if (null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
@@ -315,6 +324,31 @@ public interface Methods {
 					+ methodName + "(" + field.getType().getCanonicalName() + ") or "
 					+ methodName + "(" + primitiveFieldType.getCanonicalName() + ")", e);
 		}
+	}
+
+	/**
+	 * Returns the functional interface method if the given class is a functional interface.
+	 *
+	 * @param <T> type to get the method.
+	 *
+	 * @param cls functional interface class
+	 * @return the functional interface method if the given class is a functional interface
+	 * @throws ReflectionException if the class is not a functional interface
+	 */
+	static <T> Method getFunctionalInterfaceMethod(final Class<T> cls) {
+		Method singleAbstractMethod = null;
+		for (Method method : cls.getMethods()) {
+			if (Modifier.isAbstract(method.getModifiers())) {
+				if (null != singleAbstractMethod) {
+					throw new ReflectionException(cls + " is not a functional interface because it has more than one abstract method");
+				}
+				singleAbstractMethod = method;
+			}
+		}
+		if (null == singleAbstractMethod) {
+			throw new ReflectionException(cls + " is not a functional interface because it has no abstract method");
+		}
+		return singleAbstractMethod;
 	}
 
 	/**

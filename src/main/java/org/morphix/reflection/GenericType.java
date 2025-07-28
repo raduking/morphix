@@ -130,13 +130,14 @@ public class GenericType implements ParameterizedType {
 	 * <code>Class&lt;String&gt;</code>
 	 *
 	 * @param <T> generic argument type
+	 * @param <U> type to get the generic type from
 	 *
 	 * @param field field
 	 * @param cls class
 	 * @param index index of the generic argument
 	 * @return class of the argument, null otherwise
 	 */
-	public static <T extends Type> T getGenericArgumentType(final Field field, final Class<?> cls, final int index) {
+	public static <T extends Type, U> T getGenericArgumentType(final Field field, final Class<U> cls, final int index) {
 		Method getterMethod;
 		try {
 			String getterMethodName = MethodType.GETTER.getMethodName(field);
@@ -150,10 +151,12 @@ public class GenericType implements ParameterizedType {
 	/**
 	 * Returns true if the given class is generic, false otherwise.
 	 *
+	 * @param <T> type to check
+	 *
 	 * @param cls class to check
 	 * @return true if the given class is generic, false otherwise.
 	 */
-	public static boolean isGenericClass(final Class<?> cls) {
+	public static <T> boolean isGenericClass(final Class<T> cls) {
 		Type type = cls.getGenericSuperclass();
 		return type instanceof ParameterizedType;
 	}

@@ -141,4 +141,14 @@ public class MemberPredicates {
 		return Predicates.cast(isStatic().negate());
 	}
 
+	/**
+	 * Returns a predicate that verifies if a member is abstract.
+	 *
+	 * @param <T> member type, can be Field, Method, etc
+	 *
+	 * @return a predicate that verifies if a member is abstract
+	 */
+	public static <T extends Member> Predicate<T> isAbstract() {
+		return member -> Modifier.isAbstract(member.getModifiers());
+	}
 }

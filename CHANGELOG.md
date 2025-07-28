@@ -9,6 +9,11 @@
 - Changed `Fields.IgnoreAccess.getStatic` with field name as parameter to look for the field in the class hierarchy because they are accessible through derived classes too.
 - Changed `Fields.IgnoreAccess.setStatic` with field name as parameter to look for the field in the class hierarchy because they are accessible through derived classes too.
 - Added `ThrowingBiFunction` to wrap a `BiFunction` that throws without the need for a `try`/`catch`.
+- Added `MemberPredicates.isAbstract` to test if a member is abstract.
+- Added `HandleMethods` utility class for faster method invoking using method handles.
+- Added `Methods.getFunctionalInterfaceMethod` to find the functional interface method for a class/interface.
+- Added `MethodSignature` record to hold a method signature for invocation caching.
+- Changed all methods in `Methods` and `Fields` classes to use declared generic arguments instead of a wildcard.
 
 ---
 

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,66 +26,67 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
- * Test class for {@link ThrowingFunction}.
+ * Test class for {@link ThrowingBiFunction}.
  *
  * @author Radu Sebastian LAZIN
  */
 @ExtendWith(MockitoExtension.class)
-class ThrowingFunctionTest {
+class ThrowingBiFunctionTest {
 
 	private static final Integer FORTY_TWO = 42;
-	private static final String INPUT = "input";
+	private static final String INPUT1 = "input1";
+	private static final Boolean INPUT2 = Boolean.TRUE;
 	private static final String CHECKED_EXCEPTION = "Checked exception";
 	private static final String RUNTIME_EXCEPTION = "Runtime exception";
 	private static final String TEST_ERROR = "Test error";
 
 	@Mock
-	private ThrowingFunction<String, Integer> mockThrowingFunction;
+	private ThrowingBiFunction<String, Boolean, Integer> mockThrowingFunction;
 
 	@Test
 	void shouldReturnValueWhenThrowingFunctionDoesNotThrowException() throws Throwable {
-		when(mockThrowingFunction.apply(INPUT)).thenReturn(FORTY_TWO);
+		when(mockThrowingFunction.apply(INPUT1, INPUT2)).thenReturn(FORTY_TWO);
 
-		Function<String, Integer> function = ThrowingFunction.unchecked(mockThrowingFunction);
-		Integer result = function.apply(INPUT);
+		BiFunction<String, Boolean, Integer> function = ThrowingBiFunction.unchecked(mockThrowingFunction);
+		Integer result = function.apply(INPUT1, INPUT2);
 
 		assertThat(result, is(FORTY_TWO));
-		verify(mockThrowingFunction).apply(INPUT);
+		verify(mockThrowingFunction).apply(INPUT1, INPUT2);
 	}
 
 	@Test
 	void shouldRethrowCheckedExceptionAsUncheckedException() throws Throwable {
 		Exception checkedException = new Exception(CHECKED_EXCEPTION);
-		when(mockThrowingFunction.apply(INPUT)).thenThrow(checkedException);
+		when(mockThrowingFunction.apply(INPUT1, INPUT2)).thenThrow(checkedException);
 
-		Function<String, Integer> function = ThrowingFunction.unchecked(mockThrowingFunction);
+		BiFunction<String, Boolean, Integer> function = ThrowingBiFunction.unchecked(mockThrowingFunction);
 
-		Exception exception = assertThrows(Exception.class, () -> function.apply(INPUT));
+		Exception exception = assertThrows(Exception.class, () -> function.apply(INPUT1, INPUT2));
 		assertThat(exception.getMessage(), is(CHECKED_EXCEPTION));
-		verify(mockThrowingFunction).apply(INPUT);
+		verify(mockThrowingFunction).apply(INPUT1, INPUT2);
 	}
 
 	@Test
 	void shouldRethrowRuntimeExceptionAsIs() throws Throwable {
 		RuntimeException runtimeException = new RuntimeException(RUNTIME_EXCEPTION);
-		when(mockThrowingFunction.apply(INPUT)).thenThrow(runtimeException);
+		when(mockThrowingFunction.apply(INPUT1, INPUT2)).thenThrow(runtimeException);
 
-		Function<String, Integer> function = ThrowingFunction.unchecked(mockThrowingFunction);
+		BiFunction<String, Boolean, Integer> function = ThrowingBiFunction.unchecked(mockThrowingFunction);
 
-		RuntimeException exception = assertThrows(RuntimeException.class, () -> function.apply(INPUT));
+		RuntimeException exception = assertThrows(RuntimeException.class, () -> function.apply(INPUT1, INPUT2));
 		assertThat(exception.getMessage(), is(RUNTIME_EXCEPTION));
-		verify(mockThrowingFunction).apply(INPUT);
+		verify(mockThrowingFunction).apply(INPUT1, INPUT2);
 	}
 
 	@Test
 	void shouldRethrowErrorAsIs() throws Throwable {
 		Error error = new Error(TEST_ERROR);
-		when(mockThrowingFunction.apply(INPUT)).thenThrow(error);
+		when(mockThrowingFunction.apply(INPUT1, INPUT2)).thenThrow(error);
 
-		Function<String, Integer> function = ThrowingFunction.unchecked(mockThrowingFunction);
+		BiFunction<String, Boolean, Integer> function = ThrowingBiFunction.unchecked(mockThrowingFunction);
 
-		Error thrownError = assertThrows(Error.class, () -> function.apply(INPUT));
+		Error thrownError = assertThrows(Error.class, () -> function.apply(INPUT1, INPUT2));
 		assertThat(thrownError.getMessage(), is(TEST_ERROR));
-		verify(mockThrowingFunction).apply(INPUT);
+		verify(mockThrowingFunction).apply(INPUT1, INPUT2);
 	}
 }

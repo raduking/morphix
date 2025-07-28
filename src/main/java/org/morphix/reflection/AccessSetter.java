@@ -49,8 +49,7 @@ public interface AccessSetter<T extends AccessibleObject & Member> {
 		Objects.requireNonNull(overrideSetter, "overrideSetter");
 		return (object, value) -> {
 			try {
-				// this is the correct way to invoke the overrideSetter method so disable Sonar
-				overrideSetter.invokeWithArguments(new Object[] { object, value }); // NOSONAR
+				overrideSetter.invokeWithArguments(object, value);
 				return true;
 			} catch (Throwable t) {
 				return false;
