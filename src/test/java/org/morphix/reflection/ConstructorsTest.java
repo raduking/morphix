@@ -79,7 +79,7 @@ class ConstructorsTest {
 		assertThat(e.getMessage(), startsWith("Could not instantiate class, default constructor threw exception: "));
 	}
 
-	public static abstract class E {
+	public abstract static class E {
 		public E() {
 			// empty
 		}

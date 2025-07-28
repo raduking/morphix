@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionGetIgnoreAccessByPathsTest {
+class FieldsGetIgnoreAccessByPathsTest {
 
 	private static final String TEST_STRING = "testString";
 

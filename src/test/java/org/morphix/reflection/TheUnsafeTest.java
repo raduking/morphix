@@ -15,44 +15,30 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.lang.reflect.InvocationTargetException;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.lang.JavaObjects;
 
 /**
- * Test class for {@link Fields#getStatic(Class, String)}.
+ * Test class for {@link TheUnsafe}.
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionGetStaticFieldsTest {
-
-	private static final String FIELD_VALUE = "aaa";
+class TheUnsafeTest {
 
 	@Test
-	void shouldReturnStaticFieldValue() {
-		String staticField = Fields.IgnoreAccess.getStatic(A.class, "STATIC_FIELD");
-
-		assertThat(staticField, equalTo(FIELD_VALUE));
-	}
-
-	@Test
-	void shouldThrowErrorIfFieldNotFound() {
-		assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, "wrongName"));
-
-	}
-
-	private static class A {
-		@SuppressWarnings("unused")
-		public static final String STATIC_FIELD = FIELD_VALUE;
-	}
-
-	private static class B extends A {
-		// empty
+	void shouldThrowExceptionOnCallingConstructor() {
+		ReflectionException reflectionException = assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(TheUnsafe.class));
+		InvocationTargetException invocationTargetException = JavaObjects.cast(reflectionException.getCause());
+		UnsupportedOperationException unsupportedOperationException = JavaObjects.cast(invocationTargetException.getCause());
+		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 	}
 
 	@Test
-	void shouldReturnStaticFieldValueFromDerivedClass() {
-		String staticField = Fields.IgnoreAccess.getStatic(B.class, "STATIC_FIELD");
-
-		assertThat(staticField, equalTo(FIELD_VALUE));
+	void shouldReturnTrueIfUnsafeIsAvailable() {
+		assertTrue(TheUnsafe.isUnsafeAvailable());
 	}
 }

@@ -13,6 +13,7 @@
 package org.morphix.reflection;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -147,7 +148,7 @@ public interface Fields {
 	 * @param field field on which to extract the value
 	 * @return value of the field on the object obj
 	 */
-	static <T> T getFieldValue(final Object obj, final Field field) {
+	static <T> T get(final Object obj, final Field field) {
 		try {
 			return JavaObjects.cast(field.get(obj));
 		} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -162,7 +163,7 @@ public interface Fields {
 	 * @param field field on which to set the value
 	 * @param value value to be set on the field
 	 */
-	static void setFieldValue(final Object obj, final Field field, final Object value) {
+	static void set(final Object obj, final Field field, final Object value) {
 		try {
 			field.set(obj, value); // NOSONAR this is a reflection enhancement method
 		} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -229,7 +230,7 @@ public interface Fields {
 		 */
 		static <T> T get(final Object obj, final Field field) {
 			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
-				return getFieldValue(obj, field);
+				return Fields.get(obj, field);
 			}
 		}
 
@@ -261,7 +262,13 @@ public interface Fields {
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
 			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
-				setFieldValue(obj, field, value);
+				Fields.set(obj, field, value);
+			} catch (ReflectionException e) {
+				if (e.getCause() instanceof IllegalArgumentException) {
+					throw e;
+				}
+				// only final fields will reach this code
+				Unsafe.set(obj, field, value);
 			}
 		}
 
@@ -392,6 +399,34 @@ public interface Fields {
 				}
 			}
 			return result;
+		}
+
+	}
+
+	/**
+	 * Unsafe utility methods.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Unsafe {
+
+		/**
+		 * Sets the field value using the {@link Unsafe} method.
+		 *
+		 * @param obj object on which the represented field's value is to be set
+		 * @param field field on which to set the value
+		 * @param value value to be set on the field
+		 */
+		static void set(final Object obj, final Field field, final Object value) {
+			boolean isStatic = Modifier.isStatic(field.getModifiers());
+			Object instance = obj;
+			if (isStatic) {
+				instance = TheUnsafe.staticFieldBase(field);
+			}
+			long offset = isStatic
+					? TheUnsafe.staticFieldOffset(field)
+					: TheUnsafe.objectFieldOffset(field);
+			TheUnsafe.putObject(instance, offset, value);
 		}
 	}
 

@@ -16,37 +16,43 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.lang.reflect.Field;
-
 import org.junit.jupiter.api.Test;
-import org.morphix.reflection.testdata.A;
 
 /**
- * Test class for {@link Fields#get(Object, Field)}.
+ * Test class for {@link Fields#getStatic(Class, String)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsGetFieldValueTest {
+class FieldsGetStaticFieldsTest {
+
+	private static final String FIELD_VALUE = "aaa";
 
 	@Test
-	void shouldReturnFieldValue() throws Exception {
-		A a = new A();
-		a.b = Boolean.TRUE;
+	void shouldReturnStaticFieldValue() {
+		String staticField = Fields.IgnoreAccess.getStatic(A.class, "STATIC_FIELD");
 
-		Field bField = A.class.getDeclaredField("b");
-		Boolean result = Fields.get(a, bField);
-
-		assertThat(result, equalTo(Boolean.TRUE));
+		assertThat(staticField, equalTo(FIELD_VALUE));
 	}
 
 	@Test
-	void shouldThrowExceptionIfFiledIsNotAccessible() throws Exception {
-		A a = new A();
+	void shouldThrowErrorIfFieldNotFound() {
+		assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, "wrongName"));
 
-		Field field = A.class.getDeclaredField(A.FIELD_NAME);
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.get(a, field));
-
-		assertThat(e.getMessage(), equalTo("Could not get field " + A.FIELD_NAME));
 	}
 
+	private static class A {
+		@SuppressWarnings("unused")
+		public static final String STATIC_FIELD = FIELD_VALUE;
+	}
+
+	private static class B extends A {
+		// empty
+	}
+
+	@Test
+	void shouldReturnStaticFieldValueFromDerivedClass() {
+		String staticField = Fields.IgnoreAccess.getStatic(B.class, "STATIC_FIELD");
+
+		assertThat(staticField, equalTo(FIELD_VALUE));
+	}
 }

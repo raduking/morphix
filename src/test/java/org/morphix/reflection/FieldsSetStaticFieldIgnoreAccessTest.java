@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionSetStaticFieldIgnoreAccessTest {
+class FieldsSetStaticFieldIgnoreAccessTest {
 
 	private static final String MISSING_FIELD_NAME = "missingField";
 	private static final String STATIC_FIELD_NAME = "staticField";

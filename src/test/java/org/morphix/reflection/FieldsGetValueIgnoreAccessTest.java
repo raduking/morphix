@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Radu Sebastian LAZIN
  */
-public class ReflectionGetValueIgnoreAccessTest {
+public class FieldsGetValueIgnoreAccessTest {
 
 	public static final String TEST_STRING = "testString";
 	public static final Long TEST_LONG = 17L;

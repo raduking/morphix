@@ -27,7 +27,7 @@ import org.morphix.reflection.testdata.A;
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionSetIgnoreAccessTest {
+class FieldsSetIgnoreAccessTest {
 
 	private static final String MISSING_FIELD_NAME = "missingField";
 	private static final String FIELD_NAME = "field";
@@ -76,5 +76,44 @@ class ReflectionSetIgnoreAccessTest {
 		Fields.IgnoreAccess.set(object, FIELD_NAME, VALUE);
 
 		assertThat(object.getField(), equalTo(VALUE));
+	}
+
+	static class D {
+
+		private static final String FIELD = init();
+
+		private static String init() {
+			return "test";
+		}
+
+		private final String field = VALUE;
+
+		public String getField() {
+			return field;
+		}
+	}
+
+	@Test
+	void shouldSetIgnoreAccessOnFinalField() {
+		D object = new D();
+		Fields.IgnoreAccess.set(object, FIELD_NAME, VALUE);
+
+		assertThat(object.getField(), equalTo(VALUE));
+	}
+
+	@Test
+	void shouldSetIgnoreAccessOnFinalFieldWithUnsafe() throws NoSuchFieldException, SecurityException {
+		D object = new D();
+		Field field = D.class.getDeclaredField(FIELD_NAME);
+		Fields.Unsafe.set(object, field, VALUE);
+
+		assertThat(object.getField(), equalTo(VALUE));
+	}
+
+	@Test
+	void shouldSetIgnoreAccessOnStaticFinalField() {
+		Fields.IgnoreAccess.setStatic(D.class, "FIELD", VALUE);
+
+		assertThat(D.FIELD, equalTo(VALUE));
 	}
 }

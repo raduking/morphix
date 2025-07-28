@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionGetDeclaredMethodsInHierarchyTest {
+class MethodsGetDeclaredMethodsInHierarchyTest {
 
 	public enum E {
 		// empty enum

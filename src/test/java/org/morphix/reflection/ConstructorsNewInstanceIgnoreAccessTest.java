@@ -27,7 +27,7 @@ import org.morphix.reflection.testdata.C;
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionNewInstanceIgnoreAccessTest {
+class ConstructorsNewInstanceIgnoreAccessTest {
 
 	public static class A {
 		// empty

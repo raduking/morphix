@@ -22,11 +22,11 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class {@link Reflection#getClassWithPrefix(Class, String)}.
+ * Test class {@link Methods#getSetterMethod(Class, Field)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionGetSetterMethodTest {
+class MethodsGetSetterMethodTest {
 
 	static class A {
 

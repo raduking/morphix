@@ -15,6 +15,9 @@
 - Added `MethodSignature` record to hold a method signature for invocation caching.
 - Changed all methods in `Methods` and `Fields` classes to use declared generic arguments instead of a wild card.
 - Renamed `Fields.resetField` to `Fields.reset` and inverted parameters.
+- Added support for setting private final fields.
+- Renamed `Fields.setFieldValue` to `Fields.set`.
+- Renamed `Fields.getFieldValue` to `Fields.get`.
 
 ---
 

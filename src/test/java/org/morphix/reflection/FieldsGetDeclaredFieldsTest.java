@@ -18,18 +18,16 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.morphix.reflection.predicates.MemberPredicates.withAnnotation;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#getDeclaredFieldsInHierarchy(Class)}.
+ * Test class for {@link Fields#getDeclaredFields(Class)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionGetDeclaredFieldsInHierarchyTest {
+class FieldsGetDeclaredFieldsTest {
 
 	public enum E {
 		// empty enum
@@ -54,64 +52,53 @@ class ReflectionGetDeclaredFieldsInHierarchyTest {
 		int y;
 	}
 
-	public static class F extends B {
-		int x;
-		int y;
+	public record R(int x) {
+		// empty
 	}
 
 	@Test
-	void shouldReturnAllFieldsInHierarchy() {
-		List<Field> fields = Fields.getDeclaredFieldsInHierarchy(B.class);
+	void shouldReturnAllFields() {
+		List<Field> fields = Fields.getDeclaredFields(B.class);
 
 		int sizeB = B.class.getDeclaredFields().length;
-		int sizeA = A.class.getDeclaredFields().length;
 
-		assertThat(fields, hasSize(sizeA + sizeB));
+		assertThat(fields, hasSize(sizeB));
 	}
 
 	@Test
 	void shouldReturnEmptyListForClassesWithNoFields() {
-		List<Field> fields = Fields.getDeclaredFieldsInHierarchy(C.class);
+		List<Field> fields = Fields.getDeclaredFields(C.class);
 
-		int size = C.class.getDeclaredFields().length;
+		int sizeC = C.class.getDeclaredFields().length;
 
-		assertThat(fields, hasSize(size));
+		assertThat(fields, hasSize(sizeC));
 	}
 
 	@Test
-	void shouldReturnEnumClassFieldsListForEmptyEnumsToo() {
-		List<Field> fields = Fields.getDeclaredFieldsInHierarchy(E.class);
+	void shouldReturnNoFieldsForEmptyEnums() {
+		List<Field> fields = Fields.getDeclaredFields(E.class);
 
-		int sizeEnum = Enum.class.getDeclaredFields().length;
 		int sizeE = E.class.getDeclaredFields().length;
 
-		assertThat(fields, hasSize(sizeEnum + sizeE));
+		assertThat(fields, hasSize(sizeE));
+	}
+
+	@Test
+	void shouldReturnFieldsForRecords() {
+		List<Field> fields = Fields.getDeclaredFields(R.class);
+
+		int sizeF = R.class.getDeclaredFields().length;
+
+		assertThat(fields, hasSize(sizeF));
 	}
 
 	@Test
 	void shouldReturnFieldsWithAnnotation() throws Exception {
 		Field fx = D.class.getDeclaredField("x");
 
-		List<Field> annotatedFields = Fields.getDeclaredFieldsInHierarchy(D.class, withAnnotation(Deprecated.class));
+		List<Field> annotatedFields = Fields.getDeclaredFields(D.class, withAnnotation(Deprecated.class));
 		assertThat(annotatedFields, hasSize(1));
 		assertThat(annotatedFields.get(0), equalTo(fx));
-	}
-
-	@Test
-	void shouldReturnAllFieldsIncludingTheOnesWithTheSameName() {
-		List<Field> result = Fields.getDeclaredFieldsInHierarchy(F.class);
-
-		List<Field> expected = new ArrayList<>();
-		expected.addAll(Fields.getDeclaredFields(F.class));
-		expected.addAll(Fields.getDeclaredFields(B.class));
-		expected.addAll(Fields.getDeclaredFields(A.class));
-
-		assertThat(result, equalTo(expected));
-
-		for (Iterator<Field> fieldsIt = result.iterator(), expectedIt = expected.iterator(); fieldsIt.hasNext();) {
-			Field resultField = fieldsIt.next(), expectedField = expectedIt.next();
-			assertThat(resultField, equalTo(expectedField));
-		}
 	}
 
 }
