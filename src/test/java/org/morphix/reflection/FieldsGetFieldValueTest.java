@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.morphix.reflection.testdata.A;
 
 /**
- * Test class for {@link Reflection#setFieldValue(Object, java.lang.reflect.Field, Object)}.
+ * Test class for {@link Fields#get(Object, Field)}.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -34,7 +34,7 @@ class FieldsGetFieldValueTest {
 		a.b = Boolean.TRUE;
 
 		Field bField = A.class.getDeclaredField("b");
-		Boolean result = Fields.getFieldValue(a, bField);
+		Boolean result = Fields.get(a, bField);
 
 		assertThat(result, equalTo(Boolean.TRUE));
 	}
@@ -44,7 +44,7 @@ class FieldsGetFieldValueTest {
 		A a = new A();
 
 		Field field = A.class.getDeclaredField(A.FIELD_NAME);
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.getFieldValue(a, field));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.get(a, field));
 
 		assertThat(e.getMessage(), equalTo("Could not get field " + A.FIELD_NAME));
 	}

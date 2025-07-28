@@ -26,7 +26,7 @@ public interface Constructors {
 	/**
 	 * Exception message for when a class should not be instantiated.
 	 */
-	static final String MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED = "This class should not be instantiated!";
+	String MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED = "This class should not be instantiated!";
 
 	/**
 	 * Creates a new instance for the given type with its default constructor. When a new instance cannot be created It
@@ -127,7 +127,7 @@ public interface Constructors {
 		 * @return an object of type T
 		 */
 		static <T> T newInstance(final Constructor<T> constructor, final Object... args) {
-			try (ConstructorAccessor<T> constructorAccessor = new ConstructorAccessor<>(constructor)) {
+			try (ConstructorAccessor<T> ignored = new ConstructorAccessor<>(constructor)) {
 				return constructor.newInstance(args);
 			} catch (NullPointerException | InvocationTargetException
 					| IllegalAccessException | IllegalAccessError
@@ -147,7 +147,7 @@ public interface Constructors {
 		 */
 		static <T> T newInstance(final Class<T> cls, final InstanceCreator instanceCreator) {
 			try {
-				return newInstance(cls);
+				return IgnoreAccess.newInstance(cls);
 			} catch (ReflectionException e) {
 				return instanceCreator.newInstance(cls);
 			}

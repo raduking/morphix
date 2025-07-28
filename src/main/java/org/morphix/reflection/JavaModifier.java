@@ -128,6 +128,9 @@ public enum JavaModifier {
 		return value;
 	}
 
+	/**
+	 * @see #toString()
+	 */
 	@Override
 	public String toString() {
 		return getValue();

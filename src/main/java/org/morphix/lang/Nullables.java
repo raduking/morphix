@@ -25,7 +25,7 @@ import org.morphix.lang.function.SetterFunction;
 import org.morphix.reflection.Constructors;
 
 /**
- * Utility methods that handles operations with null-able objects.
+ * Utility methods that handle operations with null-able objects.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -609,7 +609,7 @@ public final class Nullables {
 		}
 
 		/**
-		 * Returns the value if it's not null and conforms to the given predicate. Otherwise the default value is returned.
+		 * Returns the value if it's not null and conforms to the given predicate. Otherwise, the default value is returned.
 		 *
 		 * @param predicate value predicate
 		 * @param defaultValue default value.
@@ -620,7 +620,7 @@ public final class Nullables {
 		}
 
 		/**
-		 * Returns the value if it's not null and conforms to the given predicate. Otherwise the default value supplied by the
+		 * Returns the value if it's not null and conforms to the given predicate. Otherwise, the default value supplied by the
 		 * given supplier is returned.
 		 *
 		 * @param predicate value predicate
@@ -632,7 +632,7 @@ public final class Nullables {
 		}
 
 		/**
-		 * Returns the value if it's not null and conforms to the given predicate. Otherwise an {@link IllegalStateException} is
+		 * Returns the value if it's not null and conforms to the given predicate. Otherwise, an {@link IllegalStateException} is
 		 * thrown with the given error message.
 		 *
 		 *

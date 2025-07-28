@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionGetDeclaredConstructorWithParamsTest {
+class ConstructorsGetDeclaredConstructorWithParamsTest {
 
 	public static class B {
 		private final int i;

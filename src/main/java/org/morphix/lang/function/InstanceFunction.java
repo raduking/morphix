@@ -118,7 +118,7 @@ public interface InstanceFunction<T> extends Supplier<T> {
 		Fields.getDeclaredFieldsInHierarchy(instance).stream()
 				// only non static fields
 				.filter(isNotStatic())
-				.forEach(field -> Fields.resetField(instance, field));
+				.forEach(field -> Fields.reset(field, instance));
 		return instanceFunction(instance);
 	}
 

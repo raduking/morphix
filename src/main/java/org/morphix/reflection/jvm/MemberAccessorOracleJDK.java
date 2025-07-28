@@ -26,7 +26,7 @@ import org.morphix.reflection.Constructors;
 /**
  * This class is used to make accessible some methods which normally are not accessible. From Java 12,
  * {@link AccessibleObject}.override was added to the reflection blacklist. Access modification can still be
- * circumvented by using the Unsafe technique to get the implementation lookup from {@link MethodHandles}
+ * circumvented by using the Unsafe technique to get the implementation lookup from {@link MethodHandles}.
  *
  * @param <T> accessible object type
  *

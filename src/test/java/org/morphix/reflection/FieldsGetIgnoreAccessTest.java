@@ -26,7 +26,7 @@ import org.morphix.reflection.testdata.B;
  *
  * @author Radu Sebastian LAZIN
  */
-public class ReflectionGetIgnoreAccessTest {
+public class FieldsGetIgnoreAccessTest {
 
 	public static final String TEST_STRING = "testString";
 	public static final Long TEST_LONG = 17L;
@@ -98,6 +98,20 @@ public class ReflectionGetIgnoreAccessTest {
 		assertThat(i, equalTo(TEST_INTEGER));
 
 		assertThat(field.canAccess(b), equalTo(false));
+	}
+
+	static class C extends B {
+		// empty
+	}
+
+	@Test
+	void shouldGetTheFieldValueInHierarchy() throws Exception {
+		C b = new C();
+		b.s = TEST_STRING;
+
+		String s = Fields.IgnoreAccess.get(b, B.class.getDeclaredField("s"));
+
+		assertThat(s, equalTo(TEST_STRING));
 	}
 
 }

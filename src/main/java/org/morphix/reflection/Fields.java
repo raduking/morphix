@@ -13,6 +13,7 @@
 package org.morphix.reflection;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -31,21 +32,25 @@ public interface Fields {
 	 * Returns a list with all the fields in the class given as parameter. This is different from
 	 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array.
 	 *
+	 * @param <T> type to get the fields from
+	 *
 	 * @param cls class on which the fields are returned
 	 * @return list of fields
 	 */
-	static List<Field> getDeclaredFields(final Class<?> cls) {
+	static <T> List<Field> getDeclaredFields(final Class<T> cls) {
 		return List.of(cls.getDeclaredFields());
 	}
 
 	/**
 	 * Returns a list with all the fields in the class, given as parameter and the field predicate.
 	 *
+	 * @param <T> type to get the fields from
+	 *
 	 * @param cls class on which the fields are returned
 	 * @param predicate predicate for fields
 	 * @return list of fields
 	 */
-	static List<Field> getDeclaredFields(final Class<?> cls, final Predicate<Field> predicate) {
+	static <T> List<Field> getDeclaredFields(final Class<T> cls, final Predicate<Field> predicate) {
 		return getDeclaredFields(cls).stream().filter(predicate).toList();
 	}
 
@@ -62,10 +67,12 @@ public interface Fields {
 	 * The returned order of the fields are: class -> super class -> ... -> base class and all fields in each class are
 	 * returned in the declared order.
 	 *
+	 * @param <T> type to get the fields from
+	 *
 	 * @param cls class on which the fields are returned
 	 * @return list of fields
 	 */
-	static List<Field> getDeclaredFieldsInHierarchy(final Class<?> cls) {
+	static <T> List<Field> getDeclaredFieldsInHierarchy(final Class<T> cls) {
 		if (null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
@@ -78,22 +85,26 @@ public interface Fields {
 	 * Returns a list with all the fields in the class, given as parameter and the field predicate, including the ones in
 	 * all it's super classes. The returned order of the fields are: class -> super class -> ... -> base class
 	 *
+	 * @param <T> type to get the fields from
+	 *
 	 * @param cls class on which the fields are returned
 	 * @param predicate predicate for fields
 	 * @return list of fields
 	 */
-	static List<Field> getDeclaredFieldsInHierarchy(final Class<?> cls, final Predicate<Field> predicate) {
+	static <T> List<Field> getDeclaredFieldsInHierarchy(final Class<T> cls, final Predicate<Field> predicate) {
 		return getDeclaredFieldsInHierarchy(cls).stream().filter(predicate).toList();
 	}
 
 	/**
 	 * Returns a field in the class and in all super classes of the class given as parameter.
 	 *
+	 * @param <T> type to get the fields from
+	 *
 	 * @param cls class on which the fields are returned
 	 * @param fieldName the name of the fields to get
 	 * @return existing field, null otherwise
 	 */
-	static Field getDeclaredFieldInHierarchy(final Class<?> cls, final String fieldName) {
+	static <T> Field getDeclaredFieldInHierarchy(final Class<T> cls, final String fieldName) {
 		if (null == cls) {
 			return null;
 		}
@@ -137,7 +148,7 @@ public interface Fields {
 	 * @param field field on which to extract the value
 	 * @return value of the field on the object obj
 	 */
-	static <T> T getFieldValue(final Object obj, final Field field) {
+	static <T> T get(final Object obj, final Field field) {
 		try {
 			return JavaObjects.cast(field.get(obj));
 		} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -152,7 +163,7 @@ public interface Fields {
 	 * @param field field on which to set the value
 	 * @param value value to be set on the field
 	 */
-	static void setFieldValue(final Object obj, final Field field, final Object value) {
+	static void set(final Object obj, final Field field, final Object value) {
 		try {
 			field.set(obj, value); // NOSONAR this is a reflection enhancement method
 		} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -206,7 +217,7 @@ public interface Fields {
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
-	public interface IgnoreAccess {
+	interface IgnoreAccess {
 
 		/**
 		 * Returns the value of the given field from the given object ignoring field access modifiers.
@@ -218,8 +229,8 @@ public interface Fields {
 		 * @return field value
 		 */
 		static <T> T get(final Object obj, final Field field) {
-			try (MemberAccessor<Field> fieldAccessor = new MemberAccessor<>(obj, field)) {
-				return getFieldValue(obj, field);
+			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
+				return Fields.get(obj, field);
 			}
 		}
 
@@ -233,11 +244,9 @@ public interface Fields {
 		 * @return field value
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
-			Field field;
-			try {
-				field = obj.getClass().getDeclaredField(fieldName);
-			} catch (NoSuchFieldException e) {
-				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass(), e);
+			Field field = Fields.getDeclaredFieldInHierarchy(obj.getClass(), fieldName);
+			if (null == field) {
+				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass());
 			}
 			return get(obj, field);
 		}
@@ -252,8 +261,14 @@ public interface Fields {
 		 * @param value value to set
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
-			try (MemberAccessor<Field> fieldAccessor = new MemberAccessor<>(obj, field)) {
-				setFieldValue(obj, field, value);
+			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
+				Fields.set(obj, field, value);
+			} catch (ReflectionException e) {
+				if (e.getCause() instanceof IllegalArgumentException) {
+					throw e;
+				}
+				// only final fields will reach this code
+				Unsafe.set(obj, field, value);
 			}
 		}
 
@@ -267,11 +282,9 @@ public interface Fields {
 		 * @param value value to set
 		 */
 		static <T> void set(final Object obj, final String fieldName, final T value) {
-			Field field;
-			try {
-				field = obj.getClass().getDeclaredField(fieldName);
-			} catch (NoSuchFieldException e) {
-				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass(), e);
+			Field field = Fields.getDeclaredFieldInHierarchy(obj.getClass(), fieldName);
+			if (null == field) {
+				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass());
 			}
 			set(obj, field, value);
 		}
@@ -287,11 +300,9 @@ public interface Fields {
 		 * @param value value to set
 		 */
 		static <T, U> void setStatic(final Class<T> cls, final String fieldName, final U value) {
-			Field field;
-			try {
-				field = cls.getDeclaredField(fieldName);
-			} catch (NoSuchFieldException e) {
-				throw new ReflectionException("Could not find static field with name " + fieldName + " on class " + cls, e);
+			Field field = Fields.getDeclaredFieldInHierarchy(cls, fieldName);
+			if (null == field) {
+				throw new ReflectionException("Could not find static field with name " + fieldName + " on class " + cls);
 			}
 			set(null, field, value);
 		}
@@ -300,18 +311,19 @@ public interface Fields {
 		 * Returns the value of a static field ignoring access modifiers.
 		 *
 		 * @param <T> the type of the static field
+		 * @param <U> type to get the field from
+		 *
 		 *
 		 * @param cls the class that has the static field
 		 * @param fieldName the name of the static field
 		 * @return the value of the static field wit the given name
 		 */
-		static <T> T getStatic(final Class<?> cls, final String fieldName) {
-			try {
-				Field field = cls.getDeclaredField(fieldName);
-				return get(null, field);
-			} catch (NoSuchFieldException e) {
-				throw new ReflectionException("Could not find static field with name: " + fieldName + " on class" + cls, e);
+		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
+			Field field = Fields.getDeclaredFieldInHierarchy(cls, fieldName);
+			if (null == field) {
+				throw new ReflectionException("Could not find static field with name: " + fieldName + " on class" + cls);
 			}
+			return get(null, field);
 		}
 
 		/**
@@ -388,28 +400,56 @@ public interface Fields {
 			}
 			return result;
 		}
+
+	}
+
+	/**
+	 * Unsafe utility methods.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Unsafe {
+
+		/**
+		 * Sets the field value using the {@link Unsafe} method.
+		 *
+		 * @param obj object on which the represented field's value is to be set
+		 * @param field field on which to set the value
+		 * @param value value to be set on the field
+		 */
+		static void set(final Object obj, final Field field, final Object value) {
+			boolean isStatic = Modifier.isStatic(field.getModifiers());
+			Object instance = obj;
+			if (isStatic) {
+				instance = TheUnsafe.staticFieldBase(field);
+			}
+			long offset = isStatic
+					? TheUnsafe.staticFieldOffset(field)
+					: TheUnsafe.objectFieldOffset(field);
+			TheUnsafe.putObject(instance, offset, value);
+		}
 	}
 
 	/**
 	 * Resets the given field to its default value after instantiation on the given object.
 	 *
-	 * @param <T> field value type
+	 * @param <T> type of the object containing the field
 	 *
-	 * @param obj object containing the field
 	 * @param field field to reset
+	 * @param obj object containing the field
 	 */
-	static <T> void resetField(final T obj, final Field field) {
+	static <T> void reset(final Field field, final T obj) {
 		Class<?> type = field.getType();
-		if (byte.class.equals(type)
-				|| short.class.equals(type)
-				|| int.class.equals(type)
-				|| long.class.equals(type)
-				|| float.class.equals(type)
-				|| double.class.equals(type)) {
+		if (byte.class == type
+				|| short.class == type
+				|| int.class == type
+				|| long.class == type
+				|| float.class == type
+				|| double.class == type) {
 			IgnoreAccess.set(obj, field, (byte) 0);
-		} else if (boolean.class.equals(type)) {
+		} else if (boolean.class == type) {
 			IgnoreAccess.set(obj, field, false);
-		} else if (char.class.equals(type)) {
+		} else if (char.class == type) {
 			IgnoreAccess.set(obj, field, (char) 0);
 		} else {
 			IgnoreAccess.set(obj, field, null);

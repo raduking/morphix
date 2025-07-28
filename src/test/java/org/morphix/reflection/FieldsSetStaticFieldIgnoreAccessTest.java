@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionSetStaticFieldIgnoreAccessTest {
+class FieldsSetStaticFieldIgnoreAccessTest {
 
 	private static final String MISSING_FIELD_NAME = "missingField";
 	private static final String STATIC_FIELD_NAME = "staticField";
@@ -50,6 +50,18 @@ class ReflectionSetStaticFieldIgnoreAccessTest {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.setStatic(B.class, MISSING_FIELD_NAME, VALUE));
 		assertThat(e.getMessage(),
 				equalTo("Could not find static field with name " + MISSING_FIELD_NAME + " on class " + B.class));
+	}
+
+	private static class C extends B {
+		// empty
+	}
+
+	@Test
+	void shouldSetStaticFieldIgnoringAccessFromDerivedClass() {
+		Fields.IgnoreAccess.setStatic(C.class, STATIC_FIELD_NAME, VALUE);
+
+		String result = B.getStaticField();
+		assertThat(result, equalTo(VALUE));
 	}
 
 }

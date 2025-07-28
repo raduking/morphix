@@ -18,6 +18,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.LinkedList;
@@ -40,13 +41,15 @@ public interface Methods {
 	/**
 	 * Returns a method in the class given as parameter, also searching in all it's super classes.
 	 *
+	 * @param <T> type to get the methods from
+	 *
 	 * @param methodName name of the method to find
-	 * @param cls class on which the fields are returned
+	 * @param cls class from where to start the search
 	 * @param parameterTypes types of the method parameters
 	 * @return found method
 	 * @throws NoSuchMethodException if the method was not found
 	 */
-	static Method getDeclaredMethodInHierarchy(final String methodName, final Class<?> cls, final Class<?>... parameterTypes)
+	static <T> Method getDeclaredMethodInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes)
 			throws NoSuchMethodException {
 		try {
 			return cls.getDeclaredMethod(methodName, parameterTypes);
@@ -61,12 +64,14 @@ public interface Methods {
 	/**
 	 * Returns a method in the class given as parameter, also searching in all it's super classes.
 	 *
+	 * @param <T> type to get the methods from
+	 *
 	 * @param methodName name of the method to find
-	 * @param cls class on which the fields are returned
+	 * @param cls class from where to start the search
 	 * @param parameterTypes types of the method parameters
 	 * @return found method, null otherwise
 	 */
-	static Method getSafeDeclaredMethodInHierarchy(final String methodName, final Class<?> cls, final Class<?>... parameterTypes) {
+	static <T> Method getSafeDeclaredMethodInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
 		try {
 			return cls.getDeclaredMethod(methodName, parameterTypes);
 		} catch (NoSuchMethodException e) {
@@ -84,16 +89,18 @@ public interface Methods {
 	 * <ul>
 	 * <li>it is more efficient in terms of memory consumption</li>
 	 * <li>accessing the first and last has O(1) complexity</li>
-	 * <li>more often than not no random access is needed</li>
+	 * <li>more often than not, no random access is needed</li>
 	 * <li>profiling: ~2 times faster than using {@link java.util.ArrayList}</li>
 	 * </ul>
-	 * The returned order of the methods are: class -> super class -> ... -> base class and all methods in each class are
+	 * The returned order of the methods are: class -> super class -> ... -> base class, and all methods in each class are
 	 * returned in the declared order.
+	 *
+	 * @param <T> type to get the methods from
 	 *
 	 * @param cls class on which the fields are returned
 	 * @return list of fields
 	 */
-	static List<Method> getDeclaredMethodsInHierarchy(final Class<?> cls) {
+	static <T> List<Method> getDeclaredMethodsInHierarchy(final Class<T> cls) {
 		if (null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
@@ -103,14 +110,16 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a list with all the methods in the class given as parameter including the ones in all it's super classes
-	 * which verify the given method predicate.
+	 * Returns a list with all the methods in the class given as parameter including the ones in all it's super classes that
+	 * verify the given method predicate.
+	 *
+	 * @param <T> type to get the methods from
 	 *
 	 * @param cls class on which the fields are returned
 	 * @param predicate filter predicate for methods
 	 * @return list of fields
 	 */
-	static List<Method> getDeclaredMethodsInHierarchy(final Class<?> cls, final Predicate<? super Method> predicate) {
+	static <T> List<Method> getDeclaredMethodsInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
 		if (null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
@@ -139,7 +148,7 @@ public interface Methods {
 	 * @param <T> generic return type
 	 *
 	 * @param method method for which the generic return type is needed
-	 * @param index the zero based index of the type needed (for a Map the 2nd generic parameter has index 1)
+	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return type
 	 */
 	static <T extends Type> T getGenericReturnType(final Method method, final int index) {
@@ -153,12 +162,12 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns the generic return type for a method or null if method has no generic return type.
+	 * Returns the generic return type for a method or null if the method has no generic return type.
 	 *
 	 * @param <T> generic return type
 	 *
 	 * @param method method for which the generic return type is needed
-	 * @param index the zero based index of the type needed (for a Map the 2nd generic parameter has index 1)
+	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return type
 	 */
 	static <T extends Type> T getSafeGenericReturnType(final Method method, final int index) {
@@ -185,7 +194,7 @@ public interface Methods {
 	 * @param <T> generic return type
 	 *
 	 * @param method method for which the generic return type is needed
-	 * @param index the zero based index of the type needed (for a Map the 2nd generic parameter has index 1)
+	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return type
 	 */
 	static <T> Class<T> getGenericReturnClass(final Method method, final int index) {
@@ -218,7 +227,7 @@ public interface Methods {
 
 	/**
 	 * Returns the currently executing method name. The advantage of this method is that each {@link StackTraceElement} is
-	 * fetched lazily, so you don't actually construct the full stack trace before checking the first method.
+	 * fetched lazily, so you don't construct the full stack trace before checking the first method.
 	 *
 	 * @param withClassName flag to prepend class name
 	 * @return the currently executing method name
@@ -229,7 +238,7 @@ public interface Methods {
 
 	/**
 	 * Returns the currently executing method name. The advantage of this method is that each {@link StackTraceElement} is
-	 * fetched lazily, so you don't actually construct the full stack trace before checking the first method.
+	 * fetched lazily, so you don't construct the full stack trace before checking the first method.
 	 *
 	 * @param withClassName flag to prepend class name
 	 * @param depth the depth of the caller method, for the direct caller this should be 1
@@ -318,6 +327,31 @@ public interface Methods {
 	}
 
 	/**
+	 * Returns the functional interface method if the given class is a functional interface.
+	 *
+	 * @param <T> type to get the method.
+	 *
+	 * @param cls functional interface class
+	 * @return the functional interface method if the given class is a functional interface
+	 * @throws ReflectionException if the class is not a functional interface
+	 */
+	static <T> Method getFunctionalInterfaceMethod(final Class<T> cls) {
+		Method singleAbstractMethod = null;
+		for (Method method : cls.getMethods()) {
+			if (Modifier.isAbstract(method.getModifiers())) {
+				if (null != singleAbstractMethod) {
+					throw new ReflectionException(cls + " is not a functional interface because it has more than one abstract method");
+				}
+				singleAbstractMethod = method;
+			}
+		}
+		if (null == singleAbstractMethod) {
+			throw new ReflectionException(cls + " is not a functional interface because it has no abstract method");
+		}
+		return singleAbstractMethod;
+	}
+
+	/**
 	 * Interface which groups all methods that ignore constructor access modifiers.
 	 *
 	 * @author Radu Sebastian LAZIN
@@ -336,21 +370,21 @@ public interface Methods {
 		 * @return result of the method invocation
 		 */
 		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
-			try (MemberAccessor<Method> methodAccessor = new MemberAccessor<>(obj, method)) {
+			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
 				return JavaObjects.cast(method.invoke(obj, args));
 			} catch (InvocationTargetException e) {
 				// e is just a wrapper on the real exception, escalate the real one
 				Throwable cause = Reflection.unwrapInvocationTargetException(e);
 				String className = method.getDeclaringClass().getCanonicalName();
 				if (null != obj) {
-					className = obj instanceof Class ? ((Class<?>) obj).getCanonicalName() : obj.getClass().getCanonicalName();
+					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 				}
 				throw new ReflectionException(cause.getMessage() + ". Error invoking " + className + "." + method.getName(), e);
 			} catch (Exception e) {
 				// escalate any exception invoking the method
 				String className = method.getDeclaringClass().getCanonicalName();
 				if (null != obj) {
-					className = obj instanceof Class ? ((Class<?>) obj).getCanonicalName() : obj.getClass().getCanonicalName();
+					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 				}
 				throw new ReflectionException(e.getMessage() + ". Error invoking " + className + "." + method.getName(), e);
 			}
@@ -385,7 +419,7 @@ public interface Methods {
 		 * @return result of the method invocation
 		 */
 		static <T, R> R invokeWithOriginalException(final Method method, final T obj, final Object... args) {
-			try (MemberAccessor<Method> methodAccessor = new MemberAccessor<>(obj, method)) {
+			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
 				return JavaObjects.cast(method.invoke(obj, args));
 			} catch (InvocationTargetException e) {
 				// e is just a wrapper on the real exception, escalate the real one

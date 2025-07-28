@@ -17,7 +17,7 @@
 
 	<groupId>io.github.raduking</groupId>
 	<artifactId>morphix-all</artifactId>
-	<version>1.0.5</version>
+	<version>1.0.6</version>
 	<packaging>jar</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -56,6 +56,9 @@
 		<pitest.plugin.junit5.version>1.2.3</pitest.plugin.junit5.version>
 		<jacoco.plugin.version>0.8.13</jacoco.plugin.version>
 		<project.info.reports.plugin.version>3.9.0</project.info.reports.plugin.version>
+
+		<!-- Benchmarking -->
+		<jmh.version>1.37</jmh.version>
 
 		<!-- Publishing dependencies versions -->
 		<gpg.plugin.version>3.2.7</gpg.plugin.version>
@@ -109,6 +112,21 @@
 			<scope>test</scope>
 		</dependency>
 
+        <!-- Add JMH dependencies (scope=test so they don't affect the main build) -->
+		<dependency>
+			<groupId>org.openjdk.jmh</groupId>
+			<artifactId>jmh-core</artifactId>
+			<version>${jmh.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.openjdk.jmh</groupId>
+			<artifactId>jmh-generator-annprocess</artifactId>
+			<version>${jmh.version}</version>
+			<scope>test</scope>
+		</dependency>
+      
 	</dependencies>
 
 	<build>
@@ -119,6 +137,7 @@
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
+					<proc>none</proc>
 				</configuration>
 			</plugin>
 
@@ -275,6 +294,50 @@
 				</plugins>
 			</build>
 		</profile>
+    	
+    	<profile>
+			<id>benchmark</id>
+			<properties>
+				<annotation.processing>full</annotation.processing>
+				<jmh.fork>1</jmh.fork>
+				<maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<configuration>
+							<source>${maven.compiler.source}</source>
+							<target>${maven.compiler.target}</target>
+							<annotationProcessorPaths>
+								<path>
+									<groupId>org.openjdk.jmh</groupId>
+									<artifactId>jmh-generator-annprocess</artifactId>
+									<version>${jmh.version}</version>
+								</path>
+							</annotationProcessorPaths>
+							<proc>${annotation.processing}</proc>
+						</configuration>
+					</plugin>
+
+					<!--
+						run benchmarks conditionally with 1 warmup forks and 2 run forks:
+						mvn jmh:benchmark -Pbenchmark -Djmh.wf=1 -Djmh.fork=2
+					-->
+					<plugin>
+						<groupId>pw.krejci</groupId>
+						<artifactId>jmh-maven-plugin</artifactId>
+						<version>0.2.2</version>
+						<configuration>
+							<fork>${jmh.fork}</fork>
+							<resultFormat>JSON</resultFormat>
+							<resultsFile>target/jmh-result-${maven.build.timestamp}.json</resultsFile>
+						</configuration>
+					</plugin>					
+				</plugins>
+			</build>
+    	</profile>
     	
 		<profile>
 			<id>eclipse</id>

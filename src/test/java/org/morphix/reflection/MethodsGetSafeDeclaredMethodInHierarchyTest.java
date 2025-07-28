@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionGetSafeDeclaredMethodInHierarchyTest {
+class MethodsGetSafeDeclaredMethodInHierarchyTest {
 
 	public enum E {
 		// empty enum

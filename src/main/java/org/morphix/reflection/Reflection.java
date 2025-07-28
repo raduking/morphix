@@ -26,11 +26,11 @@ import org.morphix.lang.JavaObjects;
 public interface Reflection {
 
 	/**
-	 * Unwraps an exception returning the cause. If the cause is null no unwrapping is done and the exception is returned as
-	 * is.
+	 * Unwraps an exception returning the cause. If the cause is {@code null} no unwrapping is done and the exception is
+	 * returned as is.
 	 *
 	 * @param e input exception
-	 * @return the cause, if the cause is null the input exception is returned
+	 * @return the cause, if the cause is {@code null} the input exception is returned
 	 */
 	static Throwable unwrapException(final Throwable e) {
 		return null == e.getCause() || e == e.getCause() ? e : unwrapException(e.getCause());
@@ -38,10 +38,10 @@ public interface Reflection {
 
 	/**
 	 * Unwraps an {@link InvocationTargetException} returning the {@link InvocationTargetException#getCause()}. If the cause
-	 * is null no unwrapping is done and the exception is returned as is.
+	 * is {@code null} no unwrapping is done and the exception is returned as is.
 	 *
 	 * @param e input exception
-	 * @return the cause, if the cause is null the input exception is returned
+	 * @return the cause, if the cause is {@code null} the input exception is returned
 	 */
 	static Throwable unwrapInvocationTargetException(final InvocationTargetException e) {
 		return null != e.getCause() ? e.getCause() : e;
@@ -74,7 +74,7 @@ public interface Reflection {
 	 *
 	 * @param obj object on which the operation will be executed
 	 * @param field field to get value from
-	 * @return value of the field in source object
+	 * @return value of the field in the source object
 	 */
 	static <T> T getFieldValue(final Object obj, final Field field) {
 		// try a getter method first
@@ -83,7 +83,7 @@ public interface Reflection {
 			Method getterMethod = Methods.getDeclaredMethodInHierarchy(getterMethodName, obj.getClass());
 			return Methods.IgnoreAccess.invoke(getterMethod, obj);
 		} catch (NoSuchMethodException e) {
-			// if no getter found just get the value from field
+			// if no getter is found, just get the value from the field
 			return Fields.IgnoreAccess.get(obj, field);
 		}
 	}
@@ -143,7 +143,7 @@ public interface Reflection {
 	 * @param child some child class
 	 * @return the subclass of the expected parent
 	 */
-	public static Class<?> findSubclass(final Class<?> expectedParent, final Class<?> child) {
+	static Class<?> findSubclass(final Class<?> expectedParent, final Class<?> child) {
 		Class<?> parent = child.getSuperclass();
 		if (Object.class == parent) {
 			throw new ReflectionException("The parent of " + child.getCanonicalName() + " is not a " + expectedParent.getCanonicalName());
