@@ -25,14 +25,27 @@ public class TheUnsafe {
 
 	static final String THE_UNSAFE_FIELD_NAME = "theUnsafe";
 
-	static final Unsafe UNSAFE = getUnsafe(THE_UNSAFE_FIELD_NAME);
+	static final Unsafe UNSAFE = getUnsafe();
 
-	static boolean isUnsafeAvailable() {
-		return null != UNSAFE;
+	/**
+	 * Returns the Java {@link Unsafe}.
+	 *
+	 * @return the unsafe object
+	 */
+	public static Unsafe getUnsafe() {
+		return getStaticFromUnsafe(THE_UNSAFE_FIELD_NAME);
 	}
 
-	static Unsafe getUnsafe(final String theUnsafeFieldName) {
-		Field theUnsafeField = Fields.getDeclaredFieldInHierarchy(Unsafe.class, theUnsafeFieldName);
+	/**
+	 * Returns a static field from the {@link Unsafe} class.
+	 *
+	 * @param <T> return type
+	 *
+	 * @param fieldName field name
+	 * @return a static field
+	 */
+	static <T> T getStaticFromUnsafe(final String fieldName) {
+		Field theUnsafeField = Fields.getDeclaredFieldInHierarchy(Unsafe.class, fieldName);
 		if (null == theUnsafeField) {
 			return null;
 		}
@@ -41,25 +54,53 @@ public class TheUnsafe {
 		}
 	}
 
+	/**
+	 * Calls and returns the value of {@link Unsafe#staticFieldOffset(Field)}.
+	 *
+	 * @param field static field to get the offset for
+	 * @return field offset
+	 */
 	@SuppressWarnings("deprecation")
 	public static long staticFieldOffset(final Field field) {
 		return UNSAFE.staticFieldOffset(field);
 	}
 
+	/**
+	 * Calls and returns the value of {@link Unsafe#objectFieldOffset(Field)}.
+	 *
+	 * @param field field to get the offset for
+	 * @return field offset
+	 */
 	@SuppressWarnings("deprecation")
 	public static long objectFieldOffset(final Field field) {
 		return UNSAFE.objectFieldOffset(field);
 	}
 
+	/**
+	 * Calls and returns the value of {@link Unsafe#staticFieldBase(Field)}.
+	 *
+	 * @param field static field to get the base object for
+	 * @return class object the static field is declared in
+	 */
 	@SuppressWarnings("deprecation")
 	public static Object staticFieldBase(final Field field) {
 		return UNSAFE.staticFieldBase(field);
 	}
 
+	/**
+	 * Sets the field value for the given object. The field is determined by its offset.
+	 *
+	 * @param obj object containing the field
+	 * @param offset field offset
+	 * @param value value to set
+	 */
 	public static void putObject(final Object obj, final long offset, final Object value) {
 		UNSAFE.putObject(obj, offset, value);
 	}
 
+	/**
+	 * Hide constructor.
+	 */
 	private TheUnsafe() {
 		throw Constructors.unsupportedOperationException();
 	}

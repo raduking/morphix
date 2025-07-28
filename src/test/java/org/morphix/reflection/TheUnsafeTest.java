@@ -14,13 +14,15 @@ package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.lang.JavaObjects;
+
+import sun.misc.Unsafe;
 
 /**
  * Test class for {@link TheUnsafe}.
@@ -34,11 +36,14 @@ class TheUnsafeTest {
 		ReflectionException reflectionException = assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(TheUnsafe.class));
 		InvocationTargetException invocationTargetException = JavaObjects.cast(reflectionException.getCause());
 		UnsupportedOperationException unsupportedOperationException = JavaObjects.cast(invocationTargetException.getCause());
+
 		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 	}
 
 	@Test
-	void shouldReturnTrueIfUnsafeIsAvailable() {
-		assertTrue(TheUnsafe.isUnsafeAvailable());
+	void shouldReturnNullIfUnsafeFieldIsMissing() {
+		Unsafe unsafe = TheUnsafe.getStaticFromUnsafe("someField");
+
+		assertNull(unsafe);
 	}
 }
