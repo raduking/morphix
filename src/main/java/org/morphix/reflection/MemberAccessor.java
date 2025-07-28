@@ -18,10 +18,8 @@ import java.lang.reflect.Modifier;
 import java.util.Objects;
 
 /**
- * Helper class for accessing members that are not accessible.
- * <p>
- * TODO: allow final fields also.
- * </p>
+ * Helper class for accessing members that are not accessible. This is only a read access meaning that it cannot write
+ * {@code final} fields.
  *
  * @param <T> an {@link AccessibleObject} or {@link Member} type
  *
@@ -32,9 +30,16 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	/**
 	 * Error message.
 	 */
-	private static final String ACCESS_CHANGE_ERROR = "Could not change access to member: ";
+	protected static final String ACCESS_CHANGE_ERROR = "Could not change access to member: ";
 
+	/**
+	 * The member which will have its access changed temporarily.
+	 */
 	private final T member;
+
+	/**
+	 * The flag that says if the field is accessible or not.
+	 */
 	private final boolean isAccessible;
 
 	/**
@@ -47,18 +52,20 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 		this.member = Objects.requireNonNull(member, "member");
 		// by default, a reflected object is not accessible
 		Object actual = null != object && Modifier.isStatic(member.getModifiers()) ? null : object;
-		this.isAccessible = ReflectionException.wrapThrowing(() -> member.canAccess(actual), ACCESS_CHANGE_ERROR + member);
 
+		this.isAccessible = ReflectionException.wrapThrowing(() -> member.canAccess(actual), ACCESS_CHANGE_ERROR + member);
 		if (!isAccessible) {
 			ReflectionException.wrapThrowing(() -> member.setAccessible(true), ACCESS_CHANGE_ERROR + member); // NOSONAR
 		}
 	}
 
+	/**
+	 * @see #close()
+	 */
 	@Override
 	public void close() {
 		if (!isAccessible) {
 			ReflectionException.wrapThrowing(() -> member.setAccessible(false), ACCESS_CHANGE_ERROR + member);
 		}
 	}
-
 }

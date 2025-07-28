@@ -30,10 +30,19 @@ import org.morphix.lang.JavaObjects;
  */
 public class GenericType implements ParameterizedType {
 
+	/**
+	 * The raw type without generics.
+	 */
 	private final Class<?> rawType;
 
+	/**
+	 * Generic type arguments.
+	 */
 	private final Type[] arguments;
 
+	/**
+	 * Owner type.
+	 */
 	private final Type ownerType;
 
 	/**

@@ -26,6 +26,9 @@ import org.morphix.lang.JavaObjects;
  */
 public class Primitives {
 
+	/**
+	 * Map containing mappings from primitive classes to boxed classes.
+	 */
 	private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_CLASS_MAP = new HashMap<>();
 	static {
 		PRIMITIVE_TO_CLASS_MAP.put(int.class, Integer.class);
@@ -38,6 +41,9 @@ public class Primitives {
 		PRIMITIVE_TO_CLASS_MAP.put(double.class, Double.class);
 	}
 
+	/**
+	 * Map containing mappings from boxed classes to primitive classes.
+	 */
 	private static final Map<Class<?>, Class<?>> CLASS_TO_PRIMITIVE_MAP = PRIMITIVE_TO_CLASS_MAP.keySet().stream()
 			.collect(Collectors.toMap(PRIMITIVE_TO_CLASS_MAP::get, Function.identity()));
 
