@@ -109,9 +109,8 @@ public class Lambdas {
 	 */
 	static <T> SerializedLambda getSerializedLambda(final T function, final Class<?> cls) {
 		if (null != cls) {
-			Method replaceMethod;
 			try {
-				replaceMethod = cls.getDeclaredMethod(SERIALIZATION_METHOD_NAME);
+				Method replaceMethod = cls.getDeclaredMethod(SERIALIZATION_METHOD_NAME);
 				Object serializedForm = Methods.IgnoreAccess.invoke(replaceMethod, function);
 				if (serializedForm instanceof SerializedLambda serializedLambda) {
 					return serializedLambda;

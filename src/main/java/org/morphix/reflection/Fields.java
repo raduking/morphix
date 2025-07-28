@@ -398,23 +398,23 @@ public interface Fields {
 	/**
 	 * Resets the given field to its default value after instantiation on the given object.
 	 *
-	 * @param <T> field value type
+	 * @param <T> type of the object containing the field
 	 *
-	 * @param obj object containing the field
 	 * @param field field to reset
+	 * @param obj object containing the field
 	 */
-	static <T> void resetField(final T obj, final Field field) {
+	static <T> void reset(final Field field, final T obj) {
 		Class<?> type = field.getType();
-		if (byte.class.equals(type)
-				|| short.class.equals(type)
-				|| int.class.equals(type)
-				|| long.class.equals(type)
-				|| float.class.equals(type)
-				|| double.class.equals(type)) {
+		if (byte.class == type
+				|| short.class == type
+				|| int.class == type
+				|| long.class == type
+				|| float.class == type
+				|| double.class == type) {
 			IgnoreAccess.set(obj, field, (byte) 0);
-		} else if (boolean.class.equals(type)) {
+		} else if (boolean.class == type) {
 			IgnoreAccess.set(obj, field, false);
-		} else if (char.class.equals(type)) {
+		} else if (char.class == type) {
 			IgnoreAccess.set(obj, field, (char) 0);
 		} else {
 			IgnoreAccess.set(obj, field, null);

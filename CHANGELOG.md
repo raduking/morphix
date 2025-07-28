@@ -13,7 +13,8 @@
 - Added `HandleMethods` utility class for faster method invoking using method handles.
 - Added `Methods.getFunctionalInterfaceMethod` to find the functional interface method for a class/interface.
 - Added `MethodSignature` record to hold a method signature for invocation caching.
-- Changed all methods in `Methods` and `Fields` classes to use declared generic arguments instead of a wildcard.
+- Changed all methods in `Methods` and `Fields` classes to use declared generic arguments instead of a wild card.
+- Renamed `Fields.resetField` to `Fields.reset` and inverted parameters.
 
 ---
 

@@ -377,14 +377,14 @@ public interface Methods {
 				Throwable cause = Reflection.unwrapInvocationTargetException(e);
 				String className = method.getDeclaringClass().getCanonicalName();
 				if (null != obj) {
-					className = obj instanceof Class ? ((Class<?>) obj).getCanonicalName() : obj.getClass().getCanonicalName();
+					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 				}
 				throw new ReflectionException(cause.getMessage() + ". Error invoking " + className + "." + method.getName(), e);
 			} catch (Exception e) {
 				// escalate any exception invoking the method
 				String className = method.getDeclaringClass().getCanonicalName();
 				if (null != obj) {
-					className = obj instanceof Class ? ((Class<?>) obj).getCanonicalName() : obj.getClass().getCanonicalName();
+					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 				}
 				throw new ReflectionException(e.getMessage() + ". Error invoking " + className + "." + method.getName(), e);
 			}
