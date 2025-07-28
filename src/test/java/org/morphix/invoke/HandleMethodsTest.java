@@ -48,7 +48,7 @@ class HandleMethodsTest {
 
 	@Test
 	void shouldInvokePublicMethodWithNoParams() throws Throwable {
-		MethodHandle method = HandleMethods.getMethod(A.class, "getS", String.class);
+		MethodHandle method = HandleMethods.getMethod("getS", A.class, String.class);
 		A a = new A();
 
 		String result = HandleMethods.invoke(method, a);
@@ -58,7 +58,7 @@ class HandleMethodsTest {
 
 	@Test
 	void shouldInvokePublicMethodWithNoParamsWithMethodHandleInvokeExact() throws Throwable {
-		MethodHandle method = HandleMethods.getMethod(A.class, "getS", String.class);
+		MethodHandle method = HandleMethods.getMethod("getS", A.class, String.class);
 		A a = new A();
 
 		String result = (String) method.invokeExact(a);
@@ -68,7 +68,7 @@ class HandleMethodsTest {
 
 	@Test
 	void shouldInvokePublicStaticMethodWithNoParams() throws Throwable {
-		MethodHandle method = HandleMethods.getStaticMethod(A.class, "getStaticS", String.class);
+		MethodHandle method = HandleMethods.getStaticMethod("getStaticS", A.class, String.class);
 
 		String result = HandleMethods.invoke(method);
 
@@ -77,7 +77,7 @@ class HandleMethodsTest {
 
 	@Test
 	void shouldInvokePublicStaticMethodWithNoParamsWithMethodHandleInvokeExact() throws Throwable {
-		MethodHandle method = HandleMethods.getStaticMethod(A.class, "getStaticS", String.class);
+		MethodHandle method = HandleMethods.getStaticMethod("getStaticS", A.class, String.class);
 
 		String result = (String) method.invokeExact();
 
@@ -95,7 +95,7 @@ class HandleMethodsTest {
 
 	@Test
 	void shouldTransformAnyThrowanleToReflectionExceptionOnInvoke() {
-		MethodHandle method = HandleMethods.getStaticMethod(A.class, "getStaticS", String.class);
+		MethodHandle method = HandleMethods.getStaticMethod("getStaticS", A.class, String.class);
 		A a = new A();
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> HandleMethods.invoke(method, a));
@@ -105,7 +105,7 @@ class HandleMethodsTest {
 
 	@Test
 	void shouldThrowExceptionForPrivateLookupInMethodDoesNotExist() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> HandleMethods.getMethod(A.class, UNKNOWN, String.class));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> HandleMethods.getMethod(UNKNOWN, A.class, String.class));
 
 		assertThat(e.getMessage(), equalTo("Method handle creation failed for " + A.class.getName() + "#" + UNKNOWN));
 		assertThat(e.getCause().getClass(), equalTo(NoSuchMethodException.class));

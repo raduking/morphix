@@ -44,7 +44,7 @@ public interface Methods {
 	 * @param <T> type to get the methods from
 	 *
 	 * @param methodName name of the method to find
-	 * @param cls class on which the fields are returned
+	 * @param cls class from where to start the search
 	 * @param parameterTypes types of the method parameters
 	 * @return found method
 	 * @throws NoSuchMethodException if the method was not found
@@ -67,7 +67,7 @@ public interface Methods {
 	 * @param <T> type to get the methods from
 	 *
 	 * @param methodName name of the method to find
-	 * @param cls class on which the fields are returned
+	 * @param cls class from where to start the search
 	 * @param parameterTypes types of the method parameters
 	 * @return found method, null otherwise
 	 */

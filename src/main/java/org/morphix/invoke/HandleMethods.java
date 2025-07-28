@@ -60,16 +60,16 @@ public class HandleMethods {
 	 *
 	 * @param <T> the type of the class.
 	 *
-	 * @param cls the class where the method is declared.
 	 * @param name the name of the method.
+	 * @param cls the class where the method is declared.
 	 * @param returnType the return type of the method.
 	 * @param parameterTypes the parameter types of the method.
 	 * @return a {@link MethodHandle} pointing to the specified method.
 	 * @throws ReflectionException If the method cannot be found or accessed.
 	 */
-	public static <T> MethodHandle getMethod(final Class<T> cls, final String name, final Class<?> returnType, final Class<?>... parameterTypes) {
+	public static <T> MethodHandle getMethod(final String name, final Class<T> cls, final Class<?> returnType, final Class<?>... parameterTypes) {
 		MethodType methodType = MethodType.methodType(returnType, parameterTypes);
-		return getMethod(cls, name, methodType, false);
+		return getMethod(name, cls, methodType, false);
 	}
 
 	/**
@@ -77,17 +77,17 @@ public class HandleMethods {
 	 *
 	 * @param <T> the type of the class.
 	 *
-	 * @param cls the class where the static method is declared.
 	 * @param name the name of the method.
+	 * @param cls the class where the static method is declared.
 	 * @param returnType the return type of the method.
 	 * @param parameterTypes the parameter types of the method.
 	 * @return A {@link MethodHandle} pointing to the specified static method.
 	 * @throws ReflectionException If the method cannot be found or accessed.
 	 */
-	public static <T> MethodHandle getStaticMethod(final Class<T> cls, final String name, final Class<?> returnType,
+	public static <T> MethodHandle getStaticMethod(final String name, final Class<T> cls, final Class<?> returnType,
 			final Class<?>... parameterTypes) {
 		MethodType methodType = MethodType.methodType(returnType, parameterTypes);
-		return getMethod(cls, name, methodType, true);
+		return getMethod(name, cls, methodType, true);
 	}
 
 	/**
@@ -115,14 +115,14 @@ public class HandleMethods {
 	 *
 	 * @param <T> the type of the class.
 	 *
-	 * @param cls the class where the static method is declared.
 	 * @param methodName the name of the method.
+	 * @param cls the class where the static method is declared.
 	 * @param methodType the type of the method.
 	 * @param isStatic flag to specify if the method is static or not
 	 * @return A {@link MethodHandle} pointing to the specified static method.
 	 * @throws ReflectionException If the method cannot be found or accessed.
 	 */
-	private static MethodHandle getMethod(final Class<?> cls, final String methodName, final MethodType methodType, final boolean isStatic) {
+	private static MethodHandle getMethod(final String methodName, final Class<?> cls, final MethodType methodType, final boolean isStatic) {
 		ConcurrentMap<MethodSignature, MethodHandle> classMethods = METHOD_CACHE
 				.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
 
