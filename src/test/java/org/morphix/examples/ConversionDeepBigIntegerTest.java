@@ -15,6 +15,7 @@ package org.morphix.examples;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.morphix.convert.Conversions.convertFrom;
+import static org.morphix.convert.Converter.convert;
 
 import java.math.BigInteger;
 
@@ -64,6 +65,22 @@ class ConversionDeepBigIntegerTest {
 		assertThat(dst.a.i, equalTo(BigInteger.TEN));
 	}
 
+	@Test
+	void shouldConvertBigIntegersWithNewApi() {
+		Src src = new Src();
+		src.id = BigInteger.ONE;
+		A a = new A();
+		a.i = BigInteger.TEN;
+		src.a = a;
+
+		Dst dst = convert(src)
+				.with(ConversionDeepBigIntegerTest::toBigInteger)
+				.to(Dst::new);
+
+		assertThat(dst.id, equalTo(BigInteger.ONE));
+		assertThat(dst.a.i, equalTo(BigInteger.TEN));
+	}
+
 	public static class C {
 		public long i;
 	}
@@ -76,7 +93,7 @@ class ConversionDeepBigIntegerTest {
 		C c = new C();
 		c.i = 1L;
 
-		B b = convertFrom(c, B::new);
+		B b = convert(c).to(B::new);
 
 		assertThat(b.i, equalTo(BigInteger.ONE));
 	}
