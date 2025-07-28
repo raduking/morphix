@@ -2,6 +2,10 @@
 
 ---
 
+`1.0.7`
+
+---
+
 `1.0.6`
 
 - Changed `Fields.IgnoreAccess.get` with field name as parameter to look for the field in the class hierarchy.
