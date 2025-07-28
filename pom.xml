@@ -299,6 +299,8 @@
 			<id>benchmark</id>
 			<properties>
 				<annotation.processing>full</annotation.processing>
+				<jmh.fork>1</jmh.fork>
+				<maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
 			</properties>
 			<build>
 				<plugins>
@@ -319,11 +321,19 @@
 						</configuration>
 					</plugin>
 
-					<!-- run benchmarks conditionally with 2 warmup forks: mvn jmh:benchmark -Pbenchmark -Djmh.wf=2 -->
+					<!--
+						run benchmarks conditionally with 1 warmup forks and 2 run forks:
+						mvn jmh:benchmark -Pbenchmark -Djmh.wf=1 -Djmh.fork=2
+					-->
 					<plugin>
 						<groupId>pw.krejci</groupId>
 						<artifactId>jmh-maven-plugin</artifactId>
 						<version>0.2.2</version>
+						<configuration>
+							<fork>${jmh.fork}</fork>
+							<resultFormat>JSON</resultFormat>
+							<resultsFile>target/jmh-result-${maven.build.timestamp}.json</resultsFile>
+						</configuration>
 					</plugin>					
 				</plugins>
 			</build>
