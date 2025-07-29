@@ -118,25 +118,29 @@ public interface Fields {
 	}
 
 	/**
-	 * Variation of {@link #getDeclaredFieldsInHierarchy(Class)}. It will call the method with <code>obj.getClass()</code>.
+	 * Variation of {@link #getDeclaredFieldsInHierarchy(Class)}. It will call the method with <code>obj.getClass()</code>
+	 * if the object is not instance of {@link Class}, otherwise it will search for fields in the given class.
 	 *
 	 * @param obj object on which the fields are needed
 	 * @return list of fields
 	 */
 	static List<Field> getDeclaredFieldsInHierarchy(final Object obj) {
-		return getDeclaredFieldsInHierarchy(obj.getClass());
+		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
+		return getDeclaredFieldsInHierarchy(clazz);
 	}
 
 	/**
 	 * Variation of {@link #getDeclaredFieldInHierarchy(Class, String)}. It will call the method with
-	 * <code>obj.getClass()</code>.
+	 * <code>obj.getClass()</code> if the object is not instance of {@link Class}, otherwise it will search for fields in
+	 * the given class.
 	 *
 	 * @param obj object on which the fields are needed
 	 * @param fieldName the name of the field to be retrieved
 	 * @return existing field, null otherwise
 	 */
 	static Field getDeclaredFieldInHierarchy(final Object obj, final String fieldName) {
-		return getDeclaredFieldInHierarchy(obj.getClass(), fieldName);
+		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
+		return getDeclaredFieldInHierarchy(clazz, fieldName);
 	}
 
 	/**
@@ -235,7 +239,8 @@ public interface Fields {
 		}
 
 		/**
-		 * Returns the value of the given field from the given object ignoring field access modifiers.
+		 * Returns the value of the given field from the given object ignoring field access modifiers. If the object supplied is
+		 * a {@link Class} then the field will be considered static.
 		 *
 		 * @param <T> field value type
 		 *
@@ -244,6 +249,9 @@ public interface Fields {
 		 * @return field value
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
+			if (obj instanceof Class<?> cls) {
+				return getStatic(cls, fieldName);
+			}
 			Field field = Fields.getDeclaredFieldInHierarchy(obj.getClass(), fieldName);
 			if (null == field) {
 				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass());
@@ -273,7 +281,8 @@ public interface Fields {
 		}
 
 		/**
-		 * Sets the value of the given field from the given object to the value supplied ignoring field access modifiers.
+		 * Sets the value of the given field from the given object to the value supplied ignoring field access modifiers. If the
+		 * object supplied is a {@link Class} then the field will be considered static.
 		 *
 		 * @param <T> field value type
 		 *
@@ -282,6 +291,10 @@ public interface Fields {
 		 * @param value value to set
 		 */
 		static <T> void set(final Object obj, final String fieldName, final T value) {
+			if (obj instanceof Class<?> cls) {
+				setStatic(cls, fieldName, value);
+				return;
+			}
 			Field field = Fields.getDeclaredFieldInHierarchy(obj.getClass(), fieldName);
 			if (null == field) {
 				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass());
