@@ -5,6 +5,7 @@ A library that exposes general Java utility and reflection methods and a package
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.raduking/morphix-all)](https://central.sonatype.com/artifact/io.github.raduking/morphix-all)
 [![GitHub Release](https://img.shields.io/github/v/release/raduking/morphix)](https://github.com/your-repo/your-project/releases)
 [![License](https://img.shields.io/github/license/raduking/morphix)](https://opensource.org/license/apache-2-0)
+[![Java](https://img.shields.io/badge/Java-21+-blue)](https://www.oracle.com/java/technologies/downloads/#java21)
 
 #### Languages and Tools
 <p>
