@@ -2,7 +2,7 @@
 
 A library that exposes general Java utility and reflection methods and a package for converting a *source* object to a *destination* object.
 
-[![Latest Build](https://maven-badges.sml.io/sonatype-central/io.github.raduking/morphix-all/badge.svg)](https://central.sonatype.com/artifact/io.github.raduking/morphix-all)
+[![Latest Build](https://img.shields.io/maven-central/v/io.github.raduking/morphix-all)](https://central.sonatype.com/artifact/io.github.raduking/morphix-all)
 
 #### Languages and Tools
 <p>
