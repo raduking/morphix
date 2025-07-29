@@ -173,7 +173,7 @@ public final class ParameterizedTypeConversions {
 		updateGenericTypesMap(configuration, parameterizedType);
 		D destination = Constructors.IgnoreAccess.newInstance(dClass, InstanceCreator.getInstance());
 
-		for (Field dField : Fields.getDeclaredFields(dClass, Predicates.not(MemberPredicates.isStatic()))) {
+		for (Field dField : Fields.getAllDeclared(dClass, Predicates.not(MemberPredicates.isStatic()))) {
 			String typeName = dField.getGenericType().getTypeName();
 			Type actualFieldType = configuration.getGenericType(typeName);
 			if (null == actualFieldType) {
@@ -207,7 +207,7 @@ public final class ParameterizedTypeConversions {
 	private static <D, S> D newDestinationFieldValue(final S source, final Field dField, final Type actualFieldType,
 			final Configuration configuration) {
 		Class<?> sClass = source.getClass();
-		Field sField = Fields.getDeclaredFieldInHierarchy(sClass, dField.getName());
+		Field sField = Fields.getOneDeclaredInHierarchy(sClass, dField.getName());
 		if (null == sField) {
 			return null;
 		}

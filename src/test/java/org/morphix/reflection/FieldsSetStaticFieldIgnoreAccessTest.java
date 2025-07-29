@@ -28,9 +28,12 @@ class FieldsSetStaticFieldIgnoreAccessTest {
 	private static final String MISSING_FIELD_NAME = "missingField";
 	private static final String STATIC_FIELD_NAME = "staticField";
 	private static final String VALUE = "someValue";
+	private static final String NON_STATIC_FIELD_NAME = "s";
 
 	public static class B {
 		private static String staticField = null;
+
+		public String s;
 
 		public static String getStaticField() {
 			return staticField;
@@ -46,10 +49,25 @@ class FieldsSetStaticFieldIgnoreAccessTest {
 	}
 
 	@Test
+	void shouldSetStaticFieldIgnoringAccessWithSet() {
+		Fields.IgnoreAccess.set(B.class, STATIC_FIELD_NAME, VALUE);
+
+		String result = B.getStaticField();
+		assertThat(result, equalTo(VALUE));
+	}
+
+	@Test
 	void shouldThrowExceptionForFieldThatDoesNotExist() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.setStatic(B.class, MISSING_FIELD_NAME, VALUE));
 		assertThat(e.getMessage(),
-				equalTo("Could not find static field with name " + MISSING_FIELD_NAME + " on class " + B.class));
+				equalTo("Could not find static field with name: " + MISSING_FIELD_NAME + " in class: " + B.class));
+	}
+
+	@Test
+	void shouldThrowExceptionForFieldIsNotStatic() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.setStatic(B.class, NON_STATIC_FIELD_NAME, VALUE));
+		assertThat(e.getMessage(),
+				equalTo("Could not find static field with name: " + NON_STATIC_FIELD_NAME + " in class: " + B.class));
 	}
 
 	private static class C extends B {

@@ -52,30 +52,30 @@ class MethodPredicatesTest {
 
 	@Test
 	void shouldReturnTrueForGetter() {
-		Field field = Fields.getDeclaredFieldInHierarchy(A.class, "value");
+		Field field = Fields.getOneDeclaredInHierarchy(A.class, "value");
 
 		Predicate<Method> predicate = isGetter(field);
-		Method method = Methods.getSafeDeclaredMethodInHierarchy("getValue", A.class);
+		Method method = Methods.getSafeOneDeclaredInHierarchy("getValue", A.class);
 
 		assertTrue(predicate.test(method));
 	}
 
 	@Test
 	void shouldReturnTrueForGetterWithBaseClass() {
-		Field field = Fields.getDeclaredFieldInHierarchy(A.class, "type");
+		Field field = Fields.getOneDeclaredInHierarchy(A.class, "type");
 
 		Predicate<Method> predicate = isGetter(field);
-		Method method = Methods.getSafeDeclaredMethodInHierarchy("getType", A.class);
+		Method method = Methods.getSafeOneDeclaredInHierarchy("getType", A.class);
 
 		assertTrue(predicate.test(method));
 	}
 
 	@Test
 	void shouldReturnFalseForGetterWithWrongReturnType() {
-		Field field = Fields.getDeclaredFieldInHierarchy(A.class, "i");
+		Field field = Fields.getOneDeclaredInHierarchy(A.class, "i");
 
 		Predicate<Method> predicate = isGetter(field);
-		Method method = Methods.getSafeDeclaredMethodInHierarchy("getI", A.class);
+		Method method = Methods.getSafeOneDeclaredInHierarchy("getI", A.class);
 
 		assertFalse(predicate.test(method));
 	}

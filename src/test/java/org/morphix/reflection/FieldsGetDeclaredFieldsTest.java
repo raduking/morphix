@@ -23,7 +23,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#getDeclaredFields(Class)}.
+ * Test class for {@link Fields#getAllDeclared(Class)}.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -58,7 +58,7 @@ class FieldsGetDeclaredFieldsTest {
 
 	@Test
 	void shouldReturnAllFields() {
-		List<Field> fields = Fields.getDeclaredFields(B.class);
+		List<Field> fields = Fields.getAllDeclared(B.class);
 
 		int sizeB = B.class.getDeclaredFields().length;
 
@@ -67,7 +67,7 @@ class FieldsGetDeclaredFieldsTest {
 
 	@Test
 	void shouldReturnEmptyListForClassesWithNoFields() {
-		List<Field> fields = Fields.getDeclaredFields(C.class);
+		List<Field> fields = Fields.getAllDeclared(C.class);
 
 		int sizeC = C.class.getDeclaredFields().length;
 
@@ -76,7 +76,7 @@ class FieldsGetDeclaredFieldsTest {
 
 	@Test
 	void shouldReturnNoFieldsForEmptyEnums() {
-		List<Field> fields = Fields.getDeclaredFields(E.class);
+		List<Field> fields = Fields.getAllDeclared(E.class);
 
 		int sizeE = E.class.getDeclaredFields().length;
 
@@ -85,7 +85,7 @@ class FieldsGetDeclaredFieldsTest {
 
 	@Test
 	void shouldReturnFieldsForRecords() {
-		List<Field> fields = Fields.getDeclaredFields(R.class);
+		List<Field> fields = Fields.getAllDeclared(R.class);
 
 		int sizeF = R.class.getDeclaredFields().length;
 
@@ -96,7 +96,7 @@ class FieldsGetDeclaredFieldsTest {
 	void shouldReturnFieldsWithAnnotation() throws Exception {
 		Field fx = D.class.getDeclaredField("x");
 
-		List<Field> annotatedFields = Fields.getDeclaredFields(D.class, withAnnotation(Deprecated.class));
+		List<Field> annotatedFields = Fields.getAllDeclared(D.class, withAnnotation(Deprecated.class));
 		assertThat(annotatedFields, hasSize(1));
 		assertThat(annotatedFields.get(0), equalTo(fx));
 	}

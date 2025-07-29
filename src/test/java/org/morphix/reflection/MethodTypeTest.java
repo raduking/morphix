@@ -40,7 +40,7 @@ class MethodTypeTest {
 
 	@Test
 	void shouldBuildProperMethodName() {
-		Field field = Fields.getDeclaredFieldInHierarchy(A.class, "x");
+		Field field = Fields.getOneDeclaredInHierarchy(A.class, "x");
 		String result = MethodType.GETTER.getMethodName(field);
 
 		assertThat(result, equalTo("getX"));

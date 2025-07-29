@@ -56,7 +56,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectAnyModifiersPredicate() {
-		Method staticMethod = Methods.getSafeDeclaredMethodInHierarchy("fooStatic", A.class);
+		Method staticMethod = Methods.getSafeOneDeclaredInHierarchy("fooStatic", A.class);
 
 		boolean result = withAnyModifiers(Modifier::isStatic, Modifier::isPrivate).test(staticMethod);
 
@@ -65,7 +65,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectAllModifiersPredicate() {
-		Method staticMethod = Methods.getSafeDeclaredMethodInHierarchy("fooStatic", A.class);
+		Method staticMethod = Methods.getSafeOneDeclaredInHierarchy("fooStatic", A.class);
 
 		boolean result = withAllModifiers(Modifier::isStatic, Modifier::isPublic).test(staticMethod);
 
@@ -74,7 +74,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectAllModifiersPredicateAlias() {
-		Method staticMethod = Methods.getSafeDeclaredMethodInHierarchy("fooStatic", A.class);
+		Method staticMethod = Methods.getSafeOneDeclaredInHierarchy("fooStatic", A.class);
 
 		boolean result = withModifiers(Modifier::isStatic, Modifier::isPublic).test(staticMethod);
 
@@ -83,7 +83,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectMethodsForPublicPredicate() {
-		List<Method> methods = Methods.getDeclaredMethodsInHierarchy(A.class, withAllModifiers(Modifier::isStatic, Modifier::isPublic));
+		List<Method> methods = Methods.getAllDeclaredInHierarchy(A.class, withAllModifiers(Modifier::isStatic, Modifier::isPublic));
 
 		assertThat(methods, hasSize(1));
 		assertThat(methods.get(0).getName(), equalTo("fooStatic"));
@@ -91,7 +91,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectMethodsForNamePredicate() {
-		List<Method> methods = Methods.getDeclaredMethodsInHierarchy(A.class, hasName("foo"));
+		List<Method> methods = Methods.getAllDeclaredInHierarchy(A.class, hasName("foo"));
 
 		assertThat(methods, hasSize(1));
 		assertThat(methods.get(0).getName(), equalTo("foo"));
@@ -99,7 +99,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnMethodsWithNames() {
-		List<Method> methods = Methods.getDeclaredMethodsInHierarchy(A.class, nameIn(List.of("foo")));
+		List<Method> methods = Methods.getAllDeclaredInHierarchy(A.class, nameIn(List.of("foo")));
 
 		assertThat(methods, hasSize(1));
 		assertThat(methods.get(0).getName(), equalTo("foo"));
@@ -107,7 +107,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectPredicateForAbstractMethod() {
-		Method abstractMethod = Methods.getSafeDeclaredMethodInHierarchy("fooAbstract",  B.class);
+		Method abstractMethod = Methods.getSafeOneDeclaredInHierarchy("fooAbstract",  B.class);
 
 		boolean result = withModifiers(Modifier::isAbstract).test(abstractMethod);
 		assertTrue(result);
@@ -118,7 +118,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectPredicateForNonAbstractMethod() {
-		Method abstractMethod = Methods.getSafeDeclaredMethodInHierarchy("fooNotAbstract",  B.class);
+		Method abstractMethod = Methods.getSafeOneDeclaredInHierarchy("fooNotAbstract",  B.class);
 
 		boolean result = withModifiers(Modifier::isAbstract).test(abstractMethod);
 

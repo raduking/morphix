@@ -49,7 +49,7 @@ public interface Methods {
 	 * @return found method
 	 * @throws NoSuchMethodException if the method was not found
 	 */
-	static <T> Method getDeclaredMethodInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes)
+	static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes)
 			throws NoSuchMethodException {
 		try {
 			return cls.getDeclaredMethod(methodName, parameterTypes);
@@ -57,7 +57,7 @@ public interface Methods {
 			if (null == cls.getSuperclass()) {
 				throw e;
 			}
-			return getDeclaredMethodInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
+			return getOneDeclaredInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
 		}
 	}
 
@@ -71,14 +71,14 @@ public interface Methods {
 	 * @param parameterTypes types of the method parameters
 	 * @return found method, null otherwise
 	 */
-	static <T> Method getSafeDeclaredMethodInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
+	static <T> Method getSafeOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
 		try {
 			return cls.getDeclaredMethod(methodName, parameterTypes);
 		} catch (NoSuchMethodException e) {
 			if (null == cls.getSuperclass()) {
 				return null;
 			}
-			return getSafeDeclaredMethodInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
+			return getSafeOneDeclaredInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
 		}
 	}
 
@@ -100,11 +100,11 @@ public interface Methods {
 	 * @param cls class on which the fields are returned
 	 * @return list of fields
 	 */
-	static <T> List<Method> getDeclaredMethodsInHierarchy(final Class<T> cls) {
+	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
 		if (null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
-		List<Method> methods = getDeclaredMethodsInHierarchy(cls.getSuperclass());
+		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass());
 		methods.addAll(0, List.of(cls.getDeclaredMethods()));
 		return methods;
 	}
@@ -119,11 +119,11 @@ public interface Methods {
 	 * @param predicate filter predicate for methods
 	 * @return list of fields
 	 */
-	static <T> List<Method> getDeclaredMethodsInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
+	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
 		if (null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
-		List<Method> methods = getDeclaredMethodsInHierarchy(cls.getSuperclass(), predicate);
+		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), predicate);
 		for (Method method : cls.getDeclaredMethods()) {
 			if (predicate.test(method)) {
 				methods.add(method);
@@ -308,7 +308,7 @@ public interface Methods {
 		String methodName = MethodType.SETTER.getMethodName(field);
 		Class<?> primitiveFieldType;
 		try {
-			return Methods.getDeclaredMethodInHierarchy(methodName, cls, field.getType());
+			return Methods.getOneDeclaredInHierarchy(methodName, cls, field.getType());
 		} catch (NoSuchMethodException e) {
 			try {
 				primitiveFieldType = Primitives.toPrimitive(field.getType());
@@ -318,7 +318,7 @@ public interface Methods {
 			}
 		}
 		try {
-			return Methods.getDeclaredMethodInHierarchy(methodName, cls, primitiveFieldType);
+			return Methods.getOneDeclaredInHierarchy(methodName, cls, primitiveFieldType);
 		} catch (NoSuchMethodException e) {
 			throw new ReflectionException("Error finding method: "
 					+ methodName + "(" + field.getType().getCanonicalName() + ") or "
@@ -401,7 +401,7 @@ public interface Methods {
 		 * @param annotationClass annotation class
 		 */
 		static <T, A extends Annotation> void invokeWithAnnotation(final T obj, final Class<A> annotationClass) {
-			List<Method> methods = Methods.getDeclaredMethodsInHierarchy(obj.getClass(), withAnnotation(annotationClass));
+			List<Method> methods = Methods.getAllDeclaredInHierarchy(obj.getClass(), withAnnotation(annotationClass));
 			for (Method method : methods) {
 				invoke(method, obj);
 			}

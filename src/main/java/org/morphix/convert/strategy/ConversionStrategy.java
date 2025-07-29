@@ -71,10 +71,10 @@ public interface ConversionStrategy {
 	static <T> Stream<ExtendedField> findFields(final T obj, final Predicate<? super ExtendedField> filter) {
 		// TODO: check duplicate fields (with the same name) in hierarchy (fields/getters)
 		Map<String, ExtendedField> nameToFieldMap =
-				Fields.getDeclaredFieldsInHierarchy(obj.getClass(), MemberPredicates.<Field>isNotStatic()).stream()
+				Fields.getAllDeclaredInHierarchy(obj.getClass(), MemberPredicates.<Field>isNotStatic()).stream()
 						.collect(toMap(Field::getName, field -> ExtendedField.of(field, obj), (field1, field2) -> field1));
 
-		List<Method> getterMethods = Methods.getDeclaredMethodsInHierarchy(obj.getClass(), MethodType.GETTER.getPredicate());
+		List<Method> getterMethods = Methods.getAllDeclaredInHierarchy(obj.getClass(), MethodType.GETTER.getPredicate());
 		for (Method getterMethod : getterMethods) {
 			String fieldName = MethodType.GETTER.getFieldName(getterMethod);
 			ExtendedField converterField = nameToFieldMap.get(fieldName);

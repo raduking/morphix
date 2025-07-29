@@ -21,7 +21,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Methods#getDeclaredMethodsInHierarchy(Class)}.
+ * Test class for {@link Methods#getAllDeclaredInHierarchy(Class)}.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -49,7 +49,7 @@ class MethodsGetDeclaredMethodsInHierarchyTest {
 
 	@Test
 	void shouldGetAllMethodsInHierarchy() {
-		List<Method> fields = Methods.getDeclaredMethodsInHierarchy(B.class);
+		List<Method> fields = Methods.getAllDeclaredInHierarchy(B.class);
 
 		int sizeB = B.class.getDeclaredMethods().length;
 		int sizeA = A.class.getDeclaredMethods().length;
@@ -59,7 +59,7 @@ class MethodsGetDeclaredMethodsInHierarchyTest {
 
 	@Test
 	void shouldReturnEmptyListForClassesWithNoMethods() {
-		List<Method> fields = Methods.getDeclaredMethodsInHierarchy(C.class);
+		List<Method> fields = Methods.getAllDeclaredInHierarchy(C.class);
 
 		int size = C.class.getDeclaredMethods().length;
 
@@ -68,7 +68,7 @@ class MethodsGetDeclaredMethodsInHierarchyTest {
 
 	@Test
 	void shouldReturnEnumClassMethodsListForEmptyEnumsToo() {
-		List<Method> fields = Methods.getDeclaredMethodsInHierarchy(E.class);
+		List<Method> fields = Methods.getAllDeclaredInHierarchy(E.class);
 
 		int sizeEnum = Enum.class.getDeclaredMethods().length;
 		int sizeE = E.class.getDeclaredMethods().length;
