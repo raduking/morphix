@@ -54,14 +54,14 @@ public class MethodInvocation {
 
 	@Benchmark
 	public Integer testMethodsInvoke() {
-		Method method = Methods.getSafeDeclaredMethodInHierarchy("sum", A.class, Integer.class, int.class);
+		Method method = Methods.getSafeOneDeclaredInHierarchy("sum", A.class, Integer.class, int.class);
 
 		return Methods.IgnoreAccess.invoke(method, a, 10, 20);
 	}
 
 	@Benchmark
 	public Integer testHandleMethodsInvoke() {
-		MethodHandle method = HandleMethods.getMethod("sum", A.class, Integer.class, Integer.class, int.class);
+		MethodHandle method = HandleMethods.get("sum", A.class, Integer.class, Integer.class, int.class);
 
 		return HandleMethods.invoke(method, a, 10, 10);
 	}

@@ -93,7 +93,7 @@ public class NumberToNumber extends FieldHandler {
 		Object sValue = sfo.getFieldValue();
 		if (null != sValue) {
 			String methodName = NUMBER_SUPPLIER_MAP.get(dfo.toClass());
-			Method method = Methods.getSafeDeclaredMethodInHierarchy(methodName, sfo.toClass());
+			Method method = Methods.getSafeOneDeclaredInHierarchy(methodName, sfo.toClass());
 			Object dValue = Methods.IgnoreAccess.invoke(method, sValue);
 			dfo.setFieldValue(dValue);
 		}

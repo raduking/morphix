@@ -45,7 +45,7 @@ public class TheUnsafe {
 	 * @return a static field
 	 */
 	static <T> T getStaticFromUnsafe(final String fieldName) {
-		Field theUnsafeField = Fields.getDeclaredFieldInHierarchy(Unsafe.class, fieldName);
+		Field theUnsafeField = Fields.getOneDeclaredInHierarchy(Unsafe.class, fieldName);
 		if (null == theUnsafeField) {
 			return null;
 		}

@@ -2,6 +2,14 @@
 
 ---
 
+`1.0.7`
+
+- Renamed all `Fields` methods to follow the pattern `getAll*` for methods returning lists and `getOne*` for methods returning single fields.
+- Renamed all `Methods` methods to follow the pattern `getAll*` for methods returning lists and `getOne*` for methods returning single methods.
+- Renamed all `HandleMethods` methods to not contain the word "Method" anymore for brevity.
+
+---
+
 `1.0.6`
 
 - Changed `Fields.IgnoreAccess.get` with field name as parameter to look for the field in the class hierarchy.

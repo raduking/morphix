@@ -2,7 +2,11 @@
 
 A library that exposes general Java utility and reflection methods and a package for converting a *source* object to a *destination* object.
 
-[![Latest Build](https://maven-badges.sml.io/sonatype-central/io.github.raduking/morphix-all/badge.svg)](https://central.sonatype.com/artifact/io.github.raduking/morphix-all)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.raduking/morphix-all)](https://central.sonatype.com/artifact/io.github.raduking/morphix-all)
+[![GitHub Release](https://img.shields.io/github/v/release/raduking/morphix)](https://github.com/raduking/morphix/releases)
+[![License](https://img.shields.io/github/license/raduking/morphix)](https://opensource.org/license/apache-2-0)
+[![Java](https://img.shields.io/badge/Java-21+-blue)](https://www.oracle.com/java/technologies/downloads/#java21)
+[![PRs](https://img.shields.io/github/issues-pr/raduking/morphix)](https://github.com/raduking/morphix/pulls)
 
 #### Languages and Tools
 <p>
@@ -32,7 +36,7 @@ A library that exposes general Java utility and reflection methods and a package
 
 ### Releases
 
-Current release `1.0.6`
+Current release `1.0.7`
 
 ### Documentation
 
@@ -60,6 +64,6 @@ Maven: add this dependency to your `pom.xml`
 <dependency>
     <groupId>io.github.raduking</groupId>
     <artifactId>morphix-all</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
 </dependency>
 ```

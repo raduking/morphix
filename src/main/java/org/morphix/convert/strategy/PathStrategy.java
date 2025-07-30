@@ -62,7 +62,7 @@ public class PathStrategy implements ConversionStrategy {
 			if (null != resultField && null != resultObject) {
 				resultObject = Fields.IgnoreAccess.get(resultObject, resultField);
 			}
-			resultField = Fields.getDeclaredFieldInHierarchy(currentClass, fieldName);
+			resultField = Fields.getOneDeclaredInHierarchy(currentClass, fieldName);
 			if (null != resultField && Modifier.isStatic(resultField.getModifiers())) {
 				resultField = null;
 			}

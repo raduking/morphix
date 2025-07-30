@@ -639,7 +639,7 @@ public interface Conversions {
 			return destination;
 		}
 		if (destination.getClass().equals(source.getClass())) {
-			Fields.getDeclaredFieldsInHierarchy(source.getClass(), not(isStatic()))
+			Fields.getAllDeclaredInHierarchy(source.getClass(), not(isStatic()))
 					.forEach(field -> {
 						Object value = Fields.IgnoreAccess.get(source, field);
 						if (overrideAll || null != value) {

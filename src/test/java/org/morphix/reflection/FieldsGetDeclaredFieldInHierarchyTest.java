@@ -20,7 +20,7 @@ import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#getDeclaredFieldInHierarchy(Class, String)}.
+ * Test class for {@link Fields#getOneDeclaredInHierarchy(Class, String)}.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -45,25 +45,25 @@ class FieldsGetDeclaredFieldInHierarchyTest {
 	@Test
 	void shouldGetFieldInHierarchy() throws Exception {
 		Field expected = A.class.getDeclaredField("x");
-		Field field = Fields.getDeclaredFieldInHierarchy(B.class, "x");
+		Field field = Fields.getOneDeclaredInHierarchy(B.class, "x");
 
 		assertThat(field, equalTo(expected));
 	}
 
 	@Test
 	void shouldReturnNullIfFieldNotFound() {
-		Field field = Fields.getDeclaredFieldInHierarchy(C.class, "$NonExistingField$");
+		Field field = Fields.getOneDeclaredInHierarchy(C.class, "$NonExistingField$");
 
 		assertThat(field, equalTo(null));
 
-		field = Fields.getDeclaredFieldInHierarchy(B.class, "$NonExistingField$");
+		field = Fields.getOneDeclaredInHierarchy(B.class, "$NonExistingField$");
 
 		assertThat(field, equalTo(null));
 	}
 
 	@Test
 	void shouldReturnNullIfClassIsNull() {
-		Field field = Fields.getDeclaredFieldInHierarchy(null, "x");
+		Field field = Fields.getOneDeclaredInHierarchy(null, "x");
 
 		assertThat(field, equalTo(null));
 	}
@@ -73,7 +73,17 @@ class FieldsGetDeclaredFieldInHierarchyTest {
 		Object o = new B();
 
 		Field expected = A.class.getDeclaredField("x");
-		Field field = Fields.getDeclaredFieldInHierarchy(o, "x");
+		Field field = Fields.getOneDeclaredInHierarchy(o, "x");
+
+		assertThat(field, equalTo(expected));
+	}
+
+	@Test
+	void shouldReturnFieldInHierarchyOnClass() throws Exception {
+		Object o = B.class;
+
+		Field expected = A.class.getDeclaredField("x");
+		Field field = Fields.getOneDeclaredInHierarchy(o, "x");
 
 		assertThat(field, equalTo(expected));
 	}

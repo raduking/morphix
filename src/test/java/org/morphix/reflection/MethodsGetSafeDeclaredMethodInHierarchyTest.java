@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Methods#getSafeDeclaredMethodInHierarchy(String, Class, Class...)}.
+ * Test class for {@link Methods#getSafeOneDeclaredInHierarchy(String, Class, Class...)}.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -49,18 +49,18 @@ class MethodsGetSafeDeclaredMethodInHierarchyTest {
 	@Test
 	void shouldReturnDeclaredMethodInHierarchy() throws Exception {
 		Method expected = A.class.getDeclaredMethod("fooA");
-		Method result = Methods.getSafeDeclaredMethodInHierarchy("fooA", B.class);
+		Method result = Methods.getSafeOneDeclaredInHierarchy("fooA", B.class);
 
 		assertThat(result, equalTo(expected));
 	}
 
 	@Test
 	void shouldReturnNullIfMethodNotFound() {
-		Method method = Methods.getSafeDeclaredMethodInHierarchy("$NonExistingMethod$", C.class);
+		Method method = Methods.getSafeOneDeclaredInHierarchy("$NonExistingMethod$", C.class);
 
 		assertThat(method, equalTo(null));
 
-		method = Methods.getSafeDeclaredMethodInHierarchy("$NonExistingMethod$", B.class);
+		method = Methods.getSafeOneDeclaredInHierarchy("$NonExistingMethod$", B.class);
 
 		assertThat(method, equalTo(null));
 	}

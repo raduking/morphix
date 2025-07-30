@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test;
  */
 class FieldsGetStaticFieldsTest {
 
+	private static final String GOOD_NAME = "s";
+	private static final String WRONG_NAME = "wrongName";
 	private static final String FIELD_VALUE = "aaa";
 
 	@Test
@@ -35,14 +37,34 @@ class FieldsGetStaticFieldsTest {
 	}
 
 	@Test
-	void shouldThrowErrorIfFieldNotFound() {
-		assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, "wrongName"));
+	void shouldReturnStaticFieldValueWithGet() {
+		String staticField = Fields.IgnoreAccess.get(A.class, "STATIC_FIELD");
 
+		assertThat(staticField, equalTo(FIELD_VALUE));
+	}
+
+	@Test
+	void shouldThrowExceptionIfFieldNotFound() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, WRONG_NAME));
+
+		assertThat(e.getMessage(),
+				equalTo("Could not find static field with name: " + WRONG_NAME + " in class: " + A.class));
+	}
+
+	@Test
+	void shouldThrowExceptionIfFieldIsNotStatic() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, GOOD_NAME));
+
+		assertThat(e.getMessage(),
+				equalTo("Could not find static field with name: " + GOOD_NAME + " in class: " + A.class));
 	}
 
 	private static class A {
 		@SuppressWarnings("unused")
 		public static final String STATIC_FIELD = FIELD_VALUE;
+
+		@SuppressWarnings("unused")
+		public String s;
 	}
 
 	private static class B extends A {

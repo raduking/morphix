@@ -25,7 +25,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#getDeclaredFieldsInHierarchy(Class)}.
+ * Test class for {@link Fields#getAllDeclaredInHierarchy(Class)}.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -61,7 +61,29 @@ class FieldsGetDeclaredFieldsInHierarchyTest {
 
 	@Test
 	void shouldReturnAllFieldsInHierarchy() {
-		List<Field> fields = Fields.getDeclaredFieldsInHierarchy(B.class);
+		List<Field> fields = Fields.getAllDeclaredInHierarchy(B.class);
+
+		int sizeB = B.class.getDeclaredFields().length;
+		int sizeA = A.class.getDeclaredFields().length;
+
+		assertThat(fields, hasSize(sizeA + sizeB));
+	}
+
+	@Test
+	void shouldReturnAllFieldsInHierarchyFromObject() {
+		Object o = new B();
+		List<Field> fields = Fields.getAllDeclaredInHierarchy(o);
+
+		int sizeB = B.class.getDeclaredFields().length;
+		int sizeA = A.class.getDeclaredFields().length;
+
+		assertThat(fields, hasSize(sizeA + sizeB));
+	}
+
+	@Test
+	void shouldReturnAllFieldsInHierarchyFromClassAsObject() {
+		Object o = B.class;
+		List<Field> fields = Fields.getAllDeclaredInHierarchy(o);
 
 		int sizeB = B.class.getDeclaredFields().length;
 		int sizeA = A.class.getDeclaredFields().length;
@@ -71,7 +93,7 @@ class FieldsGetDeclaredFieldsInHierarchyTest {
 
 	@Test
 	void shouldReturnEmptyListForClassesWithNoFields() {
-		List<Field> fields = Fields.getDeclaredFieldsInHierarchy(C.class);
+		List<Field> fields = Fields.getAllDeclaredInHierarchy(C.class);
 
 		int size = C.class.getDeclaredFields().length;
 
@@ -80,7 +102,7 @@ class FieldsGetDeclaredFieldsInHierarchyTest {
 
 	@Test
 	void shouldReturnEnumClassFieldsListForEmptyEnumsToo() {
-		List<Field> fields = Fields.getDeclaredFieldsInHierarchy(E.class);
+		List<Field> fields = Fields.getAllDeclaredInHierarchy(E.class);
 
 		int sizeEnum = Enum.class.getDeclaredFields().length;
 		int sizeE = E.class.getDeclaredFields().length;
@@ -92,19 +114,19 @@ class FieldsGetDeclaredFieldsInHierarchyTest {
 	void shouldReturnFieldsWithAnnotation() throws Exception {
 		Field fx = D.class.getDeclaredField("x");
 
-		List<Field> annotatedFields = Fields.getDeclaredFieldsInHierarchy(D.class, withAnnotation(Deprecated.class));
+		List<Field> annotatedFields = Fields.getAllDeclaredInHierarchy(D.class, withAnnotation(Deprecated.class));
 		assertThat(annotatedFields, hasSize(1));
 		assertThat(annotatedFields.get(0), equalTo(fx));
 	}
 
 	@Test
 	void shouldReturnAllFieldsIncludingTheOnesWithTheSameName() {
-		List<Field> result = Fields.getDeclaredFieldsInHierarchy(F.class);
+		List<Field> result = Fields.getAllDeclaredInHierarchy(F.class);
 
 		List<Field> expected = new ArrayList<>();
-		expected.addAll(Fields.getDeclaredFields(F.class));
-		expected.addAll(Fields.getDeclaredFields(B.class));
-		expected.addAll(Fields.getDeclaredFields(A.class));
+		expected.addAll(Fields.getAllDeclared(F.class));
+		expected.addAll(Fields.getAllDeclared(B.class));
+		expected.addAll(Fields.getAllDeclared(A.class));
 
 		assertThat(result, equalTo(expected));
 

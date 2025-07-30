@@ -150,7 +150,7 @@ public class GenericType implements ParameterizedType {
 		Method getterMethod;
 		try {
 			String getterMethodName = MethodType.GETTER.getMethodName(field);
-			getterMethod = Methods.getDeclaredMethodInHierarchy(getterMethodName, cls);
+			getterMethod = Methods.getOneDeclaredInHierarchy(getterMethodName, cls);
 		} catch (NoSuchMethodException e) {
 			return null;
 		}

@@ -67,9 +67,9 @@ public class HandleMethods {
 	 * @return a {@link MethodHandle} pointing to the specified method.
 	 * @throws ReflectionException If the method cannot be found or accessed.
 	 */
-	public static <T> MethodHandle getMethod(final String name, final Class<T> cls, final Class<?> returnType, final Class<?>... parameterTypes) {
+	public static <T> MethodHandle get(final String name, final Class<T> cls, final Class<?> returnType, final Class<?>... parameterTypes) {
 		MethodType methodType = MethodType.methodType(returnType, parameterTypes);
-		return getMethod(name, cls, methodType, false);
+		return get(name, cls, methodType, false);
 	}
 
 	/**
@@ -84,10 +84,10 @@ public class HandleMethods {
 	 * @return A {@link MethodHandle} pointing to the specified static method.
 	 * @throws ReflectionException If the method cannot be found or accessed.
 	 */
-	public static <T> MethodHandle getStaticMethod(final String name, final Class<T> cls, final Class<?> returnType,
+	public static <T> MethodHandle getStatic(final String name, final Class<T> cls, final Class<?> returnType,
 			final Class<?>... parameterTypes) {
 		MethodType methodType = MethodType.methodType(returnType, parameterTypes);
-		return getMethod(name, cls, methodType, true);
+		return get(name, cls, methodType, true);
 	}
 
 	/**
@@ -122,12 +122,12 @@ public class HandleMethods {
 	 * @return A {@link MethodHandle} pointing to the specified static method.
 	 * @throws ReflectionException If the method cannot be found or accessed.
 	 */
-	private static MethodHandle getMethod(final String methodName, final Class<?> cls, final MethodType methodType, final boolean isStatic) {
+	private static MethodHandle get(final String methodName, final Class<?> cls, final MethodType methodType, final boolean isStatic) {
 		ConcurrentMap<MethodSignature, MethodHandle> classMethods = METHOD_CACHE
 				.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
 
 		MethodSignature signature = MethodSignature.of(cls, methodName, methodType, isStatic);
-		return classMethods.computeIfAbsent(signature, k -> createHandle(cls, signature));
+		return classMethods.computeIfAbsent(signature, k -> create(cls, signature));
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class HandleMethods {
 	 * @param signature the method signature
 	 * @return a method handle for the given class and signature
 	 */
-	private static MethodHandle createHandle(final Class<?> cls, final MethodSignature signature) {
+	private static MethodHandle create(final Class<?> cls, final MethodSignature signature) {
 		try {
 			Lookup lookup = getLookup(cls);
 			return signature.isStatic()

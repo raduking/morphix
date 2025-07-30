@@ -14,6 +14,7 @@ package org.morphix.reflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -37,7 +38,7 @@ public interface Fields {
 	 * @param cls class on which the fields are returned
 	 * @return list of fields
 	 */
-	static <T> List<Field> getDeclaredFields(final Class<T> cls) {
+	static <T> List<Field> getAllDeclared(final Class<T> cls) {
 		return List.of(cls.getDeclaredFields());
 	}
 
@@ -50,8 +51,27 @@ public interface Fields {
 	 * @param predicate predicate for fields
 	 * @return list of fields
 	 */
-	static <T> List<Field> getDeclaredFields(final Class<T> cls, final Predicate<Field> predicate) {
-		return getDeclaredFields(cls).stream().filter(predicate).toList();
+	static <T> List<Field> getAllDeclared(final Class<T> cls, final Predicate<Field> predicate) {
+		return filter(getAllDeclared(cls), predicate);
+	}
+
+	/**
+	 * Filters the given field list with the given predicate. This method could have been implemented with the stream API
+	 * but the benchmarking shows that with the stream API is 50% slower. These methods are implemented with performance
+	 * considerations first.
+	 *
+	 * @param fields the fields to filter
+	 * @param predicate predicate to filter with
+	 * @return filtered list
+	 */
+	static List<Field> filter(final List<Field> fields, final Predicate<Field> predicate) {
+		List<Field> fieldsMatchingPredicate = new ArrayList<>(fields.size());
+		for (Field field : fields) {
+			if (predicate.test(field)) {
+				fieldsMatchingPredicate.add(field);
+			}
+		}
+		return fieldsMatchingPredicate;
 	}
 
 	/**
@@ -62,7 +82,7 @@ public interface Fields {
 	 * <li>it is more efficient in terms of memory consumption</li>
 	 * <li>accessing the first and last has O(1) complexity</li>
 	 * <li>more often than not no random access is needed</li>
-	 * <li>profiling: ~2 times faster than using {@link java.util.ArrayList}</li>
+	 * <li>profiling: ~50% times faster than using {@link java.util.ArrayList}</li>
 	 * </ul>
 	 * The returned order of the fields are: class -> super class -> ... -> base class and all fields in each class are
 	 * returned in the declared order.
@@ -72,12 +92,12 @@ public interface Fields {
 	 * @param cls class on which the fields are returned
 	 * @return list of fields
 	 */
-	static <T> List<Field> getDeclaredFieldsInHierarchy(final Class<T> cls) {
+	static <T> List<Field> getAllDeclaredInHierarchy(final Class<T> cls) {
 		if (null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
-		List<Field> fields = getDeclaredFieldsInHierarchy(cls.getSuperclass());
-		fields.addAll(0, getDeclaredFields(cls));
+		List<Field> fields = getAllDeclaredInHierarchy(cls.getSuperclass());
+		fields.addAll(0, getAllDeclared(cls));
 		return fields;
 	}
 
@@ -91,8 +111,20 @@ public interface Fields {
 	 * @param predicate predicate for fields
 	 * @return list of fields
 	 */
-	static <T> List<Field> getDeclaredFieldsInHierarchy(final Class<T> cls, final Predicate<Field> predicate) {
-		return getDeclaredFieldsInHierarchy(cls).stream().filter(predicate).toList();
+	static <T> List<Field> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<Field> predicate) {
+		return filter(getAllDeclaredInHierarchy(cls), predicate);
+	}
+
+	/**
+	 * Variation of {@link #getAllDeclaredInHierarchy(Class)}. It will call the method with <code>obj.getClass()</code>
+	 * if the object is not instance of {@link Class}, otherwise it will search for fields in the given class.
+	 *
+	 * @param obj object on which the fields are needed
+	 * @return list of fields
+	 */
+	static List<Field> getAllDeclaredInHierarchy(final Object obj) {
+		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
+		return getAllDeclaredInHierarchy(clazz);
 	}
 
 	/**
@@ -104,49 +136,41 @@ public interface Fields {
 	 * @param fieldName the name of the fields to get
 	 * @return existing field, null otherwise
 	 */
-	static <T> Field getDeclaredFieldInHierarchy(final Class<T> cls, final String fieldName) {
+	static <T> Field getOneDeclaredInHierarchy(final Class<T> cls, final String fieldName) {
 		if (null == cls) {
 			return null;
 		}
-		List<Field> fields = getDeclaredFieldsInHierarchy(cls);
-		for (Field field : fields) {
+		for (Field field : cls.getDeclaredFields()) {
 			if (field.getName().equals(fieldName)) {
 				return field;
 			}
 		}
-		return null;
+		return getOneDeclaredInHierarchy(cls.getSuperclass(), fieldName);
 	}
 
 	/**
-	 * Variation of {@link #getDeclaredFieldsInHierarchy(Class)}. It will call the method with <code>obj.getClass()</code>.
-	 *
-	 * @param obj object on which the fields are needed
-	 * @return list of fields
-	 */
-	static List<Field> getDeclaredFieldsInHierarchy(final Object obj) {
-		return getDeclaredFieldsInHierarchy(obj.getClass());
-	}
-
-	/**
-	 * Variation of {@link #getDeclaredFieldInHierarchy(Class, String)}. It will call the method with
-	 * <code>obj.getClass()</code>.
+	 * Variation of {@link #getOneDeclaredInHierarchy(Class, String)}. It will call the method with
+	 * <code>obj.getClass()</code> if the object is not instance of {@link Class}, otherwise it will search for fields in
+	 * the given class.
 	 *
 	 * @param obj object on which the fields are needed
 	 * @param fieldName the name of the field to be retrieved
 	 * @return existing field, null otherwise
 	 */
-	static Field getDeclaredFieldInHierarchy(final Object obj, final String fieldName) {
-		return getDeclaredFieldInHierarchy(obj.getClass(), fieldName);
+	static Field getOneDeclaredInHierarchy(final Object obj, final String fieldName) {
+		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
+		return getOneDeclaredInHierarchy(clazz, fieldName);
 	}
 
 	/**
-	 * Calls field.get(obj). See {@link Field#get(Object)}.
+	 * Calls {@link Field#get(Object)}. See {@link Field#get(Object)}.
 	 *
 	 * @param <T> field value type
 	 *
 	 * @param obj object from which the represented field's value is to be extracted
 	 * @param field field on which to extract the value
-	 * @return value of the field on the object obj
+	 * @return value of the field on the given object
+	 * @throws ReflectionException if the field value cannot be returned
 	 */
 	static <T> T get(final Object obj, final Field field) {
 		try {
@@ -157,13 +181,16 @@ public interface Fields {
 	}
 
 	/**
-	 * Calls field.set(obj, value). See {@link Field#set(Object, Object)}.
+	 * Calls {@link Field#set(Object, Object)}. See {@link Field#set(Object, Object)}.
+	 *
+	 * @param <T> the type of the field
 	 *
 	 * @param obj object on which the represented field's value is to be set
 	 * @param field field on which to set the value
 	 * @param value value to be set on the field
+	 * @throws ReflectionException if the field value cannot be set
 	 */
-	static void set(final Object obj, final Field field, final Object value) {
+	static <T> void set(final Object obj, final Field field, final T value) {
 		try {
 			field.set(obj, value); // NOSONAR this is a reflection enhancement method
 		} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -177,16 +204,16 @@ public interface Fields {
 	 * <p>
 	 * Note: It ignores access specifiers.
 	 *
-	 * @param <T> the type of the object
-	 * @param <U> the type of the returned field
+	 * @param <T> the type of the returned field
 	 *
 	 * @param object the object from which the field should be retrieved
 	 * @param fieldName the field name
 	 * @return the value of the field requested, retrieved by its getter method, and if not present, using direct access
+	 * @throws ReflectionException if the field is not found
 	 */
-	static <T, U> U get(final T object, final String fieldName) {
+	static <T> T get(final Object object, final String fieldName) {
 		Class<?> cls = object.getClass();
-		Field field = Fields.getDeclaredFieldInHierarchy(cls, fieldName);
+		Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 		if (null == field) {
 			throw new ReflectionException("Object does not contain a field named: " + fieldName);
 		}
@@ -194,18 +221,21 @@ public interface Fields {
 	}
 
 	/**
-	 * Sets the value of the given field from the given object to the value supplied ignoring field access modifiers. The
-	 * field is set using its setter if it has one otherwise sets the field directly.
+	 * Sets the value of the given field from the given object to the value supplied. The field is set using its setter if
+	 * it has one otherwise sets the field directly.
+	 * <p>
+	 * Note: It ignores access specifiers.
 	 *
 	 * @param <T> field value type
 	 *
 	 * @param fieldName field to query
 	 * @param obj object containing the field (null for static fields)
 	 * @param value value to set
+	 * @throws ReflectionException if the field does not exist or the value type is not compatible with the field type
 	 */
 	static <T> void set(final Object obj, final String fieldName, final T value) {
 		Class<?> cls = obj.getClass();
-		Field field = Fields.getDeclaredFieldInHierarchy(cls, fieldName);
+		Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 		if (null == field) {
 			throw new ReflectionException("Object does not contain a field named: " + fieldName);
 		}
@@ -235,16 +265,21 @@ public interface Fields {
 		}
 
 		/**
-		 * Returns the value of the given field from the given object ignoring field access modifiers.
+		 * Returns the value of the given field from the given object ignoring field access modifiers. If the object supplied is
+		 * a {@link Class} then the field will be considered static.
 		 *
 		 * @param <T> field value type
 		 *
 		 * @param obj object containing the field (null for static fields)
 		 * @param fieldName field name to query
 		 * @return field value
+		 * @throws ReflectionException if the field is not found
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
-			Field field = Fields.getDeclaredFieldInHierarchy(obj.getClass(), fieldName);
+			if (obj instanceof Class<?> cls) {
+				return getStatic(cls, fieldName);
+			}
+			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
 			if (null == field) {
 				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass());
 			}
@@ -273,38 +308,26 @@ public interface Fields {
 		}
 
 		/**
-		 * Sets the value of the given field from the given object to the value supplied ignoring field access modifiers.
+		 * Sets the value of the given field from the given object to the value supplied ignoring field access modifiers. If the
+		 * object supplied is a {@link Class} then the field will be considered static.
 		 *
 		 * @param <T> field value type
 		 *
 		 * @param fieldName field to query
 		 * @param obj object containing the field (null for static fields)
 		 * @param value value to set
+		 * @throws ReflectionException if the field is not found
 		 */
 		static <T> void set(final Object obj, final String fieldName, final T value) {
-			Field field = Fields.getDeclaredFieldInHierarchy(obj.getClass(), fieldName);
+			if (obj instanceof Class<?> cls) {
+				setStatic(cls, fieldName, value);
+				return;
+			}
+			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
 			if (null == field) {
 				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass());
 			}
 			set(obj, field, value);
-		}
-
-		/**
-		 * Sets the value of the given static field from the given object to the value supplied ignoring field access modifiers.
-		 *
-		 * @param <T> type containing the static method
-		 * @param <U> field value type
-		 *
-		 * @param cls class containing the static field
-		 * @param fieldName field name to query
-		 * @param value value to set
-		 */
-		static <T, U> void setStatic(final Class<T> cls, final String fieldName, final U value) {
-			Field field = Fields.getDeclaredFieldInHierarchy(cls, fieldName);
-			if (null == field) {
-				throw new ReflectionException("Could not find static field with name " + fieldName + " on class " + cls);
-			}
-			set(null, field, value);
 		}
 
 		/**
@@ -317,13 +340,33 @@ public interface Fields {
 		 * @param cls the class that has the static field
 		 * @param fieldName the name of the static field
 		 * @return the value of the static field wit the given name
+		 * @throws ReflectionException if the field is not found
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
-			Field field = Fields.getDeclaredFieldInHierarchy(cls, fieldName);
-			if (null == field) {
-				throw new ReflectionException("Could not find static field with name: " + fieldName + " on class" + cls);
+			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
+			if (null == field || !Modifier.isStatic(field.getModifiers())) {
+				throw new ReflectionException("Could not find static field with name: " + fieldName + " in class: " + cls);
 			}
 			return get(null, field);
+		}
+
+		/**
+		 * Sets the value of the given static field from the given object to the value supplied ignoring field access modifiers.
+		 *
+		 * @param <T> type containing the static method
+		 * @param <U> field value type
+		 *
+		 * @param cls class containing the static field
+		 * @param fieldName field name to query
+		 * @param value value to set
+		 * @throws ReflectionException if the field is not found
+		 */
+		static <T, U> void setStatic(final Class<T> cls, final String fieldName, final U value) {
+			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
+			if (null == field || !Modifier.isStatic(field.getModifiers())) {
+				throw new ReflectionException("Could not find static field with name: " + fieldName + " in class: " + cls);
+			}
+			set(null, field, value);
 		}
 
 		/**

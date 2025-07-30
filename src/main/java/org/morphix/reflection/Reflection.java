@@ -54,8 +54,8 @@ public interface Reflection {
 	 *
 	 * @param clazz the base class
 	 * @param prefix the prefix which is added to the class
-	 * @return returns the class which has the name composed of the prefix + {@link Class#getSimpleName()}. In case that
-	 * class is not found, a {@link ReflectionException}
+	 * @return returns the class which has the name composed of the prefix + {@link Class#getSimpleName()}.
+	 * @throws ReflectionException when the class is not found
 	 */
 	static <T> Class<T> getClassWithPrefix(final Class<?> clazz, final String prefix) {
 		String classWithPrefixName = clazz.getName().replace(clazz.getSimpleName(), prefix + clazz.getSimpleName());
@@ -80,7 +80,7 @@ public interface Reflection {
 		// try a getter method first
 		try {
 			String getterMethodName = MethodType.GETTER.getMethodName(field);
-			Method getterMethod = Methods.getDeclaredMethodInHierarchy(getterMethodName, obj.getClass());
+			Method getterMethod = Methods.getOneDeclaredInHierarchy(getterMethodName, obj.getClass());
 			return Methods.IgnoreAccess.invoke(getterMethod, obj);
 		} catch (NoSuchMethodException e) {
 			// if no getter is found, just get the value from the field
@@ -100,7 +100,7 @@ public interface Reflection {
 		// try a setter method first
 		try {
 			String setterMethodName = MethodType.SETTER.getMethodName(field);
-			Method setterMethod = Methods.getDeclaredMethodInHierarchy(setterMethodName, obj.getClass(), field.getType());
+			Method setterMethod = Methods.getOneDeclaredInHierarchy(setterMethodName, obj.getClass(), field.getType());
 			Methods.IgnoreAccess.invoke(setterMethod, obj, value);
 		} catch (NoSuchMethodException e) {
 			// if no setter found just set the value to field
@@ -125,11 +125,11 @@ public interface Reflection {
 		// try a setter method first
 		try {
 			String setterMethodName = MethodType.SETTER.getMethodName(fieldName);
-			Method setterMethod = Methods.getDeclaredMethodInHierarchy(setterMethodName, obj.getClass(), fieldType);
+			Method setterMethod = Methods.getOneDeclaredInHierarchy(setterMethodName, obj.getClass(), fieldType);
 			Methods.IgnoreAccess.invoke(setterMethod, obj, value);
 		} catch (NoSuchMethodException e) {
 			// if no setter found just set the value to field
-			Field field = Fields.getDeclaredFieldInHierarchy(obj, fieldName);
+			Field field = Fields.getOneDeclaredInHierarchy(obj, fieldName);
 			if (null != fieldName && null != field && field.getType().equals(fieldType)) {
 				Fields.IgnoreAccess.set(obj, field, value);
 			}
@@ -142,6 +142,7 @@ public interface Reflection {
 	 * @param expectedParent expected parent
 	 * @param child some child class
 	 * @return the subclass of the expected parent
+	 * @throws ReflectionException if the expected parent is not found
 	 */
 	static Class<?> findSubclass(final Class<?> expectedParent, final Class<?> child) {
 		Class<?> parent = child.getSuperclass();
