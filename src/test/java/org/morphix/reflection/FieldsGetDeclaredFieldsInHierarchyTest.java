@@ -70,6 +70,17 @@ class FieldsGetDeclaredFieldsInHierarchyTest {
 	}
 
 	@Test
+	void shouldReturnAllFieldsInHierarchyFromObject() {
+		Object o = new B();
+		List<Field> fields = Fields.getAllDeclaredInHierarchy(o);
+
+		int sizeB = B.class.getDeclaredFields().length;
+		int sizeA = A.class.getDeclaredFields().length;
+
+		assertThat(fields, hasSize(sizeA + sizeB));
+	}
+
+	@Test
 	void shouldReturnAllFieldsInHierarchyFromClassAsObject() {
 		Object o = B.class;
 		List<Field> fields = Fields.getAllDeclaredInHierarchy(o);
