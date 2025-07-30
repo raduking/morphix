@@ -54,8 +54,8 @@ public interface Reflection {
 	 *
 	 * @param clazz the base class
 	 * @param prefix the prefix which is added to the class
-	 * @return returns the class which has the name composed of the prefix + {@link Class#getSimpleName()}. In case that
-	 * class is not found, a {@link ReflectionException}
+	 * @return returns the class which has the name composed of the prefix + {@link Class#getSimpleName()}.
+	 * @throws ReflectionException when the class is not found
 	 */
 	static <T> Class<T> getClassWithPrefix(final Class<?> clazz, final String prefix) {
 		String classWithPrefixName = clazz.getName().replace(clazz.getSimpleName(), prefix + clazz.getSimpleName());
@@ -142,6 +142,7 @@ public interface Reflection {
 	 * @param expectedParent expected parent
 	 * @param child some child class
 	 * @return the subclass of the expected parent
+	 * @throws ReflectionException if the expected parent is not found
 	 */
 	static Class<?> findSubclass(final Class<?> expectedParent, final Class<?> child) {
 		Class<?> parent = child.getSuperclass();
