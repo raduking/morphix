@@ -11,3 +11,6 @@ Welcome! We appreciate your interest in contributing to this project.
 ## Code Review
 - All PRs require at least one approval from a maintainer before merging.
 - Please address any feedback before your PR is merged.
+
+## Code Formatting
+- Use the [raduking-formatter.xml](config/eclipse/raduking-formatter.xml) file to format the Java source code.
