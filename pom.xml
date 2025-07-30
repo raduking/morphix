@@ -17,7 +17,7 @@
 
 	<groupId>io.github.raduking</groupId>
 	<artifactId>morphix-all</artifactId>
-	<version>1.0.7</version>
+	<version>1.0.8</version>
 	<packaging>jar</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
