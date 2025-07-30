@@ -169,7 +169,8 @@ public interface Fields {
 	 *
 	 * @param obj object from which the represented field's value is to be extracted
 	 * @param field field on which to extract the value
-	 * @return value of the field on the object obj
+	 * @return value of the field on the given object
+	 * @throws ReflectionException if the field value cannot be returned
 	 */
 	static <T> T get(final Object obj, final Field field) {
 		try {
@@ -187,6 +188,7 @@ public interface Fields {
 	 * @param obj object on which the represented field's value is to be set
 	 * @param field field on which to set the value
 	 * @param value value to be set on the field
+	 * @throws ReflectionException if the field value cannot be set
 	 */
 	static <T> void set(final Object obj, final Field field, final T value) {
 		try {
@@ -207,6 +209,7 @@ public interface Fields {
 	 * @param object the object from which the field should be retrieved
 	 * @param fieldName the field name
 	 * @return the value of the field requested, retrieved by its getter method, and if not present, using direct access
+	 * @throws ReflectionException if the field is not found
 	 */
 	static <T> T get(final Object object, final String fieldName) {
 		Class<?> cls = object.getClass();
@@ -228,6 +231,7 @@ public interface Fields {
 	 * @param fieldName field to query
 	 * @param obj object containing the field (null for static fields)
 	 * @param value value to set
+	 * @throws ReflectionException if the field does not exist or the value type is not compatible with the field type
 	 */
 	static <T> void set(final Object obj, final String fieldName, final T value) {
 		Class<?> cls = obj.getClass();
@@ -269,6 +273,7 @@ public interface Fields {
 		 * @param obj object containing the field (null for static fields)
 		 * @param fieldName field name to query
 		 * @return field value
+		 * @throws ReflectionException if the field is not found
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
 			if (obj instanceof Class<?> cls) {
@@ -311,6 +316,7 @@ public interface Fields {
 		 * @param fieldName field to query
 		 * @param obj object containing the field (null for static fields)
 		 * @param value value to set
+		 * @throws ReflectionException if the field is not found
 		 */
 		static <T> void set(final Object obj, final String fieldName, final T value) {
 			if (obj instanceof Class<?> cls) {
@@ -334,6 +340,7 @@ public interface Fields {
 		 * @param cls the class that has the static field
 		 * @param fieldName the name of the static field
 		 * @return the value of the static field wit the given name
+		 * @throws ReflectionException if the field is not found
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
@@ -352,6 +359,7 @@ public interface Fields {
 		 * @param cls class containing the static field
 		 * @param fieldName field name to query
 		 * @param value value to set
+		 * @throws ReflectionException if the field is not found
 		 */
 		static <T, U> void setStatic(final Class<T> cls, final String fieldName, final U value) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
