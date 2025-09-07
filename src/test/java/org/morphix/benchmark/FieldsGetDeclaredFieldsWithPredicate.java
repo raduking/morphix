@@ -35,6 +35,7 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
  * {@link HandleMethods#invoke(MethodHandle, Object...)}.
  * <p>
  * Run only this benchmark with:
+ *
  * <pre>
  * mvn jmh:benchmark -Pbenchmark -Djmh.benchmarks=org.morphix.benchmark.FieldsGetDeclaredFieldsWithPredicate
  * </pre>

@@ -632,8 +632,8 @@ public final class Nullables {
 		}
 
 		/**
-		 * Returns the value if it's not null and conforms to the given predicate. Otherwise, an {@link IllegalStateException} is
-		 * thrown with the given error message.
+		 * Returns the value if it's not null and conforms to the given predicate. Otherwise, an {@link IllegalStateException}
+		 * is thrown with the given error message.
 		 *
 		 *
 		 * @param predicate value predicate

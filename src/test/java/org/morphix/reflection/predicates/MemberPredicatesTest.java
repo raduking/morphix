@@ -107,7 +107,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectPredicateForAbstractMethod() {
-		Method abstractMethod = Methods.getSafeOneDeclaredInHierarchy("fooAbstract",  B.class);
+		Method abstractMethod = Methods.getSafeOneDeclaredInHierarchy("fooAbstract", B.class);
 
 		boolean result = withModifiers(Modifier::isAbstract).test(abstractMethod);
 		assertTrue(result);
@@ -118,7 +118,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectPredicateForNonAbstractMethod() {
-		Method abstractMethod = Methods.getSafeOneDeclaredInHierarchy("fooNotAbstract",  B.class);
+		Method abstractMethod = Methods.getSafeOneDeclaredInHierarchy("fooNotAbstract", B.class);
 
 		boolean result = withModifiers(Modifier::isAbstract).test(abstractMethod);
 

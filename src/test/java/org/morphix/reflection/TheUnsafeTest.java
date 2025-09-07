@@ -33,7 +33,8 @@ class TheUnsafeTest {
 
 	@Test
 	void shouldThrowExceptionOnCallingConstructor() {
-		ReflectionException reflectionException = assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(TheUnsafe.class));
+		ReflectionException reflectionException =
+				assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(TheUnsafe.class));
 		InvocationTargetException invocationTargetException = JavaObjects.cast(reflectionException.getCause());
 		UnsupportedOperationException unsupportedOperationException = JavaObjects.cast(invocationTargetException.getCause());
 

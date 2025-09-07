@@ -48,9 +48,8 @@ public class Runnables {
 	}
 
 	/**
-	 * Transforms a runnable to a supplier that returns null. This method is useful
-	 * when you need a streamlined way of handling suppliers and runnable-s in
-	 * functional calls.
+	 * Transforms a runnable to a supplier that returns null. This method is useful when you need a streamlined way of
+	 * handling suppliers and runnable-s in functional calls.
 	 *
 	 * @param <T> supplier return type
 	 * @param runnable runnable to transform to supplier
@@ -61,8 +60,7 @@ public class Runnables {
 	}
 
 	/**
-	 * Transforms a runnable and a supplier to another supplier that runs the runnable first
-	 * and the supplier second.
+	 * Transforms a runnable and a supplier to another supplier that runs the runnable first and the supplier second.
 	 *
 	 * @param <T> supplier return type
 	 * @param runnable runnable to run before the supplier

@@ -271,9 +271,9 @@ class NullablesTest {
 		b.s = CUCU;
 
 		String result = Nullables.whenNotNull(a)
-					.andNotNull(A::getB)
-					.andNotNull(B::getS)
-					.valueOrError(SOME_ERROR_MESSAGE);
+				.andNotNull(A::getB)
+				.andNotNull(B::getS)
+				.valueOrError(SOME_ERROR_MESSAGE);
 
 		assertThat(result, equalTo(CUCU));
 	}
@@ -286,9 +286,9 @@ class NullablesTest {
 		b.s = CUCU;
 
 		String result = Nullables.whenNotNull(a)
-					.andNotNull(A::getB)
-					.andNotNull(B::getS)
-					.valueWhenOrDefault(s -> s.equals(CUCU), MUMU);
+				.andNotNull(A::getB)
+				.andNotNull(B::getS)
+				.valueWhenOrDefault(s -> s.equals(CUCU), MUMU);
 
 		assertThat(result, equalTo(CUCU));
 	}
@@ -301,9 +301,9 @@ class NullablesTest {
 		b.s = CUCU;
 
 		String result = Nullables.whenNotNull(a)
-					.andNotNull(A::getB)
-					.andNotNull(B::getS)
-					.valueWhenOrError(s -> s.equals(CUCU), SOME_ERROR_MESSAGE);
+				.andNotNull(A::getB)
+				.andNotNull(B::getS)
+				.valueWhenOrError(s -> s.equals(CUCU), SOME_ERROR_MESSAGE);
 
 		assertThat(result, equalTo(CUCU));
 	}
@@ -316,9 +316,9 @@ class NullablesTest {
 		b.s = CUCU;
 
 		String result = Nullables.whenNotNull(a)
-					.andNotNull(A::getB)
-					.andNotNull(B::getS)
-					.valueWhenOrDefault(s -> s.equals(MUMU), BIBI);
+				.andNotNull(A::getB)
+				.andNotNull(B::getS)
+				.valueWhenOrDefault(s -> s.equals(MUMU), BIBI);
 
 		assertThat(result, equalTo(BIBI));
 	}
@@ -330,9 +330,9 @@ class NullablesTest {
 		a.b = b;
 
 		String result = Nullables.whenNotNull(a)
-					.andNotNull(A::getB)
-					.andNotNull(B::getS)
-					.valueWhenOrDefault(s -> s == null, BIBI);
+				.andNotNull(A::getB)
+				.andNotNull(B::getS)
+				.valueWhenOrDefault(s -> s == null, BIBI);
 
 		assertThat(result, equalTo(BIBI));
 	}
@@ -536,39 +536,39 @@ class NullablesTest {
 		assertThat(list, hasSize(0));
 	}
 
-    @Test
-    void shouldNotThrowExceptionWhenAllObjectsAreNotNull() {
-        Object obj1 = new Object();
-        Object obj2 = "test";
-        Object obj3 = 42;
+	@Test
+	void shouldNotThrowExceptionWhenAllObjectsAreNotNull() {
+		Object obj1 = new Object();
+		Object obj2 = "test";
+		Object obj3 = 42;
 
-        assertDoesNotThrow(() -> Nullables.requireNotNull(obj1, obj2, obj3));
-    }
+		assertDoesNotThrow(() -> Nullables.requireNotNull(obj1, obj2, obj3));
+	}
 
-    @Test
-    void shouldThrowNullPointerExceptionWhenAnyObjectIsNull() {
-        Object obj1 = new Object();
-        Object obj2 = null;
-        Object obj3 = 42;
+	@Test
+	void shouldThrowNullPointerExceptionWhenAnyObjectIsNull() {
+		Object obj1 = new Object();
+		Object obj2 = null;
+		Object obj3 = 42;
 
-        NullPointerException exception = assertThrows(NullPointerException.class, () -> Nullables.requireNotNull(obj1, obj2, obj3));
-        assertThat(exception.getMessage(), is(nullValue()));
-    }
+		NullPointerException exception = assertThrows(NullPointerException.class, () -> Nullables.requireNotNull(obj1, obj2, obj3));
+		assertThat(exception.getMessage(), is(nullValue()));
+	}
 
-    @Test
-    void shouldThrowNullPointerExceptionWhenAllObjectsAreNull() {
-        Object obj1 = null;
-        Object obj2 = null;
-        Object obj3 = null;
+	@Test
+	void shouldThrowNullPointerExceptionWhenAllObjectsAreNull() {
+		Object obj1 = null;
+		Object obj2 = null;
+		Object obj3 = null;
 
-        NullPointerException exception = assertThrows(NullPointerException.class, () -> Nullables.requireNotNull(obj1, obj2, obj3));
-        assertThat(exception.getMessage(), is(nullValue()));
-    }
+		NullPointerException exception = assertThrows(NullPointerException.class, () -> Nullables.requireNotNull(obj1, obj2, obj3));
+		assertThat(exception.getMessage(), is(nullValue()));
+	}
 
-    @Test
-    void shouldNotThrowExceptionWhenNoObjectsAreProvided() {
-    	assertDoesNotThrow(() -> Nullables.requireNotNull()); // NOSONAR
-    }
+	@Test
+	void shouldNotThrowExceptionWhenNoObjectsAreProvided() {
+		assertDoesNotThrow(() -> Nullables.requireNotNull()); // NOSONAR
+	}
 
 	@Test
 	void shouldThrowExceptionIfClassIsInstantiatedWithDefaultConstructor() {
@@ -591,7 +591,7 @@ class NullablesTest {
 		assertThat(e.getMessage(), equalTo(SOME_ERROR_MESSAGE));
 	}
 
-    public static class A {
+	public static class A {
 
 		private Integer i;
 

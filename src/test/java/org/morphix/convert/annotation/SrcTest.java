@@ -101,10 +101,10 @@ class SrcTest {
 	public static class B2 {
 
 		@Src(
-				from = {
-						@From(type = A1.class, path = "s"),
-						@From(type = A2.class, path = "x.x")
-				})
+			from = {
+					@From(type = A1.class, path = "s"),
+					@From(type = A2.class, path = "x.x")
+			})
 		Integer i;
 
 		public Integer getI() {

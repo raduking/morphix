@@ -24,11 +24,11 @@ package org.morphix.lang;
  * import java.io.IOException;
  *
  * public Integer getId() throws IOException {
- *     // ...
+ * 	// ...
  * }
  *
  * public void foo(Supplier&lt;Integer&gt; integerSupplier) {
- *     // ...
+ * 	// ...
  * }
  * </pre>
  *

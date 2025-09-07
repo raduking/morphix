@@ -88,7 +88,7 @@ class ArrayToArrayTest {
 	@Test
 	void shouldConvertZeroLengthArrays() {
 		Source src = new Source();
-		src.bees = new A[] {};
+		src.bees = new A[] { };
 
 		Destination dst = convertFrom(src, Destination::new);
 

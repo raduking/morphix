@@ -82,7 +82,7 @@ class FieldsGetIgnoreAccessByPathsTest {
 
 		assertThat(result, nullValue());
 
-		result = Fields.IgnoreAccess.getByPaths(b, new String[] {});
+		result = Fields.IgnoreAccess.getByPaths(b, new String[] { });
 
 		assertThat(result, nullValue());
 	}

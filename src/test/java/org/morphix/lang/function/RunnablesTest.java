@@ -55,7 +55,8 @@ class RunnablesTest {
 
 	@Test
 	void shouldThrowExceptionWhenTryingToInstantiateClass() {
-		ReflectionException reflectionException = assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(Runnables.class));
+		ReflectionException reflectionException =
+				assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(Runnables.class));
 		InvocationTargetException invocationTargetException = JavaObjects.cast(reflectionException.getCause());
 		UnsupportedOperationException unsupportedOperationException = JavaObjects.cast(invocationTargetException.getCause());
 		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));

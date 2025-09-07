@@ -1,17 +1,14 @@
 /*
  * Copyright 2025 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 package org.morphix.convert.extras;
 
@@ -67,8 +64,7 @@ public final class ParameterizedTypeConversions {
 	@FunctionalInterface
 	public interface ParameterizedConvertMethod {
 		/**
-		 * Converts from a source to a parameterized class given its actual type
-		 * arguments.
+		 * Converts from a source to a parameterized class given its actual type arguments.
 		 *
 		 * @param <S> source type
 		 * @param <D> destination type
@@ -83,9 +79,8 @@ public final class ParameterizedTypeConversions {
 	}
 
 	/**
-	 * Constraint for the destination type for known conversions like lists,
-	 * maps, arrays, sets, queues, etc. These conversions are defined by
-	 * convention in converter.
+	 * Constraint for the destination type for known conversions like lists, maps, arrays, sets, queues, etc. These
+	 * conversions are defined by convention in converter.
 	 */
 	private static final Predicate<Class<?>> KNOWN_CONVERSION_DESTINATION_CONSTRAINT =
 			isConvertibleIterableClass()
@@ -93,8 +88,8 @@ public final class ParameterizedTypeConversions {
 					.or(isArray());
 
 	/**
-	 * Map that represents the known parameterized type conversion methods for
-	 * which we do not want actual conversions for example {@link Iterable}s and {@link Map}s.
+	 * Map that represents the known parameterized type conversion methods for which we do not want actual conversions for
+	 * example {@link Iterable}s and {@link Map}s.
 	 */
 	private static final Map<Predicate<Class<?>>, ParameterizedConvertMethod> KNOWN_CONVERSION_METHODS_MAP = new HashMap<>();
 	static {
@@ -126,13 +121,10 @@ public final class ParameterizedTypeConversions {
 	}
 
 	/**
-	 * Converts from a source to a {@link ParameterizedType} destination. This
-	 * method first builds a map which links every generic type name with its
-	 * actual type argument, then it iterates through the destination objects'
-	 * fields and whenever it finds the generic type it will instantiate the
-	 * actual type found in the constructed map, or it will convert it directly
-	 * if the type is present in the {@link #KNOWN_CONVERSION_METHODS_MAP} for
-	 * Iterables and Maps.
+	 * Converts from a source to a {@link ParameterizedType} destination. This method first builds a map which links every
+	 * generic type name with its actual type argument, then it iterates through the destination objects' fields and
+	 * whenever it finds the generic type it will instantiate the actual type found in the constructed map, or it will
+	 * convert it directly if the type is present in the {@link #KNOWN_CONVERSION_METHODS_MAP} for Iterables and Maps.
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
@@ -200,8 +192,7 @@ public final class ParameterizedTypeConversions {
 	 * @param <S> source type
 	 * @param <D> destination type
 	 * @param source source object
-	 * @param actualFieldType actual (possibly parameterized) type of the
-	 *            destination
+	 * @param actualFieldType actual (possibly parameterized) type of the destination
 	 * @param configuration configuration
 	 */
 	private static <D, S> D newDestinationFieldValue(final S source, final Field dField, final Type actualFieldType,
@@ -219,8 +210,7 @@ public final class ParameterizedTypeConversions {
 	}
 
 	/**
-	 * Returns the parameterized convert method for known conversions like maps,
-	 * {@link Iterable}s, arrays, etc.
+	 * Returns the parameterized convert method for known conversions like maps, {@link Iterable}s, arrays, etc.
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
@@ -240,20 +230,17 @@ public final class ParameterizedTypeConversions {
 	}
 
 	/**
-	 * Creates a new instance from the given type. It uses instance creator if
-	 * it can't create an instance normally. It also automatically converts
-	 * parameterized types in case we have known types for which we do not want
-	 * actual conversions as for {@link Iterable}s and {@link Map}s.
+	 * Creates a new instance from the given type. It uses instance creator if it can't create an instance normally. It also
+	 * automatically converts parameterized types in case we have known types for which we do not want actual conversions as
+	 * for {@link Iterable}s and {@link Map}s.
 	 * <p>
 	 * Note:<br>
-	 * This method internally calls the
-	 * {@link #convertFromToParameterizedType(Object, ParameterizedType, Configuration)}
-	 * because it has to convert types for which we have known conversions like
-	 * lists, maps, etc. with generic types. The {@link Iterable}s converted through this
-	 * method will not have an element type when the normal conversion in that
+	 * This method internally calls the {@link #convertFromToParameterizedType(Object, ParameterizedType, Configuration)}
+	 * because it has to convert types for which we have known conversions like lists, maps, etc. with generic types. The
+	 * {@link Iterable}s converted through this method will not have an element type when the normal conversion in that
 	 * method takes place at the end.<br>
-	 * - for simple arrays it will create empty instances so that the converter
-	 * can convert them based on the component type.<br>
+	 * - for simple arrays it will create empty instances so that the converter can convert them based on the component
+	 * type.<br>
 	 * - for generic arrays it will convert the arrays directly
 	 *
 	 * @param <S> source type

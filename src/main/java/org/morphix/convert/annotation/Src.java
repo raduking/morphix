@@ -47,5 +47,5 @@ public @interface Src {
 	 *
 	 * @return from annotation array
 	 */
-	From[] from() default {};
+	From[] from() default { };
 }
