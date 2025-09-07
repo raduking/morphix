@@ -616,7 +616,7 @@ public final class Nullables {
 		 * @return value if value is not <code>null</code> and matches predicate
 		 */
 		public T valueWhenOrDefault(final Predicate<T> predicate, final T defaultValue) {
-			return null != value && predicate.test(value) ? value : defaultValue;
+			return valueWhenOrDefault(predicate, () -> defaultValue);
 		}
 
 		/**
@@ -632,8 +632,8 @@ public final class Nullables {
 		}
 
 		/**
-		 * Returns the value if it's not null and conforms to the given predicate. Otherwise, an {@link IllegalStateException} is
-		 * thrown with the given error message.
+		 * Returns the value if it's not null and conforms to the given predicate. Otherwise, an {@link IllegalStateException}
+		 * is thrown with the given error message.
 		 *
 		 *
 		 * @param predicate value predicate

@@ -21,12 +21,16 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.reflection.Constructors;
@@ -43,6 +47,7 @@ class NullablesTest {
 	private static final String SOME_OTHER_ERROR_MESSAGE = "Other error message";
 	private static final String MUMU = "mumu";
 	private static final String BIBI = "bibi";
+	private static final String CUCU = "cucu";
 
 	@Test
 	void shouldReturnValueOnNestingWithAndNotNull() {
@@ -55,6 +60,21 @@ class NullablesTest {
 				.andNotNull(A::getB)
 				.andNotNull(B::getS)
 				.valueOrDefault(BIBI);
+
+		assertThat(result, equalTo(MUMU));
+	}
+
+	@Test
+	void shouldReturnValueOnNestingWithAndNotNullAndOrElse() {
+		A a = new A();
+		B b = new B();
+		b.s = MUMU;
+		a.b = b;
+
+		String result = Nullables.whenNotNull(a)
+				.andNotNull(A::getB)
+				.andNotNull(B::getS)
+				.orElse(BIBI);
 
 		assertThat(result, equalTo(MUMU));
 	}
@@ -93,6 +113,18 @@ class NullablesTest {
 	}
 
 	@Test
+	void shouldReturnYieldedSuppliedWhenParameterIsNotNull() {
+		B b = new B();
+		b.s = BIBI;
+
+		String result = Nullables.whenNotNull(b)
+				.thenYield(() -> CUCU)
+				.orElse(() -> MUMU);
+
+		assertThat(result, equalTo(CUCU));
+	}
+
+	@Test
 	void shouldReturnDefaultOnNestingAndNotNullEvenIfOnePathIsNull() {
 		A a = new A();
 
@@ -102,6 +134,112 @@ class NullablesTest {
 				.valueOrDefault(BIBI);
 
 		assertThat(result, equalTo(BIBI));
+	}
+
+	@Test
+	void shouldReturnSuppliedWhenParameterIsNotNull() {
+		B b = new B();
+
+		String result = Nullables.whenNotNull(b)
+				.thenReturn(() -> CUCU);
+
+		assertThat(result, equalTo(CUCU));
+	}
+
+	@Test
+	void shouldReturnThisWhenParameterIsNotNull() {
+		B b = new B();
+
+		B result = Nullables.whenNotNull(b)
+				.thenReturn();
+
+		assertThat(result, equalTo(b));
+	}
+
+	@Test
+	void shouldReturnFunctionResultWhenParameterIsNotNull() {
+		B b = new B();
+		b.s = CUCU;
+
+		String result = Nullables.whenNotNull(b)
+				.thenReturn(B::getS);
+
+		assertThat(result, equalTo(CUCU));
+	}
+
+	@Test
+	void shouldReturnDefaultNotFunctionResultWhenParameterIsNull() {
+		B b = null;
+
+		String result = Nullables.whenNotNull(b)
+				.thenOrDefault(B::getS, () -> MUMU);
+
+		assertThat(result, equalTo(MUMU));
+	}
+
+	@Test
+	void shouldReturnFunctionNotDefaultResultWhenParameterIsNotNull() {
+		B b = new B();
+		b.s = CUCU;
+
+		String result = Nullables.whenNotNull(b)
+				.thenOrDefault(B::getS, () -> MUMU);
+
+		assertThat(result, equalTo(CUCU));
+	}
+
+	@Test
+	void shouldReturnNullWhenParameterIsNull() {
+		String result = Nullables.whenNotNull(null)
+				.thenReturn(() -> CUCU);
+
+		assertThat(result, equalTo(null));
+	}
+
+	@Test
+	void shouldConsumeWhenParameterIsNotNull() {
+		B b = new B();
+
+		@SuppressWarnings("unchecked")
+		Consumer<B> consumer = mock(Consumer.class);
+
+		Nullables.whenNotNull(b).then(consumer);
+
+		verify(consumer).accept(b);
+	}
+
+	@Test
+	void shouldNotConsumeWhenParameterIsNull() {
+		B b = null;
+
+		@SuppressWarnings("unchecked")
+		Consumer<B> consumer = mock(Consumer.class);
+
+		Nullables.whenNotNull(b).then(consumer);
+
+		verifyNoInteractions(consumer);
+	}
+
+	@Test
+	void shouldRunWhenParameterIsNotNull() {
+		B b = new B();
+
+		Runnable runnable = mock(Runnable.class);
+
+		Nullables.whenNotNull(b).then(runnable);
+
+		verify(runnable).run();
+	}
+
+	@Test
+	void shouldNotRunWhenParameterIsNull() {
+		B b = null;
+
+		Runnable runnable = mock(Runnable.class);
+
+		Nullables.whenNotNull(b).then(runnable);
+
+		verifyNoInteractions(runnable);
 	}
 
 	@SuppressWarnings("null")
@@ -123,6 +261,80 @@ class NullablesTest {
 
 		assertThat(exception, notNullValue());
 		assertThat(exception.getMessage(), equalTo(SOME_ERROR_MESSAGE));
+	}
+
+	@Test
+	void shouldReturnValueWhenErrorMessageIsProvidedOnNestingWithAndNotNullIfNotNull() {
+		A a = new A();
+		B b = new B();
+		a.b = b;
+		b.s = CUCU;
+
+		String result = Nullables.whenNotNull(a)
+				.andNotNull(A::getB)
+				.andNotNull(B::getS)
+				.valueOrError(SOME_ERROR_MESSAGE);
+
+		assertThat(result, equalTo(CUCU));
+	}
+
+	@Test
+	void shouldReturnValueWhenDefaultIsProvidedOnNestingWithAndNotNullIfNotNullAndMatchesPredicate() {
+		A a = new A();
+		B b = new B();
+		a.b = b;
+		b.s = CUCU;
+
+		String result = Nullables.whenNotNull(a)
+				.andNotNull(A::getB)
+				.andNotNull(B::getS)
+				.valueWhenOrDefault(s -> s.equals(CUCU), MUMU);
+
+		assertThat(result, equalTo(CUCU));
+	}
+
+	@Test
+	void shouldReturnValueWhenDefaultIsProvidedOnNestingWithAndNotNullIfNotNullAndMatchesPredicateWithErrorMessage() {
+		A a = new A();
+		B b = new B();
+		a.b = b;
+		b.s = CUCU;
+
+		String result = Nullables.whenNotNull(a)
+				.andNotNull(A::getB)
+				.andNotNull(B::getS)
+				.valueWhenOrError(s -> s.equals(CUCU), SOME_ERROR_MESSAGE);
+
+		assertThat(result, equalTo(CUCU));
+	}
+
+	@Test
+	void shouldReturnValueWhenDefaultIsProvidedOnNestingWithAndNotNullIfNotNullAndNotMatchesPredicate() {
+		A a = new A();
+		B b = new B();
+		a.b = b;
+		b.s = CUCU;
+
+		String result = Nullables.whenNotNull(a)
+				.andNotNull(A::getB)
+				.andNotNull(B::getS)
+				.valueWhenOrDefault(s -> s.equals(MUMU), BIBI);
+
+		assertThat(result, equalTo(BIBI));
+	}
+
+	@Test
+	void shouldReturnValueWhenDefaultIsProvidedOnNestingWithAndNotNullIfNullAndMatchesPredicate() {
+		A a = new A();
+		B b = new B();
+		a.b = b;
+
+		String result = Nullables.whenNotNull(a)
+				.andNotNull(A::getB)
+				.andNotNull(B::getS)
+				.valueWhenOrDefault(s -> s == null, BIBI);
+
+		assertThat(result, equalTo(BIBI));
 	}
 
 	@SuppressWarnings("null")
@@ -181,6 +393,50 @@ class NullablesTest {
 
 		assertThat(exception, notNullValue());
 		assertThat(exception.getMessage(), equalTo(SOME_ERROR_MESSAGE));
+	}
+
+	@SuppressWarnings("null")
+	@Test
+	void shouldFailFastOnAndNotNullWhenErrorMessageIsProvided() {
+		A a = new A();
+		@SuppressWarnings("unchecked")
+		Consumer<B> consumer = mock(Consumer.class);
+
+		Exception exception = null;
+		try {
+			Nullables.whenNotNull(a)
+					.andNotNull(A::getB, SOME_ERROR_MESSAGE)
+					.then(consumer);
+		} catch (IllegalStateException e) {
+			exception = e;
+		}
+
+		assertThat(exception, notNullValue());
+		assertThat(exception.getMessage(), equalTo(SOME_ERROR_MESSAGE));
+		verifyNoInteractions(consumer);
+	}
+
+	@SuppressWarnings("null")
+	@Test
+	void shouldFailFastOnAndNotNullTwiceWhenErrorMessageIsProvided() {
+		A a = new A();
+		a.b = new B();
+		@SuppressWarnings("unchecked")
+		Consumer<String> consumer = mock(Consumer.class);
+
+		Exception exception = null;
+		try {
+			Nullables.whenNotNull(a)
+					.andNotNull(A::getB, SOME_ERROR_MESSAGE)
+					.andNotNull(B::getS, SOME_ERROR_MESSAGE)
+					.then(consumer);
+		} catch (IllegalStateException e) {
+			exception = e;
+		}
+
+		assertThat(exception, notNullValue());
+		assertThat(exception.getMessage(), equalTo(SOME_ERROR_MESSAGE));
+		verifyNoInteractions(consumer);
 	}
 
 	@SuppressWarnings("null")
@@ -280,39 +536,39 @@ class NullablesTest {
 		assertThat(list, hasSize(0));
 	}
 
-    @Test
-    void shouldNotThrowExceptionWhenAllObjectsAreNotNull() {
-        Object obj1 = new Object();
-        Object obj2 = "test";
-        Object obj3 = 42;
+	@Test
+	void shouldNotThrowExceptionWhenAllObjectsAreNotNull() {
+		Object obj1 = new Object();
+		Object obj2 = "test";
+		Object obj3 = 42;
 
-        assertDoesNotThrow(() -> Nullables.requireNotNull(obj1, obj2, obj3));
-    }
+		assertDoesNotThrow(() -> Nullables.requireNotNull(obj1, obj2, obj3));
+	}
 
-    @Test
-    void shouldThrowNullPointerExceptionWhenAnyObjectIsNull() {
-        Object obj1 = new Object();
-        Object obj2 = null;
-        Object obj3 = 42;
+	@Test
+	void shouldThrowNullPointerExceptionWhenAnyObjectIsNull() {
+		Object obj1 = new Object();
+		Object obj2 = null;
+		Object obj3 = 42;
 
-        NullPointerException exception = assertThrows(NullPointerException.class, () -> Nullables.requireNotNull(obj1, obj2, obj3));
-        assertThat(exception.getMessage(), is(nullValue()));
-    }
+		NullPointerException exception = assertThrows(NullPointerException.class, () -> Nullables.requireNotNull(obj1, obj2, obj3));
+		assertThat(exception.getMessage(), is(nullValue()));
+	}
 
-    @Test
-    void shouldThrowNullPointerExceptionWhenAllObjectsAreNull() {
-        Object obj1 = null;
-        Object obj2 = null;
-        Object obj3 = null;
+	@Test
+	void shouldThrowNullPointerExceptionWhenAllObjectsAreNull() {
+		Object obj1 = null;
+		Object obj2 = null;
+		Object obj3 = null;
 
-        NullPointerException exception = assertThrows(NullPointerException.class, () -> Nullables.requireNotNull(obj1, obj2, obj3));
-        assertThat(exception.getMessage(), is(nullValue()));
-    }
+		NullPointerException exception = assertThrows(NullPointerException.class, () -> Nullables.requireNotNull(obj1, obj2, obj3));
+		assertThat(exception.getMessage(), is(nullValue()));
+	}
 
-    @Test
-    void shouldNotThrowExceptionWhenNoObjectsAreProvided() {
-    	assertDoesNotThrow(() -> Nullables.requireNotNull());
-    }
+	@Test
+	void shouldNotThrowExceptionWhenNoObjectsAreProvided() {
+		assertDoesNotThrow(() -> Nullables.requireNotNull()); // NOSONAR
+	}
 
 	@Test
 	void shouldThrowExceptionIfClassIsInstantiatedWithDefaultConstructor() {
@@ -327,7 +583,15 @@ class NullablesTest {
 		assertTrue(targetException instanceof UnsupportedOperationException);
 	}
 
-    public static class A {
+	@Test
+	void shouldThrowExceptionOnRequireNullForNonNullInput() {
+		Nullables.requireNull(null, SOME_ERROR_MESSAGE);
+
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Nullables.requireNull(MUMU, SOME_ERROR_MESSAGE));
+		assertThat(e.getMessage(), equalTo(SOME_ERROR_MESSAGE));
+	}
+
+	public static class A {
 
 		private Integer i;
 

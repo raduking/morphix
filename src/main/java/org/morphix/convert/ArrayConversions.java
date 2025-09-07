@@ -60,7 +60,7 @@ public interface ArrayConversions {
 	 */
 	static <S, D> ArrayConversionPipeline<S, D> convertArray(final S[] sourceArray,
 			final InstanceFunction<D> elementInstanceFunction) {
-		return new ArrayConversionPipeline<>(sourceArray, (final S source) -> convertFrom(source, elementInstanceFunction));
+		return convertArray(sourceArray, (final S source) -> convertFrom(source, elementInstanceFunction));
 	}
 
 }

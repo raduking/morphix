@@ -62,7 +62,8 @@ class AccessSetterTest {
 
 	@Test
 	void shouldReturnTrueWhenSetAccessibleSuccedes() throws Exception {
-		MethodHandle handle = MethodHandles.lookup().findStatic(A.class, "setStaticX", MethodType.methodType(String.class, Field.class, Boolean.class));
+		MethodHandle handle =
+				MethodHandles.lookup().findStatic(A.class, "setStaticX", MethodType.methodType(String.class, Field.class, Boolean.class));
 		Field field = A.class.getDeclaredField("x");
 
 		AccessSetter<Field> accessSetter = AccessSetter.ofOverride(handle);

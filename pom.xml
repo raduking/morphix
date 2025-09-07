@@ -17,7 +17,7 @@
 
 	<groupId>io.github.raduking</groupId>
 	<artifactId>morphix-all</artifactId>
-	<version>1.0.7</version>
+	<version>1.0.8</version>
 	<packaging>jar</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -236,6 +236,37 @@
 					<parseSurefireArgLine>false</parseSurefireArgLine>
 					<argLine>${morphixArgLine}</argLine>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>2.46.1</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.eclipse.jdt</groupId>
+						<artifactId>org.eclipse.jdt.core</artifactId>
+						<version>3.42.0</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<java>
+						<eclipse>
+							<file>${project.basedir}/formatter/java-formatter.xml</file>
+							<version>4.36</version>
+						</eclipse>
+						<removeUnusedImports/>
+						<trimTrailingWhitespace/>
+					</java>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>apply</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>

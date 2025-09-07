@@ -60,7 +60,8 @@ class PrimitivesTest {
 
 	@Test
 	void shouldThrowExceptionOnCallingConstructor() {
-		ReflectionException reflectionException = assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(Primitives.class));
+		ReflectionException reflectionException =
+				assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(Primitives.class));
 		InvocationTargetException invocationTargetException = JavaObjects.cast(reflectionException.getCause());
 		UnsupportedOperationException unsupportedOperationException = JavaObjects.cast(invocationTargetException.getCause());
 		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));

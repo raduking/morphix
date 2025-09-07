@@ -41,8 +41,8 @@ public class Enums {
 	}
 
 	/**
-	 * Builds a name map for all the given values for an enum using a string mapper function. The mapper function can
-	 * be for example {@link Enum#name()}, {@link Enum#toString()}, etc.
+	 * Builds a name map for all the given values for an enum using a string mapper function. The mapper function can be for
+	 * example {@link Enum#name()}, {@link Enum#toString()}, etc.
 	 *
 	 * @param <T> enum type
 	 * @param <K> name map key type

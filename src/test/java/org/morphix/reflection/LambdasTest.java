@@ -200,7 +200,7 @@ class LambdasTest {
 	@Test
 	void shouldReturnEmptyListIfSerializedLambdaCannotAccessImplClass() {
 		SerializedLambda serializedLambda =
-				new SerializedLambda(null, null, null, null, 0, "test name", null, null, null, new Object[] {});
+				new SerializedLambda(null, null, null, null, 0, "test name", null, null, null, new Object[] { });
 
 		List<Method> methods = Lambdas.getLambdaDeclaredMethods(serializedLambda);
 
@@ -210,7 +210,7 @@ class LambdasTest {
 	@Test
 	void shouldReturnNullIfLambdaHasNoMethods() {
 		SerializedLambda serializedLambda =
-				new SerializedLambda(null, null, null, null, 0, "test name", null, null, null, new Object[] {});
+				new SerializedLambda(null, null, null, null, 0, "test name", null, null, null, new Object[] { });
 
 		Method method = Lambdas.getLambdaMethod(serializedLambda, Objects::nonNull);
 

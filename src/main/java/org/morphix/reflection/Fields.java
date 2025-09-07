@@ -116,8 +116,8 @@ public interface Fields {
 	}
 
 	/**
-	 * Variation of {@link #getAllDeclaredInHierarchy(Class)}. It will call the method with <code>obj.getClass()</code>
-	 * if the object is not instance of {@link Class}, otherwise it will search for fields in the given class.
+	 * Variation of {@link #getAllDeclaredInHierarchy(Class)}. It will call the method with <code>obj.getClass()</code> if
+	 * the object is not instance of {@link Class}, otherwise it will search for fields in the given class.
 	 *
 	 * @param obj object on which the fields are needed
 	 * @return list of fields

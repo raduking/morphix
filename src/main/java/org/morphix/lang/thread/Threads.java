@@ -92,7 +92,8 @@ public class Threads {
 		 * Will run each runnable using {@link CompletableFuture#runAsync(Runnable, Executor)} and the executor supplied. If the
 		 * executor is {@code null} a single thread executor will be used by default.
 		 * <p>
-		 * By default when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be used.
+		 * By default when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be
+		 * used.
 		 * <p>
 		 * If you want the runnables to run on a specific executor use:
 		 *
@@ -231,7 +232,8 @@ public class Threads {
 
 	/**
 	 * Runs each runnable in the list with the given execution type. It only returns after all threads have completed.<br/>
-	 * By default when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be used.
+	 * By default when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be
+	 * used.
 	 * <p>
 	 * If you want the runnables to run on a specific executor use: {@link #execute(List, ExecutorService)}
 	 *

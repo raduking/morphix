@@ -37,7 +37,7 @@ class SimpleConvertersTest {
 
 	@Test
 	void shouldReturnEmptySimpleConverterWhenArrayIsEmptyAsParameter() {
-		SimpleConverters result = SimpleConverters.of(new SimpleConverter<?, ?>[] {});
+		SimpleConverters result = SimpleConverters.of(new SimpleConverter<?, ?>[] { });
 
 		assertThat(result, equalTo(SimpleConverters.empty()));
 	}
@@ -58,7 +58,7 @@ class SimpleConvertersTest {
 
 	@Test
 	void shouldReturnFalseOnNullEquals() {
-		SimpleConverters sc = SimpleConverters.of(new SimpleConverter<?, ?>[] {});
+		SimpleConverters sc = SimpleConverters.of(new SimpleConverter<?, ?>[] { });
 
 		boolean result = sc.equals(null);
 
@@ -67,7 +67,7 @@ class SimpleConvertersTest {
 
 	@Test
 	void shouldReturnFalseOnOtherObjectEquals() {
-		SimpleConverters sc = SimpleConverters.of(new SimpleConverter<?, ?>[] {});
+		SimpleConverters sc = SimpleConverters.of(new SimpleConverter<?, ?>[] { });
 		Object mumu = "mumu";
 
 		boolean result = sc.equals(mumu);

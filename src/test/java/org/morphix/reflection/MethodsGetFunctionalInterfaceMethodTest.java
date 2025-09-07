@@ -51,6 +51,7 @@ class MethodsGetFunctionalInterfaceMethodTest {
 
 	public static interface C {
 		void foo();
+
 		void goo();
 	}
 
