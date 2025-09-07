@@ -4,6 +4,8 @@
 
 `1.0.8`
 
+Added `Reflection.isClassPresent` to test if a class is present in the class path.
+
 ---
 
 `1.0.7`

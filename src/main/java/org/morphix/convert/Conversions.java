@@ -301,7 +301,6 @@ public interface Conversions {
 			final Configuration configuration) {
 		ObjectConverter<S, D> converter = ConverterFactory.newObjectConverter(configuration);
 		return converter.convert(source, instanceFunction, extraConvertFunction);
-
 	}
 
 	/**

@@ -616,7 +616,7 @@ public final class Nullables {
 		 * @return value if value is not <code>null</code> and matches predicate
 		 */
 		public T valueWhenOrDefault(final Predicate<T> predicate, final T defaultValue) {
-			return null != value && predicate.test(value) ? value : defaultValue;
+			return valueWhenOrDefault(predicate, () -> defaultValue);
 		}
 
 		/**

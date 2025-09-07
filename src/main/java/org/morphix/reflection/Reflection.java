@@ -160,7 +160,7 @@ public interface Reflection {
 	 *
 	 * @param <T> returned type
 	 *
-	 * @param className class name
+	 * @param className the {@linkplain ClassLoader##binary-name binary name}
 	 * @return a class based on a class name
 	 */
 	static <T> Class<T> getClass(final String className) {
@@ -169,6 +169,16 @@ public interface Reflection {
 		} catch (ClassNotFoundException e) {
 			return null;
 		}
+	}
+
+	/**
+	 * Returns true if the class given by its name is present in the class path, false otherwise.
+	 *
+	 * @param className the {@linkplain ClassLoader##binary-name binary name}
+	 * @return true if the class is present in the class path, false otherwise
+	 */
+	static boolean isClassPresent(final String className) {
+		return null != getClass(className);
 	}
 
 }
