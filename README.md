@@ -50,6 +50,7 @@ See [examples](src/test/java/org/morphix/examples) folder in unit tests for exam
 
 ### Getting Started
 
+You will need at least Java 21 installed.
 For the latest development release, you need to get the [develop](https://github.com/raduking/morphix/tree/develop) branch and build it yourself:
 
 ```
