@@ -108,6 +108,7 @@ class ConstantPoolTest {
 
 	@Test
 	void shouldDecrementIndexOnNextElement() {
+		@SuppressWarnings("unchecked")
 		ConstantPoolIterator<Member> iterator = (ConstantPoolIterator<Member>) constantPool.iterator();
 		int index = iterator.nextIndex();
 		int nextIndex = iterator.nextIndex();
@@ -126,7 +127,7 @@ class ConstantPoolTest {
 	@ParameterizedTest
 	@MethodSource("provideIndexesTestParameters")
 	void shouldVerifyAllIteratorIndexes(final int size, final int index, final boolean hasNext) {
-		ConstantPoolIterator<Member> iterator = (ConstantPoolIterator<Member>) constantPool.iterator();
+		Iterator<Member> iterator = constantPool.iterator();
 		Fields.IgnoreAccess.set(iterator, "size", size);
 		Fields.IgnoreAccess.set(iterator, "index", index);
 
