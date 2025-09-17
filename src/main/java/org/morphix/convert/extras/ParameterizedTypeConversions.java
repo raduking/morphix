@@ -110,6 +110,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param parameterizedType parameterized type
 	 * @param configuration configuration
@@ -128,6 +129,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param parameterizedType destination parameterized type
 	 * @param extraConvertFunction extra convert function
@@ -153,6 +155,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param parameterizedType parameterized type of the destination
 	 * @param configuration configuration
@@ -191,6 +194,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param actualFieldType actual (possibly parameterized) type of the destination
 	 * @param configuration configuration
@@ -214,6 +218,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param sClass source class
 	 * @param dClass destination class
 	 * @return a parameterized conversion method
@@ -245,6 +250,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param destinationType type to create an instance for
 	 * @param configuration converter configuration object
@@ -320,6 +326,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param destinationType destination map class
 	 * @param actualTypes array of parameterized types for map
@@ -339,6 +346,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param destinationType destination class
 	 * @param actualTypes array of parameterized types for list

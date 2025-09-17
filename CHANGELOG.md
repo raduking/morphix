@@ -4,6 +4,10 @@
 
 `1.0.9`
 
+- Added `GenericType.isNotGenericClass` which returns true if the given class is not generic, false otherwise.
+- Added `GenericType.of(Class, Type, Type)` which creates a generic type with only one generic argument.
+- Added `GenericType.of(Class, Type)` which creates a generic type with only one generic argument with `null` as the owner type.
+
 ---
 
 `1.0.8`
