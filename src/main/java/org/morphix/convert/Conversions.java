@@ -120,7 +120,7 @@ public interface Conversions {
 	 * <li><code>null</code> - all fields will be expanded ({@link Expandable} annotation will be ignored)</li>
 	 * <li>empty list - no fields will be expanded (all fields with {@link Expandable} annotation present will be
 	 * <code>null</code>)</li>
-	 * <li>non empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
+	 * <li>non-empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
 	 * </ul>
 	 *
 	 * @param <S> source type
@@ -145,7 +145,7 @@ public interface Conversions {
 	 * <li><code>null</code> - all fields will be expanded ({@link Expandable} annotation will be ignored)</li>
 	 * <li>empty list - no fields will be expanded (all fields with {@link Expandable} annotation present will be
 	 * <code>null</code>)</li>
-	 * <li>non empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
+	 * <li>non-empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
 	 * </ul>
 	 * <p>
 	 * The extraConvertFunction has the form:
@@ -179,7 +179,7 @@ public interface Conversions {
 	 * <li><code>null</code> - all fields will be expanded ({@link Expandable} annotation will be ignored)</li>
 	 * <li>empty list - no fields will be expanded (all fields with {@link Expandable} annotation present will be
 	 * <code>null</code>)</li>
-	 * <li>non empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
+	 * <li>non-empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
 	 * </ul>
 	 * <p>
 	 * The extraConvertFunction has the form:
@@ -237,7 +237,7 @@ public interface Conversions {
 	 * <li><code>null</code> - all fields will be expanded ({@link Expandable} annotation will be ignored)</li>
 	 * <li>empty list - no fields will be expanded (all fields with {@link Expandable} annotation present will be
 	 * <code>null</code>)</li>
-	 * <li>non empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
+	 * <li>non-empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
 	 * </ul>
 	 * <p>
 	 * The extraConvertFunction has the form:

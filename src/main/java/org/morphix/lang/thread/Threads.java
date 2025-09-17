@@ -92,7 +92,7 @@ public class Threads {
 		 * Will run each runnable using {@link CompletableFuture#runAsync(Runnable, Executor)} and the executor supplied. If the
 		 * executor is {@code null} a single thread executor will be used by default.
 		 * <p>
-		 * By default when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be
+		 * By default, when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be
 		 * used.
 		 * <p>
 		 * If you want the runnables to run on a specific executor use:
@@ -232,7 +232,7 @@ public class Threads {
 
 	/**
 	 * Runs each runnable in the list with the given execution type. It only returns after all threads have completed.<br/>
-	 * By default when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be
+	 * By default, when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be
 	 * used.
 	 * <p>
 	 * If you want the runnables to run on a specific executor use: {@link #execute(List, ExecutorService)}
@@ -328,7 +328,7 @@ public class Threads {
 	 * @param valueSupplier value supplier
 	 * @return supplier value if computed within the timeout
 	 */
-	public static final <T> T execute(final Duration timeout, final Supplier<T> valueSupplier) {
+	public static <T> T execute(final Duration timeout, final Supplier<T> valueSupplier) {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		Future<T> task = executor.submit(valueSupplier::get);
 		T result = null;
@@ -350,7 +350,7 @@ public class Threads {
 	 * @param timeout timeout
 	 * @param runnable code to run
 	 */
-	public static final void execute(final Duration timeout, final Runnable runnable) {
+	public static void execute(final Duration timeout, final Runnable runnable) {
 		execute(timeout, Runnables.toSupplier(runnable));
 	}
 }

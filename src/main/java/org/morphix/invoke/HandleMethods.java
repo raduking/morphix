@@ -122,7 +122,7 @@ public class HandleMethods {
 	 * @return A {@link MethodHandle} pointing to the specified static method.
 	 * @throws ReflectionException If the method cannot be found or accessed.
 	 */
-	private static MethodHandle get(final String methodName, final Class<?> cls, final MethodType methodType, final boolean isStatic) {
+	private static <T> MethodHandle get(final String methodName, final Class<T> cls, final MethodType methodType, final boolean isStatic) {
 		ConcurrentMap<MethodSignature, MethodHandle> classMethods = METHOD_CACHE
 				.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
 

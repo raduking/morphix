@@ -25,7 +25,7 @@ import org.morphix.reflection.ExtendedField;
  * <ul>
  * <li><code>null</code> - no fields will be excluded</li>
  * <li>empty list - all fields will be excluded</li>
- * <li>non empty list - only the fields present in the list will be excluded all others will be converted</li>
+ * <li>non-empty list - only the fields present in the list will be excluded all others will be converted</li>
  * </ul>
  *
  * @author Radu Sebastian LAZIN
@@ -65,7 +65,7 @@ public class ExcludedFields {
 	 * <ul>
 	 * <li><code>null</code> - no fields will be excluded</li>
 	 * <li>empty list - all fields will be excluded</li>
-	 * <li>non empty list - only the fields present in the list will be excluded all others will be converted</li>
+	 * <li>non-empty list - only the fields present in the list will be excluded all others will be converted</li>
 	 * </ul>
 	 *
 	 * @param excludedFieldNames fields that will be excluded

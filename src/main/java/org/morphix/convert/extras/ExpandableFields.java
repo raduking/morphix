@@ -27,7 +27,7 @@ import org.morphix.reflection.ExtendedField;
  * <li><code>null</code> - all fields will be expanded ({@link Expandable} annotation will be ignored)</li>
  * <li>empty list - no fields will be expanded (all fields with {@link Expandable} annotation present will be
  * empty)</li>
- * <li>non empty list - only the fields present in the list will be expanded all others will be empty</li>
+ * <li>non-empty list - only the fields present in the list will be expanded all others will be empty</li>
  * </ul>
  *
  * @author Radu Sebastian LAZIN
@@ -69,7 +69,7 @@ public class ExpandableFields {
 	 * <li><code>null</code> - all fields will be expanded ({@link Expandable} annotation will be ignored)</li>
 	 * <li>empty list - no fields will be expanded (all fields with {@link Expandable} annotation present will be
 	 * empty)</li>
-	 * <li>non empty list - only the fields present in the list will be expanded all others will be empty</li>
+	 * <li>non-empty list - only the fields present in the list will be expanded all others will be empty</li>
 	 * </ul>
 	 *
 	 * @param expandableFieldNames fields that will be expanded and have the {@link Expandable} annotation.

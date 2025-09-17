@@ -104,7 +104,7 @@ public class ConstantPool<T> implements Iterable<Member> {
 	}
 
 	/**
-	 * Sets the insatnce function.
+	 * Sets the instance function.
 	 *
 	 * @param instanceFunction constant pool accessor instance function
 	 */

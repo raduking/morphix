@@ -279,7 +279,6 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param configuration conversion configuration
 	 * @param parameterizedType parameterized type
-	 * @return a map with the generic type name and the actual type associated
 	 */
 	private static void updateGenericTypesMap(final Configuration configuration, final ParameterizedType parameterizedType) {
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
