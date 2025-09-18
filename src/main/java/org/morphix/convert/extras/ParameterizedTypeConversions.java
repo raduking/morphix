@@ -27,7 +27,6 @@ import static org.morphix.reflection.predicates.ClassPredicates.isArray;
 import static org.morphix.reflection.predicates.ClassPredicates.isIterable;
 import static org.morphix.reflection.predicates.ClassPredicates.isMap;
 import static org.morphix.reflection.predicates.TypePredicates.isA;
-import static org.morphix.reflection.predicates.TypePredicates.isParameterizedType;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
@@ -110,6 +109,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param parameterizedType parameterized type
 	 * @param configuration configuration
@@ -128,6 +128,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param parameterizedType destination parameterized type
 	 * @param extraConvertFunction extra convert function
@@ -153,6 +154,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param parameterizedType parameterized type of the destination
 	 * @param configuration configuration
@@ -191,6 +193,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param actualFieldType actual (possibly parameterized) type of the destination
 	 * @param configuration configuration
@@ -214,6 +217,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param sClass source class
 	 * @param dClass destination class
 	 * @return a parameterized conversion method
@@ -245,32 +249,33 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param destinationType type to create an instance for
 	 * @param configuration converter configuration object
 	 * @return new instance
 	 */
 	public static <D, S> D newTypeInstance(final S source, final Type destinationType, final Configuration configuration) {
-		if (isParameterizedType().test(destinationType)) {
-			return convertFromToParameterizedType(source, (ParameterizedType) destinationType, configuration);
-		}
-		if (isA(GenericArrayType.class).test(destinationType)) {
-			Type componentType = ((GenericArrayType) destinationType).getGenericComponentType();
-			if (isIterable().test(source.getClass())) {
-				Class<?> arrayClass = Types.getArrayClass((ParameterizedType) componentType);
-				return JavaObjects.cast(convertIterable((Iterable<?>) source,
-						src -> convertFrom(src, componentType, configuration))
-								.toAny(arrayClass));
+		return switch (destinationType) {
+			case ParameterizedType parameterizedType -> convertFromToParameterizedType(source, parameterizedType, configuration);
+			case GenericArrayType genericArrayType -> {
+				Type componentType = genericArrayType.getGenericComponentType();
+				if (isIterable().test(source.getClass())) {
+					Class<?> arrayClass = Types.getArrayClass((ParameterizedType) componentType);
+					yield JavaObjects.cast(convertIterable((Iterable<?>) source,
+							src -> convertFrom(src, componentType, configuration))
+									.toAny(arrayClass));
+				}
+				// TODO: check if we construct the array with the generic type component
+				yield null;
 			}
-			// TODO: check if we construct the array with the generic type component
-		} else if (isA(Class.class).test(destinationType)) {
-			Class<D> dClass = JavaObjects.cast(destinationType);
-			if (isArray().test(dClass)) {
-				return JavaObjects.cast(newEmptyArrayInstance(dClass.getComponentType()));
+			case Class<?> cls when cls.isArray() -> JavaObjects.cast(newEmptyArrayInstance(cls.getComponentType()));
+			case Class<?> cls -> {
+				Class<D> dClass = JavaObjects.cast(cls);
+				yield Constructors.IgnoreAccess.newInstance(dClass, InstanceCreator.getInstance());
 			}
-			return Constructors.IgnoreAccess.newInstance(dClass, InstanceCreator.getInstance());
-		}
-		return null;
+			default -> null;
+		};
 	}
 
 	/**
@@ -279,7 +284,6 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param configuration conversion configuration
 	 * @param parameterizedType parameterized type
-	 * @return a map with the generic type name and the actual type associated
 	 */
 	private static void updateGenericTypesMap(final Configuration configuration, final ParameterizedType parameterizedType) {
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
@@ -321,6 +325,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param destinationType destination map class
 	 * @param actualTypes array of parameterized types for map
@@ -340,6 +345,7 @@ public final class ParameterizedTypeConversions {
 	 *
 	 * @param <S> source type
 	 * @param <D> destination type
+	 *
 	 * @param source source object
 	 * @param destinationType destination class
 	 * @param actualTypes array of parameterized types for list

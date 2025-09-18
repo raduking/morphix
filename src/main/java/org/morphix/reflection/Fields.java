@@ -283,7 +283,7 @@ public interface Fields {
 			if (null == field) {
 				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass());
 			}
-			return get(obj, field);
+			return IgnoreAccess.get(obj, field);
 		}
 
 		/**
@@ -327,7 +327,7 @@ public interface Fields {
 			if (null == field) {
 				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass());
 			}
-			set(obj, field, value);
+			IgnoreAccess.set(obj, field, value);
 		}
 
 		/**
@@ -347,7 +347,7 @@ public interface Fields {
 			if (null == field || !Modifier.isStatic(field.getModifiers())) {
 				throw new ReflectionException("Could not find static field with name: " + fieldName + " in class: " + cls);
 			}
-			return get(null, field);
+			return IgnoreAccess.get(null, field);
 		}
 
 		/**
@@ -366,7 +366,7 @@ public interface Fields {
 			if (null == field || !Modifier.isStatic(field.getModifiers())) {
 				throw new ReflectionException("Could not find static field with name: " + fieldName + " in class: " + cls);
 			}
-			set(null, field, value);
+			IgnoreAccess.set(null, field, value);
 		}
 
 		/**

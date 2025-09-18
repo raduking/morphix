@@ -139,6 +139,7 @@ class GenericClassTest {
 		assertTrue(result);
 	}
 
+	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	void shouldReturnFalseOnEqualsWhenTheParameterIsNotAGenericClass() {
 		GenericClass<String> gc1 = GenericClass.of(String.class);

@@ -2,9 +2,21 @@
 
 ---
 
+`1.0.9`
+
+- Added `GenericType.isNotGenericClass` which returns true if the given class is not generic, false otherwise.
+- Added `GenericType.of(Class, Type, Type)` which creates a generic type with only one generic argument.
+- Added `GenericType.of(Class, Type)` which creates a generic type with only one generic argument with `null` as the owner type.
+- Added `Comparables` class for utility methods for `Comparable` objects.
+- Moved `JavaObjects.max` method to `Comparable` class.
+- Moved `JavaObjects.min` method to `Comparable` class.
+- Changed some methods to use the Java 21 switch pattern matching for improved readability.
+
+---
+
 `1.0.8`
 
-Added `Reflection.isClassPresent` to test if a class is present in the class path.
+- Added `Reflection.isClassPresent` to test if a class is present in the class path.
 
 ---
 

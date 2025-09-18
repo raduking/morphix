@@ -133,12 +133,12 @@ public class Converter<S> {
 	 *
 	 * @param <D> destination type
 	 *
-	 * @param parameterizedClassObject a new {@link GenericClass} object which specifies the actual generic class
+	 * @param genericClass a new {@link GenericClass} object which specifies the actual generic class
 	 * @return conversion destination object
 	 */
-	public <D> D to(final GenericClass<D> parameterizedClassObject) {
-		Configuration configuration = Configuration.of(excludedFields, expandableFields, simpleConverters, parameterizedClassObject.getClass());
-		return convertFrom(source, parameterizedClassObject.getGenericArgumentType(),
+	public <D> D to(final GenericClass<D> genericClass) {
+		Configuration configuration = Configuration.of(excludedFields, expandableFields, simpleConverters, genericClass.getClass());
+		return convertFrom(source, genericClass.getGenericArgumentType(),
 				JavaObjects.cast(extraConvertFunction), configuration);
 	}
 

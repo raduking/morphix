@@ -130,6 +130,7 @@ class ExcludedFieldsTest {
 		assertThat(e.equals(null), equalTo(false));
 	}
 
+	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	void shouldReturnFalseWhenComparingDifferentClassOnEquals() {
 		ExcludedFields e = ExcludedFields.exclude("b");

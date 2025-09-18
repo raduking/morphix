@@ -120,7 +120,7 @@ public interface Conversions {
 	 * <li><code>null</code> - all fields will be expanded ({@link Expandable} annotation will be ignored)</li>
 	 * <li>empty list - no fields will be expanded (all fields with {@link Expandable} annotation present will be
 	 * <code>null</code>)</li>
-	 * <li>non empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
+	 * <li>non-empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
 	 * </ul>
 	 *
 	 * @param <S> source type
@@ -145,7 +145,7 @@ public interface Conversions {
 	 * <li><code>null</code> - all fields will be expanded ({@link Expandable} annotation will be ignored)</li>
 	 * <li>empty list - no fields will be expanded (all fields with {@link Expandable} annotation present will be
 	 * <code>null</code>)</li>
-	 * <li>non empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
+	 * <li>non-empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
 	 * </ul>
 	 * <p>
 	 * The extraConvertFunction has the form:
@@ -179,7 +179,7 @@ public interface Conversions {
 	 * <li><code>null</code> - all fields will be expanded ({@link Expandable} annotation will be ignored)</li>
 	 * <li>empty list - no fields will be expanded (all fields with {@link Expandable} annotation present will be
 	 * <code>null</code>)</li>
-	 * <li>non empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
+	 * <li>non-empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
 	 * </ul>
 	 * <p>
 	 * The extraConvertFunction has the form:
@@ -237,7 +237,7 @@ public interface Conversions {
 	 * <li><code>null</code> - all fields will be expanded ({@link Expandable} annotation will be ignored)</li>
 	 * <li>empty list - no fields will be expanded (all fields with {@link Expandable} annotation present will be
 	 * <code>null</code>)</li>
-	 * <li>non empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
+	 * <li>non-empty list - only the fields present in the list will be expanded all others will be <code>null</code></li>
 	 * </ul>
 	 * <p>
 	 * The extraConvertFunction has the form:
@@ -417,20 +417,20 @@ public interface Conversions {
 	 * @param configuration configuration
 	 * @return destination object
 	 */
-	static <S, D> D convertFrom(final S source, final Type type,
-			final ConvertFunction<S, D> extraConvertFunction,
+	static <S, D> D convertFrom(final S source, final Type type, final ConvertFunction<S, D> extraConvertFunction,
 			final Configuration configuration) {
-		if (isA(Class.class).test(type)) {
-			// the cast to (Class<D>) is necessary to call the right method
-			Class<D> destinationClass = JavaObjects.cast(type);
-			return convertFrom(source, destinationClass, extraConvertFunction, configuration); // NOSONAR
-		}
-		if (isA(ParameterizedType.class).test(type)) {
-			ParameterizedType parameterizedType = (ParameterizedType) type;
-			Configuration newConfiguration = Configuration.copyWith(parameterizedType, configuration);
-			return convertFromToParameterizedType(source, parameterizedType, extraConvertFunction, newConfiguration);
-		}
-		throw new ObjectConverterException("Could not convert to type: " + type);
+		return switch (type) {
+			case Class<?> cls -> {
+				// the cast to (Class<D>) is necessary to call the right method
+				Class<D> destinationClass = JavaObjects.cast(cls);
+				yield convertFrom(source, destinationClass, extraConvertFunction, configuration);
+			}
+			case ParameterizedType parameterizedType -> {
+				Configuration newConfiguration = Configuration.copyWith(parameterizedType, configuration);
+				yield convertFromToParameterizedType(source, parameterizedType, extraConvertFunction, newConfiguration);
+			}
+			default -> throw new ObjectConverterException("Could not convert to type: " + type);
+		};
 	}
 
 	/**

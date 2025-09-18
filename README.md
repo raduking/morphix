@@ -36,7 +36,7 @@ A library that exposes general Java utility and reflection methods and a package
 
 ### Releases
 
-Current release `1.0.8`
+Current release `1.0.9`
 
 ### Documentation
 
@@ -50,6 +50,7 @@ See [examples](src/test/java/org/morphix/examples) folder in unit tests for exam
 
 ### Getting Started
 
+You will need at least Java 21 installed.
 For the latest development release, you need to get the [develop](https://github.com/raduking/morphix/tree/develop) branch and build it yourself:
 
 ```
@@ -64,6 +65,6 @@ Maven: add this dependency to your `pom.xml`
 <dependency>
     <groupId>io.github.raduking</groupId>
     <artifactId>morphix-all</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
 </dependency>
 ```

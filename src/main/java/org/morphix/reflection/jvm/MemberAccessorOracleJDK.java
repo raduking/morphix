@@ -44,11 +44,21 @@ public class MemberAccessorOracleJDK<T extends AccessibleObject & Member> implem
 	 */
 	private static MethodHandle overrideSetter = null;
 
+	/**
+	 * Statically initialize the overrideSetter.
+	 */
 	static {
 		initialize(FIELD_NAME_IMPL_LOOKUP);
 	}
 
+	/**
+	 * The access setter.
+	 */
 	private final AccessSetter<T> accessSetter;
+
+	/**
+	 * The member for which the access needs to be changed.
+	 */
 	private final T member;
 
 	/**
@@ -92,6 +102,9 @@ public class MemberAccessorOracleJDK<T extends AccessibleObject & Member> implem
 		accessSetter.setAccessible(member, true);
 	}
 
+	/**
+	 * @see #close()
+	 */
 	@Override
 	public void close() {
 		accessSetter.setAccessible(member, false);

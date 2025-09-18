@@ -18,27 +18,37 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link JavaObjects#max(Comparable, Comparable)}.
+ * Test class for {@link Comparables#max(Comparable, Comparable)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class JavaObjectsMinTest {
+class ComparablesMinTest {
 
 	@Test
 	void shouldReturnMinimum() {
 		Integer x = 10;
 		Integer y = 20;
 
-		Integer result = JavaObjects.min(x, y);
+		Integer result = Comparables.min(x, y);
 
 		assertThat(result, equalTo(x));
+	}
+
+	@Test
+	void shouldReturnMinimumReversed() {
+		Integer x = 20;
+		Integer y = 10;
+
+		Integer result = Comparables.min(x, y);
+
+		assertThat(result, equalTo(y));
 	}
 
 	@Test
 	void shouldReturnMinimumSecondWhenFirstParamIsNull() {
 		Integer y = 20;
 
-		Integer result = JavaObjects.min(null, y);
+		Integer result = Comparables.min(null, y);
 
 		assertThat(result, equalTo(y));
 	}
@@ -47,7 +57,7 @@ class JavaObjectsMinTest {
 	void shouldReturnMinimumFirstWhenSecondParamIsNull() {
 		Integer x = 10;
 
-		Integer result = JavaObjects.min(x, null);
+		Integer result = Comparables.min(x, null);
 
 		assertThat(result, equalTo(x));
 	}

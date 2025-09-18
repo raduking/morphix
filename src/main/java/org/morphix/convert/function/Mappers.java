@@ -49,7 +49,7 @@ public interface Mappers {
 	}
 
 	/**
-	 * Maps a setter to a getter, the setter will only be called if the value returned by the getter in non null.
+	 * Maps a setter to a getter, the setter will only be called if the value returned by the getter in non-null.
 	 *
 	 * @param <T> value type
 	 *
@@ -61,7 +61,7 @@ public interface Mappers {
 	}
 
 	/**
-	 * Maps a getter to a setter, the setter will only be called if the value returned by the getter in non null.
+	 * Maps a getter to a setter, the setter will only be called if the value returned by the getter in non-null.
 	 *
 	 * @param <T> value type
 	 *

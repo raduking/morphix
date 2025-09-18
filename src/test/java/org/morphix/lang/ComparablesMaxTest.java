@@ -18,27 +18,37 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link JavaObjects#max(Comparable, Comparable)}.
+ * Test class for {@link Comparables#max(Comparable, Comparable)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class JavaObjectsMaxTest {
+class ComparablesMaxTest {
 
 	@Test
 	void shouldReturnMaximum() {
 		Integer x = 10;
 		Integer y = 20;
 
-		Integer result = JavaObjects.max(x, y);
+		Integer result = Comparables.max(x, y);
 
 		assertThat(result, equalTo(y));
+	}
+
+	@Test
+	void shouldReturnMaximumReversed() {
+		Integer x = 20;
+		Integer y = 10;
+
+		Integer result = Comparables.max(x, y);
+
+		assertThat(result, equalTo(x));
 	}
 
 	@Test
 	void shouldReturnMaximumSecondWhenFirstParamIsNull() {
 		Integer y = 20;
 
-		Integer result = JavaObjects.max(null, y);
+		Integer result = Comparables.max(null, y);
 
 		assertThat(result, equalTo(y));
 	}
@@ -47,7 +57,7 @@ class JavaObjectsMaxTest {
 	void shouldReturnMaximumFirstWhenSecondParamIsNull() {
 		Integer x = 10;
 
-		Integer result = JavaObjects.max(x, null);
+		Integer result = Comparables.max(x, null);
 
 		assertThat(result, equalTo(x));
 	}

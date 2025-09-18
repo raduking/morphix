@@ -14,13 +14,17 @@ package org.morphix.convert;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.morphix.convert.Converter.convert;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.reflection.GenericClass;
+import org.morphix.reflection.GenericType;
 
 /**
  * Test class for {@link Converter}.
@@ -157,6 +161,26 @@ class ConverterTest {
 		List<Integer> expected = List.of(1, 2);
 
 		assertThat(order, equalTo(expected));
+	}
+
+	@Test
+	void shouldConvertSetToList() {
+		Set<Integer> set = Set.of(1, 2, 3);
+
+		List<String> list = convert(set).to(new GenericClass<List<String>>() {
+			// empty
+		});
+
+		assertThat(list, containsInAnyOrder("1", "2", "3"));
+	}
+
+	@Test
+	void shouldConvertSetToListWithBuiltGenericClassAndType() {
+		Set<Integer> set = Set.of(1, 2, 3);
+
+		List<String> list = convert(set).to(GenericClass.of(GenericType.of(List.class, String.class)));
+
+		assertThat(list, containsInAnyOrder("1", "2", "3"));
 	}
 
 }

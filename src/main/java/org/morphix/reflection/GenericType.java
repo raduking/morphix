@@ -70,6 +70,29 @@ public class GenericType implements ParameterizedType {
 	}
 
 	/**
+	 * Builds a new {@link GenericType} object with the given argument.
+	 *
+	 * @param rawType raw type
+	 * @param actualTypeArgument actual generic type argument
+	 * @param ownerType owner type
+	 * @return a new parameterized type object
+	 */
+	public static GenericType of(final Class<?> rawType, final Type actualTypeArgument, final Type ownerType) {
+		return of(rawType, new Type[] { actualTypeArgument }, ownerType);
+	}
+
+	/**
+	 * Builds a new {@link GenericType} object with the given argument.
+	 *
+	 * @param rawType raw type
+	 * @param actualTypeArgument actual generic type argument
+	 * @return a new parameterized type object
+	 */
+	public static GenericType of(final Class<?> rawType, final Type actualTypeArgument) {
+		return of(rawType, actualTypeArgument, null);
+	}
+
+	/**
 	 * Builds a new {@link GenericType} object from a {@link ParameterizedType} object.
 	 *
 	 * @param parameterizedType parameterized type object
@@ -113,7 +136,7 @@ public class GenericType implements ParameterizedType {
 		if (index < 0) {
 			throw new ReflectionException("index cannot be negative.");
 		}
-		if (!isGenericClass(cls)) {
+		if (isNotGenericClass(cls)) {
 			throw new ReflectionException(cls.getCanonicalName() + " is not a generic class");
 		}
 		ParameterizedType parameterizedType = (ParameterizedType) cls.getGenericSuperclass();
@@ -163,6 +186,18 @@ public class GenericType implements ParameterizedType {
 	public static <T> boolean isGenericClass(final Class<T> cls) {
 		Type type = cls.getGenericSuperclass();
 		return type instanceof ParameterizedType;
+	}
+
+	/**
+	 * Returns true if the given class is not generic, false otherwise.
+	 *
+	 * @param <T> type to check
+	 *
+	 * @param cls class to check
+	 * @return true if the given class is not generic, false otherwise.
+	 */
+	public static <T> boolean isNotGenericClass(final Class<T> cls) {
+		return !isGenericClass(cls);
 	}
 
 	/**

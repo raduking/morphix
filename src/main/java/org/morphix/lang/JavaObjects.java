@@ -41,40 +41,4 @@ public final class JavaObjects {
 		return (T) o;
 	}
 
-	/**
-	 * Returns maximum of two comparable objects.
-	 *
-	 * @param <T> objects type
-	 * @param a first object
-	 * @param b second object
-	 * @return maximum
-	 */
-	public static <T extends Comparable<? super T>> T max(final T a, final T b) {
-		if (null == a) {
-			return b;
-		}
-		if (null == b) {
-			return a;
-		}
-		return a.compareTo(b) > 0 ? a : b;
-	}
-
-	/**
-	 * Returns minimum of two comparable objects.
-	 *
-	 * @param <T> objects type
-	 * @param a first object
-	 * @param b second object
-	 * @return minimum
-	 */
-	public static <T extends Comparable<? super T>> T min(final T a, final T b) {
-		if (null == a) {
-			return b;
-		}
-		if (null == b) {
-			return a;
-		}
-		return a.compareTo(b) < 0 ? a : b;
-	}
-
 }
