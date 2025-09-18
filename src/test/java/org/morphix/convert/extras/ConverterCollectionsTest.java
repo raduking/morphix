@@ -30,6 +30,8 @@ import org.morphix.reflection.MemberAccessor;
  */
 class ConverterCollectionsTest {
 
+	private static final int SIZE = 5;
+
 	@Test
 	void shouldThrowExceptionIfThisClassIsInstantiatedWithDefaultConstructor() throws Exception {
 		Throwable targetException = null;
@@ -41,5 +43,13 @@ class ConverterCollectionsTest {
 			targetException = e.getTargetException();
 		}
 		assertTrue(targetException instanceof UnsupportedOperationException);
+	}
+
+	@Test
+	void shouldCreateANewArrayInstanceFromPrimitiveType() {
+		Integer[] array = ConverterCollections.newArrayInstance(int.class, SIZE);
+
+		assertThat(array.length, equalTo(SIZE));
+		assertThat(array.getClass().getComponentType(), equalTo(Integer.class));
 	}
 }

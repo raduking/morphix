@@ -27,7 +27,6 @@ import static org.morphix.reflection.predicates.ClassPredicates.isArray;
 import static org.morphix.reflection.predicates.ClassPredicates.isIterable;
 import static org.morphix.reflection.predicates.ClassPredicates.isMap;
 import static org.morphix.reflection.predicates.TypePredicates.isA;
-import static org.morphix.reflection.predicates.TypePredicates.isParameterizedType;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
@@ -257,26 +256,26 @@ public final class ParameterizedTypeConversions {
 	 * @return new instance
 	 */
 	public static <D, S> D newTypeInstance(final S source, final Type destinationType, final Configuration configuration) {
-		if (isParameterizedType().test(destinationType)) {
-			return convertFromToParameterizedType(source, (ParameterizedType) destinationType, configuration);
-		}
-		if (isA(GenericArrayType.class).test(destinationType)) {
-			Type componentType = ((GenericArrayType) destinationType).getGenericComponentType();
-			if (isIterable().test(source.getClass())) {
-				Class<?> arrayClass = Types.getArrayClass((ParameterizedType) componentType);
-				return JavaObjects.cast(convertIterable((Iterable<?>) source,
-						src -> convertFrom(src, componentType, configuration))
-								.toAny(arrayClass));
+		return switch (destinationType) {
+			case ParameterizedType parameterizedType -> convertFromToParameterizedType(source, parameterizedType, configuration);
+			case GenericArrayType genericArrayType -> {
+				Type componentType = genericArrayType.getGenericComponentType();
+				if (isIterable().test(source.getClass())) {
+					Class<?> arrayClass = Types.getArrayClass((ParameterizedType) componentType);
+					yield JavaObjects.cast(convertIterable((Iterable<?>) source,
+							src -> convertFrom(src, componentType, configuration))
+									.toAny(arrayClass));
+				}
+				// TODO: check if we construct the array with the generic type component
+				yield null;
 			}
-			// TODO: check if we construct the array with the generic type component
-		} else if (isA(Class.class).test(destinationType)) {
-			Class<D> dClass = JavaObjects.cast(destinationType);
-			if (isArray().test(dClass)) {
-				return JavaObjects.cast(newEmptyArrayInstance(dClass.getComponentType()));
+			case Class<?> cls when cls.isArray() -> JavaObjects.cast(newEmptyArrayInstance(cls.getComponentType()));
+			case Class<?> cls -> {
+				Class<D> dClass = JavaObjects.cast(cls);
+				yield Constructors.IgnoreAccess.newInstance(dClass, InstanceCreator.getInstance());
 			}
-			return Constructors.IgnoreAccess.newInstance(dClass, InstanceCreator.getInstance());
-		}
-		return null;
+			default -> null;
+		};
 	}
 
 	/**
