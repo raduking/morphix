@@ -2,6 +2,10 @@
 
 ---
 
+`1.0.10`
+
+---
+
 `1.0.9`
 
 - Added `GenericType.isNotGenericClass` which returns true if the given class is not generic, false otherwise.
