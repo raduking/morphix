@@ -26,10 +26,6 @@ import org.junit.jupiter.api.Test;
  */
 class FieldsGetOneDeclaredTest {
 
-	public enum E {
-		// empty enum
-	}
-
 	public static class A {
 		int x;
 	}
