@@ -4,6 +4,8 @@
 
 `1.0.10`
 
+- Added `Fields.getOneDeclared` to retrieve a declared field in a given class.
+
 ---
 
 `1.0.9`
