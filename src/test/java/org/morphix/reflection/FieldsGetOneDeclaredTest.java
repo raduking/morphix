@@ -80,7 +80,7 @@ class FieldsGetOneDeclaredTest {
 	@Test
 	void shouldReturnFieldOnObject() throws Exception {
 		Field expected = A.class.getDeclaredField("x");
-		Field field = Fields.getOneDeclaredInHierarchy(new A(), "x");
+		Field field = Fields.getOneDeclared(new A(), "x");
 
 		assertThat(field, equalTo(expected));
 	}

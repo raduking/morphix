@@ -54,7 +54,7 @@ public class MethodInvocation {
 
 	@Benchmark
 	public Integer testMethodsInvoke() {
-		Method method = Methods.getSafeOneDeclaredInHierarchy("sum", A.class, Integer.class, int.class);
+		Method method = Methods.Safe.getOneDeclaredInHierarchy("sum", A.class, Integer.class, int.class);
 
 		return Methods.IgnoreAccess.invoke(method, a, 10, 20);
 	}

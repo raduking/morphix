@@ -55,7 +55,7 @@ class MethodPredicatesTest {
 		Field field = Fields.getOneDeclaredInHierarchy(A.class, "value");
 
 		Predicate<Method> predicate = isGetter(field);
-		Method method = Methods.getSafeOneDeclaredInHierarchy("getValue", A.class);
+		Method method = Methods.Safe.getOneDeclaredInHierarchy("getValue", A.class);
 
 		assertTrue(predicate.test(method));
 	}
@@ -65,7 +65,7 @@ class MethodPredicatesTest {
 		Field field = Fields.getOneDeclaredInHierarchy(A.class, "type");
 
 		Predicate<Method> predicate = isGetter(field);
-		Method method = Methods.getSafeOneDeclaredInHierarchy("getType", A.class);
+		Method method = Methods.Safe.getOneDeclaredInHierarchy("getType", A.class);
 
 		assertTrue(predicate.test(method));
 	}
@@ -75,7 +75,7 @@ class MethodPredicatesTest {
 		Field field = Fields.getOneDeclaredInHierarchy(A.class, "i");
 
 		Predicate<Method> predicate = isGetter(field);
-		Method method = Methods.getSafeOneDeclaredInHierarchy("getI", A.class);
+		Method method = Methods.Safe.getOneDeclaredInHierarchy("getI", A.class);
 
 		assertFalse(predicate.test(method));
 	}

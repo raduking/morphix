@@ -15,66 +15,54 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.lang.reflect.Method;
+
 import org.junit.jupiter.api.Test;
-import org.morphix.convert.annotation.Expandable;
 
 /**
- * Test class for {@link Methods.IgnoreAccess#invokeWithAnnotation(Object, Class)}.
+ * Test class for {@link Methods.Safe#getOneDeclaredInHierarchy(String, Class, Class...)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class MethodsInvokeWithAnnotationTest {
+class MethodsSafeGetOneDeclaredInHierarchyTest {
 
-	private static final int I11 = 11;
-	private static final int I22 = 22;
-
-	public static class A {
-
-		private int x = I11;
-
-		@Expandable
-		public void foo() {
-			x = I22;
-		}
-
-		public int getX() {
-			return x;
-		}
-
+	public enum E {
+		// empty enum
 	}
 
-	@Test
-	void shouldInvokeMethods() {
-		A a = new A();
-
-		Methods.IgnoreAccess.invokeWithAnnotation(a, Expandable.class);
-
-		assertThat(a.getX(), equalTo(I22));
+	public static class A {
+		public void fooA() {
+			// empty
+		}
 	}
 
 	public static class B extends A {
-
-		private int y = I11;
-
-		@Expandable
-		public void goo() {
-			y = I22;
+		public void fooB() {
+			// empty
 		}
+	}
 
-		public int getY() {
-			return y;
-		}
-
+	public static class C {
+		// empty class
 	}
 
 	@Test
-	void shouldInvokeMethodsInHierarchy() {
-		B b = new B();
+	void shouldReturnDeclaredMethodInHierarchy() throws Exception {
+		Method expected = A.class.getDeclaredMethod("fooA");
+		Method result = Methods.Safe.getOneDeclaredInHierarchy("fooA", B.class);
 
-		Methods.IgnoreAccess.invokeWithAnnotation(b, Expandable.class);
+		assertThat(result, equalTo(expected));
+	}
 
-		assertThat(b.getX(), equalTo(I22));
-		assertThat(b.getY(), equalTo(I22));
+	@Test
+	void shouldReturnNullIfMethodNotFound() {
+		Method method = Methods.Safe.getOneDeclaredInHierarchy("$NonExistingMethod$", C.class);
+
+		assertThat(method, equalTo(null));
+
+		method = Methods.Safe.getOneDeclaredInHierarchy("$NonExistingMethod$", B.class);
+
+		assertThat(method, equalTo(null));
 	}
 
 }

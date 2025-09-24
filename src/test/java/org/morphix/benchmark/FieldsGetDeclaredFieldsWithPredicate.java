@@ -12,18 +12,14 @@
  */
 package org.morphix.benchmark;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-import org.morphix.invoke.HandleMethods;
 import org.morphix.reflection.Fields;
-import org.morphix.reflection.Methods;
 import org.morphix.reflection.predicates.MemberPredicates;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -31,8 +27,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 
 /**
- * Benchmarks for {@link Methods.IgnoreAccess#invoke(Method, Object, Object...)} and
- * {@link HandleMethods#invoke(MethodHandle, Object...)}.
+ * Benchmarks for {@link Fields#getAllDeclared(Class, Predicate)} and {@link Fields#getAllDeclared(Class)}.
  * <p>
  * Run only this benchmark with:
  *
