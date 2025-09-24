@@ -437,10 +437,8 @@ public interface Methods {
 			if (null == obj) {
 				return null;
 			}
-			if (obj instanceof Class<?> cls) {
-				return Safe.getOneDeclared(methodName, cls, parameterTypes);
-			}
-			return Safe.getOneDeclared(methodName, obj.getClass(), parameterTypes);
+			Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
+			return Safe.getOneDeclared(methodName, clazz, parameterTypes);
 		}
 
 		/**
