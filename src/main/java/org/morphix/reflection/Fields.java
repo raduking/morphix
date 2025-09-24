@@ -62,6 +62,9 @@ public interface Fields {
 		if (null == obj) {
 			return null;
 		}
+		if (obj instanceof Class<?> cls) {
+			return getOneDeclared(cls, fieldName);
+		}
 		return getOneDeclared(obj.getClass(), fieldName);
 	}
 

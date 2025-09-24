@@ -428,8 +428,6 @@ public interface Methods {
 		 * Returns the method with the given name and given parameter types from the given class. If the method is not present
 		 * in the class it returns {@code null}.
 		 *
-		 * @param <T> type to get the method from
-		 *
 		 * @param methodName the name of the method
 		 * @param obj object containing the method
 		 * @param parameterTypes parameter types
@@ -438,6 +436,9 @@ public interface Methods {
 		static Method getOneDeclared(final String methodName, final Object obj, final Class<?>... parameterTypes) {
 			if (null == obj) {
 				return null;
+			}
+			if (obj instanceof Class<?> cls) {
+				return Safe.getOneDeclared(methodName, cls, parameterTypes);
 			}
 			return Safe.getOneDeclared(methodName, obj.getClass(), parameterTypes);
 		}

@@ -43,6 +43,15 @@ class FieldsGetOneDeclaredTest {
 	}
 
 	@Test
+	void shouldGetFieldWithObjectIfObjectIsClass() throws Exception {
+		Field expected = A.class.getDeclaredField("x");
+		Object obj = A.class;
+		Field field = Fields.getOneDeclared(obj, "x");
+
+		assertThat(field, equalTo(expected));
+	}
+
+	@Test
 	void shouldReturnNullIfFieldNotFound() {
 		Field field = Fields.getOneDeclared(C.class, "$NonExistingField$");
 

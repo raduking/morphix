@@ -59,6 +59,15 @@ class MethodsSafeGetOneDeclaredTest {
 	}
 
 	@Test
+	void shouldGetMethodWithParamsWithObjectIfObjectIsClass() throws Exception {
+		Method expected = A.class.getDeclaredMethod("plus", int.class);
+		Object obj = A.class;
+		Method method = Methods.Safe.getOneDeclared("plus", obj, int.class);
+
+		assertThat(method, equalTo(expected));
+	}
+
+	@Test
 	void shouldReturnNullIfMethodNotFound() {
 		Method method = Methods.Safe.getOneDeclared("$NonExistingMethod$", C.class);
 
