@@ -56,7 +56,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectAnyModifiersPredicate() {
-		Method staticMethod = Methods.getSafeOneDeclaredInHierarchy("fooStatic", A.class);
+		Method staticMethod = Methods.Safe.getOneDeclaredInHierarchy("fooStatic", A.class);
 
 		boolean result = withAnyModifiers(Modifier::isStatic, Modifier::isPrivate).test(staticMethod);
 
@@ -65,7 +65,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectAllModifiersPredicate() {
-		Method staticMethod = Methods.getSafeOneDeclaredInHierarchy("fooStatic", A.class);
+		Method staticMethod = Methods.Safe.getOneDeclaredInHierarchy("fooStatic", A.class);
 
 		boolean result = withAllModifiers(Modifier::isStatic, Modifier::isPublic).test(staticMethod);
 
@@ -74,7 +74,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectAllModifiersPredicateAlias() {
-		Method staticMethod = Methods.getSafeOneDeclaredInHierarchy("fooStatic", A.class);
+		Method staticMethod = Methods.Safe.getOneDeclaredInHierarchy("fooStatic", A.class);
 
 		boolean result = withModifiers(Modifier::isStatic, Modifier::isPublic).test(staticMethod);
 
@@ -107,7 +107,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectPredicateForAbstractMethod() {
-		Method abstractMethod = Methods.getSafeOneDeclaredInHierarchy("fooAbstract", B.class);
+		Method abstractMethod = Methods.Safe.getOneDeclaredInHierarchy("fooAbstract", B.class);
 
 		boolean result = withModifiers(Modifier::isAbstract).test(abstractMethod);
 		assertTrue(result);
@@ -118,7 +118,7 @@ class MemberPredicatesTest {
 
 	@Test
 	void shouldReturnTheCorrectPredicateForNonAbstractMethod() {
-		Method abstractMethod = Methods.getSafeOneDeclaredInHierarchy("fooNotAbstract", B.class);
+		Method abstractMethod = Methods.Safe.getOneDeclaredInHierarchy("fooNotAbstract", B.class);
 
 		boolean result = withModifiers(Modifier::isAbstract).test(abstractMethod);
 

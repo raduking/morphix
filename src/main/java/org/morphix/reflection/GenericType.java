@@ -172,7 +172,7 @@ public class GenericType implements ParameterizedType {
 		} catch (NoSuchMethodException e) {
 			return null;
 		}
-		return Methods.getSafeGenericReturnType(getterMethod, index);
+		return Methods.Safe.getGenericReturnType(getterMethod, index);
 	}
 
 	/**

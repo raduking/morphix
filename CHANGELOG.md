@@ -2,6 +2,16 @@
 
 ---
 
+`1.0.10`
+
+- Added `Fields.getOneDeclared` to retrieve a declared field in a given class.
+- Added `Methods.Safe` name space for methods that return null on expected errors (exceptions).
+- Renamed and moved `Methods.getSafeOneDeclaredInHierarchy` method to `Methods.Safe.getOneDeclaredInHierarchy`.
+- Renamed and moved `Methods.getSafeGenericReturnType` method to `Methods.Safe.getGenericReturnType`.
+- Added `Methods.Safe.getOneDeclared` methods to return a declared method from a class or an object.
+
+---
+
 `1.0.9`
 
 - Added `GenericType.isNotGenericClass` which returns true if the given class is not generic, false otherwise.

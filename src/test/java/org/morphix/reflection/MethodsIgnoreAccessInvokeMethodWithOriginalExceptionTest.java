@@ -26,7 +26,7 @@ import org.morphix.reflection.testdata.A;
  *
  * @author Radu Sebastian LAZIN
  */
-class MethodsInvokeMethodWithOriginalExceptionTest {
+class MethodsIgnoreAccessInvokeMethodWithOriginalExceptionTest {
 
 	private static final String TEST_STRING = "Test";
 
