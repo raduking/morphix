@@ -156,19 +156,15 @@ public interface Reflection {
 	}
 
 	/**
-	 * Returns a class based on a class name.
+	 * Returns a class based on a class name, if the class is not found it returns {@code null}.
 	 *
 	 * @param <T> returned type
 	 *
 	 * @param className the {@linkplain ClassLoader##binary-name binary name}
-	 * @return a class based on a class name
+	 * @return a class based on a class name, null if the class is not found
 	 */
 	static <T> Class<T> getClass(final String className) {
-		try {
-			return JavaObjects.cast(Class.forName(className));
-		} catch (ClassNotFoundException e) {
-			return null;
-		}
+		return Classes.Safe.getOne(className);
 	}
 
 	/**

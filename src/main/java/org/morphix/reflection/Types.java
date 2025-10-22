@@ -14,6 +14,7 @@ package org.morphix.reflection;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 /**
  * Methods for manipulating {@link Type}s.
@@ -27,7 +28,7 @@ public interface Types {
 	 *
 	 * @param <T> array type
 	 *
-	 * @param type class
+	 * @param type the type to create an array from, cannot be null
 	 * @return an array class based on a class
 	 */
 	static <T> Class<T> getArrayClass(final Type type) {
@@ -43,11 +44,11 @@ public interface Types {
 	/**
 	 * Returns the name of a type similar to {@link Class#getName()} to be used in {@link Class#forName(String)}.
 	 *
-	 * @param type type to get the name from
+	 * @param type type to get the name from, cannot be null
 	 * @return the name of a type
 	 */
 	static String getName(final Type type) {
-		String typeName = type.getTypeName();
+		String typeName = Objects.requireNonNull(type).getTypeName();
 
 		String tmpTypeName = typeName.replace("]", "");
 		int arrayCount = typeName.length() - tmpTypeName.length();
