@@ -156,25 +156,13 @@ public interface Reflection {
 	}
 
 	/**
-	 * Returns a class based on a class name, if the class is not found it returns {@code null}.
-	 *
-	 * @param <T> returned type
-	 *
-	 * @param className the {@linkplain ClassLoader##binary-name binary name}
-	 * @return a class based on a class name, null if the class is not found
-	 */
-	static <T> Class<T> getClass(final String className) {
-		return Classes.Safe.getOne(className);
-	}
-
-	/**
 	 * Returns true if the class given by its name is present in the class path, false otherwise.
 	 *
 	 * @param className the {@linkplain ClassLoader##binary-name binary name}
 	 * @return true if the class is present in the class path, false otherwise
 	 */
 	static boolean isClassPresent(final String className) {
-		return null != getClass(className);
+		return null != Classes.Safe.getOne(className);
 	}
 
 }

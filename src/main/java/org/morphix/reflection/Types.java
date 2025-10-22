@@ -38,7 +38,7 @@ public interface Types {
 		} else {
 			className = "[L" + className + ";";
 		}
-		return Reflection.getClass(className);
+		return Classes.Safe.getOne(className);
 	}
 
 	/**

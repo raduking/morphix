@@ -165,7 +165,7 @@ public class Lambdas {
 	 */
 	public static List<Method> getLambdaDeclaredMethods(final SerializedLambda serializedLambda) {
 		String implClassName = serializedLambda.getImplClass().replace('/', '.');
-		Class<?> implClass = Reflection.getClass(implClassName);
+		Class<?> implClass = Classes.Safe.getOne(implClassName);
 		if (null == implClass) {
 			return Collections.emptyList();
 		}

@@ -10,7 +10,7 @@
 - Renamed and moved `Methods.getSafeGenericReturnType` method to `Methods.Safe.getGenericReturnType`.
 - Added `Methods.Safe.getOneDeclared` methods to return a declared method from a class or an object.
 - Added `Classes` class with reflection utility methods for classes.
-- Changed `Reflection.getClass` to use `Classes.Safe.getOne` since it does the same thing.
+- Removed `Reflection.getClass` in favor of `Classes.Safe.getOne` since it does the same thing.
 
 ---
 
