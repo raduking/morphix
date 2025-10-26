@@ -102,9 +102,10 @@ public class ConstantPoolAccessor { // NOSONAR we want this as singleton
 		/**
 		 * Initializes the singleton for the constant pool accessor from the usable implementations.
 		 */
-		private static final ConstantPoolAccessor INSTANCE =
-				Stream.of(IMPLEMENTATIONS).filter(ConstantPoolAccessor::isUsable).findFirst()
-						.orElse(new ConstantPoolAccessor());
+		private static final ConstantPoolAccessor INSTANCE = Stream.of(IMPLEMENTATIONS)
+				.filter(ConstantPoolAccessor::isUsable)
+				.findFirst()
+				.orElseGet(ConstantPoolAccessor::new);
 
 		/**
 		 * Private constructor.

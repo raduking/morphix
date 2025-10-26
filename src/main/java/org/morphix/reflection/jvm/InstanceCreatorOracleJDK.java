@@ -23,7 +23,7 @@ import org.morphix.reflection.ReflectionException;
 /**
  * Tries to create an instance even when a default constructor is not available.
  * <p>
- * Note: platform dependent (Oracle JDK/JRE). This was only tested on JDK 8,11,17,21.
+ * Note: platform dependent (Oracle JDK/JRE). This was only tested on JDK 8, 11, 17, 21.
  *
  * @author Radu Sebastian LAZIN
  */

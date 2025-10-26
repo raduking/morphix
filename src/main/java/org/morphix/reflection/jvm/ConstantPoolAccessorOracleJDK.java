@@ -22,7 +22,7 @@ import org.morphix.reflection.Methods;
  * Class for accessing the Java Constant pool. Platform dependent (other JDKs might have different ways of accessing the
  * constant pool).
  * <p>
- * Note: This was only tested on JDK 8.
+ * Note: This was only tested on JDK 8, 11, 17, 21.
  *
  * @author Radu Sebastian LAZIN
  */
