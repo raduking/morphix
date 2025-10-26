@@ -70,11 +70,13 @@ class MemberAccessorOracleJDKTest {
 		Class<?> sharedSecretsClass = Class.forName(ConstantPoolAccessorOracleJDK.SHARED_SECRETS_CLASS_NAME);
 		Method javaLangAccessGetter = sharedSecretsClass.getMethod("getJavaLangAccess");
 
-		assertThrows(Exception.class, () -> {
+		Exception e = assertThrows(Exception.class, () -> {
 			try (var methodAccessor = new MemberAccessorOracleJDK<>(javaLangAccessGetter)) {
 				javaLangAccessGetter.invoke(null);
 			}
 		});
+		assertThat(e.getClass(), equalTo(NullPointerException.class));
+		assertThat(e.getMessage(), equalTo("overrideSetter"));
 
 		MemberAccessorOracleJDK.initialize(FIELD_NAME_IMPL_LOOKUP);
 	}

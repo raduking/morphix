@@ -11,6 +11,7 @@
 - Added `Methods.Safe.getOneDeclared` methods to return a declared method from a class or an object.
 - Added `Classes` class with reflection utility methods for classes.
 - Removed `Reflection.getClass` in favor of `Classes.Safe.getOne` since it does the same thing.
+- Added Java record support for `MethodType`.
 
 ---
 

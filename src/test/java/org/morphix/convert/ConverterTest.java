@@ -183,4 +183,21 @@ class ConverterTest {
 		assertThat(list, containsInAnyOrder("1", "2", "3"));
 	}
 
+	@Test
+	void shouldConvertSetToListWithBuiltGenericType() {
+		Set<Integer> set = Set.of(1, 2, 3);
+
+		List<String> list = convert(set).to(GenericType.of(List.class, String.class));
+
+		assertThat(list, containsInAnyOrder("1", "2", "3"));
+	}
+
+	@Test
+	void shouldConvertSetOfSetToListOfListWithBuiltGenericType() {
+		Set<Set<Integer>> set = Set.of(Set.of(1), Set.of(2), Set.of(3));
+
+		List<List<String>> list = convert(set).to(GenericType.of(List.class, GenericType.of(List.class, String.class)));
+
+		assertThat(list, containsInAnyOrder(List.of("1"), List.of("2"), List.of("3")));
+	}
 }

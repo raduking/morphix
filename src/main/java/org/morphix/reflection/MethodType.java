@@ -29,14 +29,39 @@ public enum MethodType {
 	/**
 	 * Getter method type.
 	 */
-	GETTER(Prefix.GET, 0,
+	GETTER(Prefix.GET, ParameterCount.GETTER,
 			TypePrefixConvention.of(Boolean.class, Prefix.IS),
 			TypePrefixConvention.of(boolean.class, Prefix.IS)),
 
 	/**
 	 * Setter method type.
 	 */
-	SETTER(Prefix.SET, 1);
+	SETTER(Prefix.SET, ParameterCount.SETTER);
+
+	/**
+	 * Name space class for parameter counts.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	public static class ParameterCount {
+
+		/**
+		 * Getter parameter count.
+		 */
+		public static final int GETTER = 0;
+
+		/**
+		 * Setter parameter count.
+		 */
+		public static final int SETTER = 1;
+
+		/**
+		 * Hide constructor.
+		 */
+		private ParameterCount() {
+			throw Constructors.unsupportedOperationException();
+		}
+	}
 
 	/**
 	 * Default method prefix when no other type convention is met.
@@ -174,14 +199,20 @@ public enum MethodType {
 	 */
 	public String getFieldName(final Method method) {
 		String methodName = method.getName();
-		String prefix = getDefaultPrefix();
-		if (methodName.startsWith(prefix)) {
-			return getFieldName(prefix, methodName);
+		String fieldName = getFieldName(getDefaultPrefix(), methodName);
+		if (null != fieldName) {
+			return fieldName;
 		}
 		for (Map.Entry<Class<?>, String> typeConventionEntry : typeConventions.entrySet()) {
-			String fieldName = getFieldName(typeConventionEntry.getValue(), methodName);
+			fieldName = getFieldName(typeConventionEntry.getValue(), methodName);
 			if (null != fieldName) {
 				return fieldName;
+			}
+		}
+		if (GETTER == this) {
+			Class<?> declaringClass = method.getDeclaringClass();
+			if (declaringClass.isRecord() && method.getParameterCount() == getParameterCount()) {
+				return methodName;
 			}
 		}
 		return null;
@@ -202,10 +233,7 @@ public enum MethodType {
 	 * @return a field name based on a prefix and a method name
 	 */
 	public static String getFieldName(final String prefix, final String methodName) {
-		if (prefix == null
-				|| methodName == null
-				|| Objects.equals(prefix, methodName)
-				|| !methodName.startsWith(prefix)) {
+		if (prefix == null || methodName == null || !startsWithStrict(prefix, methodName)) {
 			return null;
 		}
 		int index = prefix.length();
@@ -219,13 +247,34 @@ public enum MethodType {
 	 */
 	public Predicate<Method> getPredicate() {
 		return method -> {
-			String methodName = method.getName();
-			boolean hasPrefix = methodName.startsWith(getDefaultPrefix());
-			for (Map.Entry<Class<?>, String> typeConventionPrefix : typeConventions.entrySet()) {
-				hasPrefix |= methodName.startsWith(typeConventionPrefix.getValue());
+			if (method.getParameterCount() != getParameterCount()) {
+				return false;
 			}
-			return hasPrefix && method.getParameterCount() == getParameterCount();
+			String methodName = method.getName();
+			if (startsWithStrict(getDefaultPrefix(), methodName)) {
+				return true;
+			}
+			for (Map.Entry<Class<?>, String> typeConventionPrefix : typeConventions.entrySet()) {
+				if (startsWithStrict(typeConventionPrefix.getValue(), methodName)) {
+					return true;
+				}
+			}
+			if (GETTER == this) {
+				return method.getDeclaringClass().isRecord();
+			}
+			return false;
 		};
+	}
+
+	/**
+	 * Returns true if the method has the specified prefix and has more characters than the prefix.
+	 *
+	 * @param prefix the prefix to check
+	 * @param methodName the method name
+	 * @return true if the method has the specified prefix, false otherwise
+	 */
+	private static boolean startsWithStrict(final String prefix, final String methodName) {
+		return !Objects.equals(prefix, methodName) && methodName.startsWith(prefix);
 	}
 
 	/**
@@ -237,7 +286,14 @@ public enum MethodType {
 	 */
 	public static class TypePrefixConvention<T> {
 
+		/**
+		 * The type.
+		 */
 		private final Class<T> type;
+
+		/**
+		 * The prefix associated with the type.
+		 */
 		private final String prefix;
 
 		/**
@@ -246,7 +302,7 @@ public enum MethodType {
 		 * @param type type to add convention to
 		 * @param prefix method prefix
 		 */
-		public TypePrefixConvention(final Class<T> type, final String prefix) {
+		protected TypePrefixConvention(final Class<T> type, final String prefix) {
 			this.type = type;
 			this.prefix = prefix;
 		}
@@ -306,10 +362,10 @@ public enum MethodType {
 		public static final String IS = "is";
 
 		/**
-		 * Default constructor.
+		 * Hide constructor.
 		 */
 		private Prefix() {
-			// empty
+			throw Constructors.unsupportedOperationException();
 		}
 
 	}
