@@ -123,7 +123,7 @@ public class ObjectConverter<S, D> implements
 
 		final D destination = instanceFunction.instance();
 
-		mainConvert(source, destination);
+		mainConvert(source, Objects.requireNonNull(destination, "Converter destination cannot be null."));
 		convert(source, destination);
 
 		return destination;
@@ -165,20 +165,46 @@ public class ObjectConverter<S, D> implements
 	 * @param destination destination object
 	 */
 	private void mainConvert(final S source, final D destination) {
-		ConversionStrategy.findFields(Objects.requireNonNull(destination, "Converter destination cannot be null."), ConversionStrategy.noFilter())
-				.forEach(dfo -> {
-					if (dfo.hasField()) {
-						String sourceFieldName = getSourceFieldName(dfo, source);
-						// apply field finding strategies
-						for (ConversionStrategy strategy : getStrategies()) {
-							ExtendedField sfo = strategy.find(source, sourceFieldName);
-							if (sfo.hasObject()) {
-								convertField(sfo, dfo);
-								break;
-							}
-						}
-					}
-				});
+		List<ExtendedField> dstFields = ConversionStrategy.findFields(destination);
+		if (dstFields.isEmpty()) {
+			return;
+		}
+		List<ExtendedField> srcFields = ConversionStrategy.findFields(source);
+		if (srcFields.isEmpty()) {
+			return;
+		}
+		for (ExtendedField dfo : dstFields) {
+			String srcFieldName = getSourceFieldName(dfo, source);
+			// apply source field finding strategies
+			for (ConversionStrategy strategy : getStrategies()) {
+				ExtendedField sfo = strategy.find(source, srcFields, srcFieldName);
+				if (sfo.hasObject()) {
+					convertField(sfo, dfo);
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Call all handlers to set the fields. If one handler succeeds there's no need to call other. Changes can still be made
+	 * in the extra conversions.
+	 *
+	 * @param sfo source field object pair
+	 * @param dfo destination field object pair
+	 */
+	private void convertField(final ExtendedField sfo, final ExtendedField dfo) {
+		try {
+			for (FieldHandler handler : getFieldHandlers()) {
+				if (handler.convert(sfo, dfo)) {
+					break;
+				}
+			}
+		} catch (Exception e) {
+			throw new ObjectConverterException("Error converting fields: "
+					+ "\nsrc" + sfo
+					+ "\ndst" + dfo, e);
+		}
 	}
 
 	/**
@@ -213,27 +239,6 @@ public class ObjectConverter<S, D> implements
 			return name;
 		}
 		return srcAnnotation.name().isEmpty() ? srcAnnotation.value() : srcAnnotation.name();
-	}
-
-	/**
-	 * Call all handlers to set the fields. If one handler succeeds there's no need to call other. Changes can still be made
-	 * in the extra conversions.
-	 *
-	 * @param sfo source field object pair
-	 * @param dfo destination field object pair
-	 */
-	private void convertField(final ExtendedField sfo, final ExtendedField dfo) {
-		try {
-			for (FieldHandler handler : getFieldHandlers()) {
-				if (handler.convert(sfo, dfo)) {
-					break;
-				}
-			}
-		} catch (Exception e) {
-			throw new ObjectConverterException("Error converting fields: "
-					+ "\nsrc" + sfo
-					+ "\ndst" + dfo, e);
-		}
 	}
 
 }

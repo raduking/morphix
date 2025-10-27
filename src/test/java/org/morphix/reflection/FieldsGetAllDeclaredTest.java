@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsGetDeclaredFieldsTest {
+class FieldsGetAllDeclaredTest {
 
 	public enum E {
 		// empty enum

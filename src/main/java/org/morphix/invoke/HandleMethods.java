@@ -36,7 +36,7 @@ import org.morphix.reflection.ReflectionException;
  * Example usage:
  *
  * <pre>{@code
- * MethodHandle handle = HandleMethods.getStaticMethod(MyClass.class, "staticMethod", void.class);
+ * MethodHandle handle = HandleMethods.getStatic("staticMethod", MyClass.class, void.class);
  * HandleMethods.invoke(handle);
  * }</pre>
  *
@@ -84,8 +84,7 @@ public class HandleMethods {
 	 * @return A {@link MethodHandle} pointing to the specified static method.
 	 * @throws ReflectionException If the method cannot be found or accessed.
 	 */
-	public static <T> MethodHandle getStatic(final String name, final Class<T> cls, final Class<?> returnType,
-			final Class<?>... parameterTypes) {
+	public static <T> MethodHandle getStatic(final String name, final Class<T> cls, final Class<?> returnType, final Class<?>... parameterTypes) {
 		MethodType methodType = MethodType.methodType(returnType, parameterTypes);
 		return get(name, cls, methodType, true);
 	}

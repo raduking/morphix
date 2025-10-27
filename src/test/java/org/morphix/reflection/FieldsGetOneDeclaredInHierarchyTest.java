@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsGetDeclaredFieldInHierarchyTest {
+class FieldsGetOneDeclaredInHierarchyTest {
 
 	public enum E {
 		// empty enum

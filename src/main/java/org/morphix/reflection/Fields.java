@@ -30,6 +30,43 @@ import org.morphix.lang.JavaObjects;
 public interface Fields {
 
 	/**
+	 * Returns the field with the given name from the given class. If the field is not present in the class it returns
+	 * {@code null}.
+	 *
+	 * @param <T> type to get the field from
+	 *
+	 * @param cls class containing the field
+	 * @param fieldName the name of the field
+	 * @return the field with the given name
+	 */
+	static <T> Field getOneDeclared(final Class<T> cls, final String fieldName) {
+		if (null == cls || null == fieldName) {
+			return null;
+		}
+		try {
+			return cls.getDeclaredField(fieldName);
+		} catch (NoSuchFieldException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Returns the field with the given name from the given object. If the field is not present in the class it returns
+	 * {@code null}.
+	 *
+	 * @param obj object containing the field
+	 * @param fieldName the name of the field
+	 * @return the field with the given name
+	 */
+	static Field getOneDeclared(final Object obj, final String fieldName) {
+		if (null == obj) {
+			return null;
+		}
+		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
+		return getOneDeclared(clazz, fieldName);
+	}
+
+	/**
 	 * Returns a list with all the fields in the class given as parameter. This is different from
 	 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array.
 	 *

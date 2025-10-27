@@ -48,6 +48,9 @@ import org.morphix.reflection.Primitives;
  */
 public class ConverterCollections {
 
+	/**
+	 * Map that associates a predicate with a collection instance function.
+	 */
 	private static final Map<Predicate<Class<?>>, InstanceFunction<Collection<?>>> COLLECTION_INSTANCES_MAP = new HashMap<>();
 	static {
 		COLLECTION_INSTANCES_MAP.put(isArrayListCompatible(), ArrayList::new);

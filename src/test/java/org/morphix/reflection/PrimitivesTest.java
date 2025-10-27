@@ -20,14 +20,13 @@ import static org.morphix.reflection.Primitives.fromPrimitive;
 import static org.morphix.reflection.Primitives.isUnboxable;
 import static org.morphix.reflection.Primitives.toPrimitive;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.morphix.lang.JavaObjects;
+import org.morphix.utils.Tests;
 
 /**
  * Test class for {@link Primitives}.
@@ -60,10 +59,8 @@ class PrimitivesTest {
 
 	@Test
 	void shouldThrowExceptionOnCallingConstructor() {
-		ReflectionException reflectionException =
-				assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(Primitives.class));
-		InvocationTargetException invocationTargetException = JavaObjects.cast(reflectionException.getCause());
-		UnsupportedOperationException unsupportedOperationException = JavaObjects.cast(invocationTargetException.getCause());
+		UnsupportedOperationException unsupportedOperationException = Tests.verifyDefaultConstructorThrows(Primitives.class);
+
 		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 	}
 

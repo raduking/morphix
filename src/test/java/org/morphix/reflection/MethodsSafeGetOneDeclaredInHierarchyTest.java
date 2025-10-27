@@ -20,11 +20,11 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Methods#getSafeOneDeclaredInHierarchy(String, Class, Class...)}.
+ * Test class for {@link Methods.Safe#getOneDeclaredInHierarchy(String, Class, Class...)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class MethodsGetSafeDeclaredMethodInHierarchyTest {
+class MethodsSafeGetOneDeclaredInHierarchyTest {
 
 	public enum E {
 		// empty enum
@@ -49,18 +49,18 @@ class MethodsGetSafeDeclaredMethodInHierarchyTest {
 	@Test
 	void shouldReturnDeclaredMethodInHierarchy() throws Exception {
 		Method expected = A.class.getDeclaredMethod("fooA");
-		Method result = Methods.getSafeOneDeclaredInHierarchy("fooA", B.class);
+		Method result = Methods.Safe.getOneDeclaredInHierarchy("fooA", B.class);
 
 		assertThat(result, equalTo(expected));
 	}
 
 	@Test
 	void shouldReturnNullIfMethodNotFound() {
-		Method method = Methods.getSafeOneDeclaredInHierarchy("$NonExistingMethod$", C.class);
+		Method method = Methods.Safe.getOneDeclaredInHierarchy("$NonExistingMethod$", C.class);
 
 		assertThat(method, equalTo(null));
 
-		method = Methods.getSafeOneDeclaredInHierarchy("$NonExistingMethod$", B.class);
+		method = Methods.Safe.getOneDeclaredInHierarchy("$NonExistingMethod$", B.class);
 
 		assertThat(method, equalTo(null));
 	}

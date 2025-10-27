@@ -14,6 +14,7 @@ package org.morphix.reflection;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.morphix.utils.Tests;
 
 /**
  * Test class for {@link MethodType}.
@@ -187,6 +189,7 @@ class MethodTypeTest {
 	}
 
 	public static class C {
+
 		public String getC() {
 			return null;
 		}
@@ -199,8 +202,12 @@ class MethodTypeTest {
 			return null;
 		}
 
-		public String getY(@SuppressWarnings("unused") final int x) {
+		public String getY(@SuppressWarnings("unused") final int x) { // NOSONAR need it for test
 			return null;
+		}
+
+		public void popX(@SuppressWarnings("unused") final String x) {
+			// empty
 		}
 	}
 
@@ -249,6 +256,15 @@ class MethodTypeTest {
 	}
 
 	@Test
+	void shouldReturnFalseForSetterPredicateOnNonSetter() throws Exception {
+		Method method = C.class.getDeclaredMethod("popX", String.class);
+
+		boolean isSetter = MethodType.SETTER.getPredicate().test(method);
+
+		assertFalse(isSetter);
+	}
+
+	@Test
 	void shouldReturnFalseForGetterPredicateOnNonGetterWithParameters() throws Exception {
 		Method method = C.class.getDeclaredMethod("getY", int.class);
 
@@ -257,4 +273,55 @@ class MethodTypeTest {
 		assertFalse(isGetter);
 	}
 
+	public static record D(String x) {
+		// empty
+	}
+
+	@Test
+	void shouldReturnTheFieldNameForRecordGetter() throws Exception {
+		Method method = D.class.getDeclaredMethod("x");
+
+		String fieldName = MethodType.GETTER.getFieldName(method);
+
+		assertThat(fieldName, equalTo("x"));
+	}
+
+	@Test
+	void shouldReturnNullForRecordSetter() throws Exception {
+		Method method = D.class.getDeclaredMethod("x");
+
+		String fieldName = MethodType.SETTER.getFieldName(method);
+
+		assertThat(fieldName, nullValue());
+	}
+
+	public static record E(String x) {
+
+		String x(final int x) {
+			return "" + this.x + x;
+		}
+	}
+
+	@Test
+	void shouldReturnNullForRenamedRecordGetter() throws Exception {
+		Method method = E.class.getDeclaredMethod("x", int.class);
+
+		String fieldName = MethodType.GETTER.getFieldName(method);
+
+		assertThat(fieldName, nullValue());
+	}
+
+	@Test
+	void shouldThrowExceptionOnCallingParameterCountConstructor() {
+		UnsupportedOperationException unsupportedOperationException = Tests.verifyDefaultConstructorThrows(MethodType.ParameterCount.class);
+
+		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
+	}
+
+	@Test
+	void shouldThrowExceptionOnCallingPrefixConstructor() {
+		UnsupportedOperationException unsupportedOperationException = Tests.verifyDefaultConstructorThrows(MethodType.Prefix.class);
+
+		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
+	}
 }

@@ -16,6 +16,7 @@ import static org.morphix.reflection.ExtendedField.of;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 import org.morphix.reflection.ExtendedField;
 import org.morphix.reflection.Fields;
@@ -35,10 +36,10 @@ public class PathStrategy implements ConversionStrategy {
 	}
 
 	/**
-	 * @see ConversionStrategy#find(Object, String)
+	 * @see ConversionStrategy#find(Object, List, String)
 	 */
 	@Override
-	public ExtendedField find(final Object source, final String sourceFieldName) {
+	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
 		return getConverterFieldByPathInHierarchy(source, sourceFieldName);
 	}
 

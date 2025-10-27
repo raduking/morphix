@@ -158,12 +158,11 @@ public class ExtendedField {
 	 * @return the field value
 	 */
 	public Object getFieldValue() {
-		if (null == fieldValue) {
-			if (null == getterMethod) {
-				fieldValue = Reflection.getFieldValue(object, field);
-			} else {
-				fieldValue = Methods.IgnoreAccess.invoke(getterMethod, object);
-			}
+		if (null == fieldValue && null != getterMethod) {
+			fieldValue = Methods.IgnoreAccess.invoke(getterMethod, object);
+		}
+		if (null == fieldValue && null != field) {
+			fieldValue = Reflection.getFieldValue(object, field);
 		}
 		return fieldValue;
 	}
@@ -176,10 +175,11 @@ public class ExtendedField {
 	public void setFieldValue(final Object value) {
 		if (null != field) {
 			Reflection.setFieldValue(object, field, value);
-		} else {
-			Reflection.setFieldValue(object, this.name, getterMethod.getReturnType(), value);
+			fieldValue = value;
+		} else if (null != getterMethod) {
+			Reflection.setFieldValue(object, name, getterMethod.getReturnType(), value);
+			fieldValue = value;
 		}
-		fieldValue = value;
 	}
 
 	/**
@@ -216,7 +216,7 @@ public class ExtendedField {
 		if (null == getterMethod) {
 			return GenericType.getGenericArgumentType(field, object.getClass(), index);
 		}
-		return Methods.getSafeGenericReturnType(getterMethod, index);
+		return Methods.Safe.getGenericReturnType(getterMethod, index);
 	}
 
 	/**

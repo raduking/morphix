@@ -10,35 +10,34 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.reflection;
+package org.morphix.lang.function;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
-import org.morphix.utils.Tests;
-
-import sun.misc.Unsafe;
 
 /**
- * Test class for {@link TheUnsafe}.
+ * Test class for {@link BinaryOperators}.
  *
  * @author Radu Sebastian LAZIN
  */
-class TheUnsafeTest {
+class BinaryOperatorsTest {
+
+	private static final String FIRST = "first";
+	private static final String SECOND = "second";
 
 	@Test
-	void shouldThrowExceptionOnCallingConstructor() {
-		UnsupportedOperationException unsupportedOperationException = Tests.verifyDefaultConstructorThrows(TheUnsafe.class);
+	void shouldReturnTheFirstValue() {
+		String first = BinaryOperators.<String>first().apply(FIRST, SECOND);
 
-		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
+		assertThat(first, equalTo(FIRST));
 	}
 
 	@Test
-	void shouldReturnNullIfUnsafeFieldIsMissing() {
-		Unsafe unsafe = TheUnsafe.getStaticFromUnsafe("someField");
+	void shouldReturnTheSecondValue() {
+		String first = BinaryOperators.<String>second().apply(FIRST, SECOND);
 
-		assertNull(unsafe);
+		assertThat(first, equalTo(SECOND));
 	}
 }

@@ -62,27 +62,6 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a method in the class given as parameter, also searching in all it's super classes.
-	 *
-	 * @param <T> type to get the methods from
-	 *
-	 * @param methodName name of the method to find
-	 * @param cls class from where to start the search
-	 * @param parameterTypes types of the method parameters
-	 * @return found method, null otherwise
-	 */
-	static <T> Method getSafeOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
-		try {
-			return cls.getDeclaredMethod(methodName, parameterTypes);
-		} catch (NoSuchMethodException e) {
-			if (null == cls.getSuperclass()) {
-				return null;
-			}
-			return getSafeOneDeclaredInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
-		}
-	}
-
-	/**
 	 * Returns a list with all the fields in the class given as parameter including the ones in all it's super classes.
 	 * <p>
 	 * {@link LinkedList} is used because:
@@ -159,23 +138,6 @@ public interface Methods {
 		}
 		Type returnType = parameterizedType.getActualTypeArguments()[index];
 		return JavaObjects.cast(returnType);
-	}
-
-	/**
-	 * Returns the generic return type for a method or null if the method has no generic return type.
-	 *
-	 * @param <T> generic return type
-	 *
-	 * @param method method for which the generic return type is needed
-	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
-	 * @return generic return type
-	 */
-	static <T extends Type> T getSafeGenericReturnType(final Method method, final int index) {
-		try {
-			return Methods.getGenericReturnType(method, index);
-		} catch (ReflectionException e) {
-			return null;
-		}
 	}
 
 	/**
@@ -352,7 +314,7 @@ public interface Methods {
 	}
 
 	/**
-	 * Interface which groups all methods that ignore constructor access modifiers.
+	 * Interface which groups all methods that ignore access modifiers.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
@@ -430,7 +392,93 @@ public interface Methods {
 				throw new ReflectionException(e.getMessage(), e);
 			}
 		}
-
 	}
 
+	/**
+	 * Interface which groups all methods that return null and don't throw exceptions on expected errors. This functions as
+	 * a name space so that the method names inside keep the same name pattern.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Safe {
+
+		/**
+		 * Returns the method with the given name and given parameter types from the given class. If the method is not present
+		 * in the class it returns {@code null}.
+		 *
+		 * @param <T> type to get the method from
+		 *
+		 * @param methodName the name of the method
+		 * @param cls class containing the method
+		 * @param parameterTypes parameter types
+		 * @return the method with the given name
+		 */
+		static <T> Method getOneDeclared(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
+			if (null == cls || null == methodName) {
+				return null;
+			}
+			try {
+				return cls.getDeclaredMethod(methodName, parameterTypes);
+			} catch (NoSuchMethodException e) {
+				return null;
+			}
+		}
+
+		/**
+		 * Returns the method with the given name and given parameter types from the given class. If the method is not present
+		 * in the class it returns {@code null}.
+		 *
+		 * @param methodName the name of the method
+		 * @param obj object containing the method
+		 * @param parameterTypes parameter types
+		 * @return the method with the given name
+		 */
+		static Method getOneDeclared(final String methodName, final Object obj, final Class<?>... parameterTypes) {
+			if (null == obj) {
+				return null;
+			}
+			Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
+			return Safe.getOneDeclared(methodName, clazz, parameterTypes);
+		}
+
+		/**
+		 * Returns a method in the class given as parameter, also searching in all it's super classes, and returns {@code null}
+		 * if method is not found.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param methodName name of the method to find
+		 * @param cls class from where to start the search
+		 * @param parameterTypes types of the method parameters
+		 * @return found method, null otherwise
+		 */
+		static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
+			try {
+				return cls.getDeclaredMethod(methodName, parameterTypes);
+			} catch (NoSuchMethodException e) {
+				if (null == cls.getSuperclass()) {
+					return null;
+				}
+				return Safe.getOneDeclaredInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
+			}
+		}
+
+		/**
+		 * Returns the generic return type for a method or null if the method has no generic return type.
+		 *
+		 * @param <T> generic return type
+		 *
+		 * @param method method for which the generic return type is needed
+		 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
+		 * @return generic return type
+		 */
+		static <T extends Type> T getGenericReturnType(final Method method, final int index) {
+			Type type = method.getGenericReturnType();
+			if (!(type instanceof ParameterizedType parameterizedType)) {
+				return null;
+			}
+			Type returnType = parameterizedType.getActualTypeArguments()[index];
+			return JavaObjects.cast(returnType);
+		}
+	}
 }

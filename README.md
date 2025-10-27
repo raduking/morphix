@@ -8,6 +8,13 @@ A library that exposes general Java utility and reflection methods and a package
 [![Java](https://img.shields.io/badge/Java-21+-blue)](https://www.oracle.com/java/technologies/downloads/#java21)
 [![PRs](https://img.shields.io/github/issues-pr/raduking/morphix)](https://github.com/raduking/morphix/pulls)
 
+#### Status
+
+[![branch: master](https://img.shields.io/badge/branch-master-blue)](https://github.com/raduking/morphix/tree/master)
+![Build (master)](https://github.com/raduking/morphix/actions/workflows/build.yml/badge.svg?branch=master)
+[![branch: develop](https://img.shields.io/badge/branch-develop-purple)](https://github.com/raduking/morphix/tree/develop)
+![Build (develop)](https://github.com/raduking/morphix/actions/workflows/build.yml/badge.svg?branch=develop)
+
 #### Languages and Tools
 <p>
 	<a href="https://www.java.com" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg" alt="java" width="40" height="40"/></a>
@@ -36,7 +43,7 @@ A library that exposes general Java utility and reflection methods and a package
 
 ### Releases
 
-Current release `1.0.9`
+Current release `1.0.10`
 
 ### Documentation
 
@@ -65,6 +72,6 @@ Maven: add this dependency to your `pom.xml`
 <dependency>
     <groupId>io.github.raduking</groupId>
     <artifactId>morphix-all</artifactId>
-    <version>1.0.9</version>
+    <version>1.0.10</version>
 </dependency>
 ```

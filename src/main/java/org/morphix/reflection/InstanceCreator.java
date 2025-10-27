@@ -87,9 +87,10 @@ public class InstanceCreator {
 		/**
 		 * Initializes the singleton for the instance creator from the usable implementations.
 		 */
-		private static InstanceCreator instance =
-				Stream.of(IMPLEMENTATIONS).filter(InstanceCreator::isUsable).findFirst()
-						.orElse(new InstanceCreator());
+		private static InstanceCreator instance = Stream.of(IMPLEMENTATIONS)
+				.filter(InstanceCreator::isUsable)
+				.findFirst()
+				.orElseGet(InstanceCreator::new);
 
 		/**
 		 * Private constructor.

@@ -10,38 +10,28 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.convert.strategy;
+package org.morphix.utils;
 
-import static org.morphix.reflection.ExtendedField.of;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
 
 import org.morphix.lang.JavaObjects;
-import org.morphix.reflection.ExtendedField;
+import org.morphix.reflection.Constructors;
+import org.morphix.reflection.ReflectionException;
 
 /**
- * Map strategy.
+ * Utility methods for tests.
  *
  * @author Radu Sebastian LAZIN
  */
-public class FieldNameMapStrategy implements ConversionStrategy {
+public interface Tests {
 
-	/**
-	 * Default constructor.
-	 */
-	public FieldNameMapStrategy() {
-		// empty
-	}
-
-	/**
-	 * @see ConversionStrategy#find(Object, List, String)
-	 */
-	@Override
-	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
-		Map<String, ?> sourceMap = JavaObjects.cast(source);
-		return of((Field) null, sourceMap.get(sourceFieldName));
+	public static <T extends Throwable> T verifyDefaultConstructorThrows(final Class<?> cls) {
+		ReflectionException reflectionException =
+				assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(cls));
+		InvocationTargetException invocationTargetException = JavaObjects.cast(reflectionException.getCause());
+		return JavaObjects.cast(invocationTargetException.getCause());
 	}
 
 }

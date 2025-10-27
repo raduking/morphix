@@ -2,6 +2,22 @@
 
 ---
 
+`1.0.10`
+
+- Added `Fields.getOneDeclared` to retrieve a declared field in a given class.
+- Added `Methods.Safe` name space for methods that return null on expected errors (exceptions).
+- Renamed and moved `Methods.getSafeOneDeclaredInHierarchy` method to `Methods.Safe.getOneDeclaredInHierarchy`.
+- Renamed and moved `Methods.getSafeGenericReturnType` method to `Methods.Safe.getGenericReturnType`.
+- Added `Methods.Safe.getOneDeclared` methods to return a declared method from a class or an object.
+- Added `Classes` class with reflection utility methods for classes.
+- Removed `Reflection.getClass` in favor of `Classes.Safe.getOne` since it does the same thing.
+- Added Java record support for `MethodType`.
+- Added `BinaryOperators` utility class for common `BinaryOperator`s.
+- Changed `ConversionStrategy.find` method to have the source field list parameter if the list is available for faster searches.
+- Removed many stream operations from the converter for faster conversions. 
+
+---
+
 `1.0.9`
 
 - Added `GenericType.isNotGenericClass` which returns true if the given class is not generic, false otherwise.

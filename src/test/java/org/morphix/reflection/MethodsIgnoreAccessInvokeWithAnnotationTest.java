@@ -23,7 +23,7 @@ import org.morphix.convert.annotation.Expandable;
  *
  * @author Radu Sebastian LAZIN
  */
-class MethodsInvokeWithAnnotationTest {
+class MethodsIgnoreAccessInvokeWithAnnotationTest {
 
 	private static final int I11 = 11;
 	private static final int I22 = 22;

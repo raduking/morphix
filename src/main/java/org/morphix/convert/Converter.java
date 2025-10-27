@@ -25,6 +25,7 @@ import org.morphix.lang.JavaObjects;
 import org.morphix.lang.function.InstanceFunction;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.GenericClass;
+import org.morphix.reflection.GenericType;
 import org.morphix.reflection.InstanceCreator;
 
 /**
@@ -140,6 +141,18 @@ public class Converter<S> {
 		Configuration configuration = Configuration.of(excludedFields, expandableFields, simpleConverters, genericClass.getClass());
 		return convertFrom(source, genericClass.getGenericArgumentType(),
 				JavaObjects.cast(extraConvertFunction), configuration);
+	}
+
+	/**
+	 * Destination specifier method.
+	 *
+	 * @param <D> destination type
+	 *
+	 * @param genericType a new {@link GenericType} object which specifies the actual generic type
+	 * @return conversion destination object
+	 */
+	public <D> D to(final GenericType genericType) {
+		return to(GenericClass.of(genericType));
 	}
 
 	/**
