@@ -10,9 +10,10 @@ A library that exposes general Java utility and reflection methods and a package
 
 #### Status
 
-[![branch: master](https://img.shields.io/badge/branch-master-blue)](https://github.com/raduking/morphix/tree/master) ![Build (master)](https://github.com/raduking/morphix/actions/workflows/build.yml/badge.svg?branch=master)
-
-[![branch: develop](https://img.shields.io/badge/branch-develop-purple)](https://github.com/raduking/morphix/tree/develop) ![Build (develop)](https://github.com/raduking/morphix/actions/workflows/build.yml/badge.svg?branch=develop)
+[![branch: master](https://img.shields.io/badge/branch-master-blue)](https://github.com/raduking/morphix/tree/master)
+![Build (master)](https://github.com/raduking/morphix/actions/workflows/build.yml/badge.svg?branch=master)
+[![branch: develop](https://img.shields.io/badge/branch-develop-purple)](https://github.com/raduking/morphix/tree/develop)
+![Build (develop)](https://github.com/raduking/morphix/actions/workflows/build.yml/badge.svg?branch=develop)
 
 #### Languages and Tools
 <p>
