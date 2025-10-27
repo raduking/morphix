@@ -13,6 +13,8 @@
 - Removed `Reflection.getClass` in favor of `Classes.Safe.getOne` since it does the same thing.
 - Added Java record support for `MethodType`.
 - Added `BinaryOperators` utility class for common `BinaryOperator`s.
+- Changed `ConversionStrategy.find` method to have the source field list parameter if the list is available for faster searches.
+- Removed many stream operations from the converter for faster conversions. 
 
 ---
 

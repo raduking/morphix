@@ -12,6 +12,8 @@
  */
 package org.morphix.convert.strategy;
 
+import java.util.List;
+
 import org.morphix.reflection.ExtendedField;
 
 /**
@@ -29,11 +31,11 @@ public class NamePathStrategy extends PathStrategy {
 	}
 
 	/**
-	 * @see ConversionStrategy#find(Object, String)
+	 * @see ConversionStrategy#find(Object, List, String)
 	 */
 	@Override
-	public ExtendedField find(final Object source, final String sourceFieldName) {
-		return super.find(source, convertToPath(sourceFieldName));
+	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
+		return super.find(source, fields, convertToPath(sourceFieldName));
 	}
 
 	/**

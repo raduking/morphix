@@ -14,13 +14,12 @@ package org.morphix.convert.strategy;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.morphix.lang.function.BinaryOperators;
 import org.morphix.lang.function.Predicates;
 import org.morphix.reflection.ExtendedField;
 import org.morphix.reflection.Fields;
@@ -36,26 +35,27 @@ import org.morphix.reflection.predicates.MemberPredicates;
 public interface ConversionStrategy {
 
 	/**
-	 * Finds the source field object pair to convert to destination.
+	 * Finds the source field object to convert to destination.
 	 *
 	 * @param <T> source object type
 	 *
 	 * @param source source object
+	 * @param fields source object fields if available, can be empty
 	 * @param sourceFieldName source field name
-	 * @return the source field object pair to convert to destination
+	 * @return the source field object to convert to destination
 	 */
-	<T> ExtendedField find(T source, String sourceFieldName);
+	<T> ExtendedField find(T source, List<ExtendedField> fields, String sourceFieldName);
 
 	/**
-	 * Finds all the source field object pairs to convert to destination.
+	 * Finds all the source field objects to convert to destination.
 	 *
 	 * @param <T> source object type
 	 *
 	 * @param source source object
-	 * @return all the source field object pairs to convert to destination
+	 * @return all the source field objects to convert to destination
 	 */
 	default <T> List<ExtendedField> findAll(final T source) {
-		return findFields(source).toList();
+		return findFields(source);
 	}
 
 	/**
@@ -68,23 +68,37 @@ public interface ConversionStrategy {
 	 * @param filter filter predicate
 	 * @return stream of filtered fields
 	 */
-	static <T> Stream<ExtendedField> findFields(final T obj, final Predicate<? super ExtendedField> filter) {
+	static <T> List<ExtendedField> findFields(final T obj, final Predicate<? super ExtendedField> filter) {
+		List<ExtendedField> result = new ArrayList<>();
 		// TODO: check duplicate fields (with the same name) in hierarchy (fields/getters)
-		Map<String, ExtendedField> nameToFieldMap =
-				Fields.getAllDeclaredInHierarchy(obj.getClass(), MemberPredicates.isNotStatic()).stream()
-						.collect(Collectors.toMap(Field::getName, field -> ExtendedField.of(field, obj), BinaryOperators.first()));
+		Map<String, ExtendedField> nameToFieldMap = new HashMap<>();
+		for (Field field : Fields.getAllDeclaredInHierarchy(obj.getClass(), MemberPredicates.isNotStatic())) {
+			ExtendedField extendedField = ExtendedField.of(field, obj);
+			if (filter.test(extendedField)) {
+				nameToFieldMap.computeIfAbsent(field.getName(), key -> {
+					result.add(extendedField);
+					return extendedField;
+				});
+			}
+		}
 
 		List<Method> getterMethods = Methods.getAllDeclaredInHierarchy(obj.getClass(), MethodType.GETTER.getPredicate());
 		for (Method getterMethod : getterMethods) {
 			String fieldName = MethodType.GETTER.getFieldName(getterMethod);
-			ExtendedField converterField = nameToFieldMap.get(fieldName);
-			if (null != converterField) {
-				converterField.setGetterMethod(getterMethod);
+			ExtendedField extendedField = nameToFieldMap.get(fieldName);
+			if (null != extendedField) {
+				extendedField.setGetterMethod(getterMethod);
 			} else {
-				nameToFieldMap.put(fieldName, ExtendedField.of(getterMethod, obj));
+				ExtendedField getterField = ExtendedField.of(getterMethod, obj);
+				if (filter.test(getterField)) {
+					nameToFieldMap.computeIfAbsent(fieldName, key -> {
+						result.add(getterField);
+						return getterField;
+					});
+				}
 			}
 		}
-		return nameToFieldMap.values().stream().filter(filter);
+		return result;
 	}
 
 	/**
@@ -96,7 +110,7 @@ public interface ConversionStrategy {
 	 * @param obj object on which find fields
 	 * @return stream of fields
 	 */
-	static <T> Stream<ExtendedField> findFields(final T obj) {
+	static <T> List<ExtendedField> findFields(final T obj) {
 		return findFields(obj, noFilter());
 	}
 

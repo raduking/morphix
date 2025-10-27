@@ -17,6 +17,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.morphix.convert.Conversions.convertFrom;
 
+import java.util.Collections;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.morphix.reflection.ExtendedField;
@@ -90,7 +92,7 @@ class DeepNamePathStrategyTest {
 	void shouldDeepConvertWithDeepNamePath() {
 		DeepNamePathStrategy strategy = new DeepNamePathStrategy();
 
-		ExtendedField fop = strategy.find(strategy, "x");
+		ExtendedField fop = strategy.find(strategy, Collections.emptyList(), "x");
 		assertThat(fop.getObject(), nullValue());
 	}
 

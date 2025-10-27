@@ -84,6 +84,8 @@ public class ExtendedField {
 		if (null != field) {
 			this.modifiers = field.getModifiers();
 			this.name = field.getName();
+		} else {
+			this.modifiers = 0;
 		}
 		this.object = object;
 	}

@@ -50,7 +50,7 @@ class ConversionStrategyTest {
 
 	public static class TestStrategy implements ConversionStrategy {
 		@Override
-		public <T> ExtendedField find(final T source, final String sourceFieldName) {
+		public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
 			return null;
 		}
 	}

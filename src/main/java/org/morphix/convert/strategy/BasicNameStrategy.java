@@ -12,6 +12,8 @@
  */
 package org.morphix.convert.strategy;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.morphix.convert.annotation.Src;
@@ -32,11 +34,12 @@ public class BasicNameStrategy implements ConversionStrategy {
 	}
 
 	/**
-	 * @see ConversionStrategy#find(Object, String)
+	 * @see ConversionStrategy#find(Object, List, String)
 	 */
 	@Override
-	public ExtendedField find(final Object source, final String sourceFieldName) {
-		Optional<ExtendedField> sField = findFieldByName(source, sourceFieldName);
+	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
+		// TODO: assume fields are available for now
+		Optional<ExtendedField> sField = findFieldByName(fields, sourceFieldName);
 		return sField.orElse(ExtendedField.EMPTY);
 	}
 
@@ -44,15 +47,17 @@ public class BasicNameStrategy implements ConversionStrategy {
 	 * Finds a field by name. Field name will never be null since the converter only searches through existing fields on
 	 * destination or {@link Src} annotation parameters which can only be constants which cannot be null.
 	 *
-	 * @param <T> object type
-	 *
-	 * @param obj object on which to find the field
+	 * @param fields source object fields
 	 * @param fieldName field name
 	 * @return optional with field information
 	 */
-	protected static <T> Optional<ExtendedField> findFieldByName(final T obj, final String fieldName) {
-		return ConversionStrategy.findFields(obj,
-				converterField -> fieldName.equals(converterField.getName())).findFirst();
+	protected static Optional<ExtendedField> findFieldByName(final List<ExtendedField> fields, final String fieldName) {
+		for (ExtendedField extendedField : fields) {
+			if (Objects.equals(fieldName, extendedField.getName())) {
+				return Optional.of(extendedField);
+			}
+		}
+		return Optional.empty();
 	}
 
 }

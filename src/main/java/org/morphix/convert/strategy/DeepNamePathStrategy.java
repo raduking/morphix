@@ -12,10 +12,10 @@
  */
 package org.morphix.convert.strategy;
 
-import org.morphix.reflection.ExtendedField;
-
 /**
  * Deep name path strategy.
+ * <p>
+ * TODO: implement this
  *
  * @author Radu Sebastian LAZIN
  */
@@ -26,15 +26,6 @@ public class DeepNamePathStrategy extends NamePathStrategy {
 	 */
 	public DeepNamePathStrategy() {
 		// empty
-	}
-
-	/**
-	 * @see ConversionStrategy#find(Object, String)
-	 */
-	@Override
-	public ExtendedField find(final Object source, final String sourceFieldName) {
-		// TODO: implement this
-		return super.find(source, sourceFieldName);
 	}
 
 }

@@ -207,6 +207,33 @@ class ConverterTest {
 		assertThat(list, containsInAnyOrder(List.of("1"), List.of("2"), List.of("3")));
 	}
 
+	static class Empty {
+		// empty
+	}
+
+	@Test
+	void shouldConvertIfDestinationIsEmpty() {
+		A a = new A();
+		Empty empty = convert(a).to(Empty.class);
+
+		assertThat(empty, notNullValue());
+	}
+
+	static class OnlyGetters {
+
+		public int getX() {
+			return TEST_INT_13;
+		}
+	}
+
+	@Test
+	void shouldConvertIfDestinationOnlyHasGetters() {
+		A a = new A();
+		OnlyGetters empty = convert(a).to(OnlyGetters.class);
+
+		assertThat(empty, notNullValue());
+	}
+
 	public static record RA(int x, int y) {
 		// empty
 	}
