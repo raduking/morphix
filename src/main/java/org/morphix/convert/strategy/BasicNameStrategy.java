@@ -38,7 +38,7 @@ public class BasicNameStrategy implements ConversionStrategy {
 	 */
 	@Override
 	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
-		// TODO: assume fields are available for now
+		// TODO: implement for empty fields, assume fields are available for now
 		Optional<ExtendedField> sField = findFieldByName(fields, sourceFieldName);
 		return sField.orElse(ExtendedField.EMPTY);
 	}
