@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Enumeration declaring standard method types.
@@ -209,11 +210,8 @@ public enum MethodType {
 				return fieldName;
 			}
 		}
-		if (GETTER == this) {
-			Class<?> declaringClass = method.getDeclaringClass();
-			if (declaringClass.isRecord() && method.getParameterCount() == getParameterCount()) {
-				return methodName;
-			}
+		if (GETTER == this && method.getParameterCount() == getParameterCount()) {
+			return whenRecordAccessor(method, () -> methodName, () -> null);
 		}
 		return null;
 	}
@@ -260,7 +258,7 @@ public enum MethodType {
 				}
 			}
 			if (GETTER == this) {
-				return method.getDeclaringClass().isRecord();
+				return whenRecordAccessor(method, () -> true, () -> false);
 			}
 			return false;
 		};
@@ -275,6 +273,29 @@ public enum MethodType {
 	 */
 	private static boolean startsWithStrict(final String prefix, final String methodName) {
 		return !Objects.equals(prefix, methodName) && methodName.startsWith(prefix);
+	}
+
+	/**
+	 * Evaluates the given suppliers based on whether the method is a record accessor.
+	 *
+	 * @param <T> the result type
+	 *
+	 * @param method the method to evaluate
+	 * @param onAccessor the supplier to invoke if the method is a record accessor
+	 * @param onNonAccessor the supplier to invoke otherwise
+	 * @return the result of {@code onAccessor} for a record accessor, otherwise the result of {@code onNonAccessor}
+	 */
+	private static <T> T whenRecordAccessor(final Method method, final Supplier<T> onAccessor, final Supplier<T> onNonAccessor) {
+		Class<?> declaringClass = method.getDeclaringClass();
+		if (declaringClass.isRecord()) {
+			// for records consider only generated methods as getters
+			for (var component : declaringClass.getRecordComponents()) {
+				if (component.getAccessor().equals(method)) {
+					return onAccessor.get();
+				}
+			}
+		}
+		return onNonAccessor.get();
 	}
 
 	/**

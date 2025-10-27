@@ -159,9 +159,10 @@ public class ExtendedField {
 	 */
 	public Object getFieldValue() {
 		if (null == fieldValue) {
-			if (null == getterMethod) {
+			if (null != field) {
 				fieldValue = Reflection.getFieldValue(object, field);
-			} else {
+			}
+			if (null != getterMethod) {
 				fieldValue = Methods.IgnoreAccess.invoke(getterMethod, object);
 			}
 		}
@@ -176,8 +177,9 @@ public class ExtendedField {
 	public void setFieldValue(final Object value) {
 		if (null != field) {
 			Reflection.setFieldValue(object, field, value);
-		} else {
-			Reflection.setFieldValue(object, this.name, getterMethod.getReturnType(), value);
+		}
+		if (null != getterMethod) {
+			Reflection.setFieldValue(object, name, getterMethod.getReturnType(), value);
 		}
 		fieldValue = value;
 	}
