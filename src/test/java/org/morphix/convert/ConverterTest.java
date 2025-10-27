@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.morphix.reflection.GenericClass;
 import org.morphix.reflection.GenericType;
@@ -32,6 +33,11 @@ import org.morphix.reflection.GenericType;
  * @author Radu Sebastian LAZIN
  */
 class ConverterTest {
+
+	private static final int TEST_INT_13 = 13;
+	private static final int TEST_INT_17 = 17;
+	private static final String TEST_INT_13_STRING = String.valueOf(TEST_INT_13);
+	private static final String TEST_INT_17_STRING = String.valueOf(TEST_INT_17);
 
 	public static class A {
 		int x;
@@ -58,76 +64,76 @@ class ConverterTest {
 	@Test
 	void shouldConvertAtoB() {
 		A a = new A();
-		a.x = 13;
+		a.x = TEST_INT_13;
 
 		B b = convert(a).to(B::new);
 
 		assertThat(b, notNullValue());
-		assertThat(b.x, equalTo("13"));
+		assertThat(b.x, equalTo(TEST_INT_13_STRING));
 	}
 
 	@Test
 	void shouldConvertAtoBAndExtraConvertFunction() {
 		A a = new A();
-		a.x = 13;
+		a.x = TEST_INT_13;
 
 		B b = convert(a).to(B::new, (s, d) -> d.x = "x=" + d.x);
 
 		assertThat(b, notNullValue());
-		assertThat(b.x, equalTo("x=13"));
+		assertThat(b.x, equalTo("x=" + TEST_INT_13_STRING));
 	}
 
 	@Test
 	void shouldConvertAtoExistingB() {
 		A a = new A();
-		a.x = 13;
+		a.x = TEST_INT_13;
 
 		B existingB = new B();
 		B b = convert(a).to(existingB);
 
 		assertThat(b, notNullValue());
-		assertThat(b.x, equalTo("13"));
+		assertThat(b.x, equalTo(TEST_INT_13_STRING));
 	}
 
 	@Test
 	void shouldConvertAtoBWithClassSyntax() {
 		A a = new A();
-		a.x = 13;
+		a.x = TEST_INT_13;
 
 		B b = convert(a).to(B.class);
 
 		assertThat(b, notNullValue());
-		assertThat(b.x, equalTo("13"));
+		assertThat(b.x, equalTo(TEST_INT_13_STRING));
 	}
 
 	@Test
 	void shouldConvertAtoBWithExtraConvertFunctionV1() {
 		A a = new A();
-		a.x = 13;
-		a.y = 17;
+		a.x = TEST_INT_13;
+		a.y = TEST_INT_17;
 
 		B b = convert(a)
 				.with((final A s, final B d) -> d.x = "x=" + d.x)
 				.to(B::new);
 
 		assertThat(b, notNullValue());
-		assertThat(b.x, equalTo("x=13"));
-		assertThat(b.y, equalTo("17"));
+		assertThat(b.x, equalTo("x=" + TEST_INT_13_STRING));
+		assertThat(b.y, equalTo(TEST_INT_17_STRING));
 	}
 
 	@Test
 	void shouldConvertAtoBWithExtraConvertFunctionV2() {
 		A a = new A();
-		a.x = 13;
-		a.y = 17;
+		a.x = TEST_INT_13;
+		a.y = TEST_INT_17;
 
 		B b = convert(a)
 				.<B>with((s, d) -> d.x = "x=" + d.x)
 				.to(B::new);
 
 		assertThat(b, notNullValue());
-		assertThat(b.x, equalTo("x=13"));
-		assertThat(b.y, equalTo("17"));
+		assertThat(b.x, equalTo("x=" + TEST_INT_13_STRING));
+		assertThat(b.y, equalTo(TEST_INT_17_STRING));
 	}
 
 	@Test
@@ -199,5 +205,32 @@ class ConverterTest {
 		List<List<String>> list = convert(set).to(GenericType.of(List.class, GenericType.of(List.class, String.class)));
 
 		assertThat(list, containsInAnyOrder(List.of("1"), List.of("2"), List.of("3")));
+	}
+
+	public static record RA(int x, int y) {
+		// empty
+	}
+
+	@Test
+	void shouldConvertRecordToClass() {
+		RA ra = new RA(TEST_INT_13, TEST_INT_17);
+
+		A a = convert(ra).to(A.class);
+
+		assertThat(a.x, equalTo(TEST_INT_13));
+		assertThat(a.y, equalTo(TEST_INT_17));
+	}
+
+	@Disabled("Functionality not implemented yet.")
+	@Test
+	void shouldConvertClassToRecord() {
+		A a = new A();
+		a.x = TEST_INT_13;
+		a.y = TEST_INT_17;
+
+		RA ra = convert(a).to(RA.class);
+
+		assertThat(ra.x(), equalTo(TEST_INT_13));
+		assertThat(ra.y(), equalTo(TEST_INT_17));
 	}
 }

@@ -148,7 +148,7 @@ public class Converter<S> {
 	 *
 	 * @param <D> destination type
 	 *
-	 * @param genericClass a new {@link GenericType} object which specifies the actual generic type
+	 * @param genericType a new {@link GenericType} object which specifies the actual generic type
 	 * @return conversion destination object
 	 */
 	public <D> D to(final GenericType genericType) {

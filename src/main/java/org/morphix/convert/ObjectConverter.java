@@ -165,7 +165,7 @@ public class ObjectConverter<S, D> implements
 	 * @param destination destination object
 	 */
 	private void mainConvert(final S source, final D destination) {
-		ConversionStrategy.findFields(Objects.requireNonNull(destination, "Converter destination cannot be null."), ConversionStrategy.noFilter())
+		ConversionStrategy.findFields(Objects.requireNonNull(destination, "Converter destination cannot be null."))
 				.forEach(dfo -> {
 					if (dfo.hasField()) {
 						String sourceFieldName = getSourceFieldName(dfo, source);

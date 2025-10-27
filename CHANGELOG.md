@@ -12,6 +12,7 @@
 - Added `Classes` class with reflection utility methods for classes.
 - Removed `Reflection.getClass` in favor of `Classes.Safe.getOne` since it does the same thing.
 - Added Java record support for `MethodType`.
+- Added `BinaryOperators` utility class for common `BinaryOperator`s.
 
 ---
 
