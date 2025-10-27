@@ -7,8 +7,11 @@ A library that exposes general Java utility and reflection methods and a package
 [![License](https://img.shields.io/github/license/raduking/morphix)](https://opensource.org/license/apache-2-0)
 [![Java](https://img.shields.io/badge/Java-21+-blue)](https://www.oracle.com/java/technologies/downloads/#java21)
 [![PRs](https://img.shields.io/github/issues-pr/raduking/morphix)](https://github.com/raduking/morphix/pulls)
-![Master Build](https://github.com/raduking/morphix/actions/workflows/build.yml/badge.svg?branch=master)
-![Develop Build](https://github.com/raduking/morphix/actions/workflows/build.yml/badge.svg?branch=develop)
+
+| Branch | Status |
+|---------|---------|
+| master | ![Build (master)](https://github.com/raduking/morphix/actions/workflows/build.yml/badge.svg?branch=master) |
+| develop | ![Build (develop)](https://github.com/raduking/morphix/actions/workflows/build.yml/badge.svg?branch=develop) |
 
 #### Languages and Tools
 <p>
