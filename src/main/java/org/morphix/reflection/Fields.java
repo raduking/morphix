@@ -51,7 +51,7 @@ public interface Fields {
 	}
 
 	/**
-	 * Returns the filed with the given name from the given object. If the field is not present in the class it returns
+	 * Returns the field with the given name from the given object. If the field is not present in the class it returns
 	 * {@code null}.
 	 *
 	 * @param obj object containing the field
