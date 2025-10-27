@@ -15,12 +15,9 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.lang.reflect.InvocationTargetException;
 
 import org.junit.jupiter.api.Test;
-import org.morphix.lang.JavaObjects;
+import org.morphix.utils.Tests;
 
 import sun.misc.Unsafe;
 
@@ -33,10 +30,7 @@ class TheUnsafeTest {
 
 	@Test
 	void shouldThrowExceptionOnCallingConstructor() {
-		ReflectionException reflectionException =
-				assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(TheUnsafe.class));
-		InvocationTargetException invocationTargetException = JavaObjects.cast(reflectionException.getCause());
-		UnsupportedOperationException unsupportedOperationException = JavaObjects.cast(invocationTargetException.getCause());
+		UnsupportedOperationException unsupportedOperationException = Tests.verifyDefaultConstructorThrows(TheUnsafe.class);
 
 		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 	}

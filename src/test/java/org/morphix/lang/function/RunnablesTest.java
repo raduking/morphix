@@ -14,17 +14,14 @@ package org.morphix.lang.function;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
-import org.morphix.lang.JavaObjects;
 import org.morphix.reflection.Constructors;
-import org.morphix.reflection.ReflectionException;
+import org.morphix.utils.Tests;
 
 /**
  * Test class for {@link Runnables}.
@@ -55,10 +52,8 @@ class RunnablesTest {
 
 	@Test
 	void shouldThrowExceptionWhenTryingToInstantiateClass() {
-		ReflectionException reflectionException =
-				assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(Runnables.class));
-		InvocationTargetException invocationTargetException = JavaObjects.cast(reflectionException.getCause());
-		UnsupportedOperationException unsupportedOperationException = JavaObjects.cast(invocationTargetException.getCause());
+		UnsupportedOperationException unsupportedOperationException = Tests.verifyDefaultConstructorThrows(Runnables.class);
+
 		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 	}
 }

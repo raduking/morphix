@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.morphix.utils.Tests;
 
 /**
  * Test class for {@link MethodType}.
@@ -308,5 +309,19 @@ class MethodTypeTest {
 		String fieldName = MethodType.GETTER.getFieldName(method);
 
 		assertThat(fieldName, nullValue());
+	}
+
+	@Test
+	void shouldThrowExceptionOnCallingParameterCountConstructor() {
+		UnsupportedOperationException unsupportedOperationException = Tests.verifyDefaultConstructorThrows(MethodType.ParameterCount.class);
+
+		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
+	}
+
+	@Test
+	void shouldThrowExceptionOnCallingPrefixConstructor() {
+		UnsupportedOperationException unsupportedOperationException = Tests.verifyDefaultConstructorThrows(MethodType.Prefix.class);
+
+		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 	}
 }
