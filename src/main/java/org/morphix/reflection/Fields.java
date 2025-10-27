@@ -30,7 +30,7 @@ import org.morphix.lang.JavaObjects;
 public interface Fields {
 
 	/**
-	 * Returns the filed with the given name from the given class. If the field is not present in the class it returns
+	 * Returns the field with the given name from the given class. If the field is not present in the class it returns
 	 * {@code null}.
 	 *
 	 * @param <T> type to get the field from

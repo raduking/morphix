@@ -20,7 +20,7 @@ import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#getOneDeclaredInHierarchy(Class, String)}.
+ * Test class for {@link Fields#getOneDeclared(Class, String)}.
  *
  * @author Radu Sebastian LAZIN
  */
