@@ -162,7 +162,7 @@ public class ExtendedField {
 			fieldValue = Methods.IgnoreAccess.invoke(getterMethod, object);
 		}
 		if (null == fieldValue && null != field) {
-			fieldValue = Reflection.getFieldValue(object, field);
+			fieldValue = Fields.IgnoreAccess.get(object, field);
 		}
 		return fieldValue;
 	}
