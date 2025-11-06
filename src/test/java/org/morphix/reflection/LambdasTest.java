@@ -285,6 +285,7 @@ class LambdasTest {
 		serializedLambda = Lambdas.getSerializedLambda(foo, foo.getClass());
 
 		assertThat(serializedLambda, notNullValue());
+		assertThat(serializedLambda.getFunctionalInterfaceMethodName(), equalTo("writeReplacex"));
 	}
 
 	/**

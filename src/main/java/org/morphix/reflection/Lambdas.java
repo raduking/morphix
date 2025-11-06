@@ -52,8 +52,7 @@ public class Lambdas {
 	 * @param paramTypes parameter types
 	 * @return true if the lambda has the given parameter paramTypes and return type
 	 */
-	public static <T> boolean isLambdaWithParams(final T lambda,
-			final Class<?> returnType, final Class<?>... paramTypes) {
+	public static <T> boolean isLambdaWithParams(final T lambda, final Class<?> returnType, final Class<?>... paramTypes) {
 		Predicate<Method> lambdaPredicate = MethodPredicates.isMethodWith(returnType, paramTypes);
 
 		Method lambdaMethod = getLambdaMethod(lambda, lambdaPredicate);
@@ -110,8 +109,8 @@ public class Lambdas {
 	static <T> SerializedLambda getSerializedLambda(final T function, final Class<?> cls) {
 		if (null != cls) {
 			try {
-				Method replaceMethod = cls.getDeclaredMethod(SERIALIZATION_METHOD_NAME);
-				Object serializedForm = Methods.IgnoreAccess.invoke(replaceMethod, function);
+				Method serializationMethod = cls.getDeclaredMethod(SERIALIZATION_METHOD_NAME);
+				Object serializedForm = Methods.IgnoreAccess.invoke(serializationMethod, function);
 				if (serializedForm instanceof SerializedLambda serializedLambda) {
 					return serializedLambda;
 				}
