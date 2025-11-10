@@ -2,6 +2,8 @@
 
 `1.0.11`
 
+- Added `Methods.getCallerMethodName` without a supplier to get the caller method name.
+
 ---
 
 `1.0.10`

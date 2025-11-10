@@ -66,6 +66,17 @@ class MethodsGetCallerMethodNameTest {
 		verify(a).nameFunction(TEST_CLASS_NAME, "shouldCallNameFunctionOnlyOnce");
 	}
 
+	@Test
+	void shouldReturnCallerMethodNameForAGivenMethod() {
+		String result = foo();
+
+		assertThat(result, equalTo(TEST_CLASS_NAME + METHOD_NAME_SEPARATOR + "shouldReturnCallerMethodNameForAGivenMethod"));
+	}
+
+	private static String foo() {
+		return Methods.getCallerMethodName(MethodsGetCallerMethodNameTest::nameFunction).get();
+	}
+
 	private static String nameFunction(final String className, final String methodName) {
 		return className + METHOD_NAME_SEPARATOR + methodName;
 	}
