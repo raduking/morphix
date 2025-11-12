@@ -130,7 +130,7 @@ public interface Reflection {
 		} catch (NoSuchMethodException e) {
 			// if no setter found just set the value to field
 			Field field = Fields.getOneDeclaredInHierarchy(obj, fieldName);
-			if (null != fieldName && null != field && field.getType().equals(fieldType)) {
+			if (null != field && field.getType().equals(fieldType)) {
 				Fields.IgnoreAccess.set(obj, field, value);
 			}
 		}

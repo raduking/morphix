@@ -119,4 +119,27 @@ class DeepSourceTest {
 
 		assertThat(userDto.userName, equalTo(TEST_STRING));
 	}
+
+	public static class C {
+		public static String s;
+		String b;
+	}
+
+	public static class D {
+		C a;
+	}
+
+	@Test
+	void shouldDeepConvertStaticStringEvenIfPathMatches() {
+		C c = new C();
+		C.s = TEST_STRING;
+		c.b = TEST_STRING;
+		D d = new D();
+		d.a = c;
+
+		Destination dst = convertFrom(d, Destination::new);
+
+		assertThat(dst.l, nullValue());
+		assertThat(dst.x, equalTo(TEST_LONG));
+	}
 }

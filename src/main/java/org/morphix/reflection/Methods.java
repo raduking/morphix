@@ -222,6 +222,32 @@ public interface Methods {
 	}
 
 	/**
+	 * Returns the caller method name.
+	 *
+	 * @param nameFunction function to build the name from the class name and method name
+	 * @return optional method name
+	 */
+	static Optional<String> getCallerMethodName(final BiFunction<? super String, ? super String, String> nameFunction) {
+		// skip the calling method, this and the below call to get above
+		return getCallerMethodName(3, nameFunction);
+	}
+
+	/**
+	 * Returns the caller method name.
+	 *
+	 * @param skipFrames skips the given number of frames starting from the current frame
+	 * @param nameFunction function to build the name from the class name and method name
+	 * @return optional method name
+	 */
+	static Optional<String> getCallerMethodName(final int skipFrames, final BiFunction<? super String, ? super String, String> nameFunction) {
+		StackWalker walker = StackWalker.getInstance();
+		return walker.walk(frames -> frames
+				.skip(skipFrames) // skip frames
+				.findFirst())
+				.map(frame -> nameFunction.apply(frame.getClassName(), frame.getMethodName()));
+	}
+
+	/**
 	 * Returns the caller method name for a given supplier.
 	 *
 	 * @param <T> supplier return type
