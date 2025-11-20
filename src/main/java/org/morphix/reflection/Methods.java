@@ -140,9 +140,9 @@ public interface Methods {
 		}
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 		if (index >= actualTypeArguments.length) {
-			throw new ReflectionException("Could not find generic argument at index " + index + " for generic return type " + parameterizedType.getTypeName()
-					+ " with " + actualTypeArguments.length + " generic argument(s) for method " + method.getDeclaringClass().getCanonicalName()
-					+ "." + method.getName());
+			throw new ReflectionException("Could not find generic argument at index " + index + " for generic return type "
+					+ parameterizedType.getTypeName() + " with " + actualTypeArguments.length + " generic argument(s) for method "
+					+ method.getDeclaringClass().getCanonicalName() + "." + method.getName());
 		}
 		Type returnType = actualTypeArguments[index];
 		return JavaObjects.cast(returnType);
@@ -495,7 +495,8 @@ public interface Methods {
 		/**
 		 * Returns the generic return type for a method or null if the method has no generic return type.
 		 * <p>
-		 * Note: this method can still throw a {@link ClassCastException} if the generic return type cannot be cast to the desired.
+		 * Note: this method can still throw a {@link ClassCastException} if the generic return type cannot be cast to the
+		 * desired.
 		 *
 		 * @param <T> generic return type
 		 *
