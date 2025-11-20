@@ -105,7 +105,7 @@ public interface Methods {
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), predicate);
 		for (Method method : cls.getDeclaredMethods()) {
 			if (predicate.test(method)) {
-				methods.add(method);
+				methods.addFirst(method);
 			}
 		}
 		return methods;
@@ -136,7 +136,13 @@ public interface Methods {
 			throw new ReflectionException(type.getTypeName() + " is a raw return type for method " + method.getDeclaringClass().getCanonicalName()
 					+ "." + method.getName());
 		}
-		Type returnType = parameterizedType.getActualTypeArguments()[index];
+		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+		if (index >= actualTypeArguments.length) {
+			throw new ReflectionException("Could not find generic argument at index " + index + " for generic return type " + parameterizedType.getTypeName()
+					+ " with " + actualTypeArguments.length + " generic argument(s) for method " + method.getDeclaringClass().getCanonicalName()
+					+ "." + method.getName());
+		}
+		Type returnType = actualTypeArguments[index];
 		return JavaObjects.cast(returnType);
 	}
 
@@ -160,16 +166,10 @@ public interface Methods {
 	 * @return generic return type
 	 */
 	static <T> Class<T> getGenericReturnClass(final Method method, final int index) {
-		Type type = method.getGenericReturnType();
-		if (!(type instanceof ParameterizedType parameterizedType)) {
-			throw new ReflectionException(type.getTypeName() + " is a raw return type for method " + method.getDeclaringClass().getCanonicalName()
-					+ "." + method.getName());
-		}
-		Type returnType = parameterizedType.getActualTypeArguments()[index];
 		try {
-			return JavaObjects.cast(returnType);
+			return getGenericReturnType(method, index);
 		} catch (ClassCastException e) {
-			throw new ReflectionException("Could not infer actual generic return type argument from " + parameterizedType.getTypeName() +
+			throw new ReflectionException("Could not infer actual generic return type argument from " + method.getGenericReturnType().getTypeName() +
 					" for method " + method.getDeclaringClass().getCanonicalName() + "." + method.getName(), e);
 		}
 	}
@@ -501,6 +501,10 @@ public interface Methods {
 		static <T extends Type> T getGenericReturnType(final Method method, final int index) {
 			Type type = method.getGenericReturnType();
 			if (!(type instanceof ParameterizedType parameterizedType)) {
+				return null;
+			}
+			Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+			if (index >= actualTypeArguments.length) {
 				return null;
 			}
 			Type returnType = parameterizedType.getActualTypeArguments()[index];
