@@ -2,6 +2,8 @@
 
 `1.0.12`
 
+- Fixed wrong order for `Methods.getAllDeclaredInHierarchy(Class, Predicate)`.
+
 ---
 
 `1.0.11`

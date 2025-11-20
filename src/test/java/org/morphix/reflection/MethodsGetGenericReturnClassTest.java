@@ -95,4 +95,12 @@ class MethodsGetGenericReturnClassTest {
 
 		assertThat(cls, equalTo(null));
 	}
+
+	@Test
+	void shouldReturnNullOnFailToCastFromParameterizedClass() throws Exception {
+		Method method = A.class.getMethod("getList2");
+		Class<?> cls = Methods.Safe.getGenericReturnType(method, 0);
+
+		assertThat(cls, equalTo(null));
+	}
 }
