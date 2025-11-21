@@ -23,8 +23,14 @@ import sun.misc.Unsafe; // NOSONAR
  */
 public class TheUnsafe {
 
+	/**
+	 * The name of the field containing the singleton instance of {@link Unsafe}.
+	 */
 	static final String THE_UNSAFE_FIELD_NAME = "theUnsafe";
 
+	/**
+	 * The singleton instance of {@link Unsafe}.
+	 */
 	static final Unsafe UNSAFE = getUnsafe();
 
 	/**

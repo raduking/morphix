@@ -62,7 +62,7 @@ public interface Classes {
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
-	public interface Safe {
+	interface Safe {
 
 		/**
 		 * Returns a class based on a class name, if the class is not found it returns {@code null}.
