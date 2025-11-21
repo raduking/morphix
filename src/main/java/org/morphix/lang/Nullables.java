@@ -131,7 +131,7 @@ public final class Nullables {
 	 * @param <T> parameter type
 	 *
 	 * @param obj object to test for null
-	 * @param statements supplier
+	 * @param statements runnable to execute when obj is not null
 	 */
 	public static <T> void whenNotNull(final T obj, final Runnable statements) {
 		if (null != obj) {
@@ -145,7 +145,7 @@ public final class Nullables {
 	 * @param <T> parameter type
 	 *
 	 * @param obj object to test for null
-	 * @param statements supplier
+	 * @param statements consumer that accepts the value when obj is not null
 	 */
 	public static <T> void whenNotNull(final T obj, final Consumer<T> statements) {
 		if (null != obj) {
@@ -286,7 +286,7 @@ public final class Nullables {
 	 * @param <T> parameter type
 	 * @param condition condition to test
 	 * @param valueSupplier value supplier
-	 * @return the supplier call result if it conforms to the predicate, otherwise null
+	 * @return the supplier call result if it conforms to the condition, otherwise null
 	 */
 	public static <T> T whenOrElseNull(final boolean condition, final Supplier<T> valueSupplier) {
 		return condition ? valueSupplier.get() : null;
