@@ -460,6 +460,21 @@ public final class Nullables {
 		 * @param function return value function
 		 * @return the value returned by the function
 		 */
+		public <U> Chain<U> thenNotNull(final Function<T, U> function) {
+			return andNotNull(function);
+		}
+
+		/**
+		 * Returns the value returned by the function applied to the existing value if value is not <code>null</code>.
+		 * <p>
+		 * This is an intermediate operation.
+		 * </p>
+		 *
+		 * @param <U> return type
+		 *
+		 * @param function return value function
+		 * @return the value returned by the function
+		 */
 		public <U> Chain<U> andNotNull(final Function<T, U> function) {
 			return new Chain<>(thenReturn(function));
 		}
