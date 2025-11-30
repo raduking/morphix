@@ -40,7 +40,8 @@ public class ObjectConverter<S, D> implements
 		InstanceFunction<D>,
 		InstanceConvertFunction<S, D>,
 		SimpleConverter<S, D>,
-		ConvertFunction<S, D> {
+		ConvertFunction<S, D>,
+		Serializable {
 
 	/**
 	 * Serial version UID, required for {@link Serializable} classes.

@@ -9,6 +9,7 @@
 - Upgraded `maven-gpg-plugin` to `3.2.8`.
 - Upgraded `central-publishing-maven-plugin` to `0.9.0`.
 - Moved `Reflection.findSubclass` method to `Classes`.
+- Added `Serializable` to `ObjectConverter` to allow serialization of converters.
 
 ---
 
