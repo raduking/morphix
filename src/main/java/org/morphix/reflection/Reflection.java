@@ -137,25 +137,6 @@ public interface Reflection {
 	}
 
 	/**
-	 * Returns the subclass of the expected parent.
-	 *
-	 * @param expectedParent expected parent
-	 * @param child some child class
-	 * @return the subclass of the expected parent
-	 * @throws ReflectionException if the expected parent is not found
-	 */
-	static Class<?> findSubclass(final Class<?> expectedParent, final Class<?> child) {
-		Class<?> parent = child.getSuperclass();
-		if (Object.class == parent) {
-			throw new ReflectionException("The parent of " + child.getCanonicalName() + " is not a " + expectedParent.getCanonicalName());
-		}
-		if (expectedParent == parent) {
-			return child;
-		}
-		return findSubclass(expectedParent, parent);
-	}
-
-	/**
 	 * Returns true if the class given by its name is present in the class path, false otherwise.
 	 *
 	 * @param className the {@linkplain ClassLoader##binary-name binary name}

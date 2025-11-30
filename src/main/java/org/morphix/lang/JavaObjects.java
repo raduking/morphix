@@ -30,6 +30,10 @@ public final class JavaObjects {
 	/**
 	 * Casts the parameter to the required type. The advantage of this method is that no more {@link SuppressWarnings} is
 	 * necessary and also the type is inferred by the compiler.
+	 * <p>
+	 * Note: this method does not perform any type checking and may result in a {@link ClassCastException} at runtime if the
+	 * object is not of the expected type. Callers should ensure that the object being cast is indeed of the desired type to
+	 * avoid runtime exceptions.
 	 *
 	 * @param <T> type to cast to
 	 *

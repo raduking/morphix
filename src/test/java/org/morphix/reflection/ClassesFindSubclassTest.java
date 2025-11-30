@@ -19,11 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class {@link Reflection#findSubclass(Class, Class)}.
+ * Test class {@link Classes#findSubclass(Class, Class)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class ReflectionFindSubclassTest {
+class ClassesFindSubclassTest {
 
 	static class A {
 		// empty
@@ -39,13 +39,13 @@ class ReflectionFindSubclassTest {
 
 	@Test
 	void shouldFindSubclassForTheGivenChildAndExpectedParent() {
-		Class<?> child = Reflection.findSubclass(A.class, C.class);
+		Class<?> child = Classes.findSubclass(A.class, C.class);
 		assertThat(child, equalTo(B.class));
 	}
 
 	@Test
 	void shouldThrowReflectionExceptionIfTheParentIsObject() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Reflection.findSubclass(String.class, A.class));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Classes.findSubclass(String.class, A.class));
 		assertThat(e.getMessage(), equalTo("The parent of " + A.class.getCanonicalName() + " is not a " + String.class.getCanonicalName()));
 	}
 

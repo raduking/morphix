@@ -13,8 +13,8 @@
 package org.morphix.lang;
 
 /**
- * Utility class re-throws unchecked exceptions for lambda expressions without the need for the caller to surround his
- * lambda expression with a try/catch.
+ * Utility class re-throws checked exceptions as if they were unchecked for lambda expressions without the need for the
+ * caller to surround their lambda expression with a try/catch.
  * <p>
  * Example:
  * <p>

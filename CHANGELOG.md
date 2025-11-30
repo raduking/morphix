@@ -8,6 +8,7 @@
 - Upgraded `jacoco-maven-plugin` to `0.8.14`.
 - Upgraded `maven-gpg-plugin` to `3.2.8`.
 - Upgraded `central-publishing-maven-plugin` to `0.9.0`.
+- Moved `Reflection.findSubclass` method to `Classes`.
 
 ---
 

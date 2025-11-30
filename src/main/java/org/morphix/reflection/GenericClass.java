@@ -30,7 +30,7 @@ public abstract class GenericClass<T> {
 	 * Default protected constructor.
 	 */
 	protected GenericClass() {
-		Class<?> genericClassSubclass = Reflection.findSubclass(GenericClass.class, getClass());
+		Class<?> genericClassSubclass = Classes.findSubclass(GenericClass.class, getClass());
 		this.type = GenericType.getGenericParameterType(genericClassSubclass, 0);
 	}
 
