@@ -251,7 +251,7 @@ public interface Conversions {
 	 * @param instanceFunction destination instance function
 	 * @param extraConvertFunction extra conversion function
 	 * @param expandedFieldNames fields that will be expanded and have the {@link Expandable} annotation.
-	 * @param simpleConverters extra conversion function
+	 * @param simpleConverters inner objects conversion functions
 	 * @return destination object
 	 */
 	static <S, D> D convertFrom(
