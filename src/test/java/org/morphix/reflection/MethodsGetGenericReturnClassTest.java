@@ -55,13 +55,53 @@ class MethodsGetGenericReturnClassTest {
 	@Test
 	void shouldFailToCastFromParameterizedClass() throws Exception {
 		Method method = A.class.getMethod("getList2");
-		assertThrows(ReflectionException.class, () -> Methods.getGenericReturnClass(method, 0));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnClass(method, 0));
+		assertThat(e.getMessage(), equalTo("Could not infer actual generic return type argument from "
+				+ method.getGenericReturnType()
+				+ " for method "
+				+ MethodsGetGenericReturnClassTest.A.class.getCanonicalName() + ".getList2"));
 	}
 
 	@Test
 	void shouldFailForRawTypes() throws Exception {
 		Method method = A.class.getMethod("getList3");
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnClass(method, 0));
+		assertThat(e.getMessage(), equalTo(""
+				+ method.getGenericReturnType().getTypeName()
+				+ " is a raw return type for method "
+				+ MethodsGetGenericReturnClassTest.A.class.getCanonicalName() + ".getList3"));
+	}
+
+	@Test
+	void shouldFailForInvalidIndex() throws Exception {
+		Method method = A.class.getMethod("getList1");
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnClass(method, 1));
+		assertThat(e.getMessage(), equalTo("Could not find generic argument at index 1 for generic return type "
+				+ method.getGenericReturnType()
+				+ " with 1 generic argument(s) for method "
+				+ MethodsGetGenericReturnClassTest.A.class.getCanonicalName() + ".getList1"));
+	}
+
+	@Test
+	void shouldFailForNonGenericReturnType() throws Exception {
+		Method method = Object.class.getMethod("toString");
 		assertThrows(ReflectionException.class, () -> Methods.getGenericReturnClass(method, 0));
 	}
 
+	@Test
+	void shouldReturnNullInvalidIndexOnSafe() throws Exception {
+		Method method = A.class.getMethod("getList1");
+		Class<?> cls = Methods.Safe.getGenericReturnType(method, 1);
+
+		assertThat(cls, equalTo(null));
+	}
+
+	@Test
+	void shouldThrowClassCastExceptionOnFailToCastFromParameterizedClass() throws Exception {
+		Method method = A.class.getMethod("getList2");
+		assertThrows(ClassCastException.class, () -> {
+			@SuppressWarnings("unused")
+			Class<?> cls = Methods.Safe.getGenericReturnType(method, 0);
+		});
+	}
 }

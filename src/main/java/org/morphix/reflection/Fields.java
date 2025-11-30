@@ -376,7 +376,7 @@ public interface Fields {
 		 *
 		 * @param cls the class that has the static field
 		 * @param fieldName the name of the static field
-		 * @return the value of the static field wit the given name
+		 * @return the value of the static field with the given name
 		 * @throws ReflectionException if the field is not found
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
@@ -491,7 +491,7 @@ public interface Fields {
 	interface Unsafe {
 
 		/**
-		 * Sets the field value using the {@link Unsafe} method.
+		 * Sets the field value using the {@link TheUnsafe} utility.
 		 *
 		 * @param obj object on which the represented field's value is to be set
 		 * @param field field on which to set the value

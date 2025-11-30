@@ -39,7 +39,14 @@ import org.morphix.lang.function.InstanceFunction;
  */
 public class IterableConversionPipeline<S, D> {
 
+	/**
+	 * Source iterable.
+	 */
 	private final Iterable<S> sourceIterable;
+
+	/**
+	 * Element simple converter.
+	 */
 	private final SimpleConverter<S, D> elementConverter;
 
 	/**

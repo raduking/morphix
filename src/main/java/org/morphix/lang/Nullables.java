@@ -131,7 +131,7 @@ public final class Nullables {
 	 * @param <T> parameter type
 	 *
 	 * @param obj object to test for null
-	 * @param statements supplier
+	 * @param statements runnable to execute when obj is not null
 	 */
 	public static <T> void whenNotNull(final T obj, final Runnable statements) {
 		if (null != obj) {
@@ -145,7 +145,7 @@ public final class Nullables {
 	 * @param <T> parameter type
 	 *
 	 * @param obj object to test for null
-	 * @param statements supplier
+	 * @param statements consumer that accepts the value when obj is not null
 	 */
 	public static <T> void whenNotNull(final T obj, final Consumer<T> statements) {
 		if (null != obj) {
@@ -286,7 +286,7 @@ public final class Nullables {
 	 * @param <T> parameter type
 	 * @param condition condition to test
 	 * @param valueSupplier value supplier
-	 * @return the supplier call result if it conforms to the predicate, otherwise null
+	 * @return the supplier call result if it conforms to the condition, otherwise null
 	 */
 	public static <T> T whenOrElseNull(final boolean condition, final Supplier<T> valueSupplier) {
 		return condition ? valueSupplier.get() : null;
@@ -446,6 +446,21 @@ public final class Nullables {
 		 * @return the value returned by the function
 		 */
 		public <U> Chain<U> thenYield(final Function<T, U> function) {
+			return andNotNull(function);
+		}
+
+		/**
+		 * Returns the value returned by the function applied to the existing value if value is not <code>null</code>.
+		 * <p>
+		 * This is an intermediate operation.
+		 * </p>
+		 *
+		 * @param <U> return type
+		 *
+		 * @param function return value function
+		 * @return the value returned by the function
+		 */
+		public <U> Chain<U> thenNotNull(final Function<T, U> function) {
 			return andNotNull(function);
 		}
 

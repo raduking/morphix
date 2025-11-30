@@ -34,12 +34,29 @@ import org.morphix.lang.function.InstanceFunction;
  */
 public class MapConversionPipeline<I, S, J, D> {
 
+	/**
+	 * Source map.
+	 */
 	private final Map<I, S> sourceMap;
 
+	/**
+	 * Key instance function.
+	 */
 	private InstanceFunction<J> keyInstanceFunction;
+
+	/**
+	 * Value instance function.
+	 */
 	private InstanceFunction<D> valueInstanceFunction;
 
+	/**
+	 * Key converter.
+	 */
 	private SimpleConverter<I, J> keyConverter;
+
+	/**
+	 * Value converter.
+	 */
 	private SimpleConverter<S, D> valueConverter;
 
 	/**

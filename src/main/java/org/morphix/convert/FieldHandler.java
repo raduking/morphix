@@ -149,7 +149,7 @@ public abstract class FieldHandler {
 	 */
 	@Override
 	public int hashCode() {
-		return super.hashCode() + getClass().hashCode();
+		return getClass().hashCode();
 	}
 
 }

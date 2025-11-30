@@ -57,12 +57,31 @@ public interface Classes {
 	}
 
 	/**
+	 * Returns the subclass of the expected parent.
+	 *
+	 * @param expectedParent expected parent
+	 * @param child some child class
+	 * @return the subclass of the expected parent
+	 * @throws ReflectionException if the expected parent is not found
+	 */
+	static Class<?> findSubclass(final Class<?> expectedParent, final Class<?> child) {
+		Class<?> parent = child.getSuperclass();
+		if (Object.class == parent) {
+			throw new ReflectionException("The parent of " + child.getCanonicalName() + " is not a " + expectedParent.getCanonicalName());
+		}
+		if (expectedParent == parent) {
+			return child;
+		}
+		return findSubclass(expectedParent, parent);
+	}
+
+	/**
 	 * Interface which groups all methods that return null and don't throw exceptions on expected errors. This functions as
 	 * a name space so that the method names inside keep the same name pattern.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
-	public interface Safe {
+	interface Safe {
 
 		/**
 		 * Returns a class based on a class name, if the class is not found it returns {@code null}.

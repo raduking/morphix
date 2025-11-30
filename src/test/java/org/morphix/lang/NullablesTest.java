@@ -101,12 +101,35 @@ class NullablesTest {
 	}
 
 	@Test
+	void shouldReturnDefaultWhenParameterIsNullOnThenNotNull() {
+		B b = null;
+
+		String result = Nullables.whenNotNull(b)
+				.thenNotNull(B::getS)
+				.orElse(() -> MUMU);
+
+		assertThat(result, equalTo(MUMU));
+	}
+
+	@Test
 	void shouldReturnYieldedWhenParameterIsNotNull() {
 		B b = new B();
 		b.s = BIBI;
 
 		String result = Nullables.whenNotNull(b)
 				.thenYield(B::getS)
+				.orElse(() -> MUMU);
+
+		assertThat(result, equalTo(BIBI));
+	}
+
+	@Test
+	void shouldReturnNonNullWhenParameterIsNotNull() {
+		B b = new B();
+		b.s = BIBI;
+
+		String result = Nullables.whenNotNull(b)
+				.thenNotNull(B::getS)
 				.orElse(() -> MUMU);
 
 		assertThat(result, equalTo(BIBI));

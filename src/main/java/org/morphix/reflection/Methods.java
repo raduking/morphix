@@ -39,7 +39,7 @@ import org.morphix.lang.JavaObjects;
 public interface Methods {
 
 	/**
-	 * Returns a method in the class given as parameter, also searching in all it's super classes.
+	 * Returns a method in the class given as parameter, also searching in all its super classes.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -62,7 +62,7 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a list with all the fields in the class given as parameter including the ones in all it's super classes.
+	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes.
 	 * <p>
 	 * {@link LinkedList} is used because:
 	 * <ul>
@@ -76,27 +76,29 @@ public interface Methods {
 	 *
 	 * @param <T> type to get the methods from
 	 *
-	 * @param cls class on which the fields are returned
-	 * @return list of fields
+	 * @param cls class on which the methods are returned
+	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
 		if (null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass());
-		methods.addAll(0, List.of(cls.getDeclaredMethods()));
+		for (Method method : cls.getDeclaredMethods()) {
+			methods.addFirst(method);
+		}
 		return methods;
 	}
 
 	/**
-	 * Returns a list with all the methods in the class given as parameter including the ones in all it's super classes that
+	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes that
 	 * verify the given method predicate.
 	 *
 	 * @param <T> type to get the methods from
 	 *
-	 * @param cls class on which the fields are returned
+	 * @param cls class on which the methods are returned
 	 * @param predicate filter predicate for methods
-	 * @return list of fields
+	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
 		if (null == cls.getSuperclass()) {
@@ -105,7 +107,7 @@ public interface Methods {
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), predicate);
 		for (Method method : cls.getDeclaredMethods()) {
 			if (predicate.test(method)) {
-				methods.add(method);
+				methods.addFirst(method);
 			}
 		}
 		return methods;
@@ -136,12 +138,18 @@ public interface Methods {
 			throw new ReflectionException(type.getTypeName() + " is a raw return type for method " + method.getDeclaringClass().getCanonicalName()
 					+ "." + method.getName());
 		}
-		Type returnType = parameterizedType.getActualTypeArguments()[index];
+		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+		if (index >= actualTypeArguments.length) {
+			throw new ReflectionException("Could not find generic argument at index " + index + " for generic return type "
+					+ parameterizedType.getTypeName() + " with " + actualTypeArguments.length + " generic argument(s) for method "
+					+ method.getDeclaringClass().getCanonicalName() + "." + method.getName());
+		}
+		Type returnType = actualTypeArguments[index];
 		return JavaObjects.cast(returnType);
 	}
 
 	/**
-	 * Returns the generic return type for a method.
+	 * Returns the generic return class for a method.
 	 * <p>
 	 * Example: for the following method:
 	 *
@@ -157,19 +165,13 @@ public interface Methods {
 	 *
 	 * @param method method for which the generic return type is needed
 	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
-	 * @return generic return type
+	 * @return generic return class
 	 */
 	static <T> Class<T> getGenericReturnClass(final Method method, final int index) {
-		Type type = method.getGenericReturnType();
-		if (!(type instanceof ParameterizedType parameterizedType)) {
-			throw new ReflectionException(type.getTypeName() + " is a raw return type for method " + method.getDeclaringClass().getCanonicalName()
-					+ "." + method.getName());
-		}
-		Type returnType = parameterizedType.getActualTypeArguments()[index];
 		try {
-			return JavaObjects.cast(returnType);
+			return getGenericReturnType(method, index);
 		} catch (ClassCastException e) {
-			throw new ReflectionException("Could not infer actual generic return type argument from " + parameterizedType.getTypeName() +
+			throw new ReflectionException("Could not infer actual generic return type argument from " + method.getGenericReturnType().getTypeName() +
 					" for method " + method.getDeclaringClass().getCanonicalName() + "." + method.getName(), e);
 		}
 	}
@@ -294,16 +296,17 @@ public interface Methods {
 	 */
 	static <T> Method getSetterMethod(final Class<T> cls, final Field field) {
 		String methodName = MethodType.SETTER.getMethodName(field);
-		Class<?> primitiveFieldType;
 		try {
 			return Methods.getOneDeclaredInHierarchy(methodName, cls, field.getType());
-		} catch (NoSuchMethodException e) {
-			try {
-				primitiveFieldType = Primitives.toPrimitive(field.getType());
-			} catch (ReflectionException re) {
-				throw new ReflectionException("Error finding method: "
-						+ methodName + "(" + field.getType().getCanonicalName() + ")", re);
-			}
+		} catch (NoSuchMethodException ignored) {
+			// ignored because we try with primitive type next
+		}
+		Class<?> primitiveFieldType;
+		try {
+			primitiveFieldType = Primitives.toPrimitive(field.getType());
+		} catch (ReflectionException re) {
+			throw new ReflectionException("Error finding method: "
+					+ methodName + "(" + field.getType().getCanonicalName() + ")", re);
 		}
 		try {
 			return Methods.getOneDeclaredInHierarchy(methodName, cls, primitiveFieldType);
@@ -468,7 +471,7 @@ public interface Methods {
 		}
 
 		/**
-		 * Returns a method in the class given as parameter, also searching in all it's super classes, and returns {@code null}
+		 * Returns a method in the class given as parameter, also searching in all its super classes, and returns {@code null}
 		 * if method is not found.
 		 *
 		 * @param <T> type to get the methods from
@@ -491,6 +494,9 @@ public interface Methods {
 
 		/**
 		 * Returns the generic return type for a method or null if the method has no generic return type.
+		 * <p>
+		 * Note: this method can still throw a {@link ClassCastException} if the generic return type cannot be cast to the
+		 * desired.
 		 *
 		 * @param <T> generic return type
 		 *
@@ -503,7 +509,11 @@ public interface Methods {
 			if (!(type instanceof ParameterizedType parameterizedType)) {
 				return null;
 			}
-			Type returnType = parameterizedType.getActualTypeArguments()[index];
+			Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+			if (index >= actualTypeArguments.length) {
+				return null;
+			}
+			Type returnType = actualTypeArguments[index];
 			return JavaObjects.cast(returnType);
 		}
 	}

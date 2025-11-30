@@ -217,8 +217,7 @@ public class Threads {
 	}
 
 	/**
-	 * Helper method that calls {@link CountDownLatch#await()} on the given latch, with {@link InterruptedException}
-	 * handling.
+	 * Helper method that calls {@link Thread#join()} on the given thread, with {@link InterruptedException} handling.
 	 *
 	 * @param thread thread object
 	 */
@@ -321,6 +320,10 @@ public class Threads {
 	/**
 	 * Returns the value from the given supplier within the given timeout. If the timeout passes before the supplier returns
 	 * the value a {@link TimeoutException} is thrown.
+	 * <p>
+	 * Note: the implementation intentionally uses no try with resources because closing the executor too early would block
+	 * to cancel the task, and we want to make sure the executor is closed in the end after the manual task cancellation to
+	 * keep the {@link TimeoutException} behavior.
 	 *
 	 * @param <T> the type of results supplied by the provided supplier
 	 *
@@ -329,18 +332,19 @@ public class Threads {
 	 * @return supplier value if computed within the timeout
 	 */
 	public static <T> T execute(final Duration timeout, final Supplier<T> valueSupplier) {
+		Future<T> task = null;
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		Future<T> task = executor.submit(valueSupplier::get);
-		T result = null;
 		try {
-			result = task.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+			task = executor.submit(valueSupplier::get);
+			return task.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
 		} catch (Exception e) { // NOSONAR the exception is re-thrown as is
-			task.cancel(true);
-			Unchecked.Undeclared.reThrow(e);
+			if (null != task) {
+				task.cancel(true);
+			}
+			return Unchecked.Undeclared.reThrow(e);
 		} finally {
 			executor.close();
 		}
-		return result;
 	}
 
 	/**

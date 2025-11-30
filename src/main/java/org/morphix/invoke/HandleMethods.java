@@ -110,7 +110,7 @@ public class HandleMethods {
 	}
 
 	/**
-	 * Retrieves a {@link MethodHandle} for a static method of the given class. The result is cached for subsequent calls.
+	 * Retrieves a {@link MethodHandle} for a method of the given class. The result is cached for subsequent calls.
 	 *
 	 * @param <T> the type of the class.
 	 *
@@ -118,7 +118,7 @@ public class HandleMethods {
 	 * @param cls the class where the static method is declared.
 	 * @param methodType the type of the method.
 	 * @param isStatic flag to specify if the method is static or not
-	 * @return A {@link MethodHandle} pointing to the specified static method.
+	 * @return A {@link MethodHandle} pointing to the specified method.
 	 * @throws ReflectionException If the method cannot be found or accessed.
 	 */
 	private static <T> MethodHandle get(final String methodName, final Class<T> cls, final MethodType methodType, final boolean isStatic) {
@@ -132,7 +132,7 @@ public class HandleMethods {
 	/**
 	 * Creates a {@link MethodHandle} for the given method signature using the appropriate lookup.
 	 *
-	 * @param cls the class where the static method is declared.
+	 * @param cls the class where the method is declared.
 	 * @param signature the method signature
 	 * @return a method handle for the given class and signature
 	 */

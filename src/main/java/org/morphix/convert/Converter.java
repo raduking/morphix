@@ -138,7 +138,7 @@ public class Converter<S> {
 	 * @return conversion destination object
 	 */
 	public <D> D to(final GenericClass<D> genericClass) {
-		Configuration configuration = Configuration.of(excludedFields, expandableFields, simpleConverters, genericClass.getClass());
+		Configuration configuration = Configuration.of(excludedFields, expandableFields, simpleConverters, genericClass.getType());
 		return convertFrom(source, genericClass.getGenericArgumentType(),
 				JavaObjects.cast(extraConvertFunction), configuration);
 	}
@@ -228,7 +228,7 @@ public class Converter<S> {
 	}
 
 	/**
-	 * Conversion configuration method to configure expandable fields
+	 * Conversion configuration method to configure expandable fields.
 	 *
 	 * @see ExpandableFields
 	 *
