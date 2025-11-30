@@ -104,7 +104,7 @@ public class ExpandableFields {
 	/**
 	 * Returns an object that will result in no expandable fields to be expanded.
 	 *
-	 * @return an object that will result in all expandable fields to be expanded
+	 * @return an object that will result in no expandable fields to be expanded
 	 */
 	public static ExpandableFields expandNone() {
 		return EXPAND_NONE;
