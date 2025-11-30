@@ -27,6 +27,9 @@ import org.morphix.convert.function.SimpleConverter;
  */
 public class SimpleConverters implements Iterable<SimpleConverter<?, ?>> {
 
+	/**
+	 * List of simple converters.
+	 */
 	private final List<SimpleConverter<?, ?>> converters;
 
 	/**
@@ -38,6 +41,11 @@ public class SimpleConverters implements Iterable<SimpleConverter<?, ?>> {
 		this.converters = Collections.unmodifiableList(converters);
 	}
 
+	/**
+	 * Returns an iterator for the simple converters.
+	 *
+	 * @return an iterator for the simple converters
+	 */
 	@Override
 	public Iterator<SimpleConverter<?, ?>> iterator() {
 		return converters.iterator();
@@ -74,8 +82,7 @@ public class SimpleConverters implements Iterable<SimpleConverter<?, ?>> {
 		if (null == convertMethod) {
 			return empty();
 		}
-		SimpleConverter<?, ?>[] convertMethods = new SimpleConverter<?, ?>[] { convertMethod };
-		return of(convertMethods);
+		return of(List.of(convertMethod));
 	}
 
 	/**

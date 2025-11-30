@@ -22,7 +22,7 @@ import org.morphix.reflection.ExtendedField;
 /**
  * Keeps a list with the fields that need to be expanded.
  * <p>
- * When construction this object the <code>expandedFieldNames</code> list parameter has the following conventions:
+ * When constructing this object the <code>expandedFieldNames</code> list parameter has the following conventions:
  * <ul>
  * <li><code>null</code> - all fields will be expanded ({@link Expandable} annotation will be ignored)</li>
  * <li>empty list - no fields will be expanded (all fields with {@link Expandable} annotation present will be
@@ -102,7 +102,7 @@ public class ExpandableFields {
 	}
 
 	/**
-	 * Returns an object that will result in all expandable fields to be expanded.
+	 * Returns an object that will result in no expandable fields to be expanded.
 	 *
 	 * @return an object that will result in all expandable fields to be expanded
 	 */
@@ -113,11 +113,11 @@ public class ExpandableFields {
 	/**
 	 * Returns true if the field should not be expanded, false otherwise.
 	 *
-	 * @param fop field object pair
+	 * @param extendedField field object pair
 	 * @return true if the field should not be expanded, false otherwise.
 	 */
-	public boolean shouldNotExpandField(final ExtendedField fop) {
-		return isExpandableField(fop) && !shouldExpandFieldNoAnnotationCheck(fop);
+	public boolean shouldNotExpandField(final ExtendedField extendedField) {
+		return isExpandableField(extendedField) && !shouldExpandFieldNoAnnotationCheck(extendedField);
 	}
 
 	/**
