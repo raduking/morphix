@@ -4,6 +4,10 @@
 
 - Fixed wrong order for `Methods.getAllDeclaredInHierarchy(Class, Predicate)`.
 - Changed `Comparables` constructor to throw `UnsupportedOperationException` to prevent instantiation.
+- Upgraded `pitest-maven` to `1.22.0`.
+- Upgraded `jacoco-maven-plugin` to `0.8.14`.
+- Upgraded `maven-gpg-plugin` to `3.2.8`.
+- Upgraded `central-publishing-maven-plugin` to `0.9.0`.
 
 ---
 

@@ -52,17 +52,17 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- Testing dependencies versions -->
-		<pitest.plugin.version>1.19.4</pitest.plugin.version>
+		<pitest.maven.plugin.version>1.22.0</pitest.maven.plugin.version>
 		<pitest.plugin.junit5.version>1.2.3</pitest.plugin.junit5.version>
-		<jacoco.plugin.version>0.8.13</jacoco.plugin.version>
-		<project.info.reports.plugin.version>3.9.0</project.info.reports.plugin.version>
+		<jacoco.maven.plugin.version>0.8.14</jacoco.maven.plugin.version>
+		<maven.project.info.reports.plugin.version>3.9.0</maven.project.info.reports.plugin.version>
 
 		<!-- Benchmarking -->
 		<jmh.version>1.37</jmh.version>
 
 		<!-- Publishing dependencies versions -->
-		<gpg.plugin.version>3.2.7</gpg.plugin.version>
-		<central.publishing.plugin.version>0.7.0</central.publishing.plugin.version>
+		<maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
+		<central.publishing.maven.plugin.version>0.9.0</central.publishing.maven.plugin.version>
 
 		<morphixArgLine>
 			-XX:+EnableDynamicAgentLoading
@@ -180,7 +180,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco.plugin.version}</version>
+				<version>${jacoco.maven.plugin.version}</version>
 				<executions>
 					<execution>
 						<id>pre-unit-test</id>
@@ -213,7 +213,7 @@
 			<plugin>
 				<groupId>org.pitest</groupId>
 				<artifactId>pitest-maven</artifactId>
-				<version>${pitest.plugin.version}</version>
+				<version>${pitest.maven.plugin.version}</version>
 				<!-- Allows it to work with JUnit 5 -->
 				<dependencies>
 					<dependency>
@@ -290,7 +290,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>${gpg.plugin.version}</version>
+						<version>${maven.gpg.plugin.version}</version>
 						<executions>
 							<execution>
 							<id>sign-artifacts</id>
@@ -313,7 +313,7 @@
 					<plugin>
 						<groupId>org.sonatype.central</groupId>
 						<artifactId>central-publishing-maven-plugin</artifactId>
-						<version>${central.publishing.plugin.version}</version>
+						<version>${central.publishing.maven.plugin.version}</version>
 						<extensions>true</extensions>
 						<configuration>
 							<autoPublish>true</autoPublish>
@@ -369,13 +369,6 @@
 				</plugins>
 			</build>
     	</profile>
-    	
-		<profile>
-			<id>eclipse</id>
-			<properties>
-				<jacocoArgLine></jacocoArgLine>
-			</properties>
-		</profile>
 	</profiles>
 
 	<reporting>
@@ -386,14 +379,14 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>${project.info.reports.plugin.version}</version>
+				<version>${maven.project.info.reports.plugin.version}</version>
 			</plugin>
 
 			<!--Jacoco code coverage -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco.plugin.version}</version>
+				<version>${jacoco.maven.plugin.version}</version>
 				<reportSets>
 					<reportSet>
 						<reports>
