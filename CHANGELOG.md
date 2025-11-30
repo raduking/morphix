@@ -3,6 +3,7 @@
 `1.0.12`
 
 - Fixed wrong order for `Methods.getAllDeclaredInHierarchy(Class, Predicate)`.
+- Changed `Comparables` constructor to throw `UnsupportedOperationException` to prevent instantiation.
 
 ---
 

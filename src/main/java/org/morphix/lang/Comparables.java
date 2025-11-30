@@ -12,6 +12,8 @@
  */
 package org.morphix.lang;
 
+import org.morphix.reflection.Constructors;
+
 /**
  * Java {@link Comparable} objects utility methods.
  *
@@ -23,11 +25,11 @@ public final class Comparables {
 	 * Private constructor.
 	 */
 	private Comparables() {
-		// empty
+		throw Constructors.unsupportedOperationException();
 	}
 
 	/**
-	 * Returns maximum of two comparable objects.
+	 * Returns maximum of two comparable objects. If one is null, returns the other. If both are null, returns null.
 	 *
 	 * @param <T> objects type
 	 * @param a first object
@@ -45,7 +47,7 @@ public final class Comparables {
 	}
 
 	/**
-	 * Returns minimum of two comparable objects.
+	 * Returns minimum of two comparable objects. If one is null, returns the other. If both are null, returns null.
 	 *
 	 * @param <T> objects type
 	 * @param a first object
