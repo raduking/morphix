@@ -42,12 +42,34 @@ import org.morphix.convert.strategy.ConversionStrategy;
  */
 public final class Configuration {
 
+	/**
+	 * List of field handlers.
+	 */
 	private final List<FieldHandler> fieldHandlers;
+
+	/**
+	 * List of name finding strategies.
+	 */
 	private final List<ConversionStrategy> strategies;
+
+	/**
+	 * Excluded fields object.
+	 */
 	private final ExcludedFields excludedFields;
+
+	/**
+	 * Expandable fields object.
+	 */
 	private final ExpandableFields expandableFields;
+
+	/**
+	 * Simple converters object.
+	 */
 	private final SimpleConverters simpleConverters;
 
+	/**
+	 * Generic types map.
+	 */
 	private final Map<String, Type> genericTypesMap;
 
 	/**
