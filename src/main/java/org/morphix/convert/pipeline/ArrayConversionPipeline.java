@@ -38,7 +38,14 @@ import org.morphix.lang.function.InstanceFunction;
  */
 public class ArrayConversionPipeline<S, D> {
 
+	/**
+	 * Source array.
+	 */
 	private final S[] sourceArray;
+
+	/**
+	 * Element simple converter.
+	 */
 	private final SimpleConverter<S, D> elementConverter;
 
 	/**
