@@ -1,5 +1,11 @@
 ## Release Notes
 
+`1.0.13`
+
+- Changed `Nullables.nonNullList` to return an unmodifiable list.
+
+---
+
 `1.0.12`
 
 - Fixed wrong order for `Methods.getAllDeclaredInHierarchy(Class, Predicate)`.

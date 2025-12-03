@@ -19,8 +19,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -603,7 +603,7 @@ class NullablesTest {
 			targetException = ((InvocationTargetException) e.getCause()).getTargetException();
 			assertThat(targetException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 		}
-		assertTrue(targetException instanceof UnsupportedOperationException);
+		assertInstanceOf(UnsupportedOperationException.class, targetException);
 	}
 
 	@Test
@@ -612,6 +612,22 @@ class NullablesTest {
 
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Nullables.requireNull(MUMU, SOME_ERROR_MESSAGE));
 		assertThat(e.getMessage(), equalTo(SOME_ERROR_MESSAGE));
+	}
+
+	@Test
+	void shouldNotThrowExceptionOnRequireNullForNullInput() {
+		assertDoesNotThrow(() -> Nullables.requireNull(null, SOME_ERROR_MESSAGE));
+	}
+
+	@Test
+	void shouldNotThrowExceptionInArrayContainsNullValuesOnNonNullList() {
+		String[] array = new String[] { MUMU, null, BIBI };
+		List<String> list = assertDoesNotThrow(() -> Nullables.nonNullList(array));
+
+		assertThat(list, hasSize(3));
+		for (int i = 0; i < array.length; ++i) {
+			assertThat(array[i], equalTo(list.get(i)));
+		}
 	}
 
 	public static class A {
