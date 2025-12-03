@@ -634,14 +634,14 @@ class NullablesTest {
 	void shouldThrowExceptionIfTheListReturnedFromAnArrayIsModified() {
 		List<String> list = Nullables.nonNullList(MUMU, BIBI);
 
-		assertThrows(Exception.class,() -> list.add(CUCU));
+		assertThrows(Exception.class, () -> list.add(CUCU));
 	}
 
 	@Test
 	void shouldThrowExceptionIfTheListReturnedFromANullArrayIsModified() {
 		List<String> list = Nullables.nonNullList((String[]) null);
 
-		assertThrows(Exception.class,() -> list.add(CUCU));
+		assertThrows(Exception.class, () -> list.add(CUCU));
 	}
 
 	public static class A {

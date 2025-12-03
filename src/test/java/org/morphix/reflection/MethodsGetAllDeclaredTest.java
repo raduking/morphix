@@ -12,6 +12,7 @@
  */
 package org.morphix.reflection;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
@@ -21,11 +22,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Methods#getAllDeclaredInHierarchy(Class)}.
+ * Test class for {@link Methods#getAllDeclared(Class)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class MethodsGetAllDeclaredInHierarchyTest {
+class MethodsGetAllDeclaredTest {
 
 	public enum E {
 		// empty enum
@@ -49,31 +50,44 @@ class MethodsGetAllDeclaredInHierarchyTest {
 
 	@Test
 	void shouldGetAllMethodsInHierarchy() {
-		List<Method> methods = Methods.getAllDeclaredInHierarchy(B.class);
+		List<Method> methods = Methods.getAllDeclared(B.class);
 
+		Method[] methodsB = B.class.getDeclaredMethods();
 		int sizeB = B.class.getDeclaredMethods().length;
-		int sizeA = A.class.getDeclaredMethods().length;
 
-		assertThat(methods, hasSize(sizeA + sizeB));
+		assertThat(methods, hasSize(sizeB));
+
+		for (int i = 0; i < sizeB; ++i) {
+			assertThat(methods.get(i), equalTo(methodsB[i]));
+		}
 	}
 
 	@Test
 	void shouldReturnEmptyListForClassesWithNoMethods() {
-		List<Method> methods = Methods.getAllDeclaredInHierarchy(C.class);
+		List<Method> methods = Methods.getAllDeclared(C.class);
 
+		Method[] methodsC = C.class.getDeclaredMethods();
 		int size = C.class.getDeclaredMethods().length;
 
 		assertThat(methods, hasSize(size));
+
+		for (int i = 0; i < size; ++i) {
+			assertThat(methods.get(i), equalTo(methodsC[i]));
+		}
 	}
 
 	@Test
 	void shouldReturnEnumClassMethodsListForEmptyEnumsToo() {
-		List<Method> methods = Methods.getAllDeclaredInHierarchy(E.class);
+		List<Method> methods = Methods.getAllDeclared(E.class);
 
-		int sizeEnum = Enum.class.getDeclaredMethods().length;
+		Method[] methodsE = E.class.getDeclaredMethods();
 		int sizeE = E.class.getDeclaredMethods().length;
 
-		assertThat(methods, hasSize(sizeEnum + sizeE));
+		assertThat(methods, hasSize(sizeE));
+
+		for (int i = 0; i < sizeE; ++i) {
+			assertThat(methods.get(i), equalTo(methodsE[i]));
+		}
 	}
 
 }

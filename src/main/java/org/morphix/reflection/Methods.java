@@ -21,9 +21,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -37,6 +39,18 @@ import org.morphix.lang.JavaObjects;
  * @author Radu Sebastian LAZIN
  */
 public interface Methods {
+
+	/**
+	 * Returns a list with all the methods declared in the class given as parameter.
+	 *
+	 * @param <T> type to get the methods from
+	 *
+	 * @param cls class on which the methods are returned
+	 * @return list of methods
+	 */
+	static <T> List<Method> getAllDeclared(final Class<T> cls) {
+		return List.of(cls.getDeclaredMethods());
+	}
 
 	/**
 	 * Returns a method in the class given as parameter, also searching in all its super classes.
@@ -84,9 +98,7 @@ public interface Methods {
 			return new LinkedList<>();
 		}
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass());
-		for (Method method : cls.getDeclaredMethods()) {
-			methods.addFirst(method);
-		}
+		methods.addAll(0, getAllDeclared(cls));
 		return methods;
 	}
 
@@ -515,6 +527,53 @@ public interface Methods {
 			}
 			Type returnType = actualTypeArguments[index];
 			return JavaObjects.cast(returnType);
+		}
+	}
+
+	/**
+	 * Namespace interface which groups all methods that handle correctly cyclic dependencies in the class hierarchy
+	 * including interfaces.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Complete {
+
+		/**
+		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
+		 * interfaces.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
+			return getAllDeclaredInHierarchy(cls, new HashSet<>());
+		}
+
+		/**
+		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
+		 * interfaces.
+		 * <p>
+		 * Note: the excluded set is used to avoid cyclic dependencies in the class hierarchy.
+		 *
+		 * @param cls class on which the methods are returned
+		 * @param excluded set of classes to be excluded
+		 * @return list of methods
+		 */
+		static List<Method> getAllDeclaredInHierarchy(final Class<?> cls, final Set<Class<?>> excluded) {
+			if (cls == null || excluded.contains(cls)) {
+				return new LinkedList<>();
+			}
+			excluded.add(cls);
+
+			List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), excluded);
+			for (Class<?> iface : cls.getInterfaces()) {
+				methods.addAll(getAllDeclaredInHierarchy(iface, excluded));
+			}
+			methods.addAll(0, Methods.getAllDeclared(cls));
+
+			return methods;
 		}
 	}
 }

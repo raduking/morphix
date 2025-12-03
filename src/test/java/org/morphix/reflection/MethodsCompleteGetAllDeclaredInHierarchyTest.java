@@ -15,17 +15,19 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
+import java.lang.constant.Constable;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Methods#getAllDeclaredInHierarchy(Class)}.
+ * Test class for {@link Methods.Complete#getAllDeclaredInHierarchy(Class)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class MethodsGetAllDeclaredInHierarchyTest {
+class MethodsCompleteGetAllDeclaredInHierarchyTest {
 
 	public enum E {
 		// empty enum
@@ -49,31 +51,42 @@ class MethodsGetAllDeclaredInHierarchyTest {
 
 	@Test
 	void shouldGetAllMethodsInHierarchy() {
-		List<Method> methods = Methods.getAllDeclaredInHierarchy(B.class);
+		List<Method> methods = Methods.Complete.getAllDeclaredInHierarchy(B.class);
 
 		int sizeB = B.class.getDeclaredMethods().length;
 		int sizeA = A.class.getDeclaredMethods().length;
+		int sizeObject = Object.class.getDeclaredMethods().length;
 
-		assertThat(methods, hasSize(sizeA + sizeB));
+		assertThat(methods, hasSize(sizeA + sizeB + sizeObject));
 	}
 
 	@Test
 	void shouldReturnEmptyListForClassesWithNoMethods() {
-		List<Method> methods = Methods.getAllDeclaredInHierarchy(C.class);
+		List<Method> methods = Methods.Complete.getAllDeclaredInHierarchy(C.class);
 
 		int size = C.class.getDeclaredMethods().length;
+		int sizeObject = Object.class.getDeclaredMethods().length;
 
-		assertThat(methods, hasSize(size));
+		assertThat(methods, hasSize(size + sizeObject));
 	}
 
 	@Test
 	void shouldReturnEnumClassMethodsListForEmptyEnumsToo() {
-		List<Method> methods = Methods.getAllDeclaredInHierarchy(E.class);
+		List<Method> methods = Methods.Complete.getAllDeclaredInHierarchy(E.class);
 
 		int sizeEnum = Enum.class.getDeclaredMethods().length;
 		int sizeE = E.class.getDeclaredMethods().length;
+		int sizeObject = Object.class.getDeclaredMethods().length;
+		int sizeConstable = Constable.class.getDeclaredMethods().length;
+		int sizeComparable = Comparable.class.getDeclaredMethods().length;
 
-		assertThat(methods, hasSize(sizeEnum + sizeE));
+		assertThat(methods, hasSize(sizeEnum + sizeE + sizeObject + sizeConstable + sizeComparable));
 	}
 
+	@Test
+	void shouldReturnEmptyListForExcludedClass() {
+		List<Method> methods = Methods.Complete.getAllDeclaredInHierarchy(Object.class, Set.of(Object.class));
+
+		assertThat(methods, hasSize(0));
+	}
 }

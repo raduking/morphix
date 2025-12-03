@@ -3,6 +3,10 @@
 `1.0.13`
 
 - Changed `Nullables.nonNullList` to return an unmodifiable list.
+- Added `Methods.getAllDeclared` that returns a `List` with all declared methods in a given class.
+- Added `Methods.Complete` name-space interface for utility methods that return all methods including interface methods.
+- Added `Methods.Complete.getAllDeclaredInHierarchy(Class)` method that returns all methods including interfaces.
+- Added `Methods.Complete.getAllDeclaredInHierarchy(Class, Set)` method that returns all methods including interfaces that can exclude classes/interfaces.
 
 ---
 
