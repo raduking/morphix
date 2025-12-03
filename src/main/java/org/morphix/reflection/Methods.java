@@ -76,7 +76,9 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes.
+	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes. This
+	 * method does not return methods from interfaces or from {@link Object} class. This is a simpler version of
+	 * {@link Complete#getAllDeclaredInHierarchy(Class)} because most of the times only the class hierarchy is needed.
 	 * <p>
 	 * {@link LinkedList} is used because:
 	 * <ul>
@@ -98,7 +100,11 @@ public interface Methods {
 			return new LinkedList<>();
 		}
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass());
-		methods.addAll(0, getAllDeclared(cls));
+
+		Method[] declared = cls.getDeclaredMethods();
+		for (int i = declared.length - 1; i >= 0; --i) {
+			methods.addFirst(declared[i]);
+		}
 		return methods;
 	}
 
@@ -117,9 +123,11 @@ public interface Methods {
 			return new LinkedList<>();
 		}
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), predicate);
-		for (Method method : cls.getDeclaredMethods()) {
-			if (predicate.test(method)) {
-				methods.addFirst(method);
+
+		Method[] declared = cls.getDeclaredMethods();
+		for (int i = declared.length - 1; i >= 0; --i) {
+			if (predicate.test(declared[i])) {
+				methods.addFirst(declared[i]);
 			}
 		}
 		return methods;
@@ -571,7 +579,10 @@ public interface Methods {
 			for (Class<?> iface : cls.getInterfaces()) {
 				methods.addAll(getAllDeclaredInHierarchy(iface, excluded));
 			}
-			methods.addAll(0, Methods.getAllDeclared(cls));
+			Method[] declared = cls.getDeclaredMethods();
+			for (int i = declared.length - 1; i >= 0; --i) {
+				methods.addFirst(declared[i]);
+			}
 
 			return methods;
 		}
