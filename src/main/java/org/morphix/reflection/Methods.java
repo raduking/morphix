@@ -564,6 +564,8 @@ public interface Methods {
 		 * <p>
 		 * Note: the excluded set is also used to avoid cyclic dependencies in the class hierarchy.
 		 *
+		 * @param <T> type to get the methods from
+		 *
 		 * @param cls class on which the methods are returned
 		 * @param excluded non null mutable set of classes/interfaces/enums/records to be excluded
 		 * @return list of methods
