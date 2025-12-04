@@ -12,6 +12,9 @@
  */
 package org.morphix.reflection;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.morphix.lang.JavaObjects;
 
 /**
@@ -73,6 +76,20 @@ public interface Classes {
 			return child;
 		}
 		return findSubclass(expectedParent, parent);
+	}
+
+	/**
+	 * Creates a mutable set of classes.
+	 *
+	 * @param classes the classes to add in the set
+	 * @return a mutable set of classes
+	 */
+	static Set<Class<?>> mutableSetOf(final Class<?>... classes) {
+		Set<Class<?>> set = new HashSet<>();
+		for (Class<?> clazz : classes) {
+			set.add(clazz);
+		}
+		return set;
 	}
 
 	/**

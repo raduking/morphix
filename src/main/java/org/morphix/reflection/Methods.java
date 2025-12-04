@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -37,6 +38,18 @@ import org.morphix.lang.JavaObjects;
  * @author Radu Sebastian LAZIN
  */
 public interface Methods {
+
+	/**
+	 * Returns a list with all the methods declared in the class given as parameter.
+	 *
+	 * @param <T> type to get the methods from
+	 *
+	 * @param cls class on which the methods are returned
+	 * @return list of methods
+	 */
+	static <T> List<Method> getAllDeclared(final Class<T> cls) {
+		return List.of(cls.getDeclaredMethods());
+	}
 
 	/**
 	 * Returns a method in the class given as parameter, also searching in all its super classes.
@@ -62,7 +75,9 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes.
+	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes. This
+	 * method does not return methods from interfaces or from {@link Object} class. This is a simpler version of
+	 * {@link Complete#getAllDeclaredInHierarchy(Class)} because most of the times only the class hierarchy is needed.
 	 * <p>
 	 * {@link LinkedList} is used because:
 	 * <ul>
@@ -84,8 +99,10 @@ public interface Methods {
 			return new LinkedList<>();
 		}
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass());
-		for (Method method : cls.getDeclaredMethods()) {
-			methods.addFirst(method);
+
+		Method[] declared = cls.getDeclaredMethods();
+		for (int i = declared.length - 1; i >= 0; --i) {
+			methods.addFirst(declared[i]);
 		}
 		return methods;
 	}
@@ -105,9 +122,11 @@ public interface Methods {
 			return new LinkedList<>();
 		}
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), predicate);
-		for (Method method : cls.getDeclaredMethods()) {
-			if (predicate.test(method)) {
-				methods.addFirst(method);
+
+		Method[] declared = cls.getDeclaredMethods();
+		for (int i = declared.length - 1; i >= 0; --i) {
+			if (predicate.test(declared[i])) {
+				methods.addFirst(declared[i]);
 			}
 		}
 		return methods;
@@ -515,6 +534,64 @@ public interface Methods {
 			}
 			Type returnType = actualTypeArguments[index];
 			return JavaObjects.cast(returnType);
+		}
+	}
+
+	/**
+	 * Namespace interface which groups all methods that handle correctly cyclic dependencies in the class hierarchy
+	 * including interfaces.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Complete {
+
+		/**
+		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
+		 * interfaces.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
+			return getAllDeclaredInHierarchy(cls, Classes.mutableSetOf());
+		}
+
+		/**
+		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
+		 * interfaces.
+		 * <p>
+		 * Note: the excluded set is also used to avoid cyclic dependencies in the class hierarchy.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @param excluded non null mutable set of classes/interfaces/enums/records to be excluded
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Set<Class<?>> excluded) {
+			try {
+				if (cls == null || excluded.contains(cls)) {
+					return new LinkedList<>();
+				}
+				excluded.add(cls);
+			} catch (UnsupportedOperationException e) {
+				throw new ReflectionException("The excluded set is unmodifiable. Please provide a non null modifiable set.", e);
+			} catch (NullPointerException e) {
+				throw new ReflectionException("The excluded set is null. Please provide a non null modifiable set.", e);
+			}
+
+			List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), excluded);
+			for (Class<?> iface : cls.getInterfaces()) {
+				methods.addAll(getAllDeclaredInHierarchy(iface, excluded));
+			}
+			Method[] declared = cls.getDeclaredMethods();
+			for (int i = declared.length - 1; i >= 0; --i) {
+				methods.addFirst(declared[i]);
+			}
+
+			return methods;
 		}
 	}
 }

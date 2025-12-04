@@ -12,6 +12,7 @@
  */
 package org.morphix.lang;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -140,7 +141,7 @@ public final class Nullables {
 	}
 
 	/**
-	 * Calls the supplier method only if the parameter is not null.
+	 * Calls the consumer method only if the parameter is not null.
 	 *
 	 * @param <T> parameter type
 	 *
@@ -166,9 +167,9 @@ public final class Nullables {
 	}
 
 	/**
-	 * Calls the setter function only if the value is not null. If the given value is null the setter is called with the
-	 * defaultValue. Prefer to use {@link #set(Object, Consumer, Supplier)} for lazy default value evaluation when the
-	 * default value is not a constant.
+	 * Calls the setter function with the given value only if the value is not null. If the given value is null the setter
+	 * is called with the defaultValue. Prefer to use {@link #set(Object, Consumer, Supplier)} for lazy default value
+	 * evaluation when the default value is not a constant.
 	 *
 	 * @param <T> parameter type
 	 *
@@ -181,8 +182,8 @@ public final class Nullables {
 	}
 
 	/**
-	 * Calls the setter function only if the value is not null. If the given value is null the setter is called with the
-	 * default value returned from the default value supplier.
+	 * Calls the setter function with the given value only if the value is not null. If the given value is null the setter
+	 * is called with the default value returned from the default value supplier.
 	 *
 	 * @param <T> parameter type
 	 *
@@ -208,7 +209,9 @@ public final class Nullables {
 	 */
 	@SafeVarargs
 	public static <T> List<T> nonNullList(final T... ts) {
-		return null == ts ? Collections.emptyList() : List.of(ts);
+		// using Arrays.asList(ts) instead of List.of(ts) because List.of(ts) with a varargs array can
+		// throw NullPointerException if the array contains null elements.
+		return null == ts ? Collections.emptyList() : Collections.unmodifiableList(Arrays.asList(ts));
 	}
 
 	/**
