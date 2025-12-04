@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -556,24 +555,30 @@ public interface Methods {
 		 * @return list of methods
 		 */
 		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
-			return getAllDeclaredInHierarchy(cls, new HashSet<>());
+			return getAllDeclaredInHierarchy(cls, Classes.mutableSetOf());
 		}
 
 		/**
 		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
 		 * interfaces.
 		 * <p>
-		 * Note: the excluded set is used to avoid cyclic dependencies in the class hierarchy.
+		 * Note: the excluded set is also used to avoid cyclic dependencies in the class hierarchy.
 		 *
 		 * @param cls class on which the methods are returned
-		 * @param excluded set of classes to be excluded
+		 * @param excluded non null mutable set of classes/interfaces/enums/records to be excluded
 		 * @return list of methods
 		 */
-		static List<Method> getAllDeclaredInHierarchy(final Class<?> cls, final Set<Class<?>> excluded) {
-			if (cls == null || excluded.contains(cls)) {
-				return new LinkedList<>();
+		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Set<Class<?>> excluded) {
+			try {
+				if (cls == null || excluded.contains(cls)) {
+					return new LinkedList<>();
+				}
+				excluded.add(cls);
+			} catch (UnsupportedOperationException e) {
+				throw new ReflectionException("The excluded set is unmodifiable. Please provide a non null modifiable set.", e);
+			} catch (NullPointerException e) {
+				throw new ReflectionException("The excluded set is null. Please provide a non null modifiable set.", e);
 			}
-			excluded.add(cls);
 
 			List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), excluded);
 			for (Class<?> iface : cls.getInterfaces()) {

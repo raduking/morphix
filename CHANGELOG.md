@@ -7,6 +7,7 @@
 - Added `Methods.Complete` name-space interface for utility methods that return all methods including interface methods.
 - Added `Methods.Complete.getAllDeclaredInHierarchy(Class)` method that returns all methods including interfaces.
 - Added `Methods.Complete.getAllDeclaredInHierarchy(Class, Set)` method that returns all methods including interfaces that can exclude classes/interfaces.
+- Added `Classes.mutableSetOf` method to create a mutable set of classes.
 
 ---
 

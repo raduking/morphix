@@ -13,7 +13,9 @@
 package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.constant.Constable;
 import java.lang.reflect.Method;
@@ -88,5 +90,30 @@ class MethodsCompleteGetAllDeclaredInHierarchyTest {
 		List<Method> methods = Methods.Complete.getAllDeclaredInHierarchy(Object.class, Set.of(Object.class));
 
 		assertThat(methods, hasSize(0));
+	}
+
+	@Test
+	void shouldThrowExceptionForNullExcludedClasses() {
+		ReflectionException exception = assertThrows(ReflectionException.class, () -> Methods.Complete.getAllDeclaredInHierarchy(Object.class, null));
+
+		assertThat(exception.getMessage(), equalTo("The excluded set is null. Please provide a non null modifiable set."));
+	}
+
+	@Test
+	void shouldThrowExceptionForNonModifiableExcludedClassesSet() {
+		ReflectionException exception = assertThrows(ReflectionException.class, () -> Methods.Complete.getAllDeclaredInHierarchy(Object.class, Set.of()));
+
+		assertThat(exception.getMessage(), equalTo("The excluded set is unmodifiable. Please provide a non null modifiable set."));
+	}
+
+	@Test
+	void shouldReturnEnumClassMethodsListForEmptyEnumsTooWithExcludedInterfaces() {
+		List<Method> methods = Methods.Complete.getAllDeclaredInHierarchy(E.class, Classes.mutableSetOf(Constable.class, Comparable.class));
+
+		int sizeEnum = Enum.class.getDeclaredMethods().length;
+		int sizeE = E.class.getDeclaredMethods().length;
+		int sizeObject = Object.class.getDeclaredMethods().length;
+
+		assertThat(methods, hasSize(sizeEnum + sizeE + sizeObject));
 	}
 }
