@@ -1,5 +1,11 @@
 ## Release Notes
 
+`1.0.14`
+
+- Added `Annotations` utility class to handle annotations.
+
+---
+
 `1.0.13`
 
 - Changed `Nullables.nonNullList` to return an unmodifiable list.
