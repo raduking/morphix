@@ -52,7 +52,9 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a method in the class given as parameter, also searching in all its super classes.
+	 * Returns a method in the class given as parameter, also searching in all its super classes. This method does not
+	 * return methods from interfaces or from {@link Object} class because most of the times only the class hierarchy is
+	 * needed.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -109,7 +111,8 @@ public interface Methods {
 
 	/**
 	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes that
-	 * verify the given method predicate.
+	 * verify the given method predicate. This method does not return methods from interfaces or from {@link Object} class
+	 * because most of the times only the class hierarchy is needed.
 	 *
 	 * @param <T> type to get the methods from
 	 *
