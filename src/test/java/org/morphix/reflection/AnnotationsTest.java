@@ -46,6 +46,10 @@ class AnnotationsTest {
 		String value();
 	}
 
+	@interface NonRuntimeAnnotation {
+		String name();
+	}
+
 	static class A {
 
 		@Deprecated(since = "0.9", forRemoval = true)
@@ -55,6 +59,11 @@ class AnnotationsTest {
 
 		@TestAnnotation(value = "originalValue")
 		void foo() {
+			// empty
+		}
+
+		@NonRuntimeAnnotation(name = "test")
+		void bar() {
 			// empty
 		}
 	}
@@ -102,9 +111,20 @@ class AnnotationsTest {
 			exception = assertThrows(ReflectionException.class, () -> Annotations.overrideValue(annotation, attributeName, "newValue"));
 		}
 
-		assertEquals("Failed to override annotation: " + annotation.annotationType().getCanonicalName() + "." + attributeName + "() value",
+		assertEquals("Failed to override annotation: " + annotation.annotationType().getCanonicalName() + "." + attributeName + "() value.",
 				exception.getMessage());
 		assertSame(expectedCause, exception.getCause());
+	}
+
+	@Test
+	void shouldThrowExceptionIfAnnotationIsNotRuntime() {
+		Method method = Methods.Safe.getOneDeclared("bar", A.class);
+		NonRuntimeAnnotation annotation = method.getAnnotation(NonRuntimeAnnotation.class);
+
+		ReflectionException exception = assertThrows(ReflectionException.class,
+				() -> Annotations.overrideValue(annotation, "name", "newName"));
+
+		assertThat(exception.getMessage(), equalTo("Failed to override annotation: annotation instance is null (possibly not retained at runtime)."));
 	}
 
 	@Test
