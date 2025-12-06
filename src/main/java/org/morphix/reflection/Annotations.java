@@ -13,7 +13,6 @@
 package org.morphix.reflection;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.Map;
@@ -23,25 +22,50 @@ import java.util.Map;
  *
  * @author Radu Sebastian LAZIN
  */
-public interface Annotations {
+public class Annotations {
+
+	/**
+	 * The name of the internal field holding annotation member values.
+	 */
+	private static final String FIELD_NAME_MEMBER_VALUES = "memberValues";
 
 	/**
 	 * Overrides a specific attribute value of an annotation instance.
+	 * <p>
+	 * This class uses deep reflection to modify the values of annotation attributes by accessing the internal data
+	 * structures of the JDK's annotation proxy implementation.
+	 * <p>
+	 * To use this class, applications <strong>must</strong> provide:
+	 *
+	 * <pre>
+	 *   --add-opens java.base/sun.reflect.annotation=ALL-UNNAMED
+	 * </pre>
+	 *
+	 * Without this JVM argument, any attempt to access the {@code memberValues} field will fail.
 	 *
 	 * @param <A> the type of the annotation
 	 *
 	 * @param annotation the annotation instance
 	 * @param attribute the attribute name to override
 	 * @param value the new value to set
+	 * @throws ReflectionException if the internal map cannot be accessed or modified (typically due to missing
+	 *     {@code --add-opens} flags)
 	 */
 	static <A extends Annotation> void overrideValue(final A annotation, final String attribute, final Object value) {
 		InvocationHandler handler = Proxy.getInvocationHandler(annotation);
+		Map<String, Object> memberValues = Fields.IgnoreAccess.get(handler, FIELD_NAME_MEMBER_VALUES);
 		try {
-			Field memberValuesField = Fields.getOneDeclared(handler, "memberValues");
-			Map<String, Object> memberValues = Fields.IgnoreAccess.get(handler, memberValuesField);
 			memberValues.put(attribute, value);
 		} catch (Exception e) {
-			throw new ReflectionException("Failed to override annotation value", e);
+			throw new ReflectionException("Failed to override annotation: "
+					+ annotation.annotationType().getCanonicalName() + "." + attribute + "() value", e);
 		}
+	}
+
+	/**
+	 * Hide constructor.
+	 */
+	private Annotations() {
+		throw Constructors.unsupportedOperationException();
 	}
 }

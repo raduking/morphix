@@ -3,6 +3,7 @@
 `1.0.14`
 
 - Added `Annotations` utility class to handle annotations.
+- Added `Annotations.overrideValue` to override an annotations' value at runtime.
 
 ---
 
