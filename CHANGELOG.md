@@ -1,5 +1,11 @@
 ## Release Notes
 
+`1.0.15`
+
+- Added class file version test to ensure correct class files are built.
+
+---
+
 `1.0.14`
 
 - Added `Annotations` utility class to handle annotations.
