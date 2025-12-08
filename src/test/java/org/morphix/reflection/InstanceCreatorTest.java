@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 class InstanceCreatorTest {
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		assumeTrue(InstanceCreator.getInstance() != null);
 	}
 

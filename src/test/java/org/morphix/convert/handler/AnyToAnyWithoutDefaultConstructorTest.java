@@ -52,7 +52,7 @@ class AnyToAnyWithoutDefaultConstructorTest {
 	}
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		InstanceCreator instanceCreator = InstanceCreator.getInstance();
 		assumeTrue(instanceCreator.isUsable());
 	}

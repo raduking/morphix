@@ -12,6 +12,7 @@
  */
 package org.morphix.reflection;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -86,9 +87,7 @@ public interface Classes {
 	 */
 	static Set<Class<?>> mutableSetOf(final Class<?>... classes) {
 		Set<Class<?>> set = new HashSet<>();
-		for (Class<?> clazz : classes) {
-			set.add(clazz);
-		}
+		Collections.addAll(set, classes);
 		return set;
 	}
 

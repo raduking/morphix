@@ -87,9 +87,7 @@ class ConversionDeepBigIntegerTest {
 
 	@Test
 	void shouldConvertLongToBigInteger() {
-		// because BigInteger has a:
-		// BigInteger valueOf(long l);
-		// method.
+		// because BigInteger has a: BigInteger valueOf(long l) method.
 		C c = new C();
 		c.i = 1L;
 

@@ -101,7 +101,7 @@ class MapToMapWithExpandableTest {
 	@Test
 	void shouldExpandField() {
 		final int size = 10;
-		List<Src> list = IntStream.range(0, size).boxed().map(Src::new).collect(Collectors.toList());
+		List<Src> list = IntStream.range(0, size).boxed().map(Src::new).toList();
 		Map<Integer, Src> srcMap = list.stream().collect(Collectors.toMap(Src::getS, Function.identity()));
 
 		Source source = new Source();
@@ -122,7 +122,7 @@ class MapToMapWithExpandableTest {
 	@Test
 	void shouldNotExpandFieldIfNotInExpandableList() {
 		final int size = 10;
-		List<Src> list = IntStream.range(0, size).boxed().map(Src::new).collect(Collectors.toList());
+		List<Src> list = IntStream.range(0, size).boxed().map(Src::new).toList();
 		Map<Integer, Src> srcMap = list.stream().collect(Collectors.toMap(Src::getS, Function.identity()));
 
 		Source source = new Source();
@@ -136,7 +136,7 @@ class MapToMapWithExpandableTest {
 	@Test
 	void shouldNotExpandField() {
 		final int size = 10;
-		List<Src> list = IntStream.range(0, size).boxed().map(Src::new).collect(Collectors.toList());
+		List<Src> list = IntStream.range(0, size).boxed().map(Src::new).toList();
 		Map<Integer, Src> srcMap = list.stream().collect(Collectors.toMap(Src::getS, Function.identity()));
 
 		Source source = new Source();
@@ -154,7 +154,7 @@ class MapToMapWithExpandableTest {
 	@Test
 	void shouldExpandFieldIfItsNotAnExpandableField() {
 		final int size = 10;
-		List<Src> list = IntStream.range(0, size).boxed().map(Src::new).collect(Collectors.toList());
+		List<Src> list = IntStream.range(0, size).boxed().map(Src::new).toList();
 		Map<Integer, Src> srcMap = list.stream().collect(Collectors.toMap(Src::getS, Function.identity()));
 
 		Source1 source = new Source1();
