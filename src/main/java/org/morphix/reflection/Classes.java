@@ -136,10 +136,14 @@ public interface Classes {
 
 		/**
 		 * Finds all classes in a specific package located in a specific classes directory.
+		 * <p>
+		 * This method resolves the package name to a directory path, verifies the directory exists, and then searches for all
+		 * class files within that directory and its sub-directories.
 		 *
 		 * @param basePackage the base package to scan
 		 * @param classesDir the classes directory
 		 * @return all classes in a specific package located in a specific classes directory
+		 * @throws SecurityException if a security manager exists and access to class loading is restricted
 		 */
 		static Set<Class<?>> findInPackage(final String basePackage, final Path classesDir) {
 			File directory = classesDir.resolve(basePackage.replace('.', '/')).toFile();
@@ -152,6 +156,9 @@ public interface Classes {
 
 		/**
 		 * Recursively finds all classes in a specific directory.
+		 * <p>
+		 * This method performs a depth-first traversal of the directory structure, treating each sub-directory as a package
+		 * component and each `.class` file as a loadable class.
 		 *
 		 * @param directory the directory
 		 * @param packageName the package name
@@ -175,6 +182,9 @@ public interface Classes {
 		/**
 		 * Finds all classes annotated with any of the specified annotations in the specified packages located in a specific
 		 * classes directory.
+		 * <p>
+		 * This method scans each package for classes, checks each class for the presence of the specified annotations, and
+		 * collects those classes into a result set.
 		 *
 		 * @param packages the packages to scan
 		 * @param classesDir the classes directory
