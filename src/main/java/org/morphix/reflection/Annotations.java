@@ -51,7 +51,7 @@ public class Annotations {
 	 * @throws ReflectionException if the internal map cannot be accessed or modified (typically due to missing
 	 *     {@code --add-opens} flags)
 	 */
-	static <A extends Annotation> void overrideValue(final A annotation, final String attribute, final Object value) {
+	public static <A extends Annotation> void overrideValue(final A annotation, final String attribute, final Object value) {
 		if (annotation == null) {
 			throw new ReflectionException("Failed to override annotation: annotation instance is null (possibly not retained at runtime).");
 		}
