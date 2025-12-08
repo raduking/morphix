@@ -16,6 +16,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 
 import org.morphix.reflection.ConstantPoolAccessor;
+import org.morphix.reflection.Constructors;
 import org.morphix.reflection.Methods;
 
 /**
@@ -29,14 +30,29 @@ import org.morphix.reflection.Methods;
 public class ConstantPoolAccessorOracleJDK extends ConstantPoolAccessor { // NOSONAR
 
 	/**
-	 * ConstantPool class name.
+	 * Class names used in this class.
+	 *
+	 * @author Radu Sebastian LAZIN
 	 */
-	static final String CONSTANT_POOL_CLASS_NAME = "jdk.internal.reflect.ConstantPool";
+	static class ClassName {
 
-	/**
-	 * SharedSecrets class name.
-	 */
-	static final String SHARED_SECRETS_CLASS_NAME = "jdk.internal.access.SharedSecrets";
+		/**
+		 * ConstantPool class name.
+		 */
+		static final String CONSTANT_POOL = "jdk.internal.reflect.ConstantPool";
+
+		/**
+		 * SharedSecrets class name.
+		 */
+		static final String SHARED_SECRETS = "jdk.internal.access.SharedSecrets";
+
+		/**
+		 * Hide constructor.
+		 */
+		private ClassName() {
+			throw Constructors.unsupportedOperationException();
+		}
+	}
 
 	/**
 	 * getConstantPool method.
@@ -83,7 +99,7 @@ public class ConstantPoolAccessorOracleJDK extends ConstantPoolAccessor { // NOS
 		try {
 			Class<?> internalConstantPoolClass = Class.forName(constantPoolClassName);
 
-			Class<?> sharedSecretsClass = Class.forName(SHARED_SECRETS_CLASS_NAME);
+			Class<?> sharedSecretsClass = Class.forName(ClassName.SHARED_SECRETS);
 			Method javaLangAccessGetter = sharedSecretsClass.getMethod("getJavaLangAccess");
 
 			try (MemberAccessorOracleJDK<Method> methodAccessor = new MemberAccessorOracleJDK<>(javaLangAccessGetter)) {
@@ -105,7 +121,7 @@ public class ConstantPoolAccessorOracleJDK extends ConstantPoolAccessor { // NOS
 	 * @return the constant pool class name
 	 */
 	public static String getConstantPoolClassName() {
-		return CONSTANT_POOL_CLASS_NAME;
+		return ClassName.CONSTANT_POOL;
 	}
 
 	/**

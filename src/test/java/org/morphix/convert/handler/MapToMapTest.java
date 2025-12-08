@@ -203,7 +203,7 @@ class MapToMapTest {
 	@Test
 	void shouldNotConvertListToMap() {
 		final int size = 10;
-		List<Src> list = IntStream.range(0, size).boxed().map(Src::new).collect(Collectors.toList());
+		List<Src> list = IntStream.range(0, size).boxed().map(Src::new).toList();
 
 		SourceList source = new SourceList();
 		source.m = list;

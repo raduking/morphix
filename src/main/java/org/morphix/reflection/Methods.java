@@ -52,23 +52,27 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a method in the class given as parameter, also searching in all its super classes.
+	 * Returns a method in the class given as parameter, also searching in all its super classes. This method does not
+	 * return methods from interfaces or from {@link Object} class because most of the times only the class hierarchy is
+	 * needed.
+	 * <p>
+	 * The method returns null if no method is found. The philosophy of this method is to return the method or null and not
+	 * to throw exceptions because most of the times the method may not be present and the caller just needs to check for
+	 * null.
 	 *
 	 * @param <T> type to get the methods from
 	 *
 	 * @param methodName name of the method to find
 	 * @param cls class from where to start the search
 	 * @param parameterTypes types of the method parameters
-	 * @return found method
-	 * @throws NoSuchMethodException if the method was not found
+	 * @return found method,
 	 */
-	static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes)
-			throws NoSuchMethodException {
+	static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
 		try {
 			return cls.getDeclaredMethod(methodName, parameterTypes);
 		} catch (NoSuchMethodException e) {
 			if (null == cls.getSuperclass()) {
-				throw e;
+				return null;
 			}
 			return getOneDeclaredInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
 		}
@@ -109,7 +113,8 @@ public interface Methods {
 
 	/**
 	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes that
-	 * verify the given method predicate.
+	 * verify the given method predicate. This method does not return methods from interfaces or from {@link Object} class
+	 * because most of the times only the class hierarchy is needed.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -312,28 +317,28 @@ public interface Methods {
 	 * @param cls class from which to search for the setter
 	 * @param field field to get the setter from
 	 * @return the setter method for the given field
+	 * @throws ReflectionException if no setter method is found
 	 */
 	static <T> Method getSetterMethod(final Class<T> cls, final Field field) {
 		String methodName = MethodType.SETTER.getMethodName(field);
-		try {
-			return Methods.getOneDeclaredInHierarchy(methodName, cls, field.getType());
-		} catch (NoSuchMethodException ignored) {
-			// ignored because we try with primitive type next
+		Method method = Methods.getOneDeclaredInHierarchy(methodName, cls, field.getType());
+		if (null != method) {
+			return method;
 		}
 		Class<?> primitiveFieldType;
 		try {
 			primitiveFieldType = Primitives.toPrimitive(field.getType());
-		} catch (ReflectionException re) {
+		} catch (ReflectionException e) {
 			throw new ReflectionException("Error finding method: "
-					+ methodName + "(" + field.getType().getCanonicalName() + ")", re);
+					+ methodName + "(" + field.getType().getCanonicalName() + ")", e);
 		}
-		try {
-			return Methods.getOneDeclaredInHierarchy(methodName, cls, primitiveFieldType);
-		} catch (NoSuchMethodException e) {
+		method = Methods.getOneDeclaredInHierarchy(methodName, cls, primitiveFieldType);
+		if (null == method) {
 			throw new ReflectionException("Error finding method: "
 					+ methodName + "(" + field.getType().getCanonicalName() + ") or "
-					+ methodName + "(" + primitiveFieldType.getCanonicalName() + ")", e);
+					+ methodName + "(" + primitiveFieldType.getCanonicalName() + ")");
 		}
+		return method;
 	}
 
 	/**

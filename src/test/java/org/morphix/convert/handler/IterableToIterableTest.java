@@ -64,8 +64,9 @@ class IterableToIterableTest {
 		@Override
 		public boolean equals(final Object obj) {
 			// basic equals implementation
-			if (null == obj)
+			if (null == obj) {
 				return false;
+			}
 			return Objects.equals(x, ((B) obj).x);
 		}
 
@@ -245,7 +246,7 @@ class IterableToIterableTest {
 		int z;
 	}
 
-	public static abstract class F {
+	public abstract static class F {
 		String z;
 	}
 

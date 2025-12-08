@@ -41,8 +41,9 @@ class ArrayToAnyTest {
 		@Override
 		public boolean equals(final Object obj) {
 			// basic equals implementation
-			if (null == obj)
+			if (null == obj) {
 				return false;
+			}
 			return Objects.equals(x, ((A) obj).x);
 		}
 
@@ -58,8 +59,9 @@ class ArrayToAnyTest {
 		@Override
 		public boolean equals(final Object obj) {
 			// basic equals implementation
-			if (null == obj)
+			if (null == obj) {
 				return false;
+			}
 			return Objects.equals(x, ((B) obj).x);
 		}
 
@@ -114,7 +116,7 @@ class ArrayToAnyTest {
 	void shouldConvertArraysToSet() {
 		Integer[] as = new Integer[] { TEST_INTEGER_1, TEST_INTEGER_2 };
 
-		Set<String> bs = convertArray(as, s -> String.valueOf(s)).toSet();
+		Set<String> bs = convertArray(as, String::valueOf).toSet();
 
 		assertThat(bs, containsInAnyOrder(TEST_STRING_1, TEST_STRING_2));
 	}

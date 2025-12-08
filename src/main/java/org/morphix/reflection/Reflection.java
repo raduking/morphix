@@ -78,14 +78,13 @@ public interface Reflection {
 	 */
 	static <T> T getFieldValue(final Object obj, final Field field) {
 		// try a getter method first
-		try {
-			String getterMethodName = MethodType.GETTER.getMethodName(field);
-			Method getterMethod = Methods.getOneDeclaredInHierarchy(getterMethodName, obj.getClass());
+		String getterMethodName = MethodType.GETTER.getMethodName(field);
+		Method getterMethod = Methods.getOneDeclaredInHierarchy(getterMethodName, obj.getClass());
+		if (null != getterMethod) {
 			return Methods.IgnoreAccess.invoke(getterMethod, obj);
-		} catch (NoSuchMethodException e) {
-			// if no getter is found, just get the value from the field
-			return Fields.IgnoreAccess.get(obj, field);
 		}
+		// if no getter is found, just get the value from the field
+		return Fields.IgnoreAccess.get(obj, field);
 	}
 
 	/**
@@ -98,11 +97,11 @@ public interface Reflection {
 	 */
 	static void setFieldValue(final Object obj, final Field field, final Object value) {
 		// try a setter method first
-		try {
-			String setterMethodName = MethodType.SETTER.getMethodName(field);
-			Method setterMethod = Methods.getOneDeclaredInHierarchy(setterMethodName, obj.getClass(), field.getType());
+		String setterMethodName = MethodType.SETTER.getMethodName(field);
+		Method setterMethod = Methods.getOneDeclaredInHierarchy(setterMethodName, obj.getClass(), field.getType());
+		if (null != setterMethod) {
 			Methods.IgnoreAccess.invoke(setterMethod, obj, value);
-		} catch (NoSuchMethodException e) {
+		} else {
 			// if no setter found just set the value to field
 			Fields.IgnoreAccess.set(obj, field, value);
 		}
@@ -123,11 +122,11 @@ public interface Reflection {
 	 */
 	static <T, F, U> void setFieldValue(final T obj, final String fieldName, final Class<F> fieldType, final U value) {
 		// try a setter method first
-		try {
-			String setterMethodName = MethodType.SETTER.getMethodName(fieldName);
-			Method setterMethod = Methods.getOneDeclaredInHierarchy(setterMethodName, obj.getClass(), fieldType);
+		String setterMethodName = MethodType.SETTER.getMethodName(fieldName);
+		Method setterMethod = Methods.getOneDeclaredInHierarchy(setterMethodName, obj.getClass(), fieldType);
+		if (null != setterMethod) {
 			Methods.IgnoreAccess.invoke(setterMethod, obj, value);
-		} catch (NoSuchMethodException e) {
+		} else {
 			// if no setter found just set the value to field
 			Field field = Fields.getOneDeclaredInHierarchy(obj, fieldName);
 			if (null != field && field.getType().equals(fieldType)) {

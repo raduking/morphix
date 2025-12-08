@@ -177,10 +177,9 @@ public interface Fields {
 		if (null == cls) {
 			return null;
 		}
-		for (Field field : cls.getDeclaredFields()) {
-			if (field.getName().equals(fieldName)) {
-				return field;
-			}
+		Field field = getOneDeclared(cls, fieldName);
+		if (null != field) {
+			return field;
 		}
 		return getOneDeclaredInHierarchy(cls.getSuperclass(), fieldName);
 	}

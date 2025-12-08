@@ -17,7 +17,7 @@
 
 	<groupId>io.github.raduking</groupId>
 	<artifactId>morphix-all</artifactId>
-	<version>1.0.13</version>
+	<version>1.0.14</version>
 	<packaging>jar</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -70,6 +70,7 @@
 			--add-opens java.base/java.util=ALL-UNNAMED
 			--add-opens java.base/java.lang=ALL-UNNAMED
 			--add-opens java.base/java.lang.invoke=ALL-UNNAMED
+			--add-opens java.base/sun.reflect.annotation=ALL-UNNAMED
 		</morphixArgLine>
 	</properties>
 

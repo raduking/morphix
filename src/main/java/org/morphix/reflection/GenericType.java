@@ -165,11 +165,9 @@ public class GenericType implements ParameterizedType {
 	 * @return class of the argument, null otherwise
 	 */
 	public static <T extends Type, U> T getGenericArgumentType(final Field field, final Class<U> cls, final int index) {
-		Method getterMethod;
-		try {
-			String getterMethodName = MethodType.GETTER.getMethodName(field);
-			getterMethod = Methods.getOneDeclaredInHierarchy(getterMethodName, cls);
-		} catch (NoSuchMethodException e) {
+		String getterMethodName = MethodType.GETTER.getMethodName(field);
+		Method getterMethod = Methods.getOneDeclaredInHierarchy(getterMethodName, cls);
+		if (null == getterMethod) {
 			return null;
 		}
 		return Methods.Safe.getGenericReturnType(getterMethod, index);

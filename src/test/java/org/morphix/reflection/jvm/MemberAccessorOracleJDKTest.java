@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.reflection.Fields;
+import org.morphix.reflection.jvm.ConstantPoolAccessorOracleJDK.ClassName;
 import org.morphix.reflection.testdata.A;
 
 /**
@@ -67,7 +68,7 @@ class MemberAccessorOracleJDKTest {
 		}
 		assertTrue(staticFieldsValues.stream().allMatch(Objects::isNull));
 
-		Class<?> sharedSecretsClass = Class.forName(ConstantPoolAccessorOracleJDK.SHARED_SECRETS_CLASS_NAME);
+		Class<?> sharedSecretsClass = Class.forName(ClassName.SHARED_SECRETS);
 		Method javaLangAccessGetter = sharedSecretsClass.getMethod("getJavaLangAccess");
 
 		Exception e = assertThrows(Exception.class, () -> {

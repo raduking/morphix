@@ -288,6 +288,11 @@ class LambdasTest {
 		assertThat(serializedLambda.getFunctionalInterfaceMethodName(), equalTo("writeReplacex"));
 	}
 
+	@Test
+	void shouldReturnSerializationMethodName() {
+		assertThat(Lambdas.SERIALIZATION_METHOD_NAME, equalTo("writeReplace"));
+	}
+
 	/**
 	 * Constant Pool iterator.
 	 *

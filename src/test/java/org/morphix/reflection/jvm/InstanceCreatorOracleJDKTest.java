@@ -52,7 +52,7 @@ class InstanceCreatorOracleJDKTest {
 	private static final Set<String> EXCLUDED_FIELDS = Set.of("REFLECTION_FACTORY_CLASS_NAME");
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		assumeTrue(InstanceCreatorOracleJDK.getInstance().isUsable());
 	}
 
