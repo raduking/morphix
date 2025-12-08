@@ -4,6 +4,7 @@
 
 - Added `Annotations` utility class to handle annotations.
 - Added `Annotations.overrideValue` to override an annotations' value at runtime.
+- Changed `Methods.getOneDeclaredInHierarchy` to return `null` instead of throwing an exception when the method is not found.
 
 ---
 
