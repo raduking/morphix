@@ -33,7 +33,7 @@ public class Lambdas {
 	/**
 	 * Name of the method that returns the serialized lambda.
 	 */
-	private static final String SERIALIZATION_METHOD_NAME = "writeReplace";
+	static final String SERIALIZATION_METHOD_NAME = "writeReplace";
 
 	/**
 	 * Private constructor.

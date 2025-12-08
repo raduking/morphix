@@ -27,7 +27,7 @@ public class Annotations {
 	/**
 	 * The name of the internal field holding annotation member values.
 	 */
-	private static final String FIELD_NAME_MEMBER_VALUES = "memberValues";
+	static final String FIELD_NAME_MEMBER_VALUES = "memberValues";
 
 	/**
 	 * Overrides a specific attribute value of an annotation instance.

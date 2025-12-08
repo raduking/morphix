@@ -12,8 +12,8 @@
  */
 package org.morphix.reflection.jvm;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,8 +34,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.morphix.reflection.ConstantPool;
+import org.morphix.reflection.Constructors;
 import org.morphix.reflection.Fields;
 import org.morphix.reflection.MemberAccessor;
+import org.morphix.reflection.jvm.ConstantPoolAccessorOracleJDK.ClassName;
+import org.morphix.utils.Tests;
 
 /**
  * Test class for {@link ConstantPoolAccessorOracleJDK}.
@@ -63,7 +66,7 @@ class ConstantPoolAccessorOracleJDKTest {
 	private ConstantPool<?> constantPool;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		try {
 			getMethodAtMethod = ConstantPoolAccessorOracleJDKTest.class.getDeclaredMethod("getMethodAt", int.class);
 			getSizeMethod = ConstantPoolAccessorOracleJDKTest.class.getDeclaredMethod("getSize");
@@ -242,7 +245,12 @@ class ConstantPoolAccessorOracleJDKTest {
 
 	@Test
 	void shouldReturnConstantPoolClassName() {
-		assertThat(ConstantPoolAccessorOracleJDK.CONSTANT_POOL_CLASS_NAME, equalTo("jdk.internal.reflect.ConstantPool"));
+		assertThat(ClassName.CONSTANT_POOL, equalTo("jdk.internal.reflect.ConstantPool"));
+	}
+
+	@Test
+	void shouldReturnSharedSecretsClassName() {
+		assertThat(ClassName.SHARED_SECRETS, equalTo("jdk.internal.access.SharedSecrets"));
 	}
 
 	@Test
@@ -258,4 +266,10 @@ class ConstantPoolAccessorOracleJDKTest {
 		}
 	}
 
+	@Test
+	void shouldThrowExceptionOnCallingClassNameConstructor() {
+		UnsupportedOperationException unsupportedOperationException = Tests.verifyDefaultConstructorThrows(ClassName.class);
+
+		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
+	}
 }
