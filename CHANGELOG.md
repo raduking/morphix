@@ -5,6 +5,10 @@
 - Added `Annotations` utility class to handle annotations.
 - Added `Annotations.overrideValue` to override an annotations' value at runtime.
 - Changed `Methods.getOneDeclaredInHierarchy` to return `null` instead of throwing an exception when the method is not found.
+- Added `Classes.Scan` name space class for class finder methods.
+- Added `Classes.Scan.findInPackage` method to find classes in a given package.
+- Added `Classes.Scan.findInDirectory` method to find classes in a given directory.
+- Added `Classes.Scan.findWithAnyAnnotation` methods to find classes with a given set of annotations.
 
 ---
 

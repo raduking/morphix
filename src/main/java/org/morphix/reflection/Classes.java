@@ -12,9 +12,14 @@
  */
 package org.morphix.reflection;
 
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.morphix.lang.JavaObjects;
 
@@ -117,4 +122,121 @@ public interface Classes {
 
 	}
 
+	/**
+	 * Additional discovery utilities (class path scanning, annotation scanning, file-based scanning).
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Scan {
+
+		/**
+		 * The class file extension.
+		 */
+		String CLASS_FILE_EXTENSION = ".class";
+
+		/**
+		 * Finds all classes in a specific package located in a specific classes directory.
+		 *
+		 * @param basePackage the base package to scan
+		 * @param classesDir the classes directory
+		 * @return all classes in a specific package located in a specific classes directory
+		 */
+		static Set<Class<?>> findInPackage(final String basePackage, final Path classesDir) {
+			File directory = classesDir.resolve(basePackage.replace('.', '/')).toFile();
+			if (!directory.exists() || !directory.isDirectory()) {
+				return Collections.emptySet();
+			}
+			ClassLoader cl = Thread.currentThread().getContextClassLoader();
+			return findInDirectory(directory, basePackage, cl);
+		}
+
+		/**
+		 * Recursively finds all classes in a specific directory.
+		 *
+		 * @param directory the directory
+		 * @param packageName the package name
+		 * @param classLoader the class loader
+		 * @return all classes in a specific directory
+		 */
+		static Set<Class<?>> findInDirectory(final File directory, final String packageName, final ClassLoader classLoader) {
+			File[] files = Objects.requireNonNull(directory.listFiles(), "Directory listing failed for: " + directory);
+			Set<Class<?>> classes = new HashSet<>();
+			for (File file : files) {
+				if (file.isDirectory()) {
+					classes.addAll(findInDirectory(file, packageName + "." + file.getName(), classLoader));
+				} else if (file.getName().endsWith(CLASS_FILE_EXTENSION)) {
+					String className = packageName + '.' + file.getName().substring(0, file.getName().length() - CLASS_FILE_EXTENSION.length());
+					classes.add(getOne(className, classLoader));
+				}
+			}
+			return classes;
+		}
+
+		/**
+		 * Finds all classes annotated with any of the specified annotations in the specified packages located in a specific
+		 * classes directory.
+		 *
+		 * @param packages the packages to scan
+		 * @param classesDir the classes directory
+		 * @param annotations the annotations to look for
+		 * @return all classes annotated with any of the specified annotations in the specified packages located in a specific
+		 * classes directory
+		 */
+		static Set<Class<?>> findWithAnyAnnotation(final Set<String> packages, final Path classesDir,
+				final Set<Class<? extends Annotation>> annotations) {
+			if (null == packages || packages.isEmpty()) {
+				return Collections.emptySet();
+			}
+			Set<Class<?>> annotated = new HashSet<>();
+			for (String pkg : packages) {
+				for (Class<?> cls : findInPackage(pkg, classesDir)) {
+					for (Class<? extends Annotation> ann : annotations) {
+						if (null != cls.getAnnotation(ann)) {
+							annotated.add(cls);
+							break;
+						}
+					}
+				}
+			}
+			return annotated;
+		}
+
+		/**
+		 * Finds all classes annotated with any of the specified annotations in the specified packages located in a specific
+		 * classes directory. This version accepts a logger consumer to log messages during the scanning process and it is
+		 * marginally slower than the version without logging because it logs all annotations found on the classes where the
+		 * first version just skips to the next class.
+		 *
+		 * @param packages the packages to scan
+		 * @param classesDir the classes directory
+		 * @param annotations the annotations to look for
+		 * @param loggerConsumer a consumer for logging messages must not be null
+		 * @return all classes annotated with any of the specified annotations in the specified packages located in a specific
+		 * classes directory
+		 */
+		static Set<Class<?>> findWithAnyAnnotation(final Set<String> packages, final Path classesDir,
+				final Set<Class<? extends Annotation>> annotations, final Consumer<String> loggerConsumer) {
+			if (null == packages || packages.isEmpty()) {
+				return Collections.emptySet();
+			}
+			Set<Class<?>> annotated = new HashSet<>();
+			for (String pkg : packages) {
+				loggerConsumer.accept("Scanning package: " + pkg);
+				for (Class<?> cls : findInPackage(pkg, classesDir)) {
+					boolean found = false;
+					for (Class<? extends Annotation> ann : annotations) {
+						if (null == cls.getAnnotation(ann)) {
+							continue;
+						}
+						loggerConsumer.accept("Found annotated class: " + cls.getCanonicalName() + " with annotation: " + ann.getCanonicalName());
+						if (!found) {
+							annotated.add(cls);
+							found = true;
+						}
+					}
+				}
+			}
+			return annotated;
+		}
+	}
 }
