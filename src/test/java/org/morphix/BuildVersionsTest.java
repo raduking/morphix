@@ -41,7 +41,9 @@ class BuildVersionsTest {
 	private static final String PROPERTY_JAVA_VERSION = "java.version";
 	private static final String PROPERTY_MAVEN_COMPILER_TARGET = "maven.compiler.target";
 
-	private static final Properties PROPERTIES = Tests.loadMavenProperties();
+	private static final String MAVEN_PROPERTIES = TARGET + "/maven.properties";
+
+	private static final Properties PROPERTIES = Tests.loadProperties(MAVEN_PROPERTIES);
 
 	@Test
 	void shouldHaveMavenCompilerTargetProperty() {

@@ -29,17 +29,15 @@ import org.morphix.reflection.ReflectionException;
  */
 public interface Tests {
 
-	final String MAVEN_PROPERTIES = "maven.properties";
-
-	public static <T extends Throwable> T verifyDefaultConstructorThrows(final Class<?> cls) {
+	static <T extends Throwable> T verifyDefaultConstructorThrows(final Class<?> cls) {
 		ReflectionException reflectionException =
 				assertThrows(ReflectionException.class, () -> Constructors.IgnoreAccess.newInstance(cls));
 		InvocationTargetException invocationTargetException = JavaObjects.cast(reflectionException.getCause());
 		return JavaObjects.cast(invocationTargetException.getCause());
 	}
 
-	public static Properties loadMavenProperties() {
-		try (FileInputStream input = new FileInputStream("target/" + MAVEN_PROPERTIES)) {
+	static Properties loadProperties(final String filePath) {
+		try (FileInputStream input = new FileInputStream(filePath)) {
 			Properties properties = new Properties();
 			properties.load(input);
 			return properties;
