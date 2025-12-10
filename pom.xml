@@ -51,6 +51,16 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+		<!-- Publishing dependencies versions -->
+		<maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
+		<central.publishing.maven.plugin.version>0.9.0</central.publishing.maven.plugin.version>
+
+		<!-- Other plugin versions -->
+		<spotless.maven.plugin.version>2.46.1</spotless.maven.plugin.version>
+		<org.eclipse.jdt.core.version>3.42.0</org.eclipse.jdt.core.version>
+		<eclipse.formatter.version>4.36</eclipse.formatter.version>
+		<properties.maven.plugin.version>1.2.1</properties.maven.plugin.version>
+
 		<!-- Testing dependencies versions -->
 		<pitest.maven.plugin.version>1.22.0</pitest.maven.plugin.version>
 		<pitest.plugin.junit5.version>1.2.3</pitest.plugin.junit5.version>
@@ -60,10 +70,7 @@
 		<!-- Benchmarking -->
 		<jmh.version>1.37</jmh.version>
 
-		<!-- Publishing dependencies versions -->
-		<maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
-		<central.publishing.maven.plugin.version>0.9.0</central.publishing.maven.plugin.version>
-
+        <!-- JVM arguments for Morphix tests and mutation testing -->
 		<morphixArgLine>
 			-XX:+EnableDynamicAgentLoading
 			-Xshare:off
@@ -177,7 +184,25 @@
 				</executions>
 			</plugin>
 
-			<!--Jacoco code coverage -->
+			<!-- Writes all maven project properties to ${project.build.directory}/maven.properties -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>${properties.maven.plugin.version}</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>write-project-properties</goal>
+						</goals>
+						<configuration>
+							<outputFile>${project.build.directory}/maven.properties</outputFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Jacoco code coverage -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -242,19 +267,19 @@
 			<plugin>
 				<groupId>com.diffplug.spotless</groupId>
 				<artifactId>spotless-maven-plugin</artifactId>
-				<version>2.46.1</version>
+				<version>${spotless.maven.plugin.version}</version>
 				<dependencies>
 					<dependency>
 						<groupId>org.eclipse.jdt</groupId>
 						<artifactId>org.eclipse.jdt.core</artifactId>
-						<version>3.42.0</version>
+						<version>${org.eclipse.jdt.core.version}</version>
 					</dependency>
 				</dependencies>
 				<configuration>
 					<java>
 						<eclipse>
 							<file>${project.basedir}/formatter/java-formatter.xml</file>
-							<version>4.36</version>
+							<version>${eclipse.formatter.version}</version>
 						</eclipse>
 						<removeUnusedImports/>
 						<trimTrailingWhitespace/>
