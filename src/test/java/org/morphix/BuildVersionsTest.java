@@ -57,7 +57,9 @@ class BuildVersionsTest {
 		String javaVersion = PROPERTIES.getProperty(PROPERTY_JAVA_VERSION);
 		String target = PROPERTIES.getProperty(PROPERTY_MAVEN_COMPILER_TARGET);
 
-		assertEquals(target, javaVersion.startsWith("1.") ? javaVersion.substring(2, 3) : javaVersion.split("\\.")[0]);
+		String actual = javaVersion.startsWith("1.") ? javaVersion.substring(2, 3) : javaVersion.split("\\.")[0];
+
+		assertEquals(target, actual);
 	}
 
 	@Test
