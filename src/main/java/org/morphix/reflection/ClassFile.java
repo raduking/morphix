@@ -3,8 +3,7 @@ package org.morphix.reflection;
 /**
  * Represents a class file version with major and minor components.
  *
- * @param major the major version number
- * @param minor the minor version number
+ * @author Radu Sebastian LAZIN
  */
 public interface ClassFile {
 
@@ -23,6 +22,8 @@ public interface ClassFile {
 	 *
 	 * @param major the major version number
 	 * @param minor the minor version number
+	 *
+	 * @author Radu Sebastian LAZIN
 	 */
 	public record Version(int major, int minor) {
 

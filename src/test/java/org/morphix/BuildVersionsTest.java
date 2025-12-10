@@ -12,6 +12,9 @@
  */
 package org.morphix;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.DataInputStream;
@@ -23,35 +26,41 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.reflection.ClassFile;
+import org.morphix.utils.Tests;
 
 /**
  * Test class to verify that all compiled class files have the expected class file version.
  *
  * @author Radu Sebastian LAZIN
  */
-class ClassVersionTest {
+class BuildVersionsTest {
 
 	private static final String TARGET = "target";
 	private static final String TARGET_CLASSES = TARGET + "/classes";
-	private static final String MAVEN_PROPERTIES = TARGET + "/maven.properties";
 
+	private static final String PROPERTY_JAVA_VERSION = "java.version";
 	private static final String PROPERTY_MAVEN_COMPILER_TARGET = "maven.compiler.target";
 
-	private static Properties loadProjectProperties() {
-		try (FileInputStream input = new FileInputStream(MAVEN_PROPERTIES)) {
-			Properties properties = new Properties();
-			properties.load(input);
-			return properties;
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to load project properties", e);
-		}
+	private static final Properties PROPERTIES = Tests.loadMavenProperties();
+
+	@Test
+	void shouldHaveMavenCompilerTargetProperty() {
+		String target = PROPERTIES.getProperty(PROPERTY_MAVEN_COMPILER_TARGET);
+
+		assertThat(target, not(emptyOrNullString()));
+	}
+
+	@Test
+	void shouldHaveTheSameJavaVersionAsMavenCompilerTarget() {
+		String javaVersion = PROPERTIES.getProperty(PROPERTY_JAVA_VERSION);
+		String target = PROPERTIES.getProperty(PROPERTY_MAVEN_COMPILER_TARGET);
+
+		assertEquals(target, javaVersion.startsWith("1.") ? javaVersion.substring(2, 3) : javaVersion.split("\\.")[0]);
 	}
 
 	@Test
 	void shouldHaveTheCorrectClassVersion() throws Exception {
-		Properties properties = loadProjectProperties();
-
-		int javaVersion = Integer.parseInt(properties.getProperty(PROPERTY_MAVEN_COMPILER_TARGET));
+		int javaVersion = Integer.parseInt(PROPERTIES.getProperty(PROPERTY_MAVEN_COMPILER_TARGET));
 
 		Path classesDir = Path.of(TARGET_CLASSES);
 		int expectedMajor = ClassFile.Version.fromJavaVersion(javaVersion).major();
