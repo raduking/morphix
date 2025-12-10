@@ -5,7 +5,7 @@
 - Added class file version test to ensure correct class files are built.
 - Added `ClassFile` interface for class files utility methods.
 - Added `ClassFile.Version` record which represents a class file version.
-- Added `maven-properties-plugin` to `pom.xml` to output all Maven properties to `project.properties`.
+- Added `maven-properties-plugin` to `pom.xml` to output all Maven properties to `target/maven.properties`.
 
 ---
 
