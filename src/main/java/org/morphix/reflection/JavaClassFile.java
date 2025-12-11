@@ -13,7 +13,7 @@
 package org.morphix.reflection;
 
 /**
- * Represents a class file version with major and minor components.
+ * Defines constants and utilities for working with Java class files.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -22,12 +22,12 @@ public interface JavaClassFile {
 	/**
 	 * The class file extension.
 	 */
-	static final String EXTENSION = ".class";
+	String EXTENSION = ".class";
 
 	/**
 	 * The magic number that identifies a class file.
 	 */
-	static final int CAFEBABE = 0xCAFEBABE;
+	int CAFEBABE = 0xCAFEBABE;
 
 	/**
 	 * Represents a class file version with major and minor components.
@@ -37,12 +37,20 @@ public interface JavaClassFile {
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
-	public record Version(int major, int minor) {
+	record Version(int major, int minor) {
 
 		/**
 		 * The magic offset used to calculate the major version from the Java version.
+		 * <p>
+		 * According to the Java class file specification, the major version is calculated as 44 + Java version (e.g., Java 8 =
+		 * 52, Java 11 = 55)
 		 */
 		public static final int MAGIC_OFFSET = 44;
+
+		/**
+		 * The default minor version for class files.
+		 */
+		public static final int DEFAULT_MINOR = 0;
 
 		/**
 		 * Creates a Version instance from a given Java version.
@@ -52,8 +60,7 @@ public interface JavaClassFile {
 		 */
 		public static Version fromJavaVersion(final int javaVersion) {
 			int major = MAGIC_OFFSET + javaVersion;
-			int minor = 0;
-			return new Version(major, minor);
+			return new Version(major, DEFAULT_MINOR);
 		}
 	}
 }

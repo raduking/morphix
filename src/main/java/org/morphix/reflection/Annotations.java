@@ -52,12 +52,15 @@ public class Annotations {
 	 *     {@code --add-opens} flags)
 	 */
 	public static <A extends Annotation> void overrideValue(final A annotation, final String attribute, final Object value) {
+		if (attribute == null || attribute.isBlank()) {
+			throw new IllegalArgumentException("Attribute name must be non-null and non-blank.");
+		}
 		if (annotation == null) {
 			throw new ReflectionException("Failed to override annotation: annotation instance is null (possibly not retained at runtime).");
 		}
-		InvocationHandler handler = Proxy.getInvocationHandler(annotation);
-		Map<String, Object> memberValues = Fields.IgnoreAccess.get(handler, FIELD_NAME_MEMBER_VALUES);
 		try {
+			InvocationHandler handler = Proxy.getInvocationHandler(annotation);
+			Map<String, Object> memberValues = Fields.IgnoreAccess.get(handler, FIELD_NAME_MEMBER_VALUES);
 			memberValues.put(attribute, value);
 		} catch (Exception e) {
 			throw new ReflectionException("Failed to override annotation: "
