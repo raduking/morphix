@@ -143,7 +143,8 @@ public abstract class GenericClass<T> {
 	 */
 	@Override
 	public String toString() {
-		return "GenericClass<" + type + ">";
+		String typeString = null == type ? "T" : type.toString();
+		return "GenericClass<" + typeString + ">";
 	}
 
 }

@@ -222,6 +222,6 @@ class GenericClassTest {
 
 		assertThat(gc.getType(), equalTo(null));
 		assertThat(gc.getGenericArgumentType(), equalTo(null));
-		assertThat(gc.toString(), equalTo("GenericClass<null>"));
+		assertThat(gc.toString(), equalTo("GenericClass<T>"));
 	}
 }
