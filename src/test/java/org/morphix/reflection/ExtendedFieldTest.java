@@ -134,4 +134,14 @@ class ExtendedFieldTest {
 
 		assertThat(result, equalTo(REFLECTION_SET_NAME));
 	}
+
+	@Test
+	void shouldReturnNullOnGetGenericReturnTypeWhenObjectIsNullAndFieldIsSet() {
+		Field field = Fields.getOneDeclared(ExtendedFieldTest.class, "TEST_LONG");
+		ExtendedField ef = of(field, null);
+
+		Object result = ef.getGenericReturnType(0);
+
+		assertThat(result, equalTo(null));
+	}
 }

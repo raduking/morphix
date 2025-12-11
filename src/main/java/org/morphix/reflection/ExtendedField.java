@@ -256,6 +256,9 @@ public class ExtendedField {
 		if (null != getterMethod) {
 			return Methods.Safe.getGenericReturnType(getterMethod, index);
 		}
+		if (null == field) {
+			return null;
+		}
 		if (hasObject()) {
 			return GenericType.getGenericArgumentType(field, object.getClass(), index);
 		}
