@@ -1,5 +1,11 @@
 ## Release Notes
 
+`1.0.16`
+
+- Added `GenericClass.of` method without parameters to allow instantiation without a type set (null type).
+
+---
+
 `1.0.15`
 
 - Added class file version test to ensure correct class files are built.

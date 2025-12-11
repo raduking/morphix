@@ -71,12 +71,22 @@ public abstract class GenericClass<T> {
 	}
 
 	/**
+	 * Build a {@code GenericClass} without a type.
+	 *
+	 * @param <T> generic type
+	 * @return generic type reference object without a type
+	 */
+	public static <T> GenericClass<T> of() {
+		return of(null);
+	}
+
+	/**
 	 * Sets the type.
 	 *
 	 * @param type type to set
 	 */
 	public void setType(final Type type) {
-		if (!(type instanceof ParameterizedType)) {
+		if (null != type && !(type instanceof ParameterizedType)) {
 			throw new ReflectionException("Generic argument type must be a generic class (ParameterizedType), but got: " + type);
 		}
 		this.type = type;

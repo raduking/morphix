@@ -215,4 +215,13 @@ class GenericClassTest {
 
 		assertThat(e.getMessage(), equalTo("Generic argument type must be a generic class (ParameterizedType), but got: " + String.class));
 	}
+
+	@Test
+	void shouldAllowInitializationWithoutAType() {
+		GenericClass<List<String>> gc = GenericClass.of();
+
+		assertThat(gc.getType(), equalTo(null));
+		assertThat(gc.getGenericArgumentType(), equalTo(null));
+		assertThat(gc.toString(), equalTo("GenericClass<null>"));
+	}
 }
