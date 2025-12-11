@@ -187,9 +187,10 @@ class GenericTypeTest {
 
 	@Test
 	void shouldThrowExceptionWhenGenericTypeCannotBeBuiltFromGenericClass() {
-		GenericClass<String> gc = new GenericClass<>() {
+		GenericClass<List<String>> gc = new GenericClass<>() {
 			// empty
 		};
+		Fields.IgnoreAccess.set(gc, "type", String.class);
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> GenericType.of(gc));
 

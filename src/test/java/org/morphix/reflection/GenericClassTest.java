@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
@@ -33,12 +32,20 @@ import org.junit.jupiter.api.Test;
 class GenericClassTest {
 
 	@Test
-	void shouldDetectGenericArgumentType() {
-		GenericClass<String> gc = new GenericClass<>() {
-			// empty
-		};
+	void shouldThrowExceptionIfTheGenericArgumentIsNotAGenericClass() {
+		Exception exception = null;
+		try {
+			@SuppressWarnings("unused")
+			GenericClass<String> gc = new GenericClass<>() {
+				// empty
+			};
+		} catch (Exception e) {
+			exception = e;
+		}
 
-		assertThat(gc.getGenericArgumentType(), equalTo(String.class));
+		assertThat(exception.getClass(), equalTo(ReflectionException.class));
+		assertThat(exception.getMessage(),
+				equalTo("Generic argument type must be a generic class (ParameterizedType), where " + String.class + " is not."));
 	}
 
 	@Test
@@ -195,6 +202,6 @@ class GenericClassTest {
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> gc.setGenericArgumentType(String.class));
 
-		assertThat(e.getMessage(), equalTo("Type must be a " + ParameterizedType.class));
+		assertThat(e.getMessage(), equalTo("Generic argument type must be a generic class (ParameterizedType), where " + String.class + " is not."));
 	}
 }

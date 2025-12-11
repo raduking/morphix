@@ -14,6 +14,7 @@ package org.morphix.reflection;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 /**
  * The purpose of this class is to enable capturing and passing a generic type. This is achieved by creating an inline
@@ -43,7 +44,7 @@ public abstract class GenericClass<T> {
 	 */
 	protected GenericClass() {
 		Class<?> genericClassSubclass = Classes.findSubclass(GenericClass.class, getClass());
-		this.type = GenericType.getGenericParameterType(genericClassSubclass, 0);
+		setType(GenericType.getGenericParameterType(genericClassSubclass, 0));
 	}
 
 	/**
@@ -76,7 +77,7 @@ public abstract class GenericClass<T> {
 	 */
 	public void setType(final Type type) {
 		if (!(type instanceof ParameterizedType)) {
-			throw new ReflectionException("Type must be a " + ParameterizedType.class);
+			throw new ReflectionException("Generic argument type must be a generic class (ParameterizedType), where " + type + " is not.");
 		}
 		this.type = type;
 	}
@@ -116,7 +117,7 @@ public abstract class GenericClass<T> {
 		if (this == obj) {
 			return true;
 		}
-		return obj instanceof GenericClass<?> that && type.equals(that.type);
+		return obj instanceof GenericClass<?> that && Objects.equals(type, that.type);
 	}
 
 	/**
