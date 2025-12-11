@@ -158,7 +158,10 @@ class GenericTypeTest {
 
 	@Test
 	void shouldThrowExceptionForNegativeIndex() {
-		assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(ArrayList.class, -1));
+		int index = -1;
+		ReflectionException e = assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(ArrayList.class, index));
+
+		assertThat(e.getMessage(), equalTo("Generic parameter type index cannot be negative, received: " + index));
 	}
 
 	@Test
@@ -177,12 +180,19 @@ class GenericTypeTest {
 
 	@Test
 	void shouldFailToExtractArgumentTypeForNonGenericClasses() {
-		assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(String.class, 0));
+		int index = 0;
+		ReflectionException e = assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(String.class, index));
+
+		assertThat(e.getMessage(), equalTo(String.class.getCanonicalName() + " is not a generic class"));
 	}
 
 	@Test
 	void shouldFailToExtractArgumentTypeForWrongGenericTypeIndex() {
-		assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(ArrayList.class, 1));
+		int index = 1;
+		ReflectionException e = assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(ArrayList.class, index));
+
+		assertThat(e.getMessage(), equalTo("Cannot extract generic parameter type at index " + index +
+				" from " + ArrayList.class.getCanonicalName() + " because it has only 1 generic parameter(s)"));
 	}
 
 	@Test

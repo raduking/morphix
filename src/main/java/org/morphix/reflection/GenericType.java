@@ -134,7 +134,7 @@ public class GenericType implements ParameterizedType {
 	 */
 	public static <T extends Type> T getGenericParameterType(final Class<?> cls, final int index) {
 		if (index < 0) {
-			throw new ReflectionException("index cannot be negative.");
+			throw new ReflectionException("Generic parameter type index cannot be negative, received: " + index);
 		}
 		if (isNotGenericClass(cls)) {
 			throw new ReflectionException(cls.getCanonicalName() + " is not a generic class");
@@ -142,8 +142,8 @@ public class GenericType implements ParameterizedType {
 		ParameterizedType parameterizedType = (ParameterizedType) cls.getGenericSuperclass();
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 		if (index >= actualTypeArguments.length) {
-			throw new ReflectionException(cls.getCanonicalName() + " class has only " + actualTypeArguments.length
-					+ " generic arguments. Index: " + index + " is out of bounds.");
+			throw new ReflectionException("Cannot extract generic parameter type at index " + index + " from " + cls.getCanonicalName()
+					+ " because it has only " + actualTypeArguments.length + " generic parameter(s)");
 		}
 		Type genericType = actualTypeArguments[index];
 		return JavaObjects.cast(genericType);
@@ -260,7 +260,7 @@ public class GenericType implements ParameterizedType {
 			sb.append("$");
 			if (ownerType instanceof ParameterizedType ot) {
 				// Find simple name of the nested type by removing the shared prefix with an owner.
-				sb.append(rawType.getName().replace(((Class<?>) ot.getRawType()).getName() + "$", ""));
+				sb.append(rawType.getName().replace(ot.getRawType().getTypeName() + "$", ""));
 			} else {
 				sb.append(rawType.getSimpleName());
 			}

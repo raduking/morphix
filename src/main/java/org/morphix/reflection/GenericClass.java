@@ -77,7 +77,7 @@ public abstract class GenericClass<T> {
 	 */
 	public void setType(final Type type) {
 		if (!(type instanceof ParameterizedType)) {
-			throw new ReflectionException("Generic argument type must be a generic class (ParameterizedType), where " + type + " is not.");
+			throw new ReflectionException("Generic argument type must be a generic class (ParameterizedType), but got: " + type);
 		}
 		this.type = type;
 	}

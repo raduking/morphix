@@ -46,7 +46,7 @@ class GenericClassTest {
 
 		assertThat(exception.getClass(), equalTo(ReflectionException.class));
 		assertThat(exception.getMessage(),
-				equalTo("Generic argument type must be a generic class (ParameterizedType), where " + String.class + " is not."));
+				equalTo("Generic argument type must be a generic class (ParameterizedType), but got: " + String.class));
 	}
 
 	@Test
@@ -211,6 +211,6 @@ class GenericClassTest {
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> gc.setGenericArgumentType(String.class));
 
-		assertThat(e.getMessage(), equalTo("Generic argument type must be a generic class (ParameterizedType), where " + String.class + " is not."));
+		assertThat(e.getMessage(), equalTo("Generic argument type must be a generic class (ParameterizedType), but got: " + String.class));
 	}
 }
