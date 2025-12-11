@@ -56,7 +56,8 @@ class MethodsInvokeMethodTest {
 		Method method = A.class.getDeclaredMethod("foo", String.class);
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.invoke(method, obj, obj));
-		assertThat(e.getMessage(), equalTo("Error invoking " + A.class.getCanonicalName() + "." + method.getName() + ": " + e.getCause().getMessage() + "."));
+		assertThat(e.getMessage(),
+				equalTo("Error invoking " + A.class.getCanonicalName() + "." + method.getName() + ": " + e.getCause().getMessage() + "."));
 	}
 
 	@Test
@@ -82,7 +83,8 @@ class MethodsInvokeMethodTest {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.invoke(method, Class.class, "$NonExistingClass$"));
 		Throwable cause = Reflection.unwrapInvocationTargetException(JavaObjects.cast(e.getCause()));
 
-		assertThat(e.getMessage(), equalTo("Error invoking " + Class.class.getCanonicalName() + "." + method.getName() + ": " + cause.getMessage() + "."));
+		assertThat(e.getMessage(),
+				equalTo("Error invoking " + Class.class.getCanonicalName() + "." + method.getName() + ": " + cause.getMessage() + "."));
 	}
 
 	@Test

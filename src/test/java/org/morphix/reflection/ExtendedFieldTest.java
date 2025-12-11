@@ -122,4 +122,16 @@ class ExtendedFieldTest {
 
 		assertThat(result, equalTo(null));
 	}
+
+	@Test
+	void shouldNotModifyNameWhenSettingGetterMethodToNull() {
+		ExtendedField ef = of(null);
+		Fields.IgnoreAccess.set(ef, "name", REFLECTION_SET_NAME);
+
+		ef.setGetterMethod(null);
+
+		String result = ef.getName();
+
+		assertThat(result, equalTo(REFLECTION_SET_NAME));
+	}
 }

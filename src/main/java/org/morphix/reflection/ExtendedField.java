@@ -16,7 +16,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -166,8 +165,10 @@ public class ExtendedField {
 	 * @param getterMethod getter method
 	 */
 	public void setGetterMethod(final Method getterMethod) {
-		this.getterMethod = Objects.requireNonNull(getterMethod, "Getter method cannot be null");
-		this.name = MethodType.GETTER.getFieldName(getterMethod);
+		this.getterMethod = getterMethod;
+		if (null != getterMethod) {
+			this.name = MethodType.GETTER.getFieldName(getterMethod);
+		}
 	}
 
 	/**
