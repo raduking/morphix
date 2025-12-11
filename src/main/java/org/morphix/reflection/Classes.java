@@ -166,8 +166,8 @@ public interface Classes {
 			for (File file : files) {
 				if (file.isDirectory()) {
 					classes.addAll(findInDirectory(file, packageName + "." + file.getName(), classLoader));
-				} else if (file.getName().endsWith(ClassFile.EXTENSION)) {
-					String className = packageName + '.' + file.getName().substring(0, file.getName().length() - ClassFile.EXTENSION.length());
+				} else if (file.getName().endsWith(JavaClassFile.EXTENSION)) {
+					String className = packageName + '.' + file.getName().substring(0, file.getName().length() - JavaClassFile.EXTENSION.length());
 					classes.add(getOne(className, classLoader));
 				}
 			}

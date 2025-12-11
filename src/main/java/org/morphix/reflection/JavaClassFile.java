@@ -5,7 +5,7 @@ package org.morphix.reflection;
  *
  * @author Radu Sebastian LAZIN
  */
-public interface ClassFile {
+public interface JavaClassFile {
 
 	/**
 	 * The class file extension.

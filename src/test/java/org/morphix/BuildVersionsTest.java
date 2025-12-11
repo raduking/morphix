@@ -25,7 +25,7 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.morphix.reflection.ClassFile;
+import org.morphix.reflection.JavaClassFile;
 import org.morphix.utils.Tests;
 
 /**
@@ -67,14 +67,14 @@ class BuildVersionsTest {
 		int javaVersion = Integer.parseInt(PROPERTIES.getProperty(PROPERTY_MAVEN_COMPILER_TARGET));
 
 		Path classesDir = Path.of(TARGET_CLASSES);
-		int expectedMajor = ClassFile.Version.fromJavaVersion(javaVersion).major();
+		int expectedMajor = JavaClassFile.Version.fromJavaVersion(javaVersion).major();
 
 		try (Stream<Path> paths = Files.walk(classesDir)) {
-			paths.filter(path -> path.toString().endsWith(ClassFile.EXTENSION))
+			paths.filter(path -> path.toString().endsWith(JavaClassFile.EXTENSION))
 					.forEach(path -> {
 						try (DataInputStream in = new DataInputStream(new FileInputStream(path.toFile()))) {
 							int magic = in.readInt();
-							if (magic != ClassFile.CAFEBABE) {
+							if (magic != JavaClassFile.CAFEBABE) {
 								throw new IllegalStateException(path + " is not a valid class file");
 							}
 							@SuppressWarnings("unused")
