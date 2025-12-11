@@ -171,11 +171,11 @@ public class ConstantPoolAccessorOracleJDK extends ConstantPoolAccessor { // NOS
 	 * @return the constant member at the given index from the constant pool
 	 */
 	@Override
-	protected Member getMethodAt(final Object constantPool, final int index) {
+	protected Member getMemberAt(final Object constantPool, final int index) {
 		try {
 			return Methods.IgnoreAccess.invoke(getMethodAtMethod, constantPool, index);
 		} catch (Exception e) {
-			return super.getMethodAt(constantPool, index);
+			return super.getMemberAt(constantPool, index);
 		}
 	}
 

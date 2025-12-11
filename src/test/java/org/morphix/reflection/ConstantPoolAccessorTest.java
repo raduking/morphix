@@ -48,7 +48,7 @@ class ConstantPoolAccessorTest {
 
 	@Test
 	void shouldReturnNullOnGetMethodAt() {
-		Member member = victim.getMethodAt(String.class, 1);
+		Member member = victim.getMemberAt(String.class, 1);
 		assertThat(member, equalTo(null));
 	}
 

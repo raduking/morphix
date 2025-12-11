@@ -81,7 +81,7 @@ public class ConstantPoolAccessor { // NOSONAR we want this as singleton
 	 * @param index index in the constant pool
 	 * @return the constant member at the given index from the constant pool
 	 */
-	protected Member getMethodAt(final Object constantPool, final int index) {
+	protected Member getMemberAt(final Object constantPool, final int index) {
 		return null;
 	}
 

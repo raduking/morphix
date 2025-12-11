@@ -83,7 +83,7 @@ class ConstantPoolTest {
 		verify(constantPoolAccessor).getSize(constantPoolObject);
 
 		constantPool.getMemberAt(0);
-		verify(constantPoolAccessor).getMethodAt(constantPoolObject, 0);
+		verify(constantPoolAccessor).getMemberAt(constantPoolObject, 0);
 	}
 
 	@Test
@@ -98,7 +98,7 @@ class ConstantPoolTest {
 	void shouldReturnMemberOnNextInPool() throws Exception {
 		Method expected = ConstantPoolTest.class.getDeclaredMethod("shouldReturnMemberOnNextInPool");
 		doReturn(1).when(constantPoolAccessor).getSize(constantPoolObject);
-		doReturn(expected).when(constantPoolAccessor).getMethodAt(constantPoolObject, 0);
+		doReturn(expected).when(constantPoolAccessor).getMemberAt(constantPoolObject, 0);
 
 		Iterator<Member> iterator = constantPool.iterator();
 		Method result = (Method) iterator.next();
