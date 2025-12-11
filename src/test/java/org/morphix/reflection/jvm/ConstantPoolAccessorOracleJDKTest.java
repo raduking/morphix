@@ -187,7 +187,7 @@ class ConstantPoolAccessorOracleJDKTest {
 		ConstantPoolAccessorOracleJDK poolAccessor = new ConstantPoolAccessorOracleJDK();
 
 		runWithNullMethod(GET_METHOD_AT_METHOD, poolAccessor, () -> {
-			Member member = poolAccessor.getMethodAt(constantPool, 0);
+			Member member = poolAccessor.getMemberAt(constantPool, 0);
 			assertThat(member, equalTo(null));
 		});
 	}
@@ -215,7 +215,7 @@ class ConstantPoolAccessorOracleJDKTest {
 		ConstantPoolAccessorOracleJDK poolAccessor = new ConstantPoolAccessorOracleJDK();
 
 		runWithMockMethod(GET_METHOD_AT_METHOD, getMethodAtMethod, poolAccessor, () -> {
-			Member method = poolAccessor.getMethodAt(this, 3);
+			Member method = poolAccessor.getMemberAt(this, 3);
 			assertThat(method, equalTo(getMethodAtMethod));
 		});
 	}

@@ -596,7 +596,7 @@ class NullablesTest {
 	@Test
 	void shouldThrowExceptionIfClassIsInstantiatedWithDefaultConstructor() {
 		Throwable targetException = null;
-		Constructor<Nullables> defaultConstructor = Constructors.getDeclaredConstructor(Nullables.class);
+		Constructor<Nullables> defaultConstructor = Constructors.getDeclared(Nullables.class);
 		try {
 			Constructors.IgnoreAccess.newInstance(defaultConstructor);
 		} catch (ReflectionException e) {

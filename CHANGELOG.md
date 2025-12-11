@@ -1,5 +1,20 @@
 ## Release Notes
 
+`1.0.15`
+
+- Added class file version test to ensure correct class files are built.
+- Added `JavaClassFile` interface for class files utility methods (it's not named `ClassFile` so it does not clash with the Java 25 class with the same name).
+- Added `JavaClassFile.Version` record which represents a class file version.
+- Moved and renamed `Classes.CLASS_FILE_EXTENSION` constant to `JavaClassFile.EXTENSION`.
+- Added `maven-properties-plugin` to `pom.xml` to output all Maven properties to `target/maven.properties`.
+- Added `Methods.getOneDeclared` which just delegates to `Methods.Safe.getOneDeclared`.
+- Added `Methods.invoke` to invoke accessible methods contrary to `Methods.IgnoreAccess.invoke`.
+- Fixed `GenericClass` accepting non generic classes as generic type arguments.
+- Renamed `Constructors.getDefaultConstructor` to `Constructors.getDefault`.
+- Renamed `Constructors.getDeclaredConstructor` to `Constructors.getDeclared`.
+
+---
+
 `1.0.14`
 
 - Added `Annotations` utility class to handle annotations.

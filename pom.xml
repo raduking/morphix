@@ -4,7 +4,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- 
+	<!--
+		This project only has test dependencies.
+		
 		Using spring-boot-starter-parent to update dependencies easier and ensure that all dependencies work well together
 		this parent having most of the commonly used dependencies defined with tested versions across Java projects.
 	-->
@@ -17,7 +19,7 @@
 
 	<groupId>io.github.raduking</groupId>
 	<artifactId>morphix-all</artifactId>
-	<version>1.0.14</version>
+	<version>1.0.15</version>
 	<packaging>jar</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -49,7 +51,18 @@
 		<java.version>21</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- Publishing dependencies versions -->
+		<maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
+		<central.publishing.maven.plugin.version>0.9.0</central.publishing.maven.plugin.version>
+
+		<!-- Other plugin versions -->
+		<spotless.maven.plugin.version>2.46.1</spotless.maven.plugin.version>
+		<org.eclipse.jdt.core.version>3.42.0</org.eclipse.jdt.core.version>
+		<eclipse.formatter.version>4.36</eclipse.formatter.version>
+		<properties.maven.plugin.version>1.2.1</properties.maven.plugin.version>
 
 		<!-- Testing dependencies versions -->
 		<pitest.maven.plugin.version>1.22.0</pitest.maven.plugin.version>
@@ -60,10 +73,7 @@
 		<!-- Benchmarking -->
 		<jmh.version>1.37</jmh.version>
 
-		<!-- Publishing dependencies versions -->
-		<maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
-		<central.publishing.maven.plugin.version>0.9.0</central.publishing.maven.plugin.version>
-
+        <!-- JVM arguments for Morphix tests and mutation testing -->
 		<morphixArgLine>
 			-XX:+EnableDynamicAgentLoading
 			-Xshare:off
@@ -71,6 +81,7 @@
 			--add-opens java.base/java.lang=ALL-UNNAMED
 			--add-opens java.base/java.lang.invoke=ALL-UNNAMED
 			--add-opens java.base/sun.reflect.annotation=ALL-UNNAMED
+			--add-exports java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED
 		</morphixArgLine>
 	</properties>
 
@@ -138,6 +149,7 @@
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
+					<release>${maven.compiler.release}</release>
 					<proc>none</proc>
 				</configuration>
 			</plugin>
@@ -177,7 +189,25 @@
 				</executions>
 			</plugin>
 
-			<!--Jacoco code coverage -->
+			<!-- Writes all maven project properties to ${project.build.directory}/maven.properties -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>${properties.maven.plugin.version}</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>write-project-properties</goal>
+						</goals>
+						<configuration>
+							<outputFile>${project.build.directory}/maven.properties</outputFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Jacoco code coverage -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -242,19 +272,19 @@
 			<plugin>
 				<groupId>com.diffplug.spotless</groupId>
 				<artifactId>spotless-maven-plugin</artifactId>
-				<version>2.46.1</version>
+				<version>${spotless.maven.plugin.version}</version>
 				<dependencies>
 					<dependency>
 						<groupId>org.eclipse.jdt</groupId>
 						<artifactId>org.eclipse.jdt.core</artifactId>
-						<version>3.42.0</version>
+						<version>${org.eclipse.jdt.core.version}</version>
 					</dependency>
 				</dependencies>
 				<configuration>
 					<java>
 						<eclipse>
 							<file>${project.basedir}/formatter/java-formatter.xml</file>
-							<version>4.36</version>
+							<version>${eclipse.formatter.version}</version>
 						</eclipse>
 						<removeUnusedImports/>
 						<trimTrailingWhitespace/>

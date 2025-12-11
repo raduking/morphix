@@ -89,6 +89,41 @@ public class ExtendedField {
 	}
 
 	/**
+	 * Builds a new {@link ExtendedField} object.
+	 *
+	 * @param field field
+	 * @param object object
+	 * @return a new {@link ExtendedField} object
+	 */
+	public static ExtendedField of(final Field field, final Object object) {
+		return new ExtendedField(field, object);
+	}
+
+	/**
+	 * Builds a new {@link ExtendedField} object.
+	 *
+	 * @param getterMethod getter method
+	 * @param object object
+	 * @return a new {@link ExtendedField} object
+	 */
+	public static ExtendedField of(final Method getterMethod, final Object object) {
+		ExtendedField extendedField = of((Field) null, object);
+		extendedField.setGetterMethod(getterMethod);
+		extendedField.setModifiers(getterMethod.getModifiers());
+		return extendedField;
+	}
+
+	/**
+	 * Builds a new {@link ExtendedField} object.
+	 *
+	 * @param field field
+	 * @return a new {@link ExtendedField} object
+	 */
+	public static ExtendedField of(final Field field) {
+		return of(field, null);
+	}
+
+	/**
 	 * Returns the associated java reflection field.
 	 *
 	 * @return the associated java reflection field
@@ -131,7 +166,9 @@ public class ExtendedField {
 	 */
 	public void setGetterMethod(final Method getterMethod) {
 		this.getterMethod = getterMethod;
-		this.name = MethodType.GETTER.getFieldName(getterMethod);
+		if (null != getterMethod) {
+			this.name = MethodType.GETTER.getFieldName(getterMethod);
+		}
 	}
 
 	/**
@@ -201,7 +238,10 @@ public class ExtendedField {
 		if (null != field) {
 			return field.getGenericType();
 		}
-		return getterMethod.getGenericReturnType();
+		if (null != getterMethod) {
+			return getterMethod.getGenericReturnType();
+		}
+		return DEFAULT_CLASS;
 	}
 
 	/**
@@ -213,10 +253,16 @@ public class ExtendedField {
 	 * @return the generic return type parameter of the field
 	 */
 	public <T extends Type> T getGenericReturnType(final int index) {
-		if (null == getterMethod) {
+		if (null != getterMethod) {
+			return Methods.Safe.getGenericReturnType(getterMethod, index);
+		}
+		if (null == field) {
+			return null;
+		}
+		if (hasObject()) {
 			return GenericType.getGenericArgumentType(field, object.getClass(), index);
 		}
-		return Methods.Safe.getGenericReturnType(getterMethod, index);
+		return null;
 	}
 
 	/**
@@ -238,7 +284,10 @@ public class ExtendedField {
 		if (null != field) {
 			return field.getType();
 		}
-		return getterMethod.getReturnType();
+		if (null != getterMethod) {
+			return getterMethod.getReturnType();
+		}
+		return DEFAULT_CLASS;
 	}
 
 	/**
@@ -269,41 +318,6 @@ public class ExtendedField {
 	 */
 	public boolean typeMeets(final Predicate<Type> predicate) {
 		return predicate.test(getType());
-	}
-
-	/**
-	 * Builds a new {@link ExtendedField} object.
-	 *
-	 * @param field field
-	 * @param object object
-	 * @return a new {@link ExtendedField} object
-	 */
-	public static ExtendedField of(final Field field, final Object object) {
-		return new ExtendedField(field, object);
-	}
-
-	/**
-	 * Builds a new {@link ExtendedField} object.
-	 *
-	 * @param getterMethod getter method
-	 * @param object object
-	 * @return a new {@link ExtendedField} object
-	 */
-	public static ExtendedField of(final Method getterMethod, final Object object) {
-		ExtendedField extendedField = of((Field) null, object);
-		extendedField.setGetterMethod(getterMethod);
-		extendedField.setModifiers(getterMethod.getModifiers());
-		return extendedField;
-	}
-
-	/**
-	 * Builds a new {@link ExtendedField} object.
-	 *
-	 * @param field field
-	 * @return a new {@link ExtendedField} object
-	 */
-	public static ExtendedField of(final Field field) {
-		return of(field, null);
 	}
 
 	/**
@@ -340,7 +354,7 @@ public class ExtendedField {
 			if (hasField()) {
 				sb.append(eol).append("Value: ").append(getFieldValue()).append(eol);
 			}
-			sb.append("Object: ").append(object.toString());
+			sb.append("Object: ").append(object);
 		}
 		return sb.toString();
 	}

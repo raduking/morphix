@@ -15,13 +15,14 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -33,12 +34,21 @@ import org.junit.jupiter.api.Test;
 class GenericClassTest {
 
 	@Test
-	void shouldDetectGenericArgumentType() {
-		GenericClass<String> gc = new GenericClass<>() {
-			// empty
-		};
+	void shouldThrowExceptionIfTheGenericArgumentIsNotAGenericClass() {
+		Exception exception = null;
+		try {
+			@SuppressWarnings("unused")
+			GenericClass<String> gc = new GenericClass<>() {
+				// empty
+			};
+		} catch (Exception e) {
+			exception = e;
+		}
 
-		assertThat(gc.getGenericArgumentType(), equalTo(String.class));
+		assertNotNull(exception);
+		assertThat(exception.getClass(), equalTo(ReflectionException.class));
+		assertThat(exception.getMessage(),
+				equalTo("Generic argument type must be a generic class (ParameterizedType), but got: " + String.class));
 	}
 
 	@Test
@@ -115,14 +125,16 @@ class GenericClassTest {
 
 	@Test
 	void shouldBuildANewGenericClassWithFactoryMethod() {
-		GenericClass<String> gc = GenericClass.of(String.class);
+		Type type = GenericType.of(List.class, String.class);
+		GenericClass<List<String>> gc = GenericClass.of(type);
 
-		assertThat(gc.toString(), equalTo("GenericClass<class java.lang.String>"));
+		assertThat(gc.toString(), equalTo("GenericClass<java.util.List<java.lang.String>>"));
 	}
 
 	@Test
 	void shouldReturnTrueOnEqualsWithTheSameObject() {
-		GenericClass<String> gc = GenericClass.of(String.class);
+		Type type = GenericType.of(List.class, String.class);
+		GenericClass<String> gc = GenericClass.of(type);
 
 		boolean result = gc.equals(gc);
 
@@ -131,8 +143,10 @@ class GenericClassTest {
 
 	@Test
 	void shouldReturnTrueOnEqualsWithObjectsThatHaveTheSameUnderlyingType() {
-		GenericClass<String> gc1 = GenericClass.of(String.class);
-		GenericClass<String> gc2 = GenericClass.of(String.class);
+		Type type1 = GenericType.of(List.class, String.class);
+		Type type2 = GenericType.of(List.class, String.class);
+		GenericClass<List<String>> gc1 = GenericClass.of(type1);
+		GenericClass<List<String>> gc2 = GenericClass.of(type2);
 
 		boolean result = gc1.equals(gc2);
 
@@ -142,17 +156,20 @@ class GenericClassTest {
 	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	void shouldReturnFalseOnEqualsWhenTheParameterIsNotAGenericClass() {
-		GenericClass<String> gc1 = GenericClass.of(String.class);
+		Type type = GenericType.of(List.class, String.class);
+		GenericClass<List<String>> gc = GenericClass.of(type);
 
-		boolean result = gc1.equals("x");
+		boolean result = gc.equals("x");
 
 		assertFalse(result);
 	}
 
 	@Test
 	void shouldReturnFalseOnEqualsWithObjectsThatHaveDifferentUnderlyingTypes() {
-		GenericClass<String> gc1 = GenericClass.of(String.class);
-		GenericClass<String> gc2 = GenericClass.of(Integer.class);
+		Type type1 = GenericType.of(List.class, String.class);
+		Type type2 = GenericType.of(Set.class, Integer.class);
+		GenericClass<String> gc1 = GenericClass.of(type1);
+		GenericClass<String> gc2 = GenericClass.of(type2);
 
 		boolean result = gc1.equals(gc2);
 
@@ -161,9 +178,10 @@ class GenericClassTest {
 
 	@Test
 	void shouldReturnTheUnderlyingTypesHashCodeOnHashCode() {
-		GenericClass<String> gc = GenericClass.of(String.class);
+		Type type = GenericType.of(List.class, String.class);
+		GenericClass<List<String>> gc = GenericClass.of(type);
 
-		int expected = String.class.hashCode();
+		int expected = type.hashCode();
 		int result = gc.hashCode();
 
 		assertThat(result, equalTo(expected));
@@ -195,6 +213,6 @@ class GenericClassTest {
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> gc.setGenericArgumentType(String.class));
 
-		assertThat(e.getMessage(), equalTo("Type must be a " + ParameterizedType.class));
+		assertThat(e.getMessage(), equalTo("Generic argument type must be a generic class (ParameterizedType), but got: " + String.class));
 	}
 }

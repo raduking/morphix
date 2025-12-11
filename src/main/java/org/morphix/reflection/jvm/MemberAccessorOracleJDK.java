@@ -69,7 +69,7 @@ public class MemberAccessorOracleJDK<T extends AccessibleObject & Member> implem
 	protected static void initialize(final String implLookupFieldName) {
 		try {
 			var lookupClass = MethodHandles.Lookup.class;
-			var lookupConstructor = Constructors.getDeclaredConstructor(lookupClass, Class.class);
+			var lookupConstructor = Constructors.getDeclared(lookupClass, Class.class);
 			var lookup = Constructors.IgnoreAccess.newInstance(lookupConstructor, lookupClass);
 
 			var varHandle = lookup.findStaticVarHandle(lookupClass, implLookupFieldName, lookupClass);

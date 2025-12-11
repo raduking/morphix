@@ -130,11 +130,6 @@ public interface Classes {
 	interface Scan {
 
 		/**
-		 * The class file extension.
-		 */
-		String CLASS_FILE_EXTENSION = ".class";
-
-		/**
 		 * Finds all classes in a specific package located in a specific classes directory.
 		 * <p>
 		 * This method resolves the package name to a directory path, verifies the directory exists, and then searches for all
@@ -171,8 +166,8 @@ public interface Classes {
 			for (File file : files) {
 				if (file.isDirectory()) {
 					classes.addAll(findInDirectory(file, packageName + "." + file.getName(), classLoader));
-				} else if (file.getName().endsWith(CLASS_FILE_EXTENSION)) {
-					String className = packageName + '.' + file.getName().substring(0, file.getName().length() - CLASS_FILE_EXTENSION.length());
+				} else if (file.getName().endsWith(JavaClassFile.EXTENSION)) {
+					String className = packageName + '.' + file.getName().substring(0, file.getName().length() - JavaClassFile.EXTENSION.length());
 					classes.add(getOne(className, classLoader));
 				}
 			}
@@ -214,8 +209,8 @@ public interface Classes {
 		/**
 		 * Finds all classes annotated with any of the specified annotations in the specified packages located in a specific
 		 * classes directory. This version accepts a logger consumer to log messages during the scanning process and it is
-		 * marginally slower than the version without logging because it logs all annotations found on the classes where the
-		 * first version just skips to the next class.
+		 * marginally slower than {@link #findWithAnyAnnotation(Set, Path, Set)} because it logs all annotations found on the
+		 * classes where the other version just skips to the next class.
 		 *
 		 * @param packages the packages to scan
 		 * @param classesDir the classes directory
@@ -233,16 +228,15 @@ public interface Classes {
 			for (String pkg : packages) {
 				loggerConsumer.accept("Scanning package: " + pkg);
 				for (Class<?> cls : findInPackage(pkg, classesDir)) {
-					boolean found = false;
+					boolean hasAnyAnnotation = false;
 					for (Class<? extends Annotation> ann : annotations) {
-						if (null == cls.getAnnotation(ann)) {
-							continue;
+						if (null != cls.getAnnotation(ann)) {
+							loggerConsumer.accept("Found annotated class: " + cls.getCanonicalName() + " with annotation: " + ann.getCanonicalName());
+							hasAnyAnnotation = true;
 						}
-						loggerConsumer.accept("Found annotated class: " + cls.getCanonicalName() + " with annotation: " + ann.getCanonicalName());
-						if (!found) {
-							annotated.add(cls);
-							found = true;
-						}
+					}
+					if (hasAnyAnnotation) {
+						annotated.add(cls);
 					}
 				}
 			}

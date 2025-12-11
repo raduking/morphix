@@ -12,6 +12,7 @@
  */
 package org.morphix.reflection;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -58,12 +59,14 @@ class ConstructorsTest {
 	@Test
 	void shouldThrowExceptionIfNoDefaultConstructorIsFound() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.newInstance(B.class));
+
 		assertThat(e.getMessage(), startsWith("Default constructor is not defined for class: "));
 	}
 
 	@Test
 	void shouldThrowExceptionIfNewInstanceWithPrivateConstructor() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.newInstance(C.class));
+
 		assertThat(e.getMessage(), startsWith("Default constructor is not accessible for class: "));
 	}
 
@@ -76,7 +79,9 @@ class ConstructorsTest {
 	@Test
 	void shouldPropagateExceptionIfConstructorThrowsException() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.newInstance(D.class));
-		assertThat(e.getMessage(), startsWith("Could not instantiate class, default constructor threw exception: "));
+
+		assertThat(e.getMessage(), equalTo("Could not instantiate class, default constructor threw exception: "
+				+ NullPointerException.class.getCanonicalName() + ", for class: " + D.class.getCanonicalName()));
 	}
 
 	public abstract static class E {

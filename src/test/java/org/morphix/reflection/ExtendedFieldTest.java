@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.morphix.reflection.ExtendedField.of;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +30,7 @@ class ExtendedFieldTest {
 
 	private static final String EOL = System.lineSeparator();
 	private static final Long TEST_LONG = 666L;
+	private static final String REFLECTION_SET_NAME = "reflectionName";
 
 	@Test
 	void shouldReturnObjectClassIfNoFieldIsSet() {
@@ -80,4 +82,66 @@ class ExtendedFieldTest {
 				+ "Type: class java.lang.Long"));
 	}
 
+	@Test
+	void shouldReturnDefaultClassTypeWhenFieldAndGetterMethodIsNullOnToClass() {
+		ExtendedField ef = of(null);
+		Fields.IgnoreAccess.set(ef, "name", REFLECTION_SET_NAME);
+
+		Class<?> result = ef.toClass();
+
+		assertThat(result, equalTo(Object.class));
+	}
+
+	@Test
+	void shouldReturnDefaultClassTypeWhenFieldAndGetterMethodIsNullOnGetType() {
+		ExtendedField ef = of(null);
+		Fields.IgnoreAccess.set(ef, "name", REFLECTION_SET_NAME);
+
+		Type result = ef.getType();
+
+		assertThat(result, equalTo(Object.class));
+	}
+
+	@Test
+	void shouldReturnNullWhenFieldHasNoObjectOrGetterMethod() {
+		ExtendedField ef = of(null);
+		Fields.IgnoreAccess.set(ef, "name", REFLECTION_SET_NAME);
+
+		Object result = ef.getGenericReturnType(0);
+
+		assertThat(result, equalTo(null));
+	}
+
+	@Test
+	void shouldNotModifyFieldValueIfFieldAndGetterMethodAreNull() {
+		ExtendedField ef = of(null);
+
+		ef.setFieldValue("test");
+
+		Object result = Fields.IgnoreAccess.get(ef, "fieldValue");
+
+		assertThat(result, equalTo(null));
+	}
+
+	@Test
+	void shouldNotModifyNameWhenSettingGetterMethodToNull() {
+		ExtendedField ef = of(null);
+		Fields.IgnoreAccess.set(ef, "name", REFLECTION_SET_NAME);
+
+		ef.setGetterMethod(null);
+
+		String result = ef.getName();
+
+		assertThat(result, equalTo(REFLECTION_SET_NAME));
+	}
+
+	@Test
+	void shouldReturnNullOnGetGenericReturnTypeWhenObjectIsNullAndFieldIsSet() {
+		Field field = Fields.getOneDeclared(ExtendedFieldTest.class, "TEST_LONG");
+		ExtendedField ef = of(field, null);
+
+		Object result = ef.getGenericReturnType(0);
+
+		assertThat(result, equalTo(null));
+	}
 }

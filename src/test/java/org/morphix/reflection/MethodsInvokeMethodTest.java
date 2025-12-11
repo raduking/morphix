@@ -19,14 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.lang.JavaObjects;
 import org.morphix.reflection.testdata.A;
 
 /**
- * Test class for {@link Methods.IgnoreAccess#invoke(Method, Object, Object...)}.
+ * Test class for {@link Methods#invoke(Method, Object, Object...)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class MethodsIgnoreAccessInvokeMethodTest {
+class MethodsInvokeMethodTest {
 
 	private static final String TEST_STRING = "Test";
 
@@ -43,27 +44,18 @@ class MethodsIgnoreAccessInvokeMethodTest {
 		A obj = new A();
 
 		Method method = A.class.getDeclaredMethod("foo", String.class);
-		Methods.IgnoreAccess.invoke(method, obj, TEST_STRING);
+		Methods.invoke(method, obj, TEST_STRING);
 
 		assertThat(obj.getS(), equalTo(TEST_STRING));
 	}
 
 	@Test
-	void shouldKeepAccessModifierOnInvokeMethod() throws Exception {
-		A obj = new A();
-
-		Method method = A.class.getDeclaredMethod("fooPrivate", String.class);
-		Methods.IgnoreAccess.invoke(method, obj, TEST_STRING);
-
-		assertThat(method.canAccess(obj), equalTo(false));
-	}
-
-	@Test
-	void shouldThrowReflectionExceptionWhenInvokeWithInvalidArgument() throws Exception {
+	void shouldThrowConverterExceptionWhenInvokeWithInvalidArgument() throws Exception {
 		A obj = new A();
 
 		Method method = A.class.getDeclaredMethod("foo", String.class);
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invoke(method, obj, obj));
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.invoke(method, obj, obj));
 		assertThat(e.getMessage(),
 				equalTo("Error invoking " + A.class.getCanonicalName() + "." + method.getName() + ": " + e.getCause().getMessage() + "."));
 	}
@@ -71,7 +63,7 @@ class MethodsIgnoreAccessInvokeMethodTest {
 	@Test
 	void shouldInvokeStaticMethod() throws Exception {
 		Method method = StaticA.class.getDeclaredMethod("foo", String.class);
-		Methods.IgnoreAccess.invoke(method, null, TEST_STRING);
+		Methods.invoke(method, null, TEST_STRING);
 
 		assertThat(StaticA.s, equalTo(TEST_STRING));
 	}
@@ -79,7 +71,7 @@ class MethodsIgnoreAccessInvokeMethodTest {
 	@Test
 	void shouldInvokeClassMethod() throws Exception {
 		Method method = Class.class.getDeclaredMethod("getName");
-		String name = Methods.IgnoreAccess.invoke(method, Class.class);
+		String name = Methods.invoke(method, Class.class);
 
 		assertThat(name, equalTo(Class.class.getName()));
 	}
@@ -87,19 +79,26 @@ class MethodsIgnoreAccessInvokeMethodTest {
 	@Test
 	void shouldThrowReflectionExceptionWhenFailInvokeClassMethod() throws Exception {
 		Method method = Class.class.getDeclaredMethod("forName", String.class);
-		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invoke(method, Class.class, "$NonExistingClass$"));
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.invoke(method, Class.class, "$NonExistingClass$"));
+		Throwable cause = Reflection.unwrapInvocationTargetException(JavaObjects.cast(e.getCause()));
+
+		assertThat(e.getMessage(),
+				equalTo("Error invoking " + Class.class.getCanonicalName() + "." + method.getName() + ": " + cause.getMessage() + "."));
 	}
 
 	@Test
 	void shouldThrowReflectionExceptionWhenFailWithBadArgumentsInvokeClassMethod() throws Exception {
 		Method method = Class.class.getDeclaredMethod("forName", String.class);
-		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invoke(method, Class.class));
+
+		assertThrows(ReflectionException.class, () -> Methods.invoke(method, Class.class));
 	}
 
 	@Test
 	void shouldThrowReflectionExceptionWhenInvokeStaticMethodWithInvalidArgument() throws Exception {
 		Method method = StaticA.class.getDeclaredMethod("foo", String.class);
-		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invoke(method, null, Class.class));
+
+		assertThrows(ReflectionException.class, () -> Methods.invoke(method, null, Class.class));
 	}
 
 	public static class B {
@@ -118,15 +117,23 @@ class MethodsIgnoreAccessInvokeMethodTest {
 	@Test
 	void shouldThrowReflectionExceptionWhenInvokeFailsWithCause() throws Exception {
 		B obj = new B();
-
 		Method method = B.class.getDeclaredMethod("foo");
-		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invoke(method, obj));
+
+		assertThrows(ReflectionException.class, () -> Methods.invoke(method, obj));
 	}
 
 	@Test
 	void shouldThrowReflectionExceptionWhenInvokeStaticMethodFailsWithCause() throws Exception {
 		Method method = StaticB.class.getDeclaredMethod("foo", String.class);
-		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invoke(method, null, TEST_STRING));
+
+		assertThrows(ReflectionException.class, () -> Methods.invoke(method, null, TEST_STRING));
 	}
 
+	@Test
+	void shouldThrowReflectionExceptionWhenInvokingPrivateMethods() {
+		A obj = new A();
+		Method method = Methods.getOneDeclared("fooPrivate", A.class, String.class);
+
+		assertThrows(ReflectionException.class, () -> Methods.invoke(method, obj, TEST_STRING));
+	}
 }

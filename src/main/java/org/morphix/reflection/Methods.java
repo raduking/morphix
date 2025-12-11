@@ -33,7 +33,14 @@ import java.util.stream.Stream;
 import org.morphix.lang.JavaObjects;
 
 /**
- * Utility reflection static methods for java methods.
+ * Utility reflection static methods for java methods. The philosophy of this class is to provide methods that cover
+ * most of the use cases when dealing with methods through reflection and only throwing exceptions when something
+ * unexpected happens (like invoking a method). For methods that return null instead of throwing exceptions, see
+ * {@link Methods.Safe}.
+ * <p>
+ * Methods like {@link #getOneDeclaredInHierarchy(String, Class, Class[])} return null if the method is not found
+ * because most of the times the caller just needs to check for null and not to handle exceptions (the implementation
+ * actually delegates to {@link Methods.Safe}).
  *
  * @author Radu Sebastian LAZIN
  */
@@ -49,6 +56,21 @@ public interface Methods {
 	 */
 	static <T> List<Method> getAllDeclared(final Class<T> cls) {
 		return List.of(cls.getDeclaredMethods());
+	}
+
+	/**
+	 * Returns the method with the given name and given parameter types from the given class.
+	 *
+	 * @param <T> type to get the method from
+	 *
+	 * @param methodName the name of the method
+	 * @param cls class containing the method
+	 * @param parameterTypes parameter types
+	 * @return the method with the given name
+	 * @throws ReflectionException if no such method is found
+	 */
+	static <T> Method getOneDeclared(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
+		return Safe.getOneDeclared(methodName, cls, parameterTypes);
 	}
 
 	/**
@@ -68,14 +90,7 @@ public interface Methods {
 	 * @return found method,
 	 */
 	static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
-		try {
-			return cls.getDeclaredMethod(methodName, parameterTypes);
-		} catch (NoSuchMethodException e) {
-			if (null == cls.getSuperclass()) {
-				return null;
-			}
-			return getOneDeclaredInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
-		}
+		return Safe.getOneDeclaredInHierarchy(methodName, cls, parameterTypes);
 	}
 
 	/**
@@ -367,6 +382,38 @@ public interface Methods {
 	}
 
 	/**
+	 * Invokes the given method on the given object with parameters.
+	 *
+	 * @param <T> object type on which the method is invoked
+	 * @param <R> method return type
+	 *
+	 * @param obj object on which the method is invoked
+	 * @param method method to be invoked
+	 * @param args method arguments
+	 * @return result of the method invocation
+	 */
+	static <T, R> R invoke(final Method method, final T obj, final Object... args) {
+		try {
+			return JavaObjects.cast(method.invoke(obj, args));
+		} catch (InvocationTargetException e) {
+			// e is just a wrapper on the real exception, escalate the real one
+			Throwable cause = Reflection.unwrapInvocationTargetException(e);
+			String className = method.getDeclaringClass().getCanonicalName();
+			if (null != obj) {
+				className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
+			}
+			throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + cause.getMessage() + ".", e);
+		} catch (Exception e) {
+			// escalate any exception invoking the method
+			String className = method.getDeclaringClass().getCanonicalName();
+			if (null != obj) {
+				className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
+			}
+			throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + e.getMessage() + ".", e);
+		}
+	}
+
+	/**
 	 * Interface which groups all methods that ignore access modifiers.
 	 *
 	 * @author Radu Sebastian LAZIN
@@ -394,14 +441,14 @@ public interface Methods {
 				if (null != obj) {
 					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 				}
-				throw new ReflectionException(cause.getMessage() + ". Error invoking " + className + "." + method.getName(), e);
+				throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + cause.getMessage() + ".", e);
 			} catch (Exception e) {
 				// escalate any exception invoking the method
 				String className = method.getDeclaringClass().getCanonicalName();
 				if (null != obj) {
 					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 				}
-				throw new ReflectionException(e.getMessage() + ". Error invoking " + className + "." + method.getName(), e);
+				throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + e.getMessage() + ".", e);
 			}
 		}
 
@@ -418,7 +465,7 @@ public interface Methods {
 		static <T, A extends Annotation> void invokeWithAnnotation(final T obj, final Class<A> annotationClass) {
 			List<Method> methods = Methods.getAllDeclaredInHierarchy(obj.getClass(), withAnnotation(annotationClass));
 			for (Method method : methods) {
-				invoke(method, obj);
+				IgnoreAccess.invoke(method, obj);
 			}
 		}
 

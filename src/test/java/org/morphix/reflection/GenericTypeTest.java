@@ -18,10 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
@@ -46,6 +48,48 @@ class GenericTypeTest {
 	void shouldReturnTrueOnEqualsWhenAllFieldsAreEqual() {
 		ParameterizedType type1 = GenericType.of(String.class, new Type[] { Integer.class }, Long.class);
 		ParameterizedType type2 = GenericType.of(String.class, new Type[] { Integer.class }, Long.class);
+
+		boolean result = type1.equals(type2);
+
+		assertTrue(result);
+	}
+
+	@Test
+	void shouldReturnTrueOnEqualsForOtherParameterizedTypeWithEqualFields() {
+		ParameterizedType type1 = GenericType.of(String.class, new Type[] { Integer.class }, Long.class);
+		ParameterizedType type2 = new ParameterizedType() {
+
+			@Override
+			public Type[] getActualTypeArguments() {
+				return new Type[] { Integer.class };
+			}
+
+			@Override
+			public Type getRawType() {
+				return String.class;
+			}
+
+			@Override
+			public Type getOwnerType() {
+				return Long.class;
+			}
+		};
+
+		boolean result = type1.equals(type2);
+
+		assertTrue(result);
+	}
+
+	@Test
+	void shouldReturnTrueOnEqualsForJavaParameterizedTypeImpl() {
+		ParameterizedType type1 = GenericType.of(List.class, new Type[] { Integer.class }, null);
+
+		Class<?> parameterizedTypeClass = Classes.getOne("sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl");
+		Method makeMethod = Methods.getOneDeclared("make", parameterizedTypeClass, Class.class, Type[].class, Type.class);
+		ParameterizedType type2 = Methods.IgnoreAccess.invoke(makeMethod, null,
+				List.class,
+				new Type[] { Integer.class },
+				null);
 
 		boolean result = type1.equals(type2);
 
@@ -114,7 +158,10 @@ class GenericTypeTest {
 
 	@Test
 	void shouldThrowExceptionForNegativeIndex() {
-		assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(ArrayList.class, -1));
+		int index = -1;
+		ReflectionException e = assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(ArrayList.class, index));
+
+		assertThat(e.getMessage(), equalTo("Generic parameter type index cannot be negative, received: " + index));
 	}
 
 	@Test
@@ -133,19 +180,27 @@ class GenericTypeTest {
 
 	@Test
 	void shouldFailToExtractArgumentTypeForNonGenericClasses() {
-		assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(String.class, 0));
+		int index = 0;
+		ReflectionException e = assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(String.class, index));
+
+		assertThat(e.getMessage(), equalTo(String.class.getCanonicalName() + " is not a generic class"));
 	}
 
 	@Test
 	void shouldFailToExtractArgumentTypeForWrongGenericTypeIndex() {
-		assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(ArrayList.class, 1));
+		int index = 1;
+		ReflectionException e = assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(ArrayList.class, index));
+
+		assertThat(e.getMessage(), equalTo("Cannot extract generic parameter type at index " + index +
+				" from " + ArrayList.class.getCanonicalName() + " because it has only 1 generic parameter(s)"));
 	}
 
 	@Test
 	void shouldThrowExceptionWhenGenericTypeCannotBeBuiltFromGenericClass() {
-		GenericClass<String> gc = new GenericClass<>() {
+		GenericClass<List<String>> gc = new GenericClass<>() {
 			// empty
 		};
+		Fields.IgnoreAccess.set(gc, "type", String.class);
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> GenericType.of(gc));
 

@@ -39,7 +39,7 @@ public interface Constructors {
 	 */
 	static <T> T newInstance(final Class<T> cls) {
 		try {
-			return getDefaultConstructor(cls).newInstance();
+			return getDefault(cls).newInstance();
 		} catch (IllegalAccessException e) {
 			throw new ReflectionException("Default constructor is not accessible for class: " + cls.getCanonicalName(), e);
 		} catch (InstantiationException e) {
@@ -59,7 +59,7 @@ public interface Constructors {
 	 * @param cls class for which to find the constructor
 	 * @return constructor
 	 */
-	static <T> Constructor<T> getDefaultConstructor(final Class<T> cls) {
+	static <T> Constructor<T> getDefault(final Class<T> cls) {
 		try {
 			return cls.getDeclaredConstructor();
 		} catch (NoSuchMethodException e) {
@@ -76,7 +76,7 @@ public interface Constructors {
 	 * @param paramTypes parameter types
 	 * @return constructor
 	 */
-	static <T> Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>... paramTypes) {
+	static <T> Constructor<T> getDeclared(final Class<T> cls, final Class<?>... paramTypes) {
 		try {
 			return cls.getDeclaredConstructor(paramTypes);
 		} catch (NoSuchMethodException e) {
@@ -111,14 +111,13 @@ public interface Constructors {
 		 * @return an object of type T
 		 */
 		static <T> T newInstance(final Class<T> cls) {
-			Constructor<T> constructor = getDefaultConstructor(cls);
+			Constructor<T> constructor = getDefault(cls);
 			return newInstance(constructor);
 		}
 
 		/**
-		 * Creates a new instance for the given type with a given constructor ignoring its visibility.
-		 * <p>
-		 * TODO: add more detailed information.
+		 * Creates a new instance for the given type with a given constructor ignoring its visibility. It uses
+		 * try-with-resources to ensure that the constructor access is reset after usage.
 		 *
 		 * @param <T> instance type
 		 *
@@ -152,7 +151,5 @@ public interface Constructors {
 				return instanceCreator.newInstance(cls);
 			}
 		}
-
 	}
-
 }

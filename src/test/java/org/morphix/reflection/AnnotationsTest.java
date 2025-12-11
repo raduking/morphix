@@ -41,6 +41,8 @@ import org.morphix.utils.Tests;
  */
 class AnnotationsTest {
 
+	private static final String NEW_VALUE = "newValue";
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface TestAnnotation {
 		String value();
@@ -85,7 +87,7 @@ class AnnotationsTest {
 		Method method = Methods.Safe.getOneDeclared("foo", A.class);
 		TestAnnotation annotation = method.getAnnotation(TestAnnotation.class);
 
-		Annotations.overrideValue(annotation, "value", "newValue");
+		Annotations.overrideValue(annotation, "value", NEW_VALUE);
 		annotation = method.getAnnotation(TestAnnotation.class);
 
 		assertNotNull(annotation);
@@ -108,7 +110,7 @@ class AnnotationsTest {
 		try (MockedStatic<Fields.IgnoreAccess> mockedStatic = mockStatic(Fields.IgnoreAccess.class)) {
 			mockedStatic.when(() -> Fields.IgnoreAccess.get(any(), eq("memberValues"))).thenReturn(throwingMap);
 
-			exception = assertThrows(ReflectionException.class, () -> Annotations.overrideValue(annotation, attributeName, "newValue"));
+			exception = assertThrows(ReflectionException.class, () -> Annotations.overrideValue(annotation, attributeName, NEW_VALUE));
 		}
 
 		assertEquals("Failed to override annotation: " + annotation.annotationType().getCanonicalName() + "." + attributeName + "() value.",
@@ -132,6 +134,28 @@ class AnnotationsTest {
 		UnsupportedOperationException unsupportedOperationException = Tests.verifyDefaultConstructorThrows(Annotations.class);
 
 		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
+	}
+
+	@Test
+	void shouldThrowExceptionIfAttributeNameIsNull() {
+		Method method = Methods.Safe.getOneDeclared("foo", A.class);
+		TestAnnotation annotation = method.getAnnotation(TestAnnotation.class);
+
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> Annotations.overrideValue(annotation, null, NEW_VALUE));
+
+		assertThat(exception.getMessage(), equalTo("Attribute name must be non-null and non-blank."));
+	}
+
+	@Test
+	void shouldThrowExceptionIfAttributeNameIsBlank() {
+		Method method = Methods.Safe.getOneDeclared("foo", A.class);
+		TestAnnotation annotation = method.getAnnotation(TestAnnotation.class);
+
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+				() -> Annotations.overrideValue(annotation, "   ", NEW_VALUE));
+
+		assertThat(exception.getMessage(), equalTo("Attribute name must be non-null and non-blank."));
 	}
 
 	@Test

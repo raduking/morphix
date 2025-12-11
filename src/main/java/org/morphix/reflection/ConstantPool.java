@@ -83,7 +83,7 @@ public class ConstantPool<T> implements Iterable<Member> {
 	 * @return the constant member
 	 */
 	public Member getMemberAt(final int index) {
-		return constantPoolAccessor.getMethodAt(constantPoolObject, index);
+		return constantPoolAccessor.getMemberAt(constantPoolObject, index);
 	}
 
 	/**
@@ -167,10 +167,11 @@ public class ConstantPool<T> implements Iterable<Member> {
 		 */
 		@Override
 		public Member next() {
-			Member result = constantPool.getMemberAt(index);
-			if (nextIndex() < -1) {
+			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
+			Member result = constantPool.getMemberAt(index);
+			nextIndex();
 			return result;
 		}
 
