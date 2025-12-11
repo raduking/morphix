@@ -53,7 +53,7 @@ public abstract class GenericClass<T> {
 	 * @param type captured type
 	 */
 	private GenericClass(final Type type) {
-		this.type = type;
+		setType(type);
 	}
 
 	/**
@@ -125,7 +125,7 @@ public abstract class GenericClass<T> {
 	 */
 	@Override
 	public int hashCode() {
-		return type.hashCode();
+		return Objects.hashCode(type);
 	}
 
 	/**
