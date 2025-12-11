@@ -15,6 +15,7 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -44,6 +45,7 @@ class GenericClassTest {
 			exception = e;
 		}
 
+		assertNotNull(exception);
 		assertThat(exception.getClass(), equalTo(ReflectionException.class));
 		assertThat(exception.getMessage(),
 				equalTo("Generic argument type must be a generic class (ParameterizedType), but got: " + String.class));

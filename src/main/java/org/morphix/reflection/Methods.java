@@ -382,6 +382,38 @@ public interface Methods {
 	}
 
 	/**
+	 * Invokes the given method on the given object with parameters.
+	 *
+	 * @param <T> object type on which the method is invoked
+	 * @param <R> method return type
+	 *
+	 * @param obj object on which the method is invoked
+	 * @param method method to be invoked
+	 * @param args method arguments
+	 * @return result of the method invocation
+	 */
+	static <T, R> R invoke(final Method method, final T obj, final Object... args) {
+		try {
+			return JavaObjects.cast(method.invoke(obj, args));
+		} catch (InvocationTargetException e) {
+			// e is just a wrapper on the real exception, escalate the real one
+			Throwable cause = Reflection.unwrapInvocationTargetException(e);
+			String className = method.getDeclaringClass().getCanonicalName();
+			if (null != obj) {
+				className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
+			}
+			throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + cause.getMessage() + ".", e);
+		} catch (Exception e) {
+			// escalate any exception invoking the method
+			String className = method.getDeclaringClass().getCanonicalName();
+			if (null != obj) {
+				className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
+			}
+			throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + e.getMessage() + ".", e);
+		}
+	}
+
+	/**
 	 * Interface which groups all methods that ignore access modifiers.
 	 *
 	 * @author Radu Sebastian LAZIN
@@ -409,14 +441,14 @@ public interface Methods {
 				if (null != obj) {
 					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 				}
-				throw new ReflectionException(cause.getMessage() + ". Error invoking " + className + "." + method.getName(), e);
+				throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + cause.getMessage() + ".", e);
 			} catch (Exception e) {
 				// escalate any exception invoking the method
 				String className = method.getDeclaringClass().getCanonicalName();
 				if (null != obj) {
 					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 				}
-				throw new ReflectionException(e.getMessage() + ". Error invoking " + className + "." + method.getName(), e);
+				throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + e.getMessage() + ".", e);
 			}
 		}
 
