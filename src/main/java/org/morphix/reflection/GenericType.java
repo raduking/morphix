@@ -100,7 +100,7 @@ public class GenericType implements ParameterizedType {
 	 */
 	public static GenericType of(final ParameterizedType parameterizedType) {
 		return of(
-				(Class<?>) parameterizedType.getRawType(),
+				JavaObjects.cast(parameterizedType.getRawType()),
 				Objects.requireNonNull(parameterizedType.getActualTypeArguments(), "actual type arguments"),
 				parameterizedType.getOwnerType());
 	}
@@ -230,10 +230,10 @@ public class GenericType implements ParameterizedType {
 		if (o == this) {
 			return true;
 		}
-		if (o instanceof GenericType that) {
-			return Objects.equals(that.rawType, this.rawType)
-					&& Arrays.equals(that.arguments, this.arguments)
-					&& Objects.equals(that.ownerType, this.ownerType);
+		if (o instanceof ParameterizedType that) {
+			return Objects.equals(that.getRawType(), this.rawType)
+					&& Arrays.equals(that.getActualTypeArguments(), this.arguments)
+					&& Objects.equals(that.getOwnerType(), this.ownerType);
 		}
 		return false;
 	}
@@ -249,7 +249,7 @@ public class GenericType implements ParameterizedType {
 	}
 
 	/**
-	 * @see #hashCode()
+	 * @see #toString()
 	 */
 	@Override
 	public String toString() {

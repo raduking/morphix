@@ -77,7 +77,7 @@ class MemberAccessorOracleJDKTest {
 			}
 		});
 		assertThat(e.getClass(), equalTo(NullPointerException.class));
-		assertThat(e.getMessage(), equalTo("overrideSetter"));
+		assertThat(e.getMessage(), equalTo("overrideSetter method handle cannot be null."));
 
 		MemberAccessorOracleJDK.initialize(FIELD_NAME_IMPL_LOOKUP);
 	}

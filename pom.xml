@@ -4,7 +4,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- 
+	<!--
+		This project only has test dependencies.
+		
 		Using spring-boot-starter-parent to update dependencies easier and ensure that all dependencies work well together
 		this parent having most of the commonly used dependencies defined with tested versions across Java projects.
 	-->
