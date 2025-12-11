@@ -85,7 +85,7 @@ class GenericTypeTest {
 		ParameterizedType type1 = GenericType.of(List.class, new Type[] { Integer.class }, null);
 
 		Class<?> parameterizedTypeClass = Classes.getOne("sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl");
-		Method makeMethod = Methods.Safe.getOneDeclared("make", parameterizedTypeClass, Class.class, Type[].class, Type.class);
+		Method makeMethod = Methods.getOneDeclared("make", parameterizedTypeClass, Class.class, Type[].class, Type.class);
 		ParameterizedType type2 = Methods.IgnoreAccess.invoke(makeMethod, null,
 				List.class,
 				new Type[] { Integer.class },

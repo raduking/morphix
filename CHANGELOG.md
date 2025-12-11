@@ -7,6 +7,7 @@
 - Added `JavaClassFile.Version` record which represents a class file version.
 - Moved and renamed `Classes.CLASS_FILE_EXTENSION` constant to `JavaClassFile.EXTENSION`.
 - Added `maven-properties-plugin` to `pom.xml` to output all Maven properties to `target/maven.properties`.
+- Added `Methods.getOneDeclared` which just delegates to `Methods.Safe.getOneDeclared`.
 
 ---
 

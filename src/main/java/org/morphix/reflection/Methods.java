@@ -33,7 +33,14 @@ import java.util.stream.Stream;
 import org.morphix.lang.JavaObjects;
 
 /**
- * Utility reflection static methods for java methods.
+ * Utility reflection static methods for java methods. The philosophy of this class is to provide methods that cover
+ * most of the use cases when dealing with methods through reflection and only throwing exceptions when something
+ * unexpected happens (like invoking a method). For methods that return null instead of throwing exceptions, see
+ * {@link Methods.Safe}.
+ * <p>
+ * Methods like {@link #getOneDeclaredInHierarchy(String, Class, Class[])} return null if the method is not found
+ * because most of the times the caller just needs to check for null and not to handle exceptions (the implementation
+ * actually delegates to {@link Methods.Safe}).
  *
  * @author Radu Sebastian LAZIN
  */
@@ -49,6 +56,21 @@ public interface Methods {
 	 */
 	static <T> List<Method> getAllDeclared(final Class<T> cls) {
 		return List.of(cls.getDeclaredMethods());
+	}
+
+	/**
+	 * Returns the method with the given name and given parameter types from the given class.
+	 *
+	 * @param <T> type to get the method from
+	 *
+	 * @param methodName the name of the method
+	 * @param cls class containing the method
+	 * @param parameterTypes parameter types
+	 * @return the method with the given name
+	 * @throws ReflectionException if no such method is found
+	 */
+	static <T> Method getOneDeclared(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
+		return Safe.getOneDeclared(methodName, cls, parameterTypes);
 	}
 
 	/**
@@ -68,14 +90,7 @@ public interface Methods {
 	 * @return found method,
 	 */
 	static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
-		try {
-			return cls.getDeclaredMethod(methodName, parameterTypes);
-		} catch (NoSuchMethodException e) {
-			if (null == cls.getSuperclass()) {
-				return null;
-			}
-			return getOneDeclaredInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
-		}
+		return Safe.getOneDeclaredInHierarchy(methodName, cls, parameterTypes);
 	}
 
 	/**
