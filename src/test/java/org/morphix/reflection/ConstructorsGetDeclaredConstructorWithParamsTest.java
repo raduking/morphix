@@ -64,14 +64,14 @@ class ConstructorsGetDeclaredConstructorWithParamsTest {
 
 	@Test
 	void shouldFindConstructor() {
-		Constructor<B> constructor = Constructors.getDeclaredConstructor(B.class, int.class, String.class);
+		Constructor<B> constructor = Constructors.getDeclared(B.class, int.class, String.class);
 
 		assertNotNull(constructor);
 	}
 
 	@Test
 	void shouldCreateNewInstanceWithConstructor() {
-		Constructor<B> constructor = Constructors.getDeclaredConstructor(B.class, int.class, String.class);
+		Constructor<B> constructor = Constructors.getDeclared(B.class, int.class, String.class);
 		B a = Constructors.IgnoreAccess.newInstance(constructor, 10, "test");
 
 		assertNotNull(a);
@@ -81,20 +81,20 @@ class ConstructorsGetDeclaredConstructorWithParamsTest {
 
 	@Test
 	void shouldThrowExceptionIfNoConstructorIsFoundWithGivenParameters() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.getDeclaredConstructor(B.class, String.class));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.getDeclared(B.class, String.class));
 		assertThat(e.getMessage(),
 				equalTo("No constructor found for class: " + B.class.getCanonicalName() + " with parameters: [class java.lang.String]"));
 	}
 
 	@Test
 	void shouldThrowExceptionIfNoConstructorIsFoundWithNullParameters() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.getDeclaredConstructor(B.class, (Class<?>[]) null));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.getDeclared(B.class, (Class<?>[]) null));
 		assertThat(e.getMessage(), equalTo("No constructor found for class: " + B.class.getCanonicalName() + " with parameters: none"));
 	}
 
 	@Test
 	void shouldReturnPrivateConstructor() {
-		Constructor<C> constructor = Constructors.getDeclaredConstructor(C.class, long.class);
+		Constructor<C> constructor = Constructors.getDeclared(C.class, long.class);
 
 		assertNotNull(constructor);
 	}

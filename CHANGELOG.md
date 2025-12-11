@@ -10,6 +10,8 @@
 - Added `Methods.getOneDeclared` which just delegates to `Methods.Safe.getOneDeclared`.
 - Added `Methods.invoke` to invoke accessible methods contrary to `Methods.IgnoreAccess.invoke`.
 - Fixed `GenericClass` accepting non generic classes as generic type arguments.
+- Renamed `Constructors.getDefaultConstructor` to `Constructors.getDefault`.
+- Renamed `Constructors.getDeclaredConstructor` to `Constructors.getDeclared`.
 
 ---
 

@@ -133,7 +133,7 @@ class EnumsTest {
 	@Test
 	void shouldThrowExceptionIfClassIsInstantiatedWithDefaultConstructor() {
 		Throwable targetException = null;
-		Constructor<Enums> defaultConstructor = Constructors.getDeclaredConstructor(Enums.class);
+		Constructor<Enums> defaultConstructor = Constructors.getDeclared(Enums.class);
 		try {
 			Constructors.IgnoreAccess.newInstance(defaultConstructor);
 		} catch (ReflectionException e) {
