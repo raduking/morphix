@@ -465,7 +465,7 @@ public interface Methods {
 		static <T, A extends Annotation> void invokeWithAnnotation(final T obj, final Class<A> annotationClass) {
 			List<Method> methods = Methods.getAllDeclaredInHierarchy(obj.getClass(), withAnnotation(annotationClass));
 			for (Method method : methods) {
-				invoke(method, obj);
+				IgnoreAccess.invoke(method, obj);
 			}
 		}
 

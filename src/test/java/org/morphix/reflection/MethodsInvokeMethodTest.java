@@ -129,4 +129,11 @@ class MethodsInvokeMethodTest {
 		assertThrows(ReflectionException.class, () -> Methods.invoke(method, null, TEST_STRING));
 	}
 
+	@Test
+	void shouldThrowReflectionExceptionWhenInvokingPrivateMethods() {
+		A obj = new A();
+		Method method = Methods.getOneDeclared("fooPrivate", A.class, String.class);
+
+		assertThrows(ReflectionException.class, () -> Methods.invoke(method, obj, TEST_STRING));
+	}
 }
