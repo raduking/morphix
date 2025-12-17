@@ -84,6 +84,8 @@ public class GenericType implements ParameterizedType {
 
 	/**
 	 * Builds a new {@link GenericType} object with the given arguments.
+	 * <p>
+	 * For the actual type arguments use {@link Arguments#of(Type...)} to build the array.
 	 *
 	 * @param rawType raw type
 	 * @param actualTypeArguments actual generic type arguments
@@ -119,6 +121,8 @@ public class GenericType implements ParameterizedType {
 
 	/**
 	 * Builds a new {@link GenericType} object with the given arguments. The owner type is set to null.
+	 * <p>
+	 * For the actual type arguments use {@link Arguments#of(Type...)} to build the array.
 	 *
 	 * @param rawType raw type
 	 * @param actualTypeArguments actual generic type arguments
