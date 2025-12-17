@@ -55,6 +55,8 @@ public class GenericType implements ParameterizedType {
 
 	/**
 	 * Helper class to build type arguments arrays.
+	 *
+	 * @author Radu Sebastian LAZIN
 	 */
 	public interface Arguments {
 
