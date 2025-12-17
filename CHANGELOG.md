@@ -2,7 +2,7 @@
 
 `1.0.17`
 
-
+- Upgraded parent to `3.5.8`.
 
 ---
 
