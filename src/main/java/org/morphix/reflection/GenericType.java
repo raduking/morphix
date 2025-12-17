@@ -25,6 +25,15 @@ import org.morphix.lang.JavaObjects;
 /**
  * Implementation of {@link ParameterizedType}.
  *
+ * <p>
+ * <b>Usage example:</b>
+ * <p>
+ * To create a parameterized type for <code>Map&lt;String, List&lt;Integer&gt;&gt;</code>:
+ *
+ * <pre>
+ * GenericType mapType = GenericType.of(Map.class, GenericType.Arguments.of(String.class, GenericType.of(List.class, Integer.class)));
+ * </pre>
+ *
  * @author Radu Sebastian LAZIN
  */
 public class GenericType implements ParameterizedType {
@@ -43,6 +52,22 @@ public class GenericType implements ParameterizedType {
 	 * Owner type.
 	 */
 	private final Type ownerType;
+
+	/**
+	 * Helper class to build type arguments arrays.
+	 */
+	public interface Arguments {
+
+		/**
+		 * Builds a new array of {@link Type} from the given arguments.
+		 *
+		 * @param types types
+		 * @return array of types
+		 */
+		static Type[] of(final Type... types) {
+			return types;
+		}
+	}
 
 	/**
 	 * Private constructor with all arguments.
@@ -82,7 +107,7 @@ public class GenericType implements ParameterizedType {
 	}
 
 	/**
-	 * Builds a new {@link GenericType} object with the given argument.
+	 * Builds a new {@link GenericType} object with the given argument. The owner type is set to null.
 	 *
 	 * @param rawType raw type
 	 * @param actualTypeArgument actual generic type argument
@@ -90,6 +115,17 @@ public class GenericType implements ParameterizedType {
 	 */
 	public static GenericType of(final Class<?> rawType, final Type actualTypeArgument) {
 		return of(rawType, actualTypeArgument, null);
+	}
+
+	/**
+	 * Builds a new {@link GenericType} object with the given arguments. The owner type is set to null.
+	 *
+	 * @param rawType raw type
+	 * @param actualTypeArguments actual generic type arguments
+	 * @return a new parameterized type object
+	 */
+	public static GenericType of(final Class<?> rawType, final Type[] actualTypeArguments) {
+		return of(rawType, actualTypeArguments, null);
 	}
 
 	/**

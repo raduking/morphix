@@ -3,6 +3,7 @@
 `1.0.17`
 
 - Upgraded parent to `3.5.8`.
+- Added `GenericType.Arguments` helper interface to build the generic type arguments.
 
 ---
 
