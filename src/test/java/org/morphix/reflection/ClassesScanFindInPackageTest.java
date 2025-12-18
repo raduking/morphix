@@ -73,7 +73,7 @@ class ClassesScanFindInPackageTest {
 		var classesFunction = Classes.Scan.findInPackage("org.morphix.lang.function", Path.of(TARGET_CLASSES));
 		var classesThread = Classes.Scan.findInPackage("org.morphix.lang.thread", Path.of(TARGET_CLASSES));
 
-		int langClassesCount = 7;
+		int langClassesCount = 8;
 		// Classes found directly in org.morphix.lang:
 		// Comparables
 		// Enums
@@ -82,6 +82,7 @@ class ClassesScanFindInPackageTest {
 		// Nullables$Chain
 		// Unchecked
 		// Unchecked$Undeclared
+		// Messages
 
 		assertThat(classes.size(), equalTo(langClassesCount + classesFunction.size() + classesThread.size()));
 	}

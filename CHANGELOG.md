@@ -4,6 +4,8 @@
 
 - Upgraded parent to `3.5.8`.
 - Added `GenericType.Arguments` helper interface to build the generic type arguments.
+- Added `Messages` class with utility methods for lightweight message interpolation for diagnostics and exceptions.
+- Added `Messages.message` method which replaces each `{}` placeholder in the template with the corresponding argument.
 
 ---
 

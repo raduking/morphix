@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.morphix.lang.JavaObjects;
+import org.morphix.lang.Messages;
 
 /**
  * Utility reflection static methods for java methods. The philosophy of this class is to provide methods that cover
@@ -176,14 +177,16 @@ public interface Methods {
 	static <T extends Type> T getGenericReturnType(final Method method, final int index) {
 		Type type = method.getGenericReturnType();
 		if (!(type instanceof ParameterizedType parameterizedType)) {
-			throw new ReflectionException(type.getTypeName() + " is a raw return type for method " + method.getDeclaringClass().getCanonicalName()
-					+ "." + method.getName());
+			throw new ReflectionException(Messages.message(
+					"{} is a raw return type for method {}.{}",
+					type.getTypeName(), method.getDeclaringClass().getCanonicalName(), method.getName()));
 		}
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 		if (index >= actualTypeArguments.length) {
-			throw new ReflectionException("Could not find generic argument at index " + index + " for generic return type "
-					+ parameterizedType.getTypeName() + " with " + actualTypeArguments.length + " generic argument(s) for method "
-					+ method.getDeclaringClass().getCanonicalName() + "." + method.getName());
+			throw new ReflectionException(Messages.message(
+					"Could not find generic argument at index {} for generic return type {} with {} generic argument(s) for method {}.{}",
+					index, parameterizedType.getTypeName(), actualTypeArguments.length, method.getDeclaringClass().getCanonicalName(),
+					method.getName()));
 		}
 		Type returnType = actualTypeArguments[index];
 		return JavaObjects.cast(returnType);
@@ -213,8 +216,9 @@ public interface Methods {
 		try {
 			return getGenericReturnType(method, index);
 		} catch (ClassCastException e) {
-			throw new ReflectionException("Could not infer actual generic return type argument from " + method.getGenericReturnType().getTypeName() +
-					" for method " + method.getDeclaringClass().getCanonicalName() + "." + method.getName(), e);
+			throw new ReflectionException(Messages.message(
+					"Could not infer actual generic return type argument from {} for method {}.{}",
+					method.getGenericReturnType().getTypeName(), method.getDeclaringClass().getCanonicalName(), method.getName()), e);
 		}
 	}
 
@@ -348,14 +352,15 @@ public interface Methods {
 		try {
 			primitiveFieldType = Primitives.toPrimitive(field.getType());
 		} catch (ReflectionException e) {
-			throw new ReflectionException("Error finding method: "
-					+ methodName + "(" + field.getType().getCanonicalName() + ")", e);
+			throw new ReflectionException(Messages.message(
+					"Error finding method: {}({})",
+					methodName, field.getType().getCanonicalName()), e);
 		}
 		method = Methods.getOneDeclaredInHierarchy(methodName, cls, primitiveFieldType);
 		if (null == method) {
-			throw new ReflectionException("Error finding method: "
-					+ methodName + "(" + field.getType().getCanonicalName() + ") or "
-					+ methodName + "(" + primitiveFieldType.getCanonicalName() + ")");
+			throw new ReflectionException(Messages.message(
+					"Error finding method: {}({}) or {}({})",
+					methodName, field.getType().getCanonicalName(), methodName, primitiveFieldType.getCanonicalName()));
 		}
 		return method;
 	}
@@ -374,13 +379,15 @@ public interface Methods {
 		for (Method method : cls.getMethods()) {
 			if (Modifier.isAbstract(method.getModifiers())) {
 				if (null != singleAbstractMethod) {
-					throw new ReflectionException(cls + " is not a functional interface because it has more than one abstract method");
+					throw new ReflectionException(Messages.message(
+							"{} is not a functional interface because it has more than one abstract method", cls));
 				}
 				singleAbstractMethod = method;
 			}
 		}
 		if (null == singleAbstractMethod) {
-			throw new ReflectionException(cls + " is not a functional interface because it has no abstract method");
+			throw new ReflectionException(Messages.message(
+					"{} is not a functional interface because it has no abstract method", cls));
 		}
 		return singleAbstractMethod;
 	}
@@ -406,14 +413,16 @@ public interface Methods {
 			if (null != obj) {
 				className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 			}
-			throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + cause.getMessage() + ".", e);
+			throw new ReflectionException(Messages.message(
+					"Error invoking {}.{}: {}.", className, method.getName(), cause.getMessage()), e);
 		} catch (Exception e) {
 			// escalate any exception invoking the method
 			String className = method.getDeclaringClass().getCanonicalName();
 			if (null != obj) {
 				className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 			}
-			throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + e.getMessage() + ".", e);
+			throw new ReflectionException(Messages.message(
+					"Error invoking {}.{}: {}.", className, method.getName(), e.getMessage()), e);
 		}
 	}
 
@@ -446,14 +455,16 @@ public interface Methods {
 				if (null != obj) {
 					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 				}
-				throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + cause.getMessage() + ".", e);
+				throw new ReflectionException(Messages.message(
+						"Error invoking {}.{}: {}.", className, method.getName(), cause.getMessage()), e);
 			} catch (Exception e) {
 				// escalate any exception invoking the method
 				String className = method.getDeclaringClass().getCanonicalName();
 				if (null != obj) {
 					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 				}
-				throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + e.getMessage() + ".", e);
+				throw new ReflectionException(Messages.message(
+						"Error invoking {}.{}: {}.", className, method.getName(), e.getMessage()), e);
 			}
 		}
 
