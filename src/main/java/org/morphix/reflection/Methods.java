@@ -170,6 +170,8 @@ public interface Methods {
 	 * @param method method for which the generic return type is needed
 	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return type
+	 * @throws ReflectionException if the method has a raw return type or if the generic return type cannot be found at the
+	 *     given index
 	 */
 	static <T extends Type> T getGenericReturnType(final Method method, final int index) {
 		Type type = method.getGenericReturnType();
@@ -205,6 +207,7 @@ public interface Methods {
 	 * @param method method for which the generic return type is needed
 	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return class
+	 * @throws ReflectionException if the generic return type cannot be cast to a Class
 	 */
 	static <T> Class<T> getGenericReturnClass(final Method method, final int index) {
 		try {
@@ -241,7 +244,8 @@ public interface Methods {
 
 	/**
 	 * Returns the currently executing method name. The advantage of this method is that each {@link StackTraceElement} is
-	 * fetched lazily, so you don't construct the full stack trace before checking the first method.
+	 * fetched lazily, so you don't construct the full stack trace before checking the first method. If the current method
+	 * name is not found, null is returned.
 	 *
 	 * @param withClassName flag to prepend class name
 	 * @param depth the depth of the caller method, for the direct caller this should be 1
@@ -430,6 +434,7 @@ public interface Methods {
 		 * @param method method to be invoked
 		 * @param args method arguments
 		 * @return result of the method invocation
+		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
 			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
@@ -461,6 +466,7 @@ public interface Methods {
 		 *
 		 * @param obj object on which to invoke the methods
 		 * @param annotationClass annotation class
+		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, A extends Annotation> void invokeWithAnnotation(final T obj, final Class<A> annotationClass) {
 			List<Method> methods = Methods.getAllDeclaredInHierarchy(obj.getClass(), withAnnotation(annotationClass));
@@ -479,6 +485,7 @@ public interface Methods {
 		 * @param method method to be invoked
 		 * @param args method arguments
 		 * @return result of the method invocation
+		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invokeWithOriginalException(final Method method, final T obj, final Object... args) {
 			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
@@ -621,6 +628,7 @@ public interface Methods {
 		 * @param cls class on which the methods are returned
 		 * @param excluded non null mutable set of classes/interfaces/enums/records to be excluded
 		 * @return list of methods
+		 * @throws ReflectionException if the excluded set is null or unmodifiable
 		 */
 		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Set<Class<?>> excluded) {
 			try {
