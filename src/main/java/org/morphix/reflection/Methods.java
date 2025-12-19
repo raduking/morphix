@@ -183,7 +183,8 @@ public interface Methods {
 		if (index >= actualTypeArguments.length) {
 			throw new ReflectionException(
 					"Could not find generic argument at index {} for generic return type {} with {} generic argument(s) for method {}.{}",
-					index, parameterizedType.getTypeName(), actualTypeArguments.length, method.getDeclaringClass().getCanonicalName(), method.getName());
+					index, parameterizedType.getTypeName(), actualTypeArguments.length,
+					method.getDeclaringClass().getCanonicalName(), method.getName());
 		}
 		Type returnType = actualTypeArguments[index];
 		return JavaObjects.cast(returnType);
