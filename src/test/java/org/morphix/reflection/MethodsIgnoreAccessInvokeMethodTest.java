@@ -65,7 +65,7 @@ class MethodsIgnoreAccessInvokeMethodTest {
 		Method method = A.class.getDeclaredMethod("foo", String.class);
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invoke(method, obj, obj));
 		assertThat(e.getMessage(),
-				equalTo("Error invoking " + A.class.getCanonicalName() + "." + method.getName() + ": " + e.getCause().getMessage() + "."));
+				equalTo("Error invoking method " + A.class.getCanonicalName() + "." + method.getName() + ": " + e.getCause().getMessage() + "."));
 	}
 
 	@Test
