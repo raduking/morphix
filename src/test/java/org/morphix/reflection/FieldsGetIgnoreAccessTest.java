@@ -28,9 +28,10 @@ import org.morphix.reflection.testdata.B;
  */
 public class FieldsGetIgnoreAccessTest {
 
-	public static final String TEST_STRING = "testString";
-	public static final Long TEST_LONG = 17L;
-	public static final Integer TEST_INTEGER = 13;
+	private static final String TEST_STRING = "testString";
+	private static final Long TEST_LONG = 17L;
+	private static final Integer TEST_INTEGER = 13;
+	private static final String NON_EXISTENT_FIELD = "$NonExistentField$";
 
 	@Test
 	void shouldGetTheFieldValue() throws Exception {
@@ -84,7 +85,8 @@ public class FieldsGetIgnoreAccessTest {
 	@Test
 	void shouldThrowExceptionOnNonExistentField() {
 		Object o = new Object();
-		assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.get(o, "$NonExistentField$"));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.get(o, NON_EXISTENT_FIELD));
+		assertThat(e.getMessage(), equalTo("Could not find field '" + NON_EXISTENT_FIELD + "' on object of type " + o.getClass()));
 	}
 
 	@Test

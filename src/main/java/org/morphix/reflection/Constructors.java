@@ -41,13 +41,13 @@ public interface Constructors {
 		try {
 			return getDefault(cls).newInstance();
 		} catch (IllegalAccessException e) {
-			throw new ReflectionException("Default constructor is not accessible for class: " + cls.getCanonicalName(), e);
+			throw new ReflectionException(e, "Default constructor is not accessible for class: {}", cls.getCanonicalName());
 		} catch (InstantiationException e) {
-			throw new ReflectionException("Could not instantiate class, the class object represents an abstract class, an interface," +
-					" an array class, a primitive type, or void: " + cls.getCanonicalName(), e);
+			throw new ReflectionException(e, "Could not instantiate class, the class object represents an abstract class,"
+					+ " an interface, an array class, a primitive type, or void: {}", cls.getCanonicalName());
 		} catch (InvocationTargetException e) {
-			throw new ReflectionException("Could not instantiate class, default constructor threw exception: " +
-					e.getTargetException() + ", for class: " + cls.getCanonicalName(), e);
+			throw new ReflectionException(e, "Could not instantiate class, default constructor threw exception: {}, for class: {}",
+					e.getTargetException(), cls.getCanonicalName());
 		}
 	}
 
@@ -63,7 +63,7 @@ public interface Constructors {
 		try {
 			return cls.getDeclaredConstructor();
 		} catch (NoSuchMethodException e) {
-			throw new ReflectionException("Default constructor is not defined for class: " + cls.getCanonicalName(), e);
+			throw new ReflectionException(e, "Default constructor is not defined for class: {}", cls.getCanonicalName());
 		}
 	}
 
@@ -80,8 +80,8 @@ public interface Constructors {
 		try {
 			return cls.getDeclaredConstructor(paramTypes);
 		} catch (NoSuchMethodException e) {
-			throw new ReflectionException("No constructor found for class: " + cls.getCanonicalName()
-					+ " with parameters: " + (null != paramTypes ? List.of(paramTypes) : "none"), e);
+			throw new ReflectionException(e, "No constructor found for class: {} with parameters: {}",
+					cls.getCanonicalName(), null != paramTypes ? List.of(paramTypes) : "none");
 		}
 	}
 
@@ -131,7 +131,7 @@ public interface Constructors {
 			} catch (NullPointerException | InvocationTargetException
 					| IllegalAccessException | IllegalAccessError
 					| InstantiationException | InstantiationError e) {
-				throw new ReflectionException("Could not instantiate class: " + constructor.getDeclaringClass().getCanonicalName(), e);
+				throw new ReflectionException(e, "Could not instantiate class: {}", constructor.getDeclaringClass().getCanonicalName());
 			}
 		}
 

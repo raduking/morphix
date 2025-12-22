@@ -212,7 +212,7 @@ public interface Fields {
 		try {
 			return JavaObjects.cast(field.get(obj));
 		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new ReflectionException("Could not get field " + field.getName(), e);
+			throw new ReflectionException(e, "Could not get field {}", field.getName());
 		}
 	}
 
@@ -230,7 +230,7 @@ public interface Fields {
 		try {
 			field.set(obj, value); // NOSONAR this is a reflection enhancement method
 		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new ReflectionException("Could not set field " + field.getName(), e);
+			throw new ReflectionException(e, "Could not set field {}", field.getName());
 		}
 	}
 
@@ -251,7 +251,7 @@ public interface Fields {
 		Class<?> cls = object.getClass();
 		Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 		if (null == field) {
-			throw new ReflectionException("Object does not contain a field named: " + fieldName);
+			throw new ReflectionException("Object does not contain a field named: {}", fieldName);
 		}
 		return Reflection.getFieldValue(object, field);
 	}
@@ -273,7 +273,7 @@ public interface Fields {
 		Class<?> cls = obj.getClass();
 		Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 		if (null == field) {
-			throw new ReflectionException("Object does not contain a field named: " + fieldName);
+			throw new ReflectionException("Object does not contain a field named: {}", fieldName);
 		}
 		Reflection.setFieldValue(obj, field, value);
 	}
@@ -317,7 +317,7 @@ public interface Fields {
 			}
 			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
 			if (null == field) {
-				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass());
+				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, obj.getClass());
 			}
 			return IgnoreAccess.get(obj, field);
 		}
@@ -361,7 +361,7 @@ public interface Fields {
 			}
 			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
 			if (null == field) {
-				throw new ReflectionException("Could not find field '" + fieldName + "' on object of type " + obj.getClass());
+				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, obj.getClass());
 			}
 			IgnoreAccess.set(obj, field, value);
 		}
@@ -381,7 +381,7 @@ public interface Fields {
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 			if (null == field || !Modifier.isStatic(field.getModifiers())) {
-				throw new ReflectionException("Could not find static field with name: " + fieldName + " in class: " + cls);
+				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
 			}
 			return IgnoreAccess.get(null, field);
 		}
@@ -400,7 +400,7 @@ public interface Fields {
 		static <T, U> void setStatic(final Class<T> cls, final String fieldName, final U value) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 			if (null == field || !Modifier.isStatic(field.getModifiers())) {
-				throw new ReflectionException("Could not find static field with name: " + fieldName + " in class: " + cls);
+				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
 			}
 			IgnoreAccess.set(null, field, value);
 		}
