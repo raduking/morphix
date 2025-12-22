@@ -161,8 +161,7 @@ public class GenericType implements ParameterizedType {
 		if (genericArgumentType instanceof ParameterizedType parameterizedType) {
 			return of(parameterizedType);
 		}
-		throw new ReflectionException("Cannot build GenericType from " + genericArgumentType +
-				" because it is not a " + ParameterizedType.class);
+		throw new ReflectionException("Cannot build GenericType from {} because it is not a {}", genericArgumentType, ParameterizedType.class);
 	}
 
 	/**
@@ -176,16 +175,16 @@ public class GenericType implements ParameterizedType {
 	 */
 	public static <T extends Type> T getGenericParameterType(final Class<?> cls, final int index) {
 		if (index < 0) {
-			throw new ReflectionException("Generic parameter type index cannot be negative, received: " + index);
+			throw new ReflectionException("Generic parameter type index cannot be negative, received: {}", index);
 		}
 		if (isNotGenericClass(cls)) {
-			throw new ReflectionException(cls.getCanonicalName() + " is not a generic class");
+			throw new ReflectionException("{} is not a generic class", cls.getCanonicalName());
 		}
 		ParameterizedType parameterizedType = (ParameterizedType) cls.getGenericSuperclass();
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 		if (index >= actualTypeArguments.length) {
-			throw new ReflectionException("Cannot extract generic parameter type at index " + index + " from " + cls.getCanonicalName()
-					+ " because it has only " + actualTypeArguments.length + " generic parameter(s)");
+			throw new ReflectionException("Cannot extract generic parameter type at index {} from {} because it has only {} generic parameter(s)",
+					index, cls.getCanonicalName(), actualTypeArguments.length);
 		}
 		Type genericType = actualTypeArguments[index];
 		return JavaObjects.cast(genericType);

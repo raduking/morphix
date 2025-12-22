@@ -62,7 +62,7 @@ public interface Reflection {
 		try {
 			return JavaObjects.cast(Class.forName(classWithPrefixName));
 		} catch (ClassNotFoundException e) {
-			throw new ReflectionException("Could not find class with prefix '" + classWithPrefixName + "'", e);
+			throw new ReflectionException(e, "Could not find class with prefix '{}'", classWithPrefixName);
 		}
 	}
 

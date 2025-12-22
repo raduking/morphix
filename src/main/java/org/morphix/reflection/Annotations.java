@@ -63,8 +63,8 @@ public class Annotations {
 			Map<String, Object> memberValues = Fields.IgnoreAccess.get(handler, FIELD_NAME_MEMBER_VALUES);
 			memberValues.put(attribute, value);
 		} catch (Exception e) {
-			throw new ReflectionException("Failed to override annotation: "
-					+ annotation.annotationType().getCanonicalName() + "." + attribute + "() value.", e);
+			throw new ReflectionException(e, "Failed to override annotation: {}.{}() value.",
+					annotation.annotationType().getCanonicalName(), attribute);
 		}
 	}
 

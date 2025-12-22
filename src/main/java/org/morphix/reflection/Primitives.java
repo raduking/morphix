@@ -57,7 +57,7 @@ public class Primitives {
 	 */
 	public static <T> Class<T> toPrimitive(final Class<?> cls) {
 		if (!isUnboxable(cls)) {
-			throw new ReflectionException("Class " + cls.getCanonicalName() + " cannot be transformed to primitive type");
+			throw new ReflectionException("Class {} cannot be transformed to primitive type", cls.getCanonicalName());
 		}
 		return JavaObjects.cast(CLASS_TO_PRIMITIVE_MAP.get(cls));
 	}
@@ -72,7 +72,7 @@ public class Primitives {
 	 */
 	public static <T> Class<T> fromPrimitive(final Class<?> cls) {
 		if (!PRIMITIVE_TO_CLASS_MAP.containsKey(cls)) {
-			throw new ReflectionException("Class " + cls.getCanonicalName() + " cannot be transformed to boxed type");
+			throw new ReflectionException("Class {} cannot be transformed to boxed type", cls.getCanonicalName());
 		}
 		return JavaObjects.cast(PRIMITIVE_TO_CLASS_MAP.get(cls));
 	}
