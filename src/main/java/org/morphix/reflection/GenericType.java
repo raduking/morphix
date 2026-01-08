@@ -23,7 +23,7 @@ import java.util.StringJoiner;
 import org.morphix.lang.JavaObjects;
 
 /**
- * Implementation of {@link ParameterizedType}.
+ * Implementation of {@link ParameterizedType}. This class can be used to create parameterized types programmatically.
  *
  * <p>
  * <b>Usage example:</b>
