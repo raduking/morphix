@@ -129,7 +129,7 @@ public enum JavaModifier {
 	}
 
 	/**
-	 * @see #toString()
+	 * @see Object#toString()
 	 */
 	@Override
 	public String toString() {

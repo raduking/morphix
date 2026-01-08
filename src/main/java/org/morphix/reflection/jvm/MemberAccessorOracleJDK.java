@@ -103,7 +103,7 @@ public class MemberAccessorOracleJDK<T extends AccessibleObject & Member> implem
 	}
 
 	/**
-	 * @see #close()
+	 * @see AutoCloseable#close()
 	 */
 	@Override
 	public void close() {

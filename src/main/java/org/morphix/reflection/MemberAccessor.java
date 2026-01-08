@@ -60,7 +60,7 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	}
 
 	/**
-	 * @see #close()
+	 * @see AutoCloseable#close()
 	 */
 	@Override
 	public void close() {

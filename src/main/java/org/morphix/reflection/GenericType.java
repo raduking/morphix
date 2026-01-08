@@ -240,7 +240,7 @@ public class GenericType implements ParameterizedType {
 	}
 
 	/**
-	 * @see #getActualTypeArguments()
+	 * @see ParameterizedType#getActualTypeArguments()
 	 */
 	@Override
 	public Type[] getActualTypeArguments() {
@@ -248,7 +248,7 @@ public class GenericType implements ParameterizedType {
 	}
 
 	/**
-	 * @see #getRawType()
+	 * @see ParameterizedType#getRawType()
 	 */
 	@Override
 	public Type getRawType() {
@@ -256,7 +256,7 @@ public class GenericType implements ParameterizedType {
 	}
 
 	/**
-	 * @see #getOwnerType()
+	 * @see ParameterizedType#getOwnerType()
 	 */
 	@Override
 	public Type getOwnerType() {
@@ -264,7 +264,7 @@ public class GenericType implements ParameterizedType {
 	}
 
 	/**
-	 * @see #equals(Object)
+	 * @see Object#equals(Object)
 	 */
 	@Override
 	public boolean equals(final Object o) {
@@ -280,7 +280,7 @@ public class GenericType implements ParameterizedType {
 	}
 
 	/**
-	 * @see #hashCode()
+	 * @see Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
@@ -290,7 +290,7 @@ public class GenericType implements ParameterizedType {
 	}
 
 	/**
-	 * @see #toString()
+	 * @see Object#toString()
 	 */
 	@Override
 	public String toString() {
