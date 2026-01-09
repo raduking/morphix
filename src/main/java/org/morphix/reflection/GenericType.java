@@ -181,10 +181,37 @@ public class GenericType implements ParameterizedType {
 			throw new ReflectionException("{} is not a generic class", cls.getCanonicalName());
 		}
 		ParameterizedType parameterizedType = (ParameterizedType) cls.getGenericSuperclass();
+		return getGenericParameterType(parameterizedType, cls.getCanonicalName(), index);
+	}
+
+	/**
+	 * Extract the generic parameter type for a given class.
+	 *
+	 * @param <T> generic parameter type
+	 *
+	 * @param parameterizedType parameterized type to extract from
+	 * @param index type parameter index
+	 * @return the generic parameter type for a given class
+	 */
+	public static <T extends Type> T getGenericParameterType(final ParameterizedType parameterizedType, final int index) {
+		return getGenericParameterType(parameterizedType, parameterizedType.getRawType().getTypeName(), index);
+	}
+
+	/**
+	 * Extract the generic parameter type for a given class.
+	 *
+	 * @param <T> generic parameter type
+	 *
+	 * @param parameterizedType parameterized type to extract from
+	 * @param typeName type name for error messages
+	 * @param index type parameter index
+	 * @return the generic parameter type for a given class
+	 */
+	public static <T extends Type> T getGenericParameterType(final ParameterizedType parameterizedType, final String typeName, final int index) {
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 		if (index >= actualTypeArguments.length) {
 			throw new ReflectionException("Cannot extract generic parameter type at index {} from {} because it has only {} generic parameter(s)",
-					index, cls.getCanonicalName(), actualTypeArguments.length);
+					index, typeName, actualTypeArguments.length);
 		}
 		Type genericType = actualTypeArguments[index];
 		return JavaObjects.cast(genericType);
