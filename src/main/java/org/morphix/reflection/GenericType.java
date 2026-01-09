@@ -174,9 +174,6 @@ public class GenericType implements ParameterizedType {
 	 * @return the generic parameter type for a given class
 	 */
 	public static <T extends Type> T getGenericParameterType(final Class<?> cls, final int index) {
-		if (index < 0) {
-			throw new ReflectionException("Generic parameter type index cannot be negative, received: {}", index);
-		}
 		if (isNotGenericClass(cls)) {
 			throw new ReflectionException("{} is not a generic class", cls.getCanonicalName());
 		}
@@ -208,6 +205,9 @@ public class GenericType implements ParameterizedType {
 	 * @return the generic parameter type for a given class
 	 */
 	public static <T extends Type> T getGenericParameterType(final ParameterizedType parameterizedType, final String typeName, final int index) {
+		if (index < 0) {
+			throw new ReflectionException("Generic parameter type index cannot be negative, received: {}", index);
+		}
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 		if (index >= actualTypeArguments.length) {
 			throw new ReflectionException("Cannot extract generic parameter type at index {} from {} because it has only {} generic parameter(s)",
