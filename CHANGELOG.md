@@ -10,6 +10,7 @@
 - Added `Messages.message` method which replaces each `{}` placeholder in the template with the corresponding argument.
 - Added `ReflectionException` constructors with template messages using the `Messages.message` method internally.
 - Added `MapConversions.convertToMap` static method for a simple conversion of an object to a map.
+- Added `PutFunction` functional interface to be able to pass `Map::put` method references.
 
 ---
 

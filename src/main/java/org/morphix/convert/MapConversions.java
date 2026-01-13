@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.morphix.convert.function.ConvertFunction;
+import org.morphix.convert.function.PutFunction;
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.convert.pipeline.MapConversionPipeline;
 import org.morphix.convert.strategy.ConversionStrategy;
@@ -100,7 +101,8 @@ public interface MapConversions {
 
 	/**
 	 * Convenience static method to convert an object to a map conversion pipeline. If the source is null, an empty map is
-	 * returned.
+	 * returned. The putValueFunction is used to put values into the map and can be used to customize the behavior (e.g., to
+	 * handle specific types or to apply transformations or even filtering).
 	 *
 	 * @param <S> source type
 	 * @param <H> map key type
@@ -109,20 +111,41 @@ public interface MapConversions {
 	 * @param source source object
 	 * @param keyConverter key converter function
 	 * @param valueConverter value converter function
+	 * @param putValueFunction map put function
 	 * @return destination map conversion pipeline
 	 * @throws NullPointerException if any of the converters or the map instance function is null
 	 */
 	static <S, H, D> MapConversionPipeline<String, Object, H, D> convert(final S source, final SimpleConverter<String, H> keyConverter,
-			final SimpleConverter<Object, D> valueConverter) {
+			final SimpleConverter<Object, D> valueConverter, final PutFunction<Map<String, Object>, String, Object> putValueFunction) {
 		if (source == null) {
 			return convertMap(Map.of(), keyConverter, valueConverter);
 		}
 		List<ExtendedField> fields = ConversionStrategy.findFields(source);
 		Map<String, Object> map = new HashMap<>(fields.size());
 		for (ExtendedField field : fields) {
-			map.put(field.getName(), field.getFieldValue());
+			putValueFunction.put(map, field.getName(), field.getFieldValue());
 		}
 		return convertMap(map, keyConverter, valueConverter);
+	}
+
+	/**
+	 * Convenience static method to convert an object to a map. If the source is null, an empty map is returned. The
+	 * putValueFunction is used to put values into the map and can be used to customize the behavior (e.g., to handle
+	 * specific types or to apply transformations or even filtering).
+	 *
+	 * @param <S> source type
+	 * @param <H> map key type
+	 * @param <D> map value type
+	 *
+	 * @param source source object
+	 * @param keyConverter key converter function
+	 * @param valueConverter value converter function
+	 * @param putValueFunction map put function
+	 * @return destination map
+	 */
+	static <S, H, D> Map<H, D> convertToMap(final S source, final SimpleConverter<String, H> keyConverter,
+			final SimpleConverter<Object, D> valueConverter, final PutFunction<Map<String, Object>, String, Object> putValueFunction) {
+		return convert(source, keyConverter, valueConverter, putValueFunction).toMap();
 	}
 
 	/**
@@ -140,6 +163,6 @@ public interface MapConversions {
 	 */
 	static <S, H, D> Map<H, D> convertToMap(final S source, final SimpleConverter<String, H> keyConverter,
 			final SimpleConverter<Object, D> valueConverter) {
-		return convert(source, keyConverter, valueConverter).toMap();
+		return convertToMap(source, keyConverter, valueConverter, Map::put);
 	}
 }
