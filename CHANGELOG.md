@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.18`
+
+---
+
 `1.0.17`
 
 - Upgraded parent to `3.5.8`.
