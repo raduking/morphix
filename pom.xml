@@ -124,7 +124,7 @@
 			<scope>test</scope>
 		</dependency>
 
-        <!-- Add JMH dependencies (scope=test so they don't affect the main build) -->
+        <!-- Benchmarking dependencies (scope=test so they don't affect the main build) -->
 		<dependency>
 			<groupId>org.openjdk.jmh</groupId>
 			<artifactId>jmh-core</artifactId>
