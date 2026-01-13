@@ -57,7 +57,7 @@ class MethodsInvokeMethodTest {
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.invoke(method, obj, obj));
 		assertThat(e.getMessage(),
-				equalTo("Error invoking " + A.class.getCanonicalName() + "." + method.getName() + ": " + e.getCause().getMessage() + "."));
+				equalTo("Error invoking method " + A.class.getCanonicalName() + "." + method.getName() + ": " + e.getCause().getMessage() + "."));
 	}
 
 	@Test
@@ -84,7 +84,7 @@ class MethodsInvokeMethodTest {
 		Throwable cause = Reflection.unwrapInvocationTargetException(JavaObjects.cast(e.getCause()));
 
 		assertThat(e.getMessage(),
-				equalTo("Error invoking " + Class.class.getCanonicalName() + "." + method.getName() + ": " + cause.getMessage() + "."));
+				equalTo("Error invoking method " + Class.class.getCanonicalName() + "." + method.getName() + ": " + cause.getMessage() + "."));
 	}
 
 	@Test

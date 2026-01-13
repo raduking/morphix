@@ -1,5 +1,19 @@
 ## Release Notes
 
+`1.0.17`
+
+- Upgraded parent to `3.5.8`.
+- Added `GenericType.Arguments` helper interface to build the generic type arguments.
+- Added `GenericType.getGenericParameterType(ParameterizedType, int)` with `ParameterizedType` as the first parameter.
+- Added `GenericType.getGenericParameterType(ParameterizedType, String, int)` with `String` as the second as the type name.
+- Added `Messages` class with utility methods for lightweight message interpolation for diagnostics and exceptions.
+- Added `Messages.message` method which replaces each `{}` placeholder in the template with the corresponding argument.
+- Added `ReflectionException` constructors with template messages using the `Messages.message` method internally.
+- Added `MapConversions.convertToMap` static method for a simple conversion of an object to a map.
+- Added `PutFunction` functional interface to be able to pass `Map::put` method references.
+
+---
+
 `1.0.16`
 
 - Added `GenericClass.of` method without parameters to allow instantiation without a type set (null type).

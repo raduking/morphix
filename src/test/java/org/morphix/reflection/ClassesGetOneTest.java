@@ -76,7 +76,7 @@ class ClassesGetOneTest {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Classes.getOne(UNKNOWN, classLoader));
 
-		assertThat(e.getMessage(), equalTo("Could not load class: " + UNKNOWN));
+		assertThat(e.getMessage(), equalTo("Could not load class: " + UNKNOWN + ", using class loader: " + classLoader.getName()));
 		assertThat(e.getCause().getClass(), equalTo(ClassNotFoundException.class));
 	}
 }

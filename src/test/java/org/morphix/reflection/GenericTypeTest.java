@@ -178,6 +178,26 @@ class GenericTypeTest {
 		assertFalse(result);
 	}
 
+	static class A {
+		// empty
+	}
+
+	@Test
+	void shouldExtractArgumentTypeForGenericClasses() {
+		Type[] argumentTypes = new Type[] {
+				String.class,
+				Integer.class,
+				Long.class,
+				Double.class
+		};
+		ParameterizedType type = GenericType.of(A.class, argumentTypes, null);
+
+		for (int i = 0; i < argumentTypes.length; ++i) {
+			Type extractedType = GenericType.getGenericParameterType(type, i);
+			assertThat(extractedType, equalTo(argumentTypes[i]));
+		}
+	}
+
 	@Test
 	void shouldFailToExtractArgumentTypeForNonGenericClasses() {
 		int index = 0;
@@ -193,6 +213,16 @@ class GenericTypeTest {
 
 		assertThat(e.getMessage(), equalTo("Cannot extract generic parameter type at index " + index +
 				" from " + ArrayList.class.getCanonicalName() + " because it has only 1 generic parameter(s)"));
+	}
+
+	@Test
+	void shouldFailToExtractArgumentTypeForParameterizedTypeForWrongGenericTypeIndex() {
+		int index = 1;
+		ParameterizedType listType = GenericType.of(ArrayList.class, new Type[] { String.class }, null);
+		ReflectionException e = assertThrows(ReflectionException.class, () -> GenericType.getGenericParameterType(listType, index));
+
+		assertThat(e.getMessage(), equalTo("Cannot extract generic parameter type at index " + index +
+				" from " + listType.getRawType().getTypeName() + " because it has only 1 generic parameter(s)"));
 	}
 
 	@Test

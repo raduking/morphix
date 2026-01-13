@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -11,8 +11,6 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.morphix.reflection;
-
-import static org.morphix.reflection.predicates.MemberPredicates.withAnnotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -31,6 +29,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.morphix.lang.JavaObjects;
+import org.morphix.reflection.predicates.MemberPredicates;
 
 /**
  * Utility reflection static methods for java methods. The philosophy of this class is to provide methods that cover
@@ -170,18 +169,22 @@ public interface Methods {
 	 * @param method method for which the generic return type is needed
 	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return type
+	 * @throws ReflectionException if the method has a raw return type or if the generic return type cannot be found at the
+	 *     given index
 	 */
 	static <T extends Type> T getGenericReturnType(final Method method, final int index) {
 		Type type = method.getGenericReturnType();
 		if (!(type instanceof ParameterizedType parameterizedType)) {
-			throw new ReflectionException(type.getTypeName() + " is a raw return type for method " + method.getDeclaringClass().getCanonicalName()
-					+ "." + method.getName());
+			throw new ReflectionException(
+					"{} is a raw return type for method {}.{}",
+					type.getTypeName(), method.getDeclaringClass().getCanonicalName(), method.getName());
 		}
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 		if (index >= actualTypeArguments.length) {
-			throw new ReflectionException("Could not find generic argument at index " + index + " for generic return type "
-					+ parameterizedType.getTypeName() + " with " + actualTypeArguments.length + " generic argument(s) for method "
-					+ method.getDeclaringClass().getCanonicalName() + "." + method.getName());
+			throw new ReflectionException(
+					"Could not find generic argument at index {} for generic return type {} with {} generic argument(s) for method {}.{}",
+					index, parameterizedType.getTypeName(), actualTypeArguments.length,
+					method.getDeclaringClass().getCanonicalName(), method.getName());
 		}
 		Type returnType = actualTypeArguments[index];
 		return JavaObjects.cast(returnType);
@@ -205,13 +208,15 @@ public interface Methods {
 	 * @param method method for which the generic return type is needed
 	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return class
+	 * @throws ReflectionException if the generic return type cannot be cast to a Class
 	 */
 	static <T> Class<T> getGenericReturnClass(final Method method, final int index) {
 		try {
 			return getGenericReturnType(method, index);
 		} catch (ClassCastException e) {
-			throw new ReflectionException("Could not infer actual generic return type argument from " + method.getGenericReturnType().getTypeName() +
-					" for method " + method.getDeclaringClass().getCanonicalName() + "." + method.getName(), e);
+			throw new ReflectionException(
+					"Could not infer actual generic return type argument from {} for method {}.{}",
+					method.getGenericReturnType().getTypeName(), method.getDeclaringClass().getCanonicalName(), method.getName());
 		}
 	}
 
@@ -241,7 +246,8 @@ public interface Methods {
 
 	/**
 	 * Returns the currently executing method name. The advantage of this method is that each {@link StackTraceElement} is
-	 * fetched lazily, so you don't construct the full stack trace before checking the first method.
+	 * fetched lazily, so you don't construct the full stack trace before checking the first method. If the current method
+	 * name is not found, null is returned.
 	 *
 	 * @param withClassName flag to prepend class name
 	 * @param depth the depth of the caller method, for the direct caller this should be 1
@@ -344,14 +350,13 @@ public interface Methods {
 		try {
 			primitiveFieldType = Primitives.toPrimitive(field.getType());
 		} catch (ReflectionException e) {
-			throw new ReflectionException("Error finding method: "
-					+ methodName + "(" + field.getType().getCanonicalName() + ")", e);
+			throw new ReflectionException(ErrorMessage.ERROR_FINDING_METHOD, methodName, field.getType().getCanonicalName());
 		}
 		method = Methods.getOneDeclaredInHierarchy(methodName, cls, primitiveFieldType);
 		if (null == method) {
-			throw new ReflectionException("Error finding method: "
-					+ methodName + "(" + field.getType().getCanonicalName() + ") or "
-					+ methodName + "(" + primitiveFieldType.getCanonicalName() + ")");
+			throw new ReflectionException(
+					"Error finding method: {}({}) or {}({})",
+					methodName, field.getType().getCanonicalName(), methodName, primitiveFieldType.getCanonicalName());
 		}
 		return method;
 	}
@@ -370,13 +375,13 @@ public interface Methods {
 		for (Method method : cls.getMethods()) {
 			if (Modifier.isAbstract(method.getModifiers())) {
 				if (null != singleAbstractMethod) {
-					throw new ReflectionException(cls + " is not a functional interface because it has more than one abstract method");
+					throw new ReflectionException("{} is not a functional interface because it has more than one abstract method", cls);
 				}
 				singleAbstractMethod = method;
 			}
 		}
 		if (null == singleAbstractMethod) {
-			throw new ReflectionException(cls + " is not a functional interface because it has no abstract method");
+			throw new ReflectionException("{} is not a functional interface because it has no abstract method", cls);
 		}
 		return singleAbstractMethod;
 	}
@@ -402,14 +407,39 @@ public interface Methods {
 			if (null != obj) {
 				className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 			}
-			throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + cause.getMessage() + ".", e);
+			throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), cause.getMessage());
 		} catch (Exception e) {
 			// escalate any exception invoking the method
 			String className = method.getDeclaringClass().getCanonicalName();
 			if (null != obj) {
 				className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 			}
-			throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + e.getMessage() + ".", e);
+			throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), e.getMessage());
+		}
+	}
+
+	/**
+	 * Namespace for error messages. These messages are used for exception messages.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	static class ErrorMessage {
+
+		/**
+		 * Error invoking method message.
+		 */
+		public static final String ERROR_INVOKING_METHOD = "Error invoking method {}.{}: {}.";
+
+		/**
+		 * Error finding method message.
+		 */
+		public static final String ERROR_FINDING_METHOD = "Error finding method: {}({})";
+
+		/**
+		 * Private constructor to avoid instantiation.
+		 */
+		private ErrorMessage() {
+			throw Constructors.unsupportedOperationException();
 		}
 	}
 
@@ -430,6 +460,7 @@ public interface Methods {
 		 * @param method method to be invoked
 		 * @param args method arguments
 		 * @return result of the method invocation
+		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
 			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
@@ -441,14 +472,14 @@ public interface Methods {
 				if (null != obj) {
 					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 				}
-				throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + cause.getMessage() + ".", e);
+				throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), cause.getMessage());
 			} catch (Exception e) {
 				// escalate any exception invoking the method
 				String className = method.getDeclaringClass().getCanonicalName();
 				if (null != obj) {
 					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
 				}
-				throw new ReflectionException("Error invoking " + className + "." + method.getName() + ": " + e.getMessage() + ".", e);
+				throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), e.getMessage());
 			}
 		}
 
@@ -461,9 +492,10 @@ public interface Methods {
 		 *
 		 * @param obj object on which to invoke the methods
 		 * @param annotationClass annotation class
+		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, A extends Annotation> void invokeWithAnnotation(final T obj, final Class<A> annotationClass) {
-			List<Method> methods = Methods.getAllDeclaredInHierarchy(obj.getClass(), withAnnotation(annotationClass));
+			List<Method> methods = Methods.getAllDeclaredInHierarchy(obj.getClass(), MemberPredicates.withAnnotation(annotationClass));
 			for (Method method : methods) {
 				IgnoreAccess.invoke(method, obj);
 			}
@@ -479,6 +511,7 @@ public interface Methods {
 		 * @param method method to be invoked
 		 * @param args method arguments
 		 * @return result of the method invocation
+		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invokeWithOriginalException(final Method method, final T obj, final Object... args) {
 			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
@@ -621,6 +654,7 @@ public interface Methods {
 		 * @param cls class on which the methods are returned
 		 * @param excluded non null mutable set of classes/interfaces/enums/records to be excluded
 		 * @return list of methods
+		 * @throws ReflectionException if the excluded set is null or unmodifiable
 		 */
 		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Set<Class<?>> excluded) {
 			try {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -43,7 +43,7 @@ public interface Classes {
 		try {
 			return JavaObjects.cast(Class.forName(className));
 		} catch (ClassNotFoundException e) {
-			throw new ReflectionException("Could not load class: " + className, e);
+			throw new ReflectionException(e, "Could not load class: {}", className);
 		}
 	}
 
@@ -61,7 +61,7 @@ public interface Classes {
 		try {
 			return JavaObjects.cast(Class.forName(className, false, classLoader));
 		} catch (ClassNotFoundException e) {
-			throw new ReflectionException("Could not load class: " + className, e);
+			throw new ReflectionException(e, "Could not load class: {}, using class loader: {}", className, classLoader.getName());
 		}
 	}
 
@@ -76,7 +76,7 @@ public interface Classes {
 	static Class<?> findSubclass(final Class<?> expectedParent, final Class<?> child) {
 		Class<?> parent = child.getSuperclass();
 		if (Object.class == parent) {
-			throw new ReflectionException("The parent of " + child.getCanonicalName() + " is not a " + expectedParent.getCanonicalName());
+			throw new ReflectionException("The parent of {} is not a {}", child.getCanonicalName(), expectedParent.getCanonicalName());
 		}
 		if (expectedParent == parent) {
 			return child;

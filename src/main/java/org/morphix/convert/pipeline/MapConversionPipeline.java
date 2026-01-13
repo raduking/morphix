@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -16,6 +16,7 @@ import static org.morphix.convert.Conversions.convertEnvelopedFrom;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.morphix.convert.Configuration;
 import org.morphix.convert.function.SimpleConverter;
@@ -82,8 +83,8 @@ public class MapConversionPipeline<I, S, J, D> {
 	 */
 	public MapConversionPipeline(final Map<I, S> sourceMap, final SimpleConverter<I, J> keyConverter, final SimpleConverter<S, D> valueConverter) {
 		this.sourceMap = sourceMap;
-		this.keyConverter = keyConverter;
-		this.valueConverter = valueConverter;
+		this.keyConverter = Objects.requireNonNull(keyConverter, "Key converter cannot be null");
+		this.valueConverter = Objects.requireNonNull(valueConverter, "Value converter cannot be null");
 	}
 
 	/**

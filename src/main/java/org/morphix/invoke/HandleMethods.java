@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -105,7 +105,7 @@ public class HandleMethods {
 			Object result = handle.invokeWithArguments(args);
 			return JavaObjects.cast(result);
 		} catch (Throwable t) {
-			throw new ReflectionException("Error invoking method " + handle, t);
+			throw new ReflectionException(t, "Error invoking method {}", handle);
 		}
 	}
 
@@ -143,7 +143,7 @@ public class HandleMethods {
 					? lookup.findStatic(cls, signature.name(), signature.type())
 					: lookup.findVirtual(cls, signature.name(), signature.type());
 		} catch (NoSuchMethodException | IllegalAccessException e) {
-			throw new ReflectionException("Method handle creation failed for " + cls.getName() + "#" + signature.name(), e);
+			throw new ReflectionException(e, "Method handle creation failed for {}#{}", cls.getName(), signature.name());
 		}
 	}
 
@@ -170,8 +170,8 @@ public class HandleMethods {
 		try {
 			return MethodHandles.privateLookupIn(cls, MethodHandles.lookup());
 		} catch (IllegalAccessException e) {
-			throw new ReflectionException("Failed to get lookup for " + cls + " because "
-					+ cls.getModule() + " does not open " + cls.getPackage(), e);
+			throw new ReflectionException(e, "Failed to get lookup for {} because {} does not open {}",
+					cls, cls.getModule(), cls.getPackage());
 		}
 	}
 

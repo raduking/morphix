@@ -132,6 +132,14 @@ class GenericClassTest {
 	}
 
 	@Test
+	void shouldBuildANewComplexGenericClassWithFactoryMethod() {
+		Type type = GenericType.of(Map.class, GenericType.Arguments.of(String.class, GenericType.of(List.class, Integer.class)));
+		GenericClass<List<String>> gc = GenericClass.of(type);
+
+		assertThat(gc.toString(), equalTo("GenericClass<java.util.Map<java.lang.String, java.util.List<java.lang.Integer>>>"));
+	}
+
+	@Test
 	void shouldReturnTrueOnEqualsWithTheSameObject() {
 		Type type = GenericType.of(List.class, String.class);
 		GenericClass<String> gc = GenericClass.of(type);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,6 +14,8 @@ package org.morphix.reflection;
 
 import java.io.Serial;
 import java.util.function.Supplier;
+
+import org.morphix.lang.Messages;
 
 /**
  * Runtime exception that is thrown when a reflection action cannot be done.
@@ -54,6 +56,27 @@ public class ReflectionException extends RuntimeException {
 	 */
 	public ReflectionException(final Throwable cause) {
 		super(cause);
+	}
+
+	/**
+	 * Constructor with formatted message.
+	 *
+	 * @param template message template
+	 * @param args message arguments
+	 */
+	public ReflectionException(final String template, final Object... args) {
+		super(Messages.message(template, args));
+	}
+
+	/**
+	 * Constructor with cause and formatted message.
+	 *
+	 * @param cause cause of this exception
+	 * @param template message template
+	 * @param args message arguments
+	 */
+	public ReflectionException(final Throwable cause, final String template, final Object... args) {
+		super(Messages.message(template, args), cause);
 	}
 
 	/**

@@ -30,6 +30,10 @@ import org.openjdk.jmh.annotations.State;
  * Benchmarks for {@link Methods.IgnoreAccess#invoke(Method, Object, Object...)} and
  * {@link HandleMethods#invoke(MethodHandle, Object...)}.
  *
+ * <pre>
+ * mvn jmh:benchmark -Pbenchmark -Djmh.benchmarks=org.morphix.benchmark.MethodInvocation
+ * </pre>
+ *
  * @author Radu Sebastian LAZIN
  */
 @BenchmarkMode(Mode.AverageTime)
@@ -54,7 +58,7 @@ public class MethodInvocation {
 
 	@Benchmark
 	public Integer testMethodsInvoke() {
-		Method method = Methods.Safe.getOneDeclaredInHierarchy("sum", A.class, Integer.class, int.class);
+		Method method = Methods.Safe.getOneDeclared("sum", A.class, Integer.class, int.class);
 
 		return Methods.IgnoreAccess.invoke(method, a, 10, 20);
 	}
