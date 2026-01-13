@@ -12,6 +12,7 @@
  */
 package org.morphix.convert;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -98,29 +99,47 @@ public interface MapConversions {
 	}
 
 	/**
-	 * Convenience static method to convert an object to a map.
+	 * Convenience static method to convert an object to a map conversion pipeline. If the source is null, an empty map is
+	 * returned.
 	 *
 	 * @param <S> source type
 	 * @param <H> map key type
 	 * @param <D> map value type
 	 *
 	 * @param source source object
-	 * @param mapInstanceFunction map instance function
+	 * @param keyConverter key converter function
+	 * @param valueConverter value converter function
+	 * @return destination map conversion pipeline
+	 * @throws NullPointerException if any of the converters or the map instance function is null
+	 */
+	static <S, H, D> MapConversionPipeline<String, Object, H, D> convert(final S source, final SimpleConverter<String, H> keyConverter,
+			final SimpleConverter<Object, D> valueConverter) {
+		if (source == null) {
+			return convertMap(Map.of(), keyConverter, valueConverter);
+		}
+		List<ExtendedField> fields = ConversionStrategy.findFields(source);
+		Map<String, Object> map = new HashMap<>(fields.size());
+		for (ExtendedField field : fields) {
+			map.put(field.getName(), field.getFieldValue());
+		}
+		return convertMap(map, keyConverter, valueConverter);
+	}
+
+	/**
+	 * Convenience static method to convert an object to a map. If the source is null, an empty map is returned.
+	 *
+	 * @param <S> source type
+	 * @param <H> map key type
+	 * @param <D> map value type
+	 *
+	 * @param source source object
 	 * @param keyConverter key converter function
 	 * @param valueConverter value converter function
 	 * @return destination map
+	 * @throws NullPointerException if any of the converters or the map instance function is null
 	 */
-	static <S, H, D> Map<H, D> convertToMap(final S source, final InstanceFunction<Map<H, D>> mapInstanceFunction,
-			final SimpleConverter<String, H> keyConverter, final SimpleConverter<Object, D> valueConverter) {
-		List<ExtendedField> fields = ConversionStrategy.findFields(source);
-		Map<H, D> dstMap = mapInstanceFunction.instance();
-		for (ExtendedField field : fields) {
-			String fieldName = field.getName();
-			H key = keyConverter.convert(fieldName);
-			Object fieldValue = field.getFieldValue();
-			D value = valueConverter.convert(fieldValue);
-			dstMap.put(key, value);
-		}
-		return dstMap;
+	static <S, H, D> Map<H, D> convertToMap(final S source, final SimpleConverter<String, H> keyConverter,
+			final SimpleConverter<Object, D> valueConverter) {
+		return convert(source, keyConverter, valueConverter).toMap();
 	}
 }

@@ -15,8 +15,8 @@ package org.morphix.convert;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -56,7 +56,7 @@ class ToMapTest {
 		a.setKey1("value1");
 		a.setKey2("value2");
 
-		Map<String, String> params = MapConversions.convertToMap(a, HashMap::new, k -> k, String::valueOf);
+		Map<String, String> params = MapConversions.convertToMap(a, k -> k, String::valueOf);
 
 		assertThat(params.entrySet(), hasSize(2));
 		assertThat(params.get("key1"), equalTo("value1"));
@@ -69,7 +69,7 @@ class ToMapTest {
 		a.setKey1(null);
 		a.setKey2("value2");
 
-		Map<String, String> params = MapConversions.convertToMap(a, HashMap::new, k -> k, String::valueOf);
+		Map<String, String> params = MapConversions.convertToMap(a, k -> k, String::valueOf);
 
 		assertThat(params.entrySet(), hasSize(2));
 		assertThat(params.get("key1"), equalTo("null"));
@@ -104,10 +104,49 @@ class ToMapTest {
 		b.setKey1(100);
 		b.setKey2(200L);
 
-		Map<String, String> params = MapConversions.convertToMap(b, HashMap::new, k -> k, String::valueOf);
+		Map<String, String> params = MapConversions.convertToMap(b, k -> k, String::valueOf);
 
 		assertThat(params.entrySet(), hasSize(2));
 		assertThat(params.get("key1"), equalTo("100"));
 		assertThat(params.get("key2"), equalTo("200"));
 	}
+
+	@Test
+	void shouldConvertFromEmptyObject() {
+		B b = new B();
+
+		Map<String, String> params = MapConversions.convertToMap(b, k -> k, String::valueOf);
+
+		assertThat(params.entrySet(), hasSize(2));
+		assertThat(params.get("key1"), equalTo("null"));
+		assertThat(params.get("key2"), equalTo("null"));
+	}
+
+	@Test
+	void shouldConvertFromNullObject() {
+		Map<String, String> params = MapConversions.convertToMap(null, k -> k, String::valueOf);
+
+		assertThat(params.entrySet(), hasSize(0));
+	}
+
+	@Test
+	void shouldThrowNullPointerExceptionWhenKeyMapperIsNull() {
+		B b = new B();
+
+		NullPointerException e = assertThrows(NullPointerException.class,
+				() -> MapConversions.convertToMap(b, null, String::valueOf));
+
+		assertThat(e.getMessage(), equalTo("Key converter cannot be null"));
+	}
+
+	@Test
+	void shouldThrowNullPointerExceptionWhenValueMapperIsNull() {
+		B b = new B();
+
+		NullPointerException e = assertThrows(NullPointerException.class,
+				() -> MapConversions.convertToMap(b, k -> k, null));
+
+		assertThat(e.getMessage(), equalTo("Value converter cannot be null"));
+	}
+
 }
