@@ -9,6 +9,7 @@
 - Added `Messages` class with utility methods for lightweight message interpolation for diagnostics and exceptions.
 - Added `Messages.message` method which replaces each `{}` placeholder in the template with the corresponding argument.
 - Added `ReflectionException` constructors with template messages using the `Messages.message` method internally.
+- Added `MapConversions.convertToMap` static method for a simple conversion of an object to a map.
 
 ---
 

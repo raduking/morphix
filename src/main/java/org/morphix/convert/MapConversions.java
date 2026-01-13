@@ -12,12 +12,15 @@
  */
 package org.morphix.convert;
 
+import java.util.List;
 import java.util.Map;
 
 import org.morphix.convert.function.ConvertFunction;
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.convert.pipeline.MapConversionPipeline;
+import org.morphix.convert.strategy.ConversionStrategy;
 import org.morphix.lang.function.InstanceFunction;
+import org.morphix.reflection.ExtendedField;
 
 /**
  * Utility interface for conversion static methods.
@@ -92,5 +95,32 @@ public interface MapConversions {
 	static <K, S, H, D> MapConversionPipeline<K, S, H, D> convertMap(final Map<K, S> sourceMap, final SimpleConverter<K, H> keyConverter,
 			final SimpleConverter<S, D> valueConverter) {
 		return new MapConversionPipeline<>(sourceMap, keyConverter, valueConverter);
+	}
+
+	/**
+	 * Convenience static method to convert an object to a map.
+	 *
+	 * @param <S> source type
+	 * @param <H> map key type
+	 * @param <D> map value type
+	 *
+	 * @param source source object
+	 * @param mapInstanceFunction map instance function
+	 * @param keyConverter key converter function
+	 * @param valueConverter value converter function
+	 * @return destination map
+	 */
+	static <S, H, D> Map<H, D> convertToMap(final S source, final InstanceFunction<Map<H, D>> mapInstanceFunction,
+			final SimpleConverter<String, H> keyConverter, final SimpleConverter<Object, D> valueConverter) {
+		List<ExtendedField> fields = ConversionStrategy.findFields(source);
+		Map<H, D> dstMap = mapInstanceFunction.instance();
+		for (ExtendedField field : fields) {
+			String fieldName = field.getName();
+			H key = keyConverter.convert(fieldName);
+			Object fieldValue = field.getFieldValue();
+			D value = valueConverter.convert(fieldValue);
+			dstMap.put(key, value);
+		}
+		return dstMap;
 	}
 }
