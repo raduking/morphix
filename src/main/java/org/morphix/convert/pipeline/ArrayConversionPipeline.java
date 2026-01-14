@@ -69,7 +69,8 @@ public class ArrayConversionPipeline<S, D> {
 	public D[] to(final D[] array) {
 		D[] destinationArray = null;
 		if (array.length < sourceArray.length) {
-			destinationArray = newArrayInstance(JavaObjects.cast(array.getClass().getComponentType()), sourceArray.length);
+			Class<D> componentType = JavaObjects.cast(array.getClass().getComponentType());
+			destinationArray = newArrayInstance(componentType, sourceArray.length);
 		} else {
 			destinationArray = array;
 		}
