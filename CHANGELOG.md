@@ -10,6 +10,8 @@
 - Added `PutFunction.ifNotNullKeyAndValue` to return a put function that only performs the `put` if the key and value provided is not `null`.
 - Changed `SimpleConverter` to extend `Function`.
 - Changed `ConverterFunction` to extend `BiConsumer`.
+- Fixed `ArrayConversionPipeline.to(Object[])` to properly convert when the destination array is smaller than the source array.
+- Added `ArrayConversionPipeline.toArray(IntFunction)` to match Java collections style.
 
 ---
 

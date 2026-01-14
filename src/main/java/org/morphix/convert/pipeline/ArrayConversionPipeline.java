@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.IntFunction;
 
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.lang.JavaObjects;
@@ -62,14 +63,40 @@ public class ArrayConversionPipeline<S, D> {
 	/**
 	 * Destination conversion.
 	 *
-	 * @param result destination array
+	 * @param array destination array
 	 * @return destination array
 	 */
-	public D[] to(final D[] result) {
-		for (int i = 0; i < sourceArray.length; ++i) {
-			result[i] = elementConverter.convert(sourceArray[i]);
+	public D[] to(final D[] array) {
+		D[] destinationArray = null;
+		if (array.length < sourceArray.length) {
+			destinationArray = newArrayInstance(JavaObjects.cast(array.getClass().getComponentType()), sourceArray.length);
+		} else {
+			destinationArray = array;
 		}
-		return result;
+		for (int i = 0; i < sourceArray.length; ++i) {
+			destinationArray[i] = elementConverter.convert(sourceArray[i]);
+		}
+		return destinationArray;
+	}
+
+	/**
+	 * Destination conversion.
+	 *
+	 * @param arrayInstanceFunction array instance function
+	 * @return destination array
+	 */
+	public D[] toArray(final InstanceFunction<D[]> arrayInstanceFunction) {
+		return to(arrayInstanceFunction.instance());
+	}
+
+	/**
+	 * Destination conversion.
+	 *
+	 * @param arrayInstanceFunction array instance function
+	 * @return destination array
+	 */
+	public D[] toArray(final IntFunction<D[]> arrayInstanceFunction) {
+		return to(arrayInstanceFunction.apply(sourceArray.length));
 	}
 
 	/**
