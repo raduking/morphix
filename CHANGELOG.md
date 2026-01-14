@@ -8,6 +8,8 @@
 - Added `PutFunction.ifNotNullValue` to return a put function that only performs the `put` if the value provided is not `null`.
 - Added `PutFunction.ifNotNullKey` to return a put function that only performs the `put` if the key provided is not `null`.
 - Added `PutFunction.ifNotNullKeyAndValue` to return a put function that only performs the `put` if the key and value provided is not `null`.
+- Changed `SimpleConverter` to extend `Function`.
+- Changed `ConverterFunction` to extend `BiConsumer`.
 
 ---
 

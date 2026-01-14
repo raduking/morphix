@@ -92,11 +92,30 @@ public interface MapConversions {
 	 * @param sourceMap source map
 	 * @param keyConverter key converter function
 	 * @param valueConverter value converter function
+	 * @param putFunction put function
+	 * @return destination map
+	 */
+	static <K, S, H, D> MapConversionPipeline<K, S, H, D> convertMap(final Map<K, S> sourceMap, final SimpleConverter<K, H> keyConverter,
+			final SimpleConverter<S, D> valueConverter, final PutFunction<H, D> putFunction) {
+		return new MapConversionPipeline<>(sourceMap, keyConverter, valueConverter, putFunction);
+	}
+
+	/**
+	 * Convenience static method for converting maps.
+	 *
+	 * @param <K> source key type
+	 * @param <S> source value type
+	 * @param <H> destination key type
+	 * @param <D> destination value type
+	 *
+	 * @param sourceMap source map
+	 * @param keyConverter key converter function
+	 * @param valueConverter value converter function
 	 * @return destination map
 	 */
 	static <K, S, H, D> MapConversionPipeline<K, S, H, D> convertMap(final Map<K, S> sourceMap, final SimpleConverter<K, H> keyConverter,
 			final SimpleConverter<S, D> valueConverter) {
-		return new MapConversionPipeline<>(sourceMap, keyConverter, valueConverter);
+		return convertMap(sourceMap, keyConverter, valueConverter, Map::put);
 	}
 
 	/**
@@ -111,19 +130,19 @@ public interface MapConversions {
 	 * @param source source object
 	 * @param keyConverter key converter function
 	 * @param valueConverter value converter function
-	 * @param putValueFunction map put function
+	 * @param putFunction map put function
 	 * @return destination map conversion pipeline
 	 * @throws NullPointerException if any of the converters or the map instance function is null
 	 */
 	static <S, H, D> MapConversionPipeline<String, Object, H, D> convert(final S source, final SimpleConverter<String, H> keyConverter,
-			final SimpleConverter<Object, D> valueConverter, final PutFunction<String, Object> putValueFunction) {
+			final SimpleConverter<Object, D> valueConverter, final PutFunction<String, Object> putFunction) {
 		if (source == null) {
 			return convertMap(Map.of(), keyConverter, valueConverter);
 		}
 		List<ExtendedField> fields = ConversionStrategy.findFields(source);
 		Map<String, Object> map = new HashMap<>(fields.size());
 		for (ExtendedField field : fields) {
-			putValueFunction.put(map, field.getName(), field.getFieldValue());
+			putFunction.put(map, field.getName(), field.getFieldValue());
 		}
 		return convertMap(map, keyConverter, valueConverter);
 	}
@@ -140,12 +159,12 @@ public interface MapConversions {
 	 * @param source source object
 	 * @param keyConverter key converter function
 	 * @param valueConverter value converter function
-	 * @param putValueFunction map put function
+	 * @param putFunction map put function
 	 * @return destination map
 	 */
 	static <S, H, D> Map<H, D> convertToMap(final S source, final SimpleConverter<String, H> keyConverter,
-			final SimpleConverter<Object, D> valueConverter, final PutFunction<String, Object> putValueFunction) {
-		return convert(source, keyConverter, valueConverter, putValueFunction).toMap();
+			final SimpleConverter<Object, D> valueConverter, final PutFunction<String, Object> putFunction) {
+		return convert(source, keyConverter, valueConverter, putFunction).toMap();
 	}
 
 	/**
