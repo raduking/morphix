@@ -1,5 +1,20 @@
 ## Release Notes
 
+`1.0.18`
+
+- Moved `PutFunction` to `lang.function` package.
+- Added `PutFunction.of` factory method.
+- Added `PutFunction.compose` to compose two map put functions.
+- Added `PutFunction.ifNotNullValue` to return a put function that only performs the `put` if the value provided is not `null`.
+- Added `PutFunction.ifNotNullKey` to return a put function that only performs the `put` if the key provided is not `null`.
+- Added `PutFunction.ifNotNullKeyAndValue` to return a put function that only performs the `put` if the key and value provided is not `null`.
+- Changed `SimpleConverter` to extend `Function`.
+- Changed `ConverterFunction` to extend `BiConsumer`.
+- Fixed `ArrayConversionPipeline.to(Object[])` to properly convert when the destination array is smaller than the source array.
+- Added `ArrayConversionPipeline.toArray(IntFunction)` to match Java collections style.
+
+---
+
 `1.0.17`
 
 - Upgraded parent to `3.5.8`.

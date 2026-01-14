@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -11,6 +11,8 @@
  * specific language governing permissions and limitations under the License.
  */
 package org.morphix.convert.function;
+
+import java.util.function.BiConsumer;
 
 import org.morphix.convert.ObjectConverter;
 import org.morphix.lang.function.InstanceFunction;
@@ -25,7 +27,7 @@ import org.morphix.lang.function.InstanceFunction;
  * @author Radu Sebastian LAZIN
  */
 @FunctionalInterface
-public interface ConvertFunction<S, D> {
+public interface ConvertFunction<S, D> extends BiConsumer<S, D> {
 
 	/**
 	 * Encapsulates logic for converting source to destination.
@@ -34,6 +36,14 @@ public interface ConvertFunction<S, D> {
 	 * @param destination destination object
 	 */
 	void convert(S source, D destination);
+
+	/**
+	 * @see BiConsumer#accept(Object, Object)
+	 */
+	@Override
+	default void accept(final S source, final D destination) {
+		convert(source, destination);
+	}
 
 	/**
 	 * Returns an empty extra convert function.

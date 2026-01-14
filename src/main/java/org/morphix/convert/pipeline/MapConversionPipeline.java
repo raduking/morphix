@@ -22,6 +22,7 @@ import org.morphix.convert.Configuration;
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.lang.JavaObjects;
 import org.morphix.lang.function.InstanceFunction;
+import org.morphix.lang.function.PutFunction;
 
 /**
  * Wrapper over the {@link Map} conversions as a pipeline between the source and destination.
@@ -61,6 +62,11 @@ public class MapConversionPipeline<I, S, J, D> {
 	private SimpleConverter<S, D> valueConverter;
 
 	/**
+	 * Put function.
+	 */
+	private PutFunction<J, D> putFunction = Map::put;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param sourceMap source map
@@ -88,6 +94,20 @@ public class MapConversionPipeline<I, S, J, D> {
 	}
 
 	/**
+	 * Constructor.
+	 *
+	 * @param sourceMap source map
+	 * @param keyConverter key converter
+	 * @param valueConverter value converter
+	 * @param putFunction put function
+	 */
+	public MapConversionPipeline(final Map<I, S> sourceMap, final SimpleConverter<I, J> keyConverter, final SimpleConverter<S, D> valueConverter,
+			final PutFunction<J, D> putFunction) {
+		this(sourceMap, keyConverter, valueConverter);
+		this.putFunction = Objects.requireNonNull(putFunction, "Put function cannot be null");
+	}
+
+	/**
 	 * Destination conversion.
 	 *
 	 * @param <T> destination map type
@@ -103,7 +123,7 @@ public class MapConversionPipeline<I, S, J, D> {
 			D destinationValue = hasValueInstanceFunction()
 					? convertEnvelopedFrom(entry.getValue(), valueInstanceFunction, Configuration.defaultConfiguration())
 					: valueConverter.convert(entry.getValue());
-			result.put(destinationKey, destinationValue);
+			putFunction.put(result, destinationKey, destinationValue);
 		}
 		return JavaObjects.cast(result);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -13,6 +13,7 @@
 package org.morphix.convert.function;
 
 import java.io.Serializable;
+import java.util.function.Function;
 
 /**
  * Conversion functional interface for conversions defined in other classes. The {@link Serializable} base interface is
@@ -24,7 +25,7 @@ import java.io.Serializable;
  * @author Radu Sebastian LAZIN
  */
 @FunctionalInterface
-public interface SimpleConverter<S, D> extends Serializable {
+public interface SimpleConverter<S, D> extends Function<S, D>, Serializable {
 
 	/**
 	 * Converts from source to destination.
@@ -34,4 +35,11 @@ public interface SimpleConverter<S, D> extends Serializable {
 	 */
 	D convert(S source);
 
+	/**
+	 * @see Function#apply(Object)
+	 */
+	@Override
+	default D apply(final S source) {
+		return convert(source);
+	}
 }
