@@ -2,6 +2,13 @@
 
 `1.0.18`
 
+- Moved `PutFunction` to `lang.function` package.
+- Added `PutFunction.of` factory method.
+- Added `PutFunction.compose` to compose two map put functions.
+- Added `PutFunction.ifNotNullValue` to return a put function that only performs the `put` if the value provided is not `null`.
+- Added `PutFunction.ifNotNullKey` to return a put function that only performs the `put` if the key provided is not `null`.
+- Added `PutFunction.ifNotNullKeyAndValue` to return a put function that only performs the `put` if the key and value provided is not `null`.
+
 ---
 
 `1.0.17`

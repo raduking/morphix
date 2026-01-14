@@ -17,11 +17,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.morphix.convert.function.ConvertFunction;
-import org.morphix.convert.function.PutFunction;
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.convert.pipeline.MapConversionPipeline;
 import org.morphix.convert.strategy.ConversionStrategy;
 import org.morphix.lang.function.InstanceFunction;
+import org.morphix.lang.function.PutFunction;
 import org.morphix.reflection.ExtendedField;
 
 /**
@@ -116,7 +116,7 @@ public interface MapConversions {
 	 * @throws NullPointerException if any of the converters or the map instance function is null
 	 */
 	static <S, H, D> MapConversionPipeline<String, Object, H, D> convert(final S source, final SimpleConverter<String, H> keyConverter,
-			final SimpleConverter<Object, D> valueConverter, final PutFunction<Map<String, Object>, String, Object> putValueFunction) {
+			final SimpleConverter<Object, D> valueConverter, final PutFunction<String, Object> putValueFunction) {
 		if (source == null) {
 			return convertMap(Map.of(), keyConverter, valueConverter);
 		}
@@ -144,7 +144,7 @@ public interface MapConversions {
 	 * @return destination map
 	 */
 	static <S, H, D> Map<H, D> convertToMap(final S source, final SimpleConverter<String, H> keyConverter,
-			final SimpleConverter<Object, D> valueConverter, final PutFunction<Map<String, Object>, String, Object> putValueFunction) {
+			final SimpleConverter<Object, D> valueConverter, final PutFunction<String, Object> putValueFunction) {
 		return convert(source, keyConverter, valueConverter, putValueFunction).toMap();
 	}
 
