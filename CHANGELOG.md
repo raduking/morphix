@@ -2,6 +2,11 @@
 
 `1.0.19`
 
+- Upgraded formatter version to `4.38`.
+- Upgraded `spotless-maven-plugin` to `3.1.0`.
+- Upgraded `org.eclipse.jdt/org.eclipse.jdt.core` to `3.44.0`.
+- Added `code-format` version `1.0.0` as the source for Java formatter file `java-code-style.xml`.
+
 ---
 
 `1.0.18`
