@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -22,7 +22,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import org.morphix.lang.function.Runnables;
 import org.morphix.lang.function.SetterFunction;
 import org.morphix.lang.function.Suppliers;
 import org.morphix.reflection.Constructors;
@@ -362,7 +361,7 @@ public final class Nullables {
 	 * @return a supplier which runs the runnable and supplies a null value
 	 */
 	public static <T> Supplier<T> supplyNull(final Runnable runnable) {
-		return Runnables.compose(runnable, supplyNull());
+		return Suppliers.supplyNull(runnable);
 	}
 
 	/**
@@ -680,7 +679,5 @@ public final class Nullables {
 			}
 			throw new IllegalStateException(failFastErrorMessage);
 		}
-
 	}
-
 }

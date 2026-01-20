@@ -14,7 +14,6 @@ package org.morphix.lang.function;
 
 import java.util.function.Supplier;
 
-import org.morphix.lang.Nullables;
 import org.morphix.reflection.Constructors;
 
 /**
@@ -56,7 +55,7 @@ public class Runnables {
 	 * @return null
 	 */
 	public static <T> Supplier<T> toSupplier(final Runnable runnable) {
-		return Nullables.supplyNull(runnable);
+		return Suppliers.supplyNull(runnable);
 	}
 
 	/**
@@ -68,10 +67,7 @@ public class Runnables {
 	 * @return supplier
 	 */
 	public static <T> Supplier<T> compose(final Runnable runnable, final Supplier<T> supplier) {
-		return () -> {
-			runnable.run();
-			return supplier.get();
-		};
+		return Suppliers.compose(runnable, supplier);
 	}
 
 }

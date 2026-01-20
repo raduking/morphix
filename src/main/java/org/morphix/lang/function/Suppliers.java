@@ -74,4 +74,31 @@ public final class Suppliers {
 	public static <T> Supplier<T> supplyNull() {
 		return JavaObjects.cast(SUPPLY_NULL);
 	}
+
+	/**
+	 * Returns a supplier which runs the runnable and supplies <code>null</code>.
+	 *
+	 * @param <T> generic type
+	 *
+	 * @param runnable code to run before supplying <code>null</code>
+	 * @return a supplier which runs the runnable and supplies a null value
+	 */
+	public static <T> Supplier<T> supplyNull(final Runnable runnable) {
+		return Runnables.compose(runnable, supplyNull());
+	}
+
+	/**
+	 * Transforms a runnable and a supplier to another supplier that runs the runnable first and the supplier second.
+	 *
+	 * @param <T> supplier return type
+	 * @param runnable runnable to run before the supplier
+	 * @param supplier supplier to run after the runnable
+	 * @return supplier
+	 */
+	public static <T> Supplier<T> compose(final Runnable runnable, final Supplier<T> supplier) {
+		return () -> {
+			runnable.run();
+			return supplier.get();
+		};
+	}
 }
