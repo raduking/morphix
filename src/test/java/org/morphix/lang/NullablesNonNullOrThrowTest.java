@@ -37,26 +37,26 @@ class NullablesNonNullOrThrowTest {
 	private static final String EXCEPTION_MESSAGE = "default exception";
 
 	@Mock
-	private Supplier<Exception> mockDefaultValueSupplier;
+	private Supplier<Exception> mockThrowableSupplier;
 
 	@Test
 	void shouldReturnValueWhenValueIsNotNull() {
 		String value = ACTUAL_VALUE;
 
-		String result = Nullables.nonNullOrThrow(value, mockDefaultValueSupplier);
+		String result = Nullables.nonNullOrThrow(value, mockThrowableSupplier);
 
 		assertEquals(ACTUAL_VALUE, result);
-		verifyNoInteractions(mockDefaultValueSupplier);
+		verifyNoInteractions(mockThrowableSupplier);
 	}
 
 	@Test
-	void shouldReturnDefaultValueFromSupplierWhenValueIsNull_SupplierVersion() {
+	void shouldReturnDefaultValueFromSupplierWhenValueIsNull() {
 		String value = null;
-		when(mockDefaultValueSupplier.get()).thenReturn(new Exception(EXCEPTION_MESSAGE));
+		when(mockThrowableSupplier.get()).thenReturn(new Exception(EXCEPTION_MESSAGE));
 
-		Exception exception = assertThrows(Exception.class, () -> Nullables.nonNullOrThrow(value, mockDefaultValueSupplier));
+		Exception exception = assertThrows(Exception.class, () -> Nullables.nonNullOrThrow(value, mockThrowableSupplier));
 
 		assertEquals(EXCEPTION_MESSAGE, exception.getMessage());
-		verify(mockDefaultValueSupplier).get();
+		verify(mockThrowableSupplier).get();
 	}
 }
