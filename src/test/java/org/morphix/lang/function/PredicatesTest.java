@@ -12,6 +12,8 @@
  */
 package org.morphix.lang.function;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.reflection.Constructors;
+import org.morphix.utils.Tests;
 
 /**
  * Test class for {@link Predicates}.
@@ -26,6 +30,13 @@ import org.junit.jupiter.api.Test;
  * @author Radu Sebastian LAZIN
  */
 class PredicatesTest {
+
+	@Test
+	void shouldThrowExceptionWhenTryingToInstantiate() {
+		UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(Predicates.class);
+
+		assertThat(e.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
+	}
 
 	@Test
 	void shouldAlwaysReturnFalseOnAlwaysFalseAndBeSingleton() {

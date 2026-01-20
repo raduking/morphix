@@ -15,35 +15,43 @@ package org.morphix.lang.function;
 import java.util.function.Supplier;
 
 import org.morphix.lang.JavaObjects;
+import org.morphix.reflection.Constructors;
 
 /**
  * Suppliers utility methods.
  *
  * @author Radu Sebastian LAZIN
  */
-public interface Suppliers {
+public final class Suppliers {
 
 	/**
 	 * A supplier that always returns true.
 	 */
-	Supplier<Boolean> SUPPLY_TRUE = () -> true;
+	private static final Supplier<Boolean> SUPPLY_TRUE = () -> true;
 
 	/**
 	 * A supplier that always returns false.
 	 */
-	Supplier<Boolean> SUPPLY_FALSE = () -> false;
+	private static final Supplier<Boolean> SUPPLY_FALSE = () -> false;
 
 	/**
 	 * A supplier that always returns null.
 	 */
-	Supplier<Object> SUPPLY_NULL = () -> null;
+	private static final Supplier<Object> SUPPLY_NULL = () -> null;
+
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private Suppliers() {
+		throw Constructors.unsupportedOperationException();
+	}
 
 	/**
 	 * Returns a supplier that always returns true.
 	 *
 	 * @return a supplier that always returns true
 	 */
-	static Supplier<Boolean> supplyTrue() {
+	public static Supplier<Boolean> supplyTrue() {
 		return SUPPLY_TRUE;
 	}
 
@@ -52,7 +60,7 @@ public interface Suppliers {
 	 *
 	 * @return a supplier that always returns false
 	 */
-	static Supplier<Boolean> supplyFalse() {
+	public static Supplier<Boolean> supplyFalse() {
 		return SUPPLY_FALSE;
 	}
 
@@ -63,7 +71,7 @@ public interface Suppliers {
 	 *
 	 * @return a supplier that always returns null
 	 */
-	static <T> Supplier<T> supplyNull() {
+	public static <T> Supplier<T> supplyNull() {
 		return JavaObjects.cast(SUPPLY_NULL);
 	}
 }

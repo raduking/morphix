@@ -14,11 +14,11 @@
 - Added `Suppliers.supplyTrue` to always supply `true`.
 - Added `Suppliers.supplyFalse` to always supply `false`.
 - Added `Suppliers.supplyNull` to always return `null`.
-- Added `Predicates.ALWAYS_TRUE` lambda constant so that Java doesn't create instances for each `t -> true` occurrence (same for `Predicates.alwaysTrue`).
-- Added `Predicates.ALWAYS_FALSE` lambda constant so that Java doesn't create instances for each `t -> false` occurrence (same for `Predicates.alwaysFalse`).
-- Added `Suppliers.SUPPLY_TRUE` lambda constant so that Java doesn't create instances for each `() -> true` occurrence (same for `Suppliers.supplyTrue`).
-- Added `Suppliers.SUPPLY_FALSE` lambda constant so that Java doesn't create instances for each `() -> false` occurrence (same for `Suppliers.supplyFalse`).
-- Added `Suppliers.SUPPLY_NULL` lambda constant so that Java doesn't create instances for each `() -> null` occurrence (same for `Suppliers.supplyNull`).
+- Added `IntPredicates.alwaysTrue` to return a predicate that is always false.
+- Added `IntPredicates.alwaysFalse` to return a predicate that is always false.
+- Added `IntPredicates.rejectAll` to return a predicate that is always false (alias to `alwaysFalse`).
+- Added `IntPredicates.acceptAll` to return a predicate that is always true (alias to `alwaysTrue`).
+- Added internal lambda constants for all these methods so that Java doesn't create instances for each occurrence.
 
 ---
 
