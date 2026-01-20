@@ -90,6 +90,23 @@ public final class Nullables {
 	}
 
 	/**
+	 * Returns the given value if the value is non-null. Otherwise, throws the exception supplied by the exception supplier.
+	 *
+	 * @param <T> value type
+	 * @param <E> exception type
+	 *
+	 * @param value function parameter
+	 * @param throwableSupplier supplies the exception to be thrown when the value is <code>null</code>
+	 * @return the given value if the value is non-null
+	 */
+	public static <T, E extends Throwable> T nonNullOrThrow(final T value, final Supplier<E> throwableSupplier) {
+		if (null != value) {
+			return value;
+		}
+		return Unchecked.Undeclared.reThrow(throwableSupplier.get());
+	}
+
+	/**
 	 * Calls {@link Objects#requireNonNull(Object)} on all objects given as parameter.
 	 *
 	 * @param objects references to test for null
