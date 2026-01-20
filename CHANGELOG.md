@@ -7,6 +7,18 @@
 - Upgraded `org.eclipse.jdt/org.eclipse.jdt.core` to `3.44.0`.
 - Added `code-format` version `1.0.0` as the source for Java formatter file `java-code-style.xml`.
 - Added `Nullables.nonNullOrThrow` to throw the supplied `Throwable` instead of using `nonNullOrDefault`.
+- Added `Predicates.alwaysFalse` to return a predicate that is always false.
+- Added `Predicates.rejectAll` to return a predicate that is always false (alias to `alwaysFalse`).
+- Added `Predicates.acceptAll` to return a predicate that is always true (alias to `alwaysTrue`).
+- Added `Suppliers` class with utility methods for suppliers.
+- Added `Suppliers.supplyTrue` to always supply `true`.
+- Added `Suppliers.supplyFalse` to always supply `false`.
+- Added `Suppliers.supplyNull` to always return `null`.
+- Added `Predicates.ALWAYS_TRUE` lambda constant so that Java doesn't create instances for each `t -> true` occurrence (same for `Predicates.alwaysTrue`).
+- Added `Predicates.ALWAYS_FALSE` lambda constant so that Java doesn't create instances for each `t -> false` occurrence (same for `Predicates.alwaysFalse`).
+- Added `Suppliers.SUPPLY_TRUE` lambda constant so that Java doesn't create instances for each `() -> true` occurrence (same for `Suppliers.supplyTrue`).
+- Added `Suppliers.SUPPLY_FALSE` lambda constant so that Java doesn't create instances for each `() -> false` occurrence (same for `Suppliers.supplyFalse`).
+- Added `Suppliers.SUPPLY_NULL` lambda constant so that Java doesn't create instances for each `() -> null` occurrence (same for `Suppliers.supplyNull`).
 
 ---
 

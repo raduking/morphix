@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -26,6 +26,16 @@ import org.morphix.lang.JavaObjects;
 public interface Predicates {
 
 	/**
+	 * A predicate that is always true.
+	 */
+	Predicate<Object> ALWAYS_TRUE = t -> true;
+
+	/**
+	 * A predicate that is always false.
+	 */
+	Predicate<Object> ALWAYS_FALSE = t -> false;
+
+	/**
 	 * Returns a negative predicate.
 	 *
 	 * @param <T> the type of the input to the predicate
@@ -45,7 +55,40 @@ public interface Predicates {
 	 * @return a predicate that is always true
 	 */
 	static <T> Predicate<T> alwaysTrue() {
-		return t -> true;
+		return acceptAll();
+	}
+
+	/**
+	 * Returns a predicate that accepts all inputs.
+	 *
+	 * @param <T> the type of the input to the predicate
+	 *
+	 * @return a predicate that accepts all inputs
+	 */
+	static <T> Predicate<T> acceptAll() {
+		return JavaObjects.cast(ALWAYS_TRUE);
+	}
+
+	/**
+	 * Returns a predicate that is always false.
+	 *
+	 * @param <T> the type of the input to the predicate
+	 *
+	 * @return a predicate that is always false
+	 */
+	static <T> Predicate<T> alwaysFalse() {
+		return rejectAll();
+	}
+
+	/**
+	 * Returns a predicate that rejects all inputs.
+	 *
+	 * @param <T> the type of the input to the predicate
+	 *
+	 * @return a predicate that rejects all inputs
+	 */
+	static <T> Predicate<T> rejectAll() {
+		return JavaObjects.cast(ALWAYS_FALSE);
 	}
 
 	/**
@@ -57,7 +100,7 @@ public interface Predicates {
 	 * @return a predicate with and operator between all elements of the input collection
 	 */
 	static <T> Predicate<T> allOf(final Collection<Predicate<T>> predicates) {
-		Predicate<T> result = t -> true;
+		Predicate<T> result = acceptAll();
 		for (Predicate<T> predicate : predicates) {
 			result = result.and(predicate);
 		}
@@ -86,7 +129,7 @@ public interface Predicates {
 	 * @return a predicate with or operator between all elements of the input collection
 	 */
 	static <T> Predicate<T> anyOf(final Collection<Predicate<T>> predicates) {
-		Predicate<T> result = t -> false;
+		Predicate<T> result = rejectAll();
 		for (Predicate<T> predicate : predicates) {
 			result = result.or(predicate);
 		}
@@ -118,5 +161,4 @@ public interface Predicates {
 	static <T, U> Predicate<U> cast(final Predicate<T> predicate) {
 		return u -> predicate.test(JavaObjects.cast(u));
 	}
-
 }

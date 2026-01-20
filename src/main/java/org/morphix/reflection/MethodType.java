@@ -20,6 +20,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.morphix.lang.function.Suppliers;
+
 /**
  * Enumeration declaring standard method types.
  *
@@ -211,7 +213,7 @@ public enum MethodType {
 			}
 		}
 		if (GETTER == this && method.getParameterCount() == getParameterCount()) {
-			return whenRecordAccessor(method, () -> methodName, () -> null);
+			return whenRecordAccessor(method, () -> methodName, Suppliers.supplyNull());
 		}
 		return null;
 	}
@@ -258,7 +260,7 @@ public enum MethodType {
 				}
 			}
 			if (GETTER == this) {
-				return whenRecordAccessor(method, () -> true, () -> false);
+				return whenRecordAccessor(method, Suppliers.supplyTrue(), Suppliers.supplyFalse());
 			}
 			return false;
 		};
