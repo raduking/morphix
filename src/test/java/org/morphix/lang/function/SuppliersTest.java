@@ -14,6 +14,9 @@ package org.morphix.lang.function;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.reflection.Constructors;
@@ -31,5 +34,15 @@ class SuppliersTest {
 		UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(Suppliers.class);
 
 		assertThat(e.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
+	}
+
+	@Test
+	void shouldRunRunnableAndReturnNullWhenSupplyingNullWithRunnable() {
+		Runnable runnable = mock(Runnable.class);
+
+		Object result = Suppliers.supplyNull(runnable).get();
+
+		assertThat(result, nullValue());
+		verify(runnable).run();
 	}
 }
