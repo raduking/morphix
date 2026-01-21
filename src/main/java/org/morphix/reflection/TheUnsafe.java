@@ -14,7 +14,7 @@ package org.morphix.reflection;
 
 import java.lang.reflect.Field;
 
-import sun.misc.Unsafe; // NOSONAR
+import sun.misc.Unsafe; // NOSONAR used for low-level operations when no other option is available
 
 /**
  * {@link Unsafe} wrapper class.

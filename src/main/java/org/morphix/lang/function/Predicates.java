@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -17,13 +17,31 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.morphix.lang.JavaObjects;
+import org.morphix.reflection.Constructors;
 
 /**
  * Predicates utility methods.
  *
  * @author Radu Sebastian LAZIN
  */
-public interface Predicates {
+public final class Predicates {
+
+	/**
+	 * A predicate that is always true.
+	 */
+	private static final Predicate<Object> ALWAYS_TRUE = t -> true;
+
+	/**
+	 * A predicate that is always false.
+	 */
+	private static final Predicate<Object> ALWAYS_FALSE = t -> false;
+
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private Predicates() {
+		throw Constructors.unsupportedOperationException();
+	}
 
 	/**
 	 * Returns a negative predicate.
@@ -33,7 +51,7 @@ public interface Predicates {
 	 * @param predicate predicate to negate
 	 * @return a negative predicate
 	 */
-	static <T> Predicate<T> not(final Predicate<T> predicate) {
+	public static <T> Predicate<T> not(final Predicate<T> predicate) {
 		return predicate.negate();
 	}
 
@@ -44,8 +62,41 @@ public interface Predicates {
 	 *
 	 * @return a predicate that is always true
 	 */
-	static <T> Predicate<T> alwaysTrue() {
-		return t -> true;
+	public static <T> Predicate<T> alwaysTrue() {
+		return acceptAll();
+	}
+
+	/**
+	 * Returns a predicate that accepts all inputs.
+	 *
+	 * @param <T> the type of the input to the predicate
+	 *
+	 * @return a predicate that accepts all inputs
+	 */
+	public static <T> Predicate<T> acceptAll() {
+		return JavaObjects.cast(ALWAYS_TRUE);
+	}
+
+	/**
+	 * Returns a predicate that is always false.
+	 *
+	 * @param <T> the type of the input to the predicate
+	 *
+	 * @return a predicate that is always false
+	 */
+	public static <T> Predicate<T> alwaysFalse() {
+		return rejectAll();
+	}
+
+	/**
+	 * Returns a predicate that rejects all inputs.
+	 *
+	 * @param <T> the type of the input to the predicate
+	 *
+	 * @return a predicate that rejects all inputs
+	 */
+	public static <T> Predicate<T> rejectAll() {
+		return JavaObjects.cast(ALWAYS_FALSE);
 	}
 
 	/**
@@ -56,8 +107,8 @@ public interface Predicates {
 	 * @param predicates collection of predicates
 	 * @return a predicate with and operator between all elements of the input collection
 	 */
-	static <T> Predicate<T> allOf(final Collection<Predicate<T>> predicates) {
-		Predicate<T> result = t -> true;
+	public static <T> Predicate<T> allOf(final Collection<Predicate<T>> predicates) {
+		Predicate<T> result = acceptAll();
 		for (Predicate<T> predicate : predicates) {
 			result = result.and(predicate);
 		}
@@ -73,7 +124,7 @@ public interface Predicates {
 	 * @return a predicate with and operator between all elements of the input collection
 	 */
 	@SafeVarargs
-	static <T> Predicate<T> allOf(final Predicate<T>... predicates) {
+	public static <T> Predicate<T> allOf(final Predicate<T>... predicates) {
 		return allOf(List.of(predicates));
 	}
 
@@ -85,8 +136,8 @@ public interface Predicates {
 	 * @param predicates collection of predicates
 	 * @return a predicate with or operator between all elements of the input collection
 	 */
-	static <T> Predicate<T> anyOf(final Collection<Predicate<T>> predicates) {
-		Predicate<T> result = t -> false;
+	public static <T> Predicate<T> anyOf(final Collection<Predicate<T>> predicates) {
+		Predicate<T> result = rejectAll();
 		for (Predicate<T> predicate : predicates) {
 			result = result.or(predicate);
 		}
@@ -102,7 +153,7 @@ public interface Predicates {
 	 * @return a predicate with or operator between all elements of the input collection
 	 */
 	@SafeVarargs
-	static <T> Predicate<T> anyOf(final Predicate<T>... predicates) {
+	public static <T> Predicate<T> anyOf(final Predicate<T>... predicates) {
 		return anyOf(List.of(predicates));
 	}
 
@@ -115,8 +166,7 @@ public interface Predicates {
 	 * @param predicate input predicate
 	 * @return output predicate
 	 */
-	static <T, U> Predicate<U> cast(final Predicate<T> predicate) {
+	public static <T, U> Predicate<U> cast(final Predicate<T> predicate) {
 		return u -> predicate.test(JavaObjects.cast(u));
 	}
-
 }

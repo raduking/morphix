@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.morphix.lang.function.SetterFunction;
+import org.morphix.lang.function.Suppliers;
 import org.morphix.reflection.Constructors;
 
 /**
@@ -87,6 +88,21 @@ public final class Nullables {
 	 */
 	public static <T> T nonNullOrDefault(final T value, final T defaultValue) {
 		return nonNullOrDefault(value, () -> defaultValue);
+	}
+
+	/**
+	 * Returns the given value if the value is non-null. Otherwise, throws the exception supplied by the exception supplier.
+	 *
+	 * @param <T> value type
+	 * @param <E> exception type
+	 *
+	 * @param value function parameter
+	 * @param throwableSupplier supplies the exception to be thrown when the value is <code>null</code>
+	 * @return the given value if the value is non-null
+	 */
+	public static <T, E extends Throwable> T nonNullOrThrow(final T value, final Supplier<E> throwableSupplier) {
+		// JaCoco false positive on missed branch: the method reThrow always throws an exception and functionally is covered
+		return null != value ? value : Unchecked.Undeclared.reThrow(throwableSupplier.get());
 	}
 
 	/**
@@ -333,7 +349,7 @@ public final class Nullables {
 	 * @return a supplier which supplies a null value
 	 */
 	public static <T> Supplier<T> supplyNull() {
-		return () -> null;
+		return Suppliers.supplyNull();
 	}
 
 	/**
@@ -345,10 +361,7 @@ public final class Nullables {
 	 * @return a supplier which runs the runnable and supplies a null value
 	 */
 	public static <T> Supplier<T> supplyNull(final Runnable runnable) {
-		return () -> {
-			runnable.run();
-			return null;
-		};
+		return Suppliers.supplyNull(runnable);
 	}
 
 	/**
@@ -618,6 +631,7 @@ public final class Nullables {
 		 *
 		 * @param failFastErrorMessage exception message
 		 * @return value if value is not <code>null</code>
+		 * @throws IllegalStateException when value is null
 		 */
 		public T valueOrError(final String failFastErrorMessage) {
 			if (null != value) {
@@ -657,6 +671,7 @@ public final class Nullables {
 		 * @param predicate value predicate
 		 * @param failFastErrorMessage error message
 		 * @return value if value is not <code>null</code> and matches predicate
+		 * @throws IllegalStateException when value is null or does not match predicate
 		 */
 		public T valueWhenOrError(final Predicate<T> predicate, final String failFastErrorMessage) {
 			if (null != value && predicate.test(value)) {
@@ -664,7 +679,5 @@ public final class Nullables {
 			}
 			throw new IllegalStateException(failFastErrorMessage);
 		}
-
 	}
-
 }

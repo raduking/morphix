@@ -19,7 +19,7 @@
 
 	<groupId>io.github.raduking</groupId>
 	<artifactId>morphix-all</artifactId>
-	<version>1.0.18</version>
+	<version>1.0.19</version>
 	<packaging>jar</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -59,9 +59,10 @@
 		<central.publishing.maven.plugin.version>0.9.0</central.publishing.maven.plugin.version>
 
 		<!-- Other plugin versions -->
-		<spotless.maven.plugin.version>2.46.1</spotless.maven.plugin.version>
-		<org.eclipse.jdt.core.version>3.42.0</org.eclipse.jdt.core.version>
-		<eclipse.formatter.version>4.36</eclipse.formatter.version>
+		<spotless.maven.plugin.version>3.1.0</spotless.maven.plugin.version>
+		<org.eclipse.jdt.core.version>3.44.0</org.eclipse.jdt.core.version>
+		<eclipse.formatter.version>4.38</eclipse.formatter.version>
+		<code.format.version>1.0.0</code.format.version>
 		<properties.maven.plugin.version>1.2.1</properties.maven.plugin.version>
 
 		<!-- Testing dependencies versions -->
@@ -279,11 +280,16 @@
 						<artifactId>org.eclipse.jdt.core</artifactId>
 						<version>${org.eclipse.jdt.core.version}</version>
 					</dependency>
+					<dependency>
+						<groupId>io.github.raduking</groupId>
+						<artifactId>code-format</artifactId>
+						<version>${code.format.version}</version>
+                    </dependency>
 				</dependencies>
 				<configuration>
 					<java>
 						<eclipse>
-							<file>${project.basedir}/formatter/java-formatter.xml</file>
+							<file>java-code-style.xml</file>
 							<version>${eclipse.formatter.version}</version>
 						</eclipse>
 						<removeUnusedImports/>

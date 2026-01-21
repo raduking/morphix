@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -321,4 +322,49 @@ class ThreadsTest {
 		Threads.safeJoin(testingThread);
 	}
 
+	static class Resource implements AutoCloseable {
+
+		private final AtomicBoolean closed = new AtomicBoolean(false);
+
+		public void use() {
+			throw new UnsupportedOperationException("Use method exception");
+		}
+
+		@Override
+		public void close() {
+			closed.set(true);
+			throw new IllegalStateException("Close method exception");
+		}
+
+		public boolean isClosed() {
+			return closed.get();
+		}
+	}
+
+	private static Resource loadResource() {
+		return new Resource();
+	}
+
+	@SuppressWarnings("resource")
+	@Test
+	void shouldValidateTryWithResourcesVsFinally() {
+		Resource resource1 = loadResource();
+		try {
+			resource1.use();
+		} catch (Exception e) {
+			assertFalse(resource1.isClosed());
+			assertInstanceOf(UnsupportedOperationException.class, e);
+		} finally {
+			assertThrows(IllegalStateException.class, () -> resource1.close());
+		}
+
+		// The IllegalStateException from close() is suppressed in try-with-resources
+		Resource resource2 = loadResource();
+		try (resource2) {
+			resource2.use();
+		} catch (Exception e) {
+			assertTrue(resource2.isClosed());
+			assertInstanceOf(UnsupportedOperationException.class, e);
+		}
+	}
 }

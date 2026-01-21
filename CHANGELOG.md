@@ -1,5 +1,29 @@
 ## Release Notes
 
+`1.0.19`
+
+- Upgraded formatter version to `4.38`.
+- Upgraded `spotless-maven-plugin` to `3.1.0`.
+- Upgraded `org.eclipse.jdt/org.eclipse.jdt.core` to `3.44.0`.
+- Added `code-format` version `1.0.0` as the source for Java formatter file `java-code-style.xml`.
+- Added `Nullables.nonNullOrThrow` to throw the supplied `Throwable` instead of using `nonNullOrDefault`.
+- Added `Predicates.alwaysFalse` to return a predicate that is always false.
+- Added `Predicates.rejectAll` to return a predicate that is always false (alias to `alwaysFalse`).
+- Added `Predicates.acceptAll` to return a predicate that is always true (alias to `alwaysTrue`).
+- Added `Suppliers` class with utility methods for suppliers.
+- Added `Suppliers.supplyTrue` to always supply `true`.
+- Added `Suppliers.supplyFalse` to always supply `false`.
+- Added `Suppliers.supplyNull` to always return `null`.
+- Added `Suppliers.supplyNull(Runnable)` which returns a supplier that runs the runnable and then returns `null`.
+- Added `Suppliers.compose(Runnable, Supplier)` which returns a supplier that runs the runnable and the returns the supplied value by the given supplier.
+- Added `IntPredicates.alwaysTrue` to return a predicate that is always false.
+- Added `IntPredicates.alwaysFalse` to return a predicate that is always false.
+- Added `IntPredicates.rejectAll` to return a predicate that is always false (alias to `alwaysFalse`).
+- Added `IntPredicates.acceptAll` to return a predicate that is always true (alias to `alwaysTrue`).
+- Added internal lambda constants for all these methods so that Java doesn't create instances for each occurrence.
+
+---
+
 `1.0.18`
 
 - Moved `PutFunction` to `lang.function` package.

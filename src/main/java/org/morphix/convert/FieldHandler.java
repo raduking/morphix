@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import org.morphix.lang.function.Predicates;
 import org.morphix.reflection.ExtendedField;
 import org.morphix.reflection.predicates.MethodPredicates;
 
@@ -79,7 +80,7 @@ public abstract class FieldHandler {
 	 * @return the source type constraint
 	 */
 	protected Predicate<Type> sourceTypeConstraint() {
-		return type -> true;
+		return Predicates.acceptAll();
 	}
 
 	/**
@@ -88,7 +89,7 @@ public abstract class FieldHandler {
 	 * @return the destination type constraint
 	 */
 	protected Predicate<Type> destinationTypeConstraint() {
-		return type -> true;
+		return Predicates.acceptAll();
 	}
 
 	/**

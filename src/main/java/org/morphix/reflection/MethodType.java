@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import org.morphix.lang.function.Suppliers;
 
 /**
  * Enumeration declaring standard method types.
@@ -211,7 +213,7 @@ public enum MethodType {
 			}
 		}
 		if (GETTER == this && method.getParameterCount() == getParameterCount()) {
-			return whenRecordAccessor(method, () -> methodName, () -> null);
+			return whenRecordAccessor(method, () -> methodName, Suppliers.supplyNull());
 		}
 		return null;
 	}
@@ -258,7 +260,7 @@ public enum MethodType {
 				}
 			}
 			if (GETTER == this) {
-				return whenRecordAccessor(method, () -> true, () -> false);
+				return whenRecordAccessor(method, Suppliers.supplyTrue(), Suppliers.supplyFalse());
 			}
 			return false;
 		};

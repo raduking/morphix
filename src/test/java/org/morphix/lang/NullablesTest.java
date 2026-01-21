@@ -644,6 +644,16 @@ class NullablesTest {
 		assertThrows(Exception.class, () -> list.add(CUCU));
 	}
 
+	@Test
+	void shouldRunRunnableAndReturnNullWhenSupplyingNullWithRunnable() {
+		Runnable runnable = mock(Runnable.class);
+
+		Object result = Nullables.supplyNull(runnable).get();
+
+		assertThat(result, nullValue());
+		verify(runnable).run();
+	}
+
 	public static class A {
 
 		private Integer i;
