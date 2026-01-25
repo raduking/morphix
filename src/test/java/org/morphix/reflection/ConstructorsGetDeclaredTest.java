@@ -54,8 +54,7 @@ class ConstructorsGetDeclaredTest {
 	public static class C {
 		private final long x;
 
-		@SuppressWarnings("unused")
-		private C(final long x) {
+		private C(final long x) { // NOSONAR used by reflection
 			this.x = x;
 		}
 

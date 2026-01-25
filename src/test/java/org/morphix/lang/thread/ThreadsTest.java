@@ -179,6 +179,7 @@ class ThreadsTest {
 	void shouldExecuteForEachInWithExecutor() {
 		Queue<Integer> queue = new ConcurrentLinkedQueue<>();
 		List<Integer> integers = IntStream.range(0, THREAD_COUNT).boxed().toList();
+		@SuppressWarnings("resource")
 		ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
 
 		Threads.executeForEachIn(integers, i -> {
@@ -355,7 +356,7 @@ class ThreadsTest {
 			assertFalse(resource1.isClosed());
 			assertInstanceOf(UnsupportedOperationException.class, e);
 		} finally {
-			assertThrows(IllegalStateException.class, () -> resource1.close());
+			assertThrows(IllegalStateException.class, resource1::close);
 		}
 
 		// The IllegalStateException from close() is suppressed in try-with-resources
