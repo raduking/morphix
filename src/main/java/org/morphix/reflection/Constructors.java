@@ -162,18 +162,31 @@ public interface Constructors {
 	interface Safe {
 
 		/**
-		 * Creates a new instance for the given type with its default constructor. When a new instance cannot be created It
-		 * returns null.
+		 * Returns the default constructor for the given type, or null if not found.
 		 *
 		 * @param <T> instance type
 		 *
-		 * @param cls class for which to create an instance
-		 * @return an object of type T or null if it cannot be created
+		 * @param cls class for which to find the constructor
+		 * @return constructor, or null if not found
+		 */
+		static <T> Constructor<T> getDefault(final Class<T> cls) {
+			return getDeclared(cls);
+		}
+
+		/**
+		 * Returns a constructor for the given type with the constructor that matches the given parameter types, or null if not
+		 * found.
+		 *
+		 * @param <T> instance type
+		 *
+		 * @param cls class for which to find the constructor
+		 * @param paramTypes parameter types
+		 * @return constructor, or null if not found
 		 */
 		static <T> Constructor<T> getDeclared(final Class<T> cls, final Class<?>... paramTypes) {
 			try {
-				return Constructors.getDeclared(cls, paramTypes);
-			} catch (ReflectionException e) {
+				return cls.getDeclaredConstructor(paramTypes);
+			} catch (NoSuchMethodException e) {
 				return null;
 			}
 		}
