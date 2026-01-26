@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -16,11 +16,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import java.lang.reflect.Field;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#getOneDeclaredInHierarchy(Class, String)}.
+ * Test class for {@link Fields#getOneDeclaredInHierarchy(Class, String)},
+ * {@link Fields#getOneDeclaredInHierarchy(Object)} and {@link Fields#getOneDeclaredInHierarchy(Class, Predicate)}.
  *
  * @author Radu Sebastian LAZIN
  */

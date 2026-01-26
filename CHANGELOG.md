@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.21`
+
+---
+
 `1.0.20`
 
 - Added `Constructors.Safe` name space interface for methods that return `null` instead of throwing exceptions.
