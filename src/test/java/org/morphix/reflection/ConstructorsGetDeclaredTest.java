@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -22,13 +22,14 @@ import java.lang.reflect.Constructor;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Constructors#newInstance(Class)}.
+ * Test class for {@link Constructors#getDeclared(Class)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class ConstructorsGetDeclaredConstructorWithParamsTest {
+class ConstructorsGetDeclaredTest {
 
 	public static class B {
+
 		private final int i;
 		private String s;
 
@@ -53,7 +54,7 @@ class ConstructorsGetDeclaredConstructorWithParamsTest {
 	public static class C {
 		private final long x;
 
-		private C(final long x) {
+		private C(final long x) { // NOSONAR used by reflection
 			this.x = x;
 		}
 
@@ -99,4 +100,23 @@ class ConstructorsGetDeclaredConstructorWithParamsTest {
 		assertNotNull(constructor);
 	}
 
+	@Test
+	void shouldThrowExceptionIfNoNoArgsConstructorIsFound() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.getDeclared(B.class));
+
+		assertThat(e.getMessage(), equalTo("No constructor found for class: " + B.class.getCanonicalName() + " with parameters: []"));
+	}
+
+	public static class D {
+		private D() {
+			// private constructor
+		}
+	}
+
+	@Test
+	void shouldReturnPrivateNoArgsConstructor() {
+		Constructor<D> constructor = Constructors.getDeclared(D.class);
+
+		assertNotNull(constructor);
+	}
 }

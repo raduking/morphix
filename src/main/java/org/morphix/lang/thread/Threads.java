@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -331,6 +331,7 @@ public class Threads {
 	 * @param valueSupplier value supplier
 	 * @return supplier value if computed within the timeout
 	 */
+	@SuppressWarnings("resource")
 	public static <T> T execute(final Duration timeout, final Supplier<T> valueSupplier) {
 		Future<T> task = null;
 		ExecutorService executor = Executors.newSingleThreadExecutor();

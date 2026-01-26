@@ -1,5 +1,13 @@
 ## Release Notes
 
+`1.0.20`
+
+- Added `Constructors.Safe` name space interface for methods that return `null` instead of throwing exceptions.
+- Added `Constructors.Safe.getDefault` to return the default constructor if it is declared, `null` otherwise.
+- Added `Constructors.Safe.getDeclared` to return a declared constructor if it is declared, `null` otherwise.
+
+---
+
 `1.0.19`
 
 - Upgraded formatter version to `4.38`.

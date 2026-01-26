@@ -152,4 +152,43 @@ public interface Constructors {
 			}
 		}
 	}
+
+	/**
+	 * Interface which groups all methods that return null and don't throw exceptions on expected errors. This functions as
+	 * a name space so that the method names inside keep the same name pattern.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Safe {
+
+		/**
+		 * Returns the default constructor for the given type, or null if not found.
+		 *
+		 * @param <T> instance type
+		 *
+		 * @param cls class for which to find the constructor
+		 * @return constructor, or null if not found
+		 */
+		static <T> Constructor<T> getDefault(final Class<T> cls) {
+			return getDeclared(cls);
+		}
+
+		/**
+		 * Returns a constructor for the given type with the constructor that matches the given parameter types, or null if not
+		 * found.
+		 *
+		 * @param <T> instance type
+		 *
+		 * @param cls class for which to find the constructor
+		 * @param paramTypes parameter types
+		 * @return constructor, or null if not found
+		 */
+		static <T> Constructor<T> getDeclared(final Class<T> cls, final Class<?>... paramTypes) {
+			try {
+				return cls.getDeclaredConstructor(paramTypes);
+			} catch (NoSuchMethodException e) {
+				return null;
+			}
+		}
+	}
 }
