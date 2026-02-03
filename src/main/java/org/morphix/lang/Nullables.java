@@ -129,6 +129,37 @@ public final class Nullables {
 	}
 
 	/**
+	 * Alias for {@link #apply(Object, Function, Supplier)}.
+	 *
+	 * @param <T> value type / function parameter type
+	 * @param <U> return type
+	 *
+	 * @param value function parameter
+	 * @param function function
+	 * @param defaultValueSupplier default value supplier
+	 * @return result of the function for non-null values otherwise defaultValue
+	 * @see #apply(Object, Function, Supplier)
+	 */
+	public static <T, U> U whenNotNull(final T value, final Function<T, U> function, final Supplier<U> defaultValueSupplier) {
+		return apply(value, function, defaultValueSupplier);
+	}
+
+	/**
+	 * Alias for {@link #apply(Object, Function)}.
+	 *
+	 * @param <T> parameter type
+	 * @param <R> return type
+	 *
+	 * @param obj object to test for null
+	 * @param function function to call otherwise null
+	 * @return function result when parameter is not null, null otherwise
+	 * @see #apply(Object, Function)
+	 */
+	public static <T, R> R whenNotNull(final T obj, final Function<T, R> function) {
+		return apply(obj, function);
+	}
+
+	/**
 	 * Calls the supplier method only if the parameter is not null.
 	 *
 	 * @param <T> supplied type

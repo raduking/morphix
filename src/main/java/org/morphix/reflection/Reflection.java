@@ -136,10 +136,10 @@ public interface Reflection {
 	}
 
 	/**
-	 * Returns true if the class given by its name is present in the class path, false otherwise.
+	 * Returns true if the class given by its name is present in the classpath, false otherwise.
 	 *
 	 * @param className the {@linkplain ClassLoader##binary-name binary name}
-	 * @return true if the class is present in the class path, false otherwise
+	 * @return true if the class is present in the classpath, false otherwise
 	 */
 	static boolean isClassPresent(final String className) {
 		return null != Classes.Safe.getOne(className);

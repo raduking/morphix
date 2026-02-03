@@ -123,7 +123,7 @@ public interface Classes {
 	}
 
 	/**
-	 * Additional discovery utilities (class path scanning, annotation scanning, file-based scanning).
+	 * Additional discovery utilities (classpath scanning, annotation scanning, file-based scanning).
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
