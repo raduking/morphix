@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ class NullablesWhenNotNullTest {
 
 	private static final String RESULT = "result";
 	private static final String NOT_NULL = "notNull";
+	private static final int TEST_INT_1 = 123;
+	private static final int TEST_INT_2 = 456;
+	private static final String TEST_STRING = String.valueOf(TEST_INT_1);
 
 	@Mock
 	private Supplier<String> mockSupplier;
@@ -45,6 +49,12 @@ class NullablesWhenNotNullTest {
 
 	@Mock
 	private Consumer<String> mockConsumer;
+
+	@Mock
+	private Function<String, Integer> mockFunction;
+
+	@Mock
+	private Supplier<Integer> mockDefaultValueSupplier;
 
 	@Test
 	void shouldExecuteSupplierAndReturnValueWhenObjectIsNotNull() {
@@ -101,5 +111,62 @@ class NullablesWhenNotNullTest {
 		Nullables.whenNotNull(obj, mockConsumer);
 
 		verifyNoInteractions(mockConsumer);
+	}
+
+	@Test
+	void shouldApplyFunctionWhenValueIsNotNull() {
+		String value = TEST_STRING;
+		when(mockFunction.apply(value)).thenReturn(TEST_INT_1);
+
+		Integer result = Nullables.whenNotNull(value, mockFunction, mockDefaultValueSupplier);
+
+		assertEquals(TEST_INT_1, result);
+		verify(mockFunction).apply(value);
+		verifyNoInteractions(mockDefaultValueSupplier);
+	}
+
+	@Test
+	void shouldUseDefaultValueSupplierWhenValueIsNull() {
+		String value = null;
+		when(mockDefaultValueSupplier.get()).thenReturn(TEST_INT_2);
+
+		Integer result = Nullables.whenNotNull(value, mockFunction, mockDefaultValueSupplier);
+
+		assertEquals(TEST_INT_2, result);
+		verify(mockDefaultValueSupplier).get();
+		verifyNoInteractions(mockFunction);
+	}
+
+	@Test
+	void shouldNotCallFunctionOrSupplierWhenValueIsNullAndDefaultSupplierReturnsNull() {
+		String value = null;
+		when(mockDefaultValueSupplier.get()).thenReturn(null);
+
+		Integer result = Nullables.whenNotNull(value, mockFunction, mockDefaultValueSupplier);
+
+		assertEquals(null, result);
+		verify(mockDefaultValueSupplier).get();
+		verifyNoInteractions(mockFunction);
+	}
+
+	@Test
+	void shouldApplyFunctionWhenObjectIsNotNull() {
+		String value = TEST_STRING;
+		when(mockFunction.apply(value)).thenReturn(TEST_INT_1);
+
+		Integer result = Nullables.whenNotNull(value, mockFunction);
+
+		assertEquals(TEST_INT_1, result);
+		verify(mockFunction).apply(value);
+	}
+
+	@Test
+	void shouldReturnNullWhenObjectIsNull() {
+		String value = null;
+
+		Integer result = Nullables.whenNotNull(value, mockFunction);
+
+		assertNull(result);
+		verifyNoInteractions(mockFunction);
 	}
 }

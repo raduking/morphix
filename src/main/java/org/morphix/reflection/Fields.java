@@ -31,7 +31,8 @@ public interface Fields {
 
 	/**
 	 * Returns the field with the given name from the given class. If the field is not present in the class it returns
-	 * {@code null}.
+	 * {@code null}. This method does not search for fields in super classes, use
+	 * {@link #getOneDeclaredInHierarchy(Class, String)} for that.
 	 *
 	 * @param <T> type to get the field from
 	 *
@@ -52,7 +53,8 @@ public interface Fields {
 
 	/**
 	 * Returns the field with the given name from the given object. If the field is not present in the class it returns
-	 * {@code null}.
+	 * {@code null}. If the object supplied is a {@link Class} then the field from the given class will be returned. If the
+	 * object is not a {@link Class} then the field from the class of the given object will be returned.
 	 *
 	 * @param obj object containing the field
 	 * @param fieldName the name of the field
@@ -68,7 +70,8 @@ public interface Fields {
 
 	/**
 	 * Returns a list with all the fields in the class given as parameter. This is different from
-	 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array.
+	 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array. If the class is null it returns
+	 * an empty list.
 	 *
 	 * @param <T> type to get the fields from
 	 *
@@ -76,7 +79,25 @@ public interface Fields {
 	 * @return list of fields
 	 */
 	static <T> List<Field> getAllDeclared(final Class<T> cls) {
+		if (null == cls) {
+			return List.of();
+		}
 		return List.of(cls.getDeclaredFields());
+	}
+
+	/**
+	 * Variation of {@link #getAllDeclared(Class)}. It will call the method with <code>obj.getClass()</code> if the object
+	 * is not instance of {@link Class}, otherwise it will search for fields in the given class.
+	 *
+	 * @param obj object on which the fields are needed
+	 * @return list of fields
+	 */
+	static List<Field> getAllDeclared(final Object obj) {
+		if (null == obj) {
+			return List.of();
+		}
+		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
+		return getAllDeclared(clazz);
 	}
 
 	/**
@@ -89,7 +110,27 @@ public interface Fields {
 	 * @return list of fields
 	 */
 	static <T> List<Field> getAllDeclared(final Class<T> cls, final Predicate<Field> predicate) {
+		if (null == cls || null == predicate) {
+			return List.of();
+		}
 		return filter(getAllDeclared(cls), predicate);
+	}
+
+	/**
+	 * Returns a list with all the fields in the class, given as parameter and the field predicate.
+	 *
+	 * @param <T> type to get the fields from
+	 *
+	 * @param obj object on which the fields are needed
+	 * @param predicate predicate for fields
+	 * @return list of fields
+	 */
+	static List<Field> getAllDeclared(final Object obj, final Predicate<Field> predicate) {
+		if (null == obj || null == predicate) {
+			return List.of();
+		}
+		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
+		return getAllDeclared(clazz, predicate);
 	}
 
 	/**
@@ -119,7 +160,7 @@ public interface Fields {
 	 * <li>it is more efficient in terms of memory consumption</li>
 	 * <li>accessing the first and last has O(1) complexity</li>
 	 * <li>more often than not no random access is needed</li>
-	 * <li>profiling: ~50% times faster than using {@link java.util.ArrayList}</li>
+	 * <li>profiling: ~50% times faster than using {@link ArrayList}</li>
 	 * </ul>
 	 * The returned order of the fields are: class -> super class -> ... -> base class and all fields in each class are
 	 * returned in the declared order.
@@ -130,6 +171,9 @@ public interface Fields {
 	 * @return list of fields
 	 */
 	static <T> List<Field> getAllDeclaredInHierarchy(final Class<T> cls) {
+		if (null == cls) {
+			return List.of();
+		}
 		if (null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
@@ -149,6 +193,9 @@ public interface Fields {
 	 * @return list of fields
 	 */
 	static <T> List<Field> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<Field> predicate) {
+		if (null == cls || null == predicate) {
+			return List.of();
+		}
 		return filter(getAllDeclaredInHierarchy(cls), predicate);
 	}
 
@@ -160,8 +207,28 @@ public interface Fields {
 	 * @return list of fields
 	 */
 	static List<Field> getAllDeclaredInHierarchy(final Object obj) {
+		if (null == obj) {
+			return List.of();
+		}
 		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
 		return getAllDeclaredInHierarchy(clazz);
+	}
+
+	/**
+	 * Variation of {@link #getAllDeclaredInHierarchy(Class, Predicate)}. It will call the method with
+	 * <code>obj.getClass()</code> if the object is not instance of {@link Class}, otherwise it will search for fields in
+	 * the given class.
+	 *
+	 * @param obj object on which the fields are needed
+	 * @param predicate predicate for fields
+	 * @return list of fields
+	 */
+	static List<Field> getAllDeclaredInHierarchy(final Object obj, final Predicate<Field> predicate) {
+		if (null == obj) {
+			return List.of();
+		}
+		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
+		return getAllDeclaredInHierarchy(clazz, predicate);
 	}
 
 	/**
@@ -194,6 +261,9 @@ public interface Fields {
 	 * @return existing field, null otherwise
 	 */
 	static Field getOneDeclaredInHierarchy(final Object obj, final String fieldName) {
+		if (null == obj) {
+			return null;
+		}
 		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
 		return getOneDeclaredInHierarchy(clazz, fieldName);
 	}

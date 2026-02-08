@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -19,11 +19,18 @@ import static org.morphix.reflection.predicates.MemberPredicates.withAnnotation;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#getAllDeclared(Class)}.
+ * Test class for:
+ *
+ * <ul>
+ * <li>{@link Fields#getAllDeclared(Class)}</li>
+ * <li>{@link Fields#getAllDeclared(Object)}</li>
+ * <li>{@link Fields#getAllDeclared(Class, Predicate)}</li>
+ *</ul>
  *
  * @author Radu Sebastian LAZIN
  */
@@ -93,6 +100,40 @@ class FieldsGetAllDeclaredTest {
 	}
 
 	@Test
+	void shouldReturnEmptyListForNullClass() {
+		List<Field> fields = Fields.getAllDeclared((Class<?>) null);
+
+		assertThat(fields, hasSize(0));
+	}
+
+	@Test
+	void shouldReturnFieldsForObjects() {
+		D d = new D();
+		List<Field> fields = Fields.getAllDeclared(d);
+
+		int sizeD = D.class.getDeclaredFields().length;
+
+		assertThat(fields, hasSize(sizeD));
+	}
+
+	@Test
+	void shouldReturnAllFieldsForClassAsObject() {
+		Object cls = B.class;
+		List<Field> fields = Fields.getAllDeclared(cls);
+
+		int sizeB = B.class.getDeclaredFields().length;
+
+		assertThat(fields, hasSize(sizeB));
+	}
+
+	@Test
+	void shouldReturnEmptyListForNullObject() {
+		List<Field> fields = Fields.getAllDeclared((Object) null);
+
+		assertThat(fields, hasSize(0));
+	}
+
+	@Test
 	void shouldReturnFieldsWithAnnotation() throws Exception {
 		Field fx = D.class.getDeclaredField("x");
 
@@ -101,4 +142,48 @@ class FieldsGetAllDeclaredTest {
 		assertThat(annotatedFields.get(0), equalTo(fx));
 	}
 
+	@Test
+	void shouldEmptyListForWhenClassIsNullWithPredicate() {
+		List<Field> annotatedFields = Fields.getAllDeclared(null, withAnnotation(Deprecated.class));
+		assertThat(annotatedFields, hasSize(0));
+	}
+
+	@Test
+	void shouldEmptyListForWhenPredicateIsNullWithPredicate() {
+		List<Field> annotatedFields = Fields.getAllDeclared(B.class, null);
+		assertThat(annotatedFields, hasSize(0));
+	}
+
+	@Test
+	void shouldReturnFieldsWithAnnotationAndObject() throws Exception {
+		Field fx = D.class.getDeclaredField("x");
+
+		Object d = new D();
+		List<Field> annotatedFields = Fields.getAllDeclared(d, withAnnotation(Deprecated.class));
+		assertThat(annotatedFields, hasSize(1));
+		assertThat(annotatedFields.get(0), equalTo(fx));
+	}
+
+	@Test
+	void shouldReturnFieldsWithAnnotationWithObjectAsClass() throws Exception {
+		Field fx = D.class.getDeclaredField("x");
+
+		Object cls = D.class;
+		List<Field> annotatedFields = Fields.getAllDeclared(cls, withAnnotation(Deprecated.class));
+		assertThat(annotatedFields, hasSize(1));
+		assertThat(annotatedFields.get(0), equalTo(fx));
+	}
+
+	@Test
+	void shouldEmptyListForWhenClassIsNullWithPredicateAndObject() {
+		List<Field> annotatedFields = Fields.getAllDeclared((Object) null, withAnnotation(Deprecated.class));
+		assertThat(annotatedFields, hasSize(0));
+	}
+
+	@Test
+	void shouldEmptyListForWhenPredicateIsNullWithPredicateAndObject() {
+		Object cls = B.class;
+		List<Field> annotatedFields = Fields.getAllDeclared(cls, null);
+		assertThat(annotatedFields, hasSize(0));
+	}
 }

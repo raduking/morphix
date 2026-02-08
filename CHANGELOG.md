@@ -2,6 +2,12 @@
 
 `1.0.21`
 
+- Added `Nullables.whenNotNull` alias methods to all `Nullables.apply` methods.
+- Added `Fields.getAllDeclared(Object)` so that the caller doesn't need to call `getClass` everywhere.
+- Added `Fields.getAllDeclared(Class, Predicate)` to return all fields from a class matching a predicate.
+- Added `Fields.getAllDeclared(Object, Predicate)` to return all fields from an object matching a predicate.
+- Added `Fields.getAllDeclaredInHierarchy(Object, Predicate)` so that the caller doesn't need to call `getClass` everywhere.
+
 ---
 
 `1.0.20`

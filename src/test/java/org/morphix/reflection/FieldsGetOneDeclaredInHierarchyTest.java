@@ -16,13 +16,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import java.lang.reflect.Field;
-import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#getOneDeclaredInHierarchy(Class, String)},
- * {@link Fields#getOneDeclaredInHierarchy(Object)} and {@link Fields#getOneDeclaredInHierarchy(Class, Predicate)}.
+ * Test class for:
+ *
+ * <ul>
+ * <li>{@link Fields#getOneDeclaredInHierarchy(Class, String)}</li>
+ * <li>{@link Fields#getOneDeclaredInHierarchy(Object, String)}</li>
+ * </ul>
  *
  * @author Radu Sebastian LAZIN
  */
@@ -66,6 +69,13 @@ class FieldsGetOneDeclaredInHierarchyTest {
 	@Test
 	void shouldReturnNullIfClassIsNull() {
 		Field field = Fields.getOneDeclaredInHierarchy(null, "x");
+
+		assertThat(field, equalTo(null));
+	}
+
+	@Test
+	void shouldReturnNullIfObjectIsNull() {
+		Field field = Fields.getOneDeclaredInHierarchy((Object) null, "x");
 
 		assertThat(field, equalTo(null));
 	}

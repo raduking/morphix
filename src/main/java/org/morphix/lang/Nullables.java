@@ -569,7 +569,7 @@ public final class Nullables {
 		 * @return the value returned by the function
 		 */
 		public <U> U thenReturn(final Function<T, U> function) {
-			return null != value ? function.apply(value) : null;
+			return thenOrDefault(function, Suppliers.supplyNull());
 		}
 
 		/**
@@ -624,7 +624,7 @@ public final class Nullables {
 		 * @return given default value if value is <code>null</code>
 		 */
 		public T orElse(final T defaultValue) {
-			return valueOrDefault(defaultValue);
+			return valueOrDefault(() -> defaultValue);
 		}
 
 		/**
@@ -650,7 +650,7 @@ public final class Nullables {
 		 * @return given default value if value is <code>null</code>
 		 */
 		public T valueOrDefault(final T defaultValue) {
-			return null != value ? value : defaultValue;
+			return valueOrDefault(() -> defaultValue);
 		}
 
 		/**
