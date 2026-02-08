@@ -14,9 +14,9 @@ package org.morphix.reflection;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.morphix.reflection.ExtendedField.of;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class ExtendedFieldTest {
 
 	@Test
 	void shouldReturnObjectClassIfNoFieldIsSet() {
-		ExtendedField sfo = of(null);
+		ExtendedField sfo = ExtendedField.of(null);
 
 		Class<?> result = sfo.toClass();
 
@@ -50,7 +50,7 @@ class ExtendedFieldTest {
 		A a = new A();
 		a.l = TEST_LONG;
 
-		ExtendedField fop = of(A.class.getDeclaredField("l"), a);
+		ExtendedField fop = ExtendedField.of(A.class.getDeclaredField("l"), a);
 		String result = fop.toString();
 
 		assertThat(result, equalTo("Field: l" + EOL
@@ -64,7 +64,7 @@ class ExtendedFieldTest {
 		A a = new A();
 		a.l = TEST_LONG;
 
-		ExtendedField fop = of((Field) null, a);
+		ExtendedField fop = ExtendedField.of((Field) null, a);
 		String result = fop.toString();
 
 		assertThat(result, equalTo("Object: " + a));
@@ -75,7 +75,7 @@ class ExtendedFieldTest {
 		A a = new A();
 		a.l = TEST_LONG;
 
-		ExtendedField fop = of(A.class.getDeclaredField("l"));
+		ExtendedField fop = ExtendedField.of(A.class.getDeclaredField("l"));
 		String result = fop.toString();
 
 		assertThat(result, equalTo("Field: l" + EOL
@@ -84,7 +84,7 @@ class ExtendedFieldTest {
 
 	@Test
 	void shouldReturnDefaultClassTypeWhenFieldAndGetterMethodIsNullOnToClass() {
-		ExtendedField ef = of(null);
+		ExtendedField ef = ExtendedField.of(null);
 		Fields.IgnoreAccess.set(ef, "name", REFLECTION_SET_NAME);
 
 		Class<?> result = ef.toClass();
@@ -94,7 +94,7 @@ class ExtendedFieldTest {
 
 	@Test
 	void shouldReturnDefaultClassTypeWhenFieldAndGetterMethodIsNullOnGetType() {
-		ExtendedField ef = of(null);
+		ExtendedField ef = ExtendedField.of(null);
 		Fields.IgnoreAccess.set(ef, "name", REFLECTION_SET_NAME);
 
 		Type result = ef.getType();
@@ -104,7 +104,7 @@ class ExtendedFieldTest {
 
 	@Test
 	void shouldReturnNullWhenFieldHasNoObjectOrGetterMethod() {
-		ExtendedField ef = of(null);
+		ExtendedField ef = ExtendedField.of(null);
 		Fields.IgnoreAccess.set(ef, "name", REFLECTION_SET_NAME);
 
 		Object result = ef.getGenericReturnType(0);
@@ -114,7 +114,7 @@ class ExtendedFieldTest {
 
 	@Test
 	void shouldNotModifyFieldValueIfFieldAndGetterMethodAreNull() {
-		ExtendedField ef = of(null);
+		ExtendedField ef = ExtendedField.of(null);
 
 		ef.setFieldValue("test");
 
@@ -125,7 +125,7 @@ class ExtendedFieldTest {
 
 	@Test
 	void shouldNotModifyNameWhenSettingGetterMethodToNull() {
-		ExtendedField ef = of(null);
+		ExtendedField ef = ExtendedField.of(null);
 		Fields.IgnoreAccess.set(ef, "name", REFLECTION_SET_NAME);
 
 		ef.setGetterMethod(null);
@@ -138,10 +138,51 @@ class ExtendedFieldTest {
 	@Test
 	void shouldReturnNullOnGetGenericReturnTypeWhenObjectIsNullAndFieldIsSet() {
 		Field field = Fields.getOneDeclared(ExtendedFieldTest.class, "TEST_LONG");
-		ExtendedField ef = of(field, null);
+		ExtendedField ef = ExtendedField.of(field, null);
 
 		Object result = ef.getGenericReturnType(0);
 
 		assertThat(result, equalTo(null));
+	}
+
+	@Test
+	void shouldReturnNullForNoAnnotationOnField() {
+		Field field = Fields.getOneDeclared(ExtendedFieldTest.class, "TEST_LONG");
+		ExtendedField ef = ExtendedField.of(field, null);
+
+		Deprecated annotation = ef.getAnnotation(Deprecated.class);
+
+		assertThat(annotation, equalTo(null));
+	}
+
+	static class F {
+
+		@Deprecated
+		public String x;
+
+		@Deprecated
+		public String getY() {
+			return "y";
+		}
+	}
+
+	@Test
+	void shouldReturnAnnotationFromField() {
+		Field field = Fields.getOneDeclared(F.class, "x");
+		ExtendedField ef = ExtendedField.of(field, null);
+
+		Deprecated annotation = ef.getAnnotation(Deprecated.class);
+
+		assertThat(annotation, equalTo(field.getAnnotation(Deprecated.class)));
+	}
+
+	@Test
+	void shouldReturnAnnotationFromGetterMethod() {
+		Method method = Methods.getOneDeclared(MethodType.GETTER.getMethodName("y"), F.class);
+		ExtendedField ef = ExtendedField.of(method, null);
+
+		Deprecated annotation = ef.getAnnotation(Deprecated.class);
+
+		assertThat(annotation, equalTo(method.getAnnotation(Deprecated.class)));
 	}
 }

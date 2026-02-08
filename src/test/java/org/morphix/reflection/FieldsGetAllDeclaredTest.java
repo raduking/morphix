@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
  * <li>{@link Fields#getAllDeclared(Class)}</li>
  * <li>{@link Fields#getAllDeclared(Object)}</li>
  * <li>{@link Fields#getAllDeclared(Class, Predicate)}</li>
- *</ul>
+ * </ul>
  *
  * @author Radu Sebastian LAZIN
  */

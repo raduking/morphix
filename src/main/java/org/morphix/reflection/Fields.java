@@ -119,8 +119,6 @@ public interface Fields {
 	/**
 	 * Returns a list with all the fields in the class, given as parameter and the field predicate.
 	 *
-	 * @param <T> type to get the fields from
-	 *
 	 * @param obj object on which the fields are needed
 	 * @param predicate predicate for fields
 	 * @return list of fields

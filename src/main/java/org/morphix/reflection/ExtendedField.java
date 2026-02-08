@@ -13,10 +13,14 @@
 package org.morphix.reflection;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.function.Function;
 import java.util.function.Predicate;
+
+import org.morphix.lang.Nullables;
 
 /**
  * Class that holds a {@link Field} and the object for which this field corresponds. It represents a link between the
@@ -337,6 +341,23 @@ public class ExtendedField {
 			isPresent |= field.isAnnotationPresent(annotation);
 		}
 		return isPresent;
+	}
+
+	/**
+	 * Returns the annotation if it is present on the extended field, null otherwise.
+	 *
+	 * @param <T> annotation type
+	 *
+	 * @param annotationClass annotation class
+	 * @return the annotation if it is present on the extended field, null otherwise
+	 */
+	public <T extends Annotation> T getAnnotation(final Class<T> annotationClass) {
+		Function<AnnotatedElement, T> getAnnotation = annotated -> annotated.getAnnotation(annotationClass);
+		T annotation = Nullables.apply(getField(), getAnnotation);
+		if (null != annotation) {
+			return annotation;
+		}
+		return Nullables.apply(getGetterMethod(), getAnnotation);
 	}
 
 	/**

@@ -7,6 +7,7 @@
 - Added `Fields.getAllDeclared(Class, Predicate)` to return all fields from a class matching a predicate.
 - Added `Fields.getAllDeclared(Object, Predicate)` to return all fields from an object matching a predicate.
 - Added `Fields.getAllDeclaredInHierarchy(Object, Predicate)` so that the caller doesn't need to call `getClass` everywhere.
+- Added `ExtendedField.getAnnotation` to return the annotation from an extended field.
 
 ---
 
