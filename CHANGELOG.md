@@ -1,5 +1,20 @@
 ## Release Notes
 
+`1.0.21`
+
+- Added `JavaArrays` utility interface with utility methods for Java arrays.
+- Added `Nullables.whenNotNull` alias methods to all `Nullables.apply` methods.
+- Added `Fields.getAllDeclared(Object)` so that the caller doesn't need to call `getClass` everywhere.
+- Added `Fields.getAllDeclared(Class, Predicate)` to return all fields from a class matching a predicate.
+- Added `Fields.getAllDeclared(Object, Predicate)` to return all fields from an object matching a predicate.
+- Added `Fields.getAllDeclaredInHierarchy(Object, Predicate)` so that the caller doesn't need to call `getClass` everywhere.
+- Added `ExtendedField.getAnnotation` to return the annotation from an extended field.
+- Added `ToStringFunction` for generalizing the `Object.toString`.
+- Upgraded to JUnit 6 (version `6.0.2`).
+- Upgraded parent to `4.0.2`.
+
+---
+
 `1.0.20`
 
 - Added `Constructors.Safe` name space interface for methods that return `null` instead of throwing exceptions.
@@ -155,7 +170,7 @@
 
 `1.0.8`
 
-- Added `Reflection.isClassPresent` to test if a class is present in the class path.
+- Added `Reflection.isClassPresent` to test if a class is present in the classpath.
 
 ---
 

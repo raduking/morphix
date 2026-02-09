@@ -176,5 +176,4 @@ public class ArrayConversionPipeline<S, D> {
 		Class<T> rawType = JavaObjects.cast(parameterizedType.getRawType());
 		return toAny(rawType);
 	}
-
 }

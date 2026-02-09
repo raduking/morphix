@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -21,11 +21,19 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#getAllDeclaredInHierarchy(Class)}.
+ * Test class for:
+ *
+ * <ul>
+ * <li>{@link Fields#getAllDeclaredInHierarchy(Class)}</li>
+ * <li>{@link Fields#getAllDeclaredInHierarchy(Object)}</li>
+ * <li>{@link Fields#getAllDeclaredInHierarchy(Class, Predicate)}</li>
+ * <li>{@link Fields#getAllDeclaredInHierarchy(Object, Predicate)}</li>
+ * </ul>
  *
  * @author Radu Sebastian LAZIN
  */
@@ -57,6 +65,10 @@ class FieldsGetAllDeclaredInHierarchyTest {
 	public static class F extends B {
 		int x;
 		int y;
+	}
+
+	public record R(int x) {
+		// record class
 	}
 
 	@Test
@@ -111,12 +123,76 @@ class FieldsGetAllDeclaredInHierarchyTest {
 	}
 
 	@Test
+	void shouldReturnFieldsForRecords() {
+		List<Field> fields = Fields.getAllDeclaredInHierarchy(R.class);
+
+		int sizeRecord = Record.class.getDeclaredFields().length;
+		int sizeR = R.class.getDeclaredFields().length;
+
+		assertThat(fields, hasSize(sizeRecord + sizeR));
+	}
+
+	@Test
+	void shouldReturnEmptyListForNullClass() {
+		List<Field> fields = Fields.getAllDeclaredInHierarchy((Class<?>) null);
+
+		assertThat(fields, hasSize(0));
+	}
+
+	@Test
+	void shouldReturnEmptyListForNullObject() {
+		List<Field> fields = Fields.getAllDeclaredInHierarchy((Object) null);
+
+		assertThat(fields, hasSize(0));
+	}
+
+	@Test
 	void shouldReturnFieldsWithAnnotation() throws Exception {
 		Field fx = D.class.getDeclaredField("x");
 
 		List<Field> annotatedFields = Fields.getAllDeclaredInHierarchy(D.class, withAnnotation(Deprecated.class));
 		assertThat(annotatedFields, hasSize(1));
 		assertThat(annotatedFields.get(0), equalTo(fx));
+	}
+
+	@Test
+	void shouldReturnFieldsWithAnnotationOnObject() throws Exception {
+		Field fx = D.class.getDeclaredField("x");
+
+		List<Field> annotatedFields = Fields.getAllDeclaredInHierarchy(new D(), withAnnotation(Deprecated.class));
+		assertThat(annotatedFields, hasSize(1));
+		assertThat(annotatedFields.get(0), equalTo(fx));
+	}
+
+	@Test
+	void shouldReturnFieldsWithAnnotationOnClassAsObject() throws Exception {
+		Field fx = D.class.getDeclaredField("x");
+
+		Object cls = D.class;
+		List<Field> annotatedFields = Fields.getAllDeclaredInHierarchy(cls, withAnnotation(Deprecated.class));
+		assertThat(annotatedFields, hasSize(1));
+		assertThat(annotatedFields.get(0), equalTo(fx));
+	}
+
+	@Test
+	void shouldReturnEmptyListWithNullClassWithPredicate() {
+		List<Field> annotatedFields = Fields.getAllDeclaredInHierarchy(null, withAnnotation(Deprecated.class));
+
+		assertThat(annotatedFields, hasSize(0));
+	}
+
+	@Test
+	void shouldReturnEmptyListWithNullObjectWithPredicate() {
+		List<Field> annotatedFields = Fields.getAllDeclaredInHierarchy((Object) null, withAnnotation(Deprecated.class));
+
+		assertThat(annotatedFields, hasSize(0));
+	}
+
+	@Test
+	void shouldReturnEmptyListWithNullPredicate() {
+		List<Field> annotatedFields = Fields.getAllDeclaredInHierarchy(new D(), null);
+
+		assertThat(annotatedFields, hasSize(0));
 	}
 
 	@Test

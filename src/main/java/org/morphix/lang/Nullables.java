@@ -129,6 +129,37 @@ public final class Nullables {
 	}
 
 	/**
+	 * Alias for {@link #apply(Object, Function, Supplier)}.
+	 *
+	 * @param <T> value type / function parameter type
+	 * @param <U> return type
+	 *
+	 * @param value function parameter
+	 * @param function function
+	 * @param defaultValueSupplier default value supplier
+	 * @return result of the function for non-null values otherwise defaultValue
+	 * @see #apply(Object, Function, Supplier)
+	 */
+	public static <T, U> U whenNotNull(final T value, final Function<T, U> function, final Supplier<U> defaultValueSupplier) {
+		return apply(value, function, defaultValueSupplier);
+	}
+
+	/**
+	 * Alias for {@link #apply(Object, Function)}.
+	 *
+	 * @param <T> parameter type
+	 * @param <R> return type
+	 *
+	 * @param obj object to test for null
+	 * @param function function to call otherwise null
+	 * @return function result when parameter is not null, null otherwise
+	 * @see #apply(Object, Function)
+	 */
+	public static <T, R> R whenNotNull(final T obj, final Function<T, R> function) {
+		return apply(obj, function);
+	}
+
+	/**
 	 * Calls the supplier method only if the parameter is not null.
 	 *
 	 * @param <T> supplied type
@@ -538,7 +569,7 @@ public final class Nullables {
 		 * @return the value returned by the function
 		 */
 		public <U> U thenReturn(final Function<T, U> function) {
-			return null != value ? function.apply(value) : null;
+			return thenOrDefault(function, Suppliers.supplyNull());
 		}
 
 		/**
@@ -584,7 +615,9 @@ public final class Nullables {
 		}
 
 		/**
-		 * Returns given default value if value is <code>null</code>.
+		 * Returns given default value if value is <code>null</code>. Prefer using {@link #orElse(Supplier)} for lazy default
+		 * value evaluation when the default value is not a constant.
+		 *
 		 * <p>
 		 * This is a terminal operation.
 		 * </p>
@@ -593,7 +626,7 @@ public final class Nullables {
 		 * @return given default value if value is <code>null</code>
 		 */
 		public T orElse(final T defaultValue) {
-			return valueOrDefault(defaultValue);
+			return valueOrDefault(() -> defaultValue);
 		}
 
 		/**
@@ -610,7 +643,8 @@ public final class Nullables {
 		}
 
 		/**
-		 * Returns the given default value if value is <code>null</code>.
+		 * Returns the given default value if value is <code>null</code>. Prefer using {@link #valueOrDefault(Supplier)} for
+		 * lazy default value evaluation when the default value is not a constant.
 		 * <p>
 		 * This is a terminal operation.
 		 * </p>
@@ -619,7 +653,7 @@ public final class Nullables {
 		 * @return given default value if value is <code>null</code>
 		 */
 		public T valueOrDefault(final T defaultValue) {
-			return null != value ? value : defaultValue;
+			return valueOrDefault(() -> defaultValue);
 		}
 
 		/**
@@ -642,6 +676,8 @@ public final class Nullables {
 
 		/**
 		 * Returns the value if it's not null and conforms to the given predicate. Otherwise, the default value is returned.
+		 * Prefer using {@link #valueWhenOrDefault(Predicate, Supplier)} for lazy default value evaluation when the default
+		 * value is not a constant.
 		 *
 		 * @param predicate value predicate
 		 * @param defaultValue default value.
