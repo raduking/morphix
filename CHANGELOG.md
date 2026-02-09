@@ -2,6 +2,7 @@
 
 `1.0.21`
 
+- Added `JavaArrays` utility interface with utility methods for Java arrays.
 - Added `Nullables.whenNotNull` alias methods to all `Nullables.apply` methods.
 - Added `Fields.getAllDeclared(Object)` so that the caller doesn't need to call `getClass` everywhere.
 - Added `Fields.getAllDeclared(Class, Predicate)` to return all fields from a class matching a predicate.
