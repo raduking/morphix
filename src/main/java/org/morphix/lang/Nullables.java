@@ -615,7 +615,9 @@ public final class Nullables {
 		}
 
 		/**
-		 * Returns given default value if value is <code>null</code>.
+		 * Returns given default value if value is <code>null</code>. Prefer using {@link #orElse(Supplier)} for lazy default
+		 * value evaluation when the default value is not a constant.
+		 *
 		 * <p>
 		 * This is a terminal operation.
 		 * </p>
@@ -641,7 +643,8 @@ public final class Nullables {
 		}
 
 		/**
-		 * Returns the given default value if value is <code>null</code>.
+		 * Returns the given default value if value is <code>null</code>. Prefer using {@link #valueOrDefault(Supplier)} for
+		 * lazy default value evaluation when the default value is not a constant.
 		 * <p>
 		 * This is a terminal operation.
 		 * </p>
@@ -673,6 +676,8 @@ public final class Nullables {
 
 		/**
 		 * Returns the value if it's not null and conforms to the given predicate. Otherwise, the default value is returned.
+		 * Prefer using {@link #valueWhenOrDefault(Predicate, Supplier)} for lazy default value evaluation when the default
+		 * value is not a constant.
 		 *
 		 * @param predicate value predicate
 		 * @param defaultValue default value.
