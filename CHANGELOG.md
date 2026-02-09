@@ -8,6 +8,9 @@
 - Added `Fields.getAllDeclared(Object, Predicate)` to return all fields from an object matching a predicate.
 - Added `Fields.getAllDeclaredInHierarchy(Object, Predicate)` so that the caller doesn't need to call `getClass` everywhere.
 - Added `ExtendedField.getAnnotation` to return the annotation from an extended field.
+- Added `ToStringFunction` for generalizing the `Object.toString`.
+- Upgraded to JUnit 6 (version `6.0.2`).
+- Upgraded parent to `4.0.2`.
 
 ---
 
