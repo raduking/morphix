@@ -205,6 +205,9 @@ public class ExtendedField {
 		if (null == fieldValue && null != field) {
 			fieldValue = Fields.IgnoreAccess.get(object, field);
 		}
+		if (null == fieldValue && null == field && null == getterMethod && hasObject()) {
+			fieldValue = object;
+		}
 		return fieldValue;
 	}
 
@@ -230,9 +233,6 @@ public class ExtendedField {
 	 * @return type of the field
 	 */
 	public Type getType() {
-		if (!hasField()) {
-			return DEFAULT_CLASS;
-		}
 		if (hasObject()) {
 			Object value = getFieldValue();
 			if (null != value) {
@@ -276,9 +276,6 @@ public class ExtendedField {
 	 * @return type of the field
 	 */
 	public Class<?> toClass() {
-		if (!hasField()) {
-			return DEFAULT_CLASS;
-		}
 		if (hasObject()) {
 			Object value = getFieldValue();
 			if (null != value) {

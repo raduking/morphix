@@ -40,6 +40,9 @@ public class FieldNameMapStrategy implements ConversionStrategy {
 	 */
 	@Override
 	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
+		if (!(source instanceof Map)) {
+			return ExtendedField.EMPTY;
+		}
 		Map<String, ?> sourceMap = JavaObjects.cast(source);
 		return of((Field) null, sourceMap.get(sourceFieldName));
 	}

@@ -1,5 +1,12 @@
 ## Release Notes
 
+`1.0.22`
+
+- Renamed `AnyFromMap` field handler to `MapToAny`.
+- Added map conversions as part of converter handler chain so that map conversions can be done by default.
+
+---
+
 `1.0.21`
 
 - Added `JavaArrays` utility interface with utility methods for Java arrays.

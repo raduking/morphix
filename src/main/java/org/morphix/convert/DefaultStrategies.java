@@ -53,6 +53,7 @@ public final class DefaultStrategies {
 	 */
 	static final ConversionStrategy[] STRATEGIES_CHAIN = {
 			STRATEGY_BASIC_NAME,
+			STRATEGY_FIELD_NAME_MAP,
 			STRATEGY_PATH,
 			STRATEGY_NAME_PATH
 	};

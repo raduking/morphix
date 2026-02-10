@@ -12,37 +12,60 @@
  */
 package org.morphix.convert.handler;
 
-import static org.morphix.convert.Conversions.convertEnvelopedFrom;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
+import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.lang.function.Predicates.not;
+import static org.morphix.reflection.predicates.TypePredicates.isMap;
 
+import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.function.Predicate;
 
-import org.morphix.convert.Configuration;
 import org.morphix.convert.FieldHandler;
 import org.morphix.convert.FieldHandlerResult;
+import org.morphix.convert.MapConversions;
+import org.morphix.lang.JavaObjects;
+import org.morphix.lang.function.InstanceFunction;
+import org.morphix.reflection.Constructors;
 import org.morphix.reflection.ExtendedField;
+import org.morphix.reflection.InstanceCreator;
 
 /**
  * Any from {@link Map} field handler.
  *
  * @author Radu Sebastian LAZIN
  */
-public final class AnyFromMap extends FieldHandler {
+public final class MapToAny extends FieldHandler {
 
 	/**
 	 * Default constructor.
 	 */
-	public AnyFromMap() {
+	public MapToAny() {
 		// empty
 	}
 
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
-		if (sfo.hasObject()) {
-			Object value = convertEnvelopedFrom(sfo.getObject(), dfo.getType(), Configuration.defaultConfiguration());
-			dfo.setFieldValue(value);
+		if (!sfo.hasObject()) {
+			return SKIP;
 		}
+		InstanceFunction<Object> instanceFunction =
+				() -> Constructors.IgnoreAccess.newInstance(dfo.toClass(), InstanceCreator.getInstance());
+		Map<String, Object> map = JavaObjects.cast(sfo.getObject());
+
+		Object value = MapConversions.convertFromMap(map, instanceFunction);
+		dfo.setFieldValue(value);
+
 		return CONVERTED;
 	}
 
+	@Override
+	protected Predicate<Type> sourceTypeConstraint() {
+		return isMap();
+	}
+
+	@Override
+	protected Predicate<Type> destinationTypeConstraint() {
+		return not(isMap());
+	}
 }

@@ -14,7 +14,6 @@ package org.morphix.convert;
 
 import java.util.List;
 
-import org.morphix.convert.handler.AnyFromMap;
 import org.morphix.convert.handler.AnyToAny;
 import org.morphix.convert.handler.AnyToAnyFromConstructor;
 import org.morphix.convert.handler.AnyToAnyFromStaticMethod;
@@ -28,6 +27,7 @@ import org.morphix.convert.handler.CharSequenceToEnum;
 import org.morphix.convert.handler.DirectAssignment;
 import org.morphix.convert.handler.IterableToArray;
 import org.morphix.convert.handler.IterableToIterable;
+import org.morphix.convert.handler.MapToAny;
 import org.morphix.convert.handler.MapToMap;
 import org.morphix.convert.handler.NullSourceSkipper;
 import org.morphix.convert.handler.NumberToNumber;
@@ -129,14 +129,14 @@ public final class DefaultFieldHandlers {
 	public static final FieldHandler FIELD_HANDLER_ANY_TO_ITERABLE = new AnyToIterable();
 
 	/**
+	 * {@link MapToAny} default instance.
+	 */
+	public static final FieldHandler FIELD_HANDLER_MAP_TO_ANY = new MapToAny();
+
+	/**
 	 * {@link AnyToAny} default instance.
 	 */
 	public static final FieldHandler FIELD_HANDLER_ANY_TO_ANY = new AnyToAny();
-
-	/**
-	 * {@link AnyFromMap} default instance.
-	 */
-	public static final FieldHandler FIELD_HANDLER_ANY_FROM_MAP = new AnyFromMap();
 
 	/**
 	 * Default field handlers chain (as array).
@@ -158,7 +158,8 @@ public final class DefaultFieldHandlers {
 			FIELD_HANDLER_MAP_TO_MAP,
 			FIELD_HANDLER_ANY_TO_ANY_FROM_STATIC_METHOD,
 			FIELD_HANDLER_ANY_TO_ANY_FROM_CONSTRUCTOR,
-			FIELD_HANDLER_ANY_TO_ITERABLE
+			FIELD_HANDLER_ANY_TO_ITERABLE,
+			FIELD_HANDLER_MAP_TO_ANY
 	};
 
 	/**

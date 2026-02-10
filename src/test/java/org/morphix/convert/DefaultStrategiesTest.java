@@ -16,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.morphix.convert.DefaultStrategies.STRATEGY_BASIC_NAME;
+import static org.morphix.convert.DefaultStrategies.STRATEGY_FIELD_NAME_MAP;
 import static org.morphix.convert.DefaultStrategies.STRATEGY_NAME_PATH;
 import static org.morphix.convert.DefaultStrategies.STRATEGY_PATH;
 
@@ -36,6 +37,7 @@ class DefaultStrategiesTest {
 
 	static final ConversionStrategy[] STRATEGIES = {
 			STRATEGY_BASIC_NAME,
+			STRATEGY_FIELD_NAME_MAP,
 			STRATEGY_PATH,
 			STRATEGY_NAME_PATH
 	};
@@ -54,7 +56,7 @@ class DefaultStrategiesTest {
 	}
 
 	@Test
-	void shouldKeepTheHandlersOrder() {
+	void shouldKeepTheStrategiesOrder() {
 		for (int i = 0; i < STRATEGIES.length; ++i) {
 			assertThat(STRATEGIES[i], equalTo(DefaultStrategies.STRATEGIES_CHAIN[i]));
 		}

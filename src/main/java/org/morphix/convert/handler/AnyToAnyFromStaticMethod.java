@@ -57,8 +57,7 @@ public final class AnyToAnyFromStaticMethod extends FieldHandler {
 		if (null == sValue && !staticConvertMethods.isEmpty()) {
 			return BREAK;
 		}
-		// find a method in the dClass that can convert the value from a
-		// source class value
+		// find a method in the dClass that can convert the value from a source class value
 		for (Method method : staticConvertMethods) {
 			Object dValue = Methods.IgnoreAccess.invoke(method, dClass, sValue);
 			if (null != dValue) {

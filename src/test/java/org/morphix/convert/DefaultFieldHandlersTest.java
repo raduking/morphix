@@ -49,7 +49,8 @@ class DefaultFieldHandlersTest {
 			DefaultFieldHandlers.FIELD_HANDLER_MAP_TO_MAP,
 			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_ANY_FROM_STATIC_METHOD,
 			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_ANY_FROM_CONSTRUCTOR,
-			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_ITERABLE
+			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_ITERABLE,
+			DefaultFieldHandlers.FIELD_HANDLER_MAP_TO_ANY,
 	};
 
 	@Test

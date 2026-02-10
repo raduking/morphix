@@ -106,12 +106,6 @@ public interface ConverterFactory {
 	 * @return a new {@link ObjectConverter} for map conversions
 	 */
 	static <V, D> ObjectConverter<Map<String, V>, D> newMapObjectConverter() {
-		Configuration configuration = Configuration.of(
-				List.of(DefaultFieldHandlers.FIELD_HANDLER_ANY_FROM_MAP),
-				List.of(DefaultStrategies.STRATEGY_FIELD_NAME_MAP),
-				Configuration.Default.EXCLUDED_FIELDS,
-				Configuration.Default.EXPANDABLE_FIELDS,
-				Configuration.Default.SIMPLE_CONVERTERS);
-		return new ObjectConverter<>(configuration);
+		return ConverterFactory.newObjectConverter(Configuration.defaultConfiguration());
 	}
 }

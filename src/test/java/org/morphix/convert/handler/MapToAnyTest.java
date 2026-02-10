@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.morphix.convert.FieldHandlerResult.CONVERTED;
+import static org.morphix.convert.FieldHandlerResult.SKIP;
 import static org.morphix.convert.MapConversions.convertFromMap;
 import static org.morphix.reflection.ExtendedField.of;
 
@@ -36,11 +36,11 @@ import org.morphix.convert.FieldHandlerResult;
 import org.morphix.lang.function.InstanceFunction;
 
 /**
- * Test class for {@link AnyFromMap}.
+ * Test class for {@link MapToAny}.
  *
  * @author Radu Sebastian LAZIN
  */
-class AnyFromMapTest {
+class MapToAnyTest {
 
 	private static final String TEST_STRING = "testString";
 	private static final Long TEST_LONG = 11L;
@@ -199,10 +199,10 @@ class AnyFromMapTest {
 	}
 
 	@Test
-	void shouldReturnConvertedOnHandleIfSourceIsNull() {
-		FieldHandlerResult result = new AnyFromMap().handle(of((Field) null), of((Field) null));
+	void shouldReturnSkipOnHandleIfSourceIsNull() {
+		FieldHandlerResult result = new MapToAny().handle(of((Field) null), of((Field) null));
 
-		assertThat(result, equalTo(CONVERTED));
+		assertThat(result, equalTo(SKIP));
 	}
 
 }
