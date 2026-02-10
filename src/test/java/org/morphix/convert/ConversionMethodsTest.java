@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -56,8 +56,8 @@ class ConversionMethodsTest {
 			return user;
 		}
 
-		public void setUser(final SrcUser drTenant) {
-			this.user = drTenant;
+		public void setUser(final SrcUser user) {
+			this.user = user;
 		}
 
 		@Override
@@ -71,10 +71,10 @@ class ConversionMethodsTest {
 			if (getClass() != o.getClass()) {
 				return false;
 			}
-			SrcUser srcUser = (SrcUser) o;
-			return Objects.equals(this.someId, srcUser.someId)
-					&& Objects.equals(this.y, srcUser.someId)
-					&& Objects.equals(this.user, srcUser.user);
+			SrcUser that = (SrcUser) o;
+			return Objects.equals(this.someId, that.someId)
+					&& Objects.equals(this.y, that.y)
+					&& Objects.equals(this.user, that.user);
 		}
 
 		@Override
@@ -90,7 +90,6 @@ class ConversionMethodsTest {
 					user + "\n" +
 					"}";
 		}
-
 	}
 
 	public static class DstUser {
@@ -111,28 +110,28 @@ class ConversionMethodsTest {
 			return y;
 		}
 
-		public void setY(final String siteId) {
-			this.y = siteId;
+		public void setY(final String y) {
+			this.y = y;
 		}
 
 		public DstUser getUser() {
 			return user;
 		}
 
-		public void setUser(final DstUser drTenant) {
-			this.user = drTenant;
+		public void setUser(final DstUser user) {
+			this.user = user;
 		}
 
-		public void set(final SrcUser vccTenant) {
-			if (null == vccTenant) {
+		public void set(final SrcUser srcUser) {
+			if (null == srcUser) {
 				return;
 			}
-			DstUser dstUser = convertFromSrcUser(vccTenant);
+			DstUser dstUser = convertFromSrcUser(srcUser);
 			Conversions.copyFrom(dstUser, to(this));
 		}
 
-		public DstUser convertFromSrcUser(final SrcUser vccGpsTenant) {
-			return convertFrom(vccGpsTenant, DstUser::new, (src, dst) -> {
+		public DstUser convertFromSrcUser(final SrcUser srcUser) {
+			return convertFrom(srcUser, DstUser::new, (src, dst) -> {
 				Mappers.mapNonNull(src::getSomeId, dst::setId);
 			}, this::convertFromSrcUser);
 		}
@@ -148,10 +147,10 @@ class ConversionMethodsTest {
 			if (getClass() != o.getClass()) {
 				return false;
 			}
-			DstUser dstUser = (DstUser) o;
-			return Objects.equals(this.id, dstUser.id)
-					&& Objects.equals(this.y, dstUser.id)
-					&& Objects.equals(this.user, dstUser.user);
+			DstUser that = (DstUser) o;
+			return Objects.equals(this.id, that.id)
+					&& Objects.equals(this.y, that.y)
+					&& Objects.equals(this.user, that.user);
 		}
 
 		@Override
@@ -203,5 +202,4 @@ class ConversionMethodsTest {
 		assertThat(dstUser.y, equalTo("13"));
 		assertThat(dstUser.user, equalTo(null));
 	}
-
 }
