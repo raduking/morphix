@@ -25,7 +25,7 @@ import org.morphix.reflection.GenericType;
  * Test class for:
  *
  * <ul>
- * <li>{@link Conversions#convertEnvelopedFrom(Object, Type, Configuration)</li>
+ * <li>{@link Conversions#convertEnvelopedFrom(Object, Type, Configuration)}</li>
  * </ul>
  *
  * @author Radu Sebastian LAZIN
