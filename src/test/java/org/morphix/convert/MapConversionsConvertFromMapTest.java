@@ -118,4 +118,20 @@ class MapConversionsConvertFromMapTest {
 
 		assertThat(result, equalTo(expected));
 	}
+
+	@Test
+	void shouldConvertMapToDeepObjectWithConverterConvert() {
+		Map<String, Object> srcMap = Map.of(
+				"s", Integer.valueOf(1),
+				"dst", Map.of("s", Integer.valueOf(2)));
+
+		DstComplex expected = new DstComplex();
+		expected.s = "1";
+		expected.dst = new Dst();
+		expected.dst.s = "2";
+
+		DstComplex result = Converter.convert(srcMap).to(DstComplex.class);
+
+		assertThat(result, equalTo(expected));
+	}
 }
