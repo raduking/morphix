@@ -103,9 +103,10 @@ public interface ConverterFactory {
 	 * @param <V> map key type
 	 * @param <D> destination type
 	 *
+	 * @param configuration conversion configuration
 	 * @return a new {@link ObjectConverter} for map conversions
 	 */
-	static <V, D> ObjectConverter<Map<String, V>, D> newMapObjectConverter() {
-		return ConverterFactory.newObjectConverter(Configuration.defaultConfiguration());
+	static <V, D> ObjectConverter<Map<String, V>, D> newMapObjectConverter(final Configuration configuration) {
+		return ConverterFactory.newObjectConverter(configuration);
 	}
 }

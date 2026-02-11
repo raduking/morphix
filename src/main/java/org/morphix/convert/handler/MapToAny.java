@@ -53,7 +53,7 @@ public final class MapToAny extends FieldHandler {
 				() -> Constructors.IgnoreAccess.newInstance(dfo.toClass(), InstanceCreator.getInstance());
 		Map<String, Object> map = JavaObjects.cast(sfo.getObject());
 
-		Object value = MapConversions.convertFromMap(map, instanceFunction);
+		Object value = MapConversions.convertFromMap(map, instanceFunction, getConfiguration());
 		dfo.setFieldValue(value);
 
 		return CONVERTED;

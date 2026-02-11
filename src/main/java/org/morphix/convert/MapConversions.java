@@ -43,7 +43,41 @@ public interface MapConversions {
 	 * @return destination object
 	 */
 	static <V, D> D convertFromMap(final Map<String, V> sourceMap, final InstanceFunction<D> instanceFunction) {
-		return ConverterFactory.<V, D>newMapObjectConverter().convert(sourceMap, instanceFunction);
+		return convertFromMap(sourceMap, instanceFunction, Configuration.defaultConfiguration());
+	}
+
+	/**
+	 * Convenience static conversion method to convert from a map to an object. The map contains field names as keys and
+	 * objects as values.
+	 *
+	 * @param <V> map value type
+	 * @param <D> destination type
+	 *
+	 * @param sourceMap source map object
+	 * @param instanceFunction destination instance function
+	 * @param configuration configuration object
+	 * @return destination object
+	 */
+	static <V, D> D convertFromMap(final Map<String, V> sourceMap, final InstanceFunction<D> instanceFunction, final Configuration configuration) {
+		return ConverterFactory.<V, D>newMapObjectConverter(configuration).convert(sourceMap, instanceFunction);
+	}
+
+	/**
+	 * Convenience static conversion method to convert from a map to an object. The map contains field names as keys and
+	 * objects as values.
+	 *
+	 * @param <V> map value type
+	 * @param <D> destination type
+	 *
+	 * @param sourceMap source map object
+	 * @param instanceFunction destination instance function
+	 * @param extraConvertFunction extra convert function
+	 * @param configuration configuration object
+	 * @return destination object
+	 */
+	static <V, D> D convertFromMap(final Map<String, V> sourceMap, final InstanceFunction<D> instanceFunction,
+			final ConvertFunction<Map<String, V>, D> extraConvertFunction, final Configuration configuration) {
+		return ConverterFactory.<V, D>newMapObjectConverter(configuration).convert(sourceMap, instanceFunction, extraConvertFunction);
 	}
 
 	/**
@@ -60,7 +94,7 @@ public interface MapConversions {
 	 */
 	static <V, D> D convertFromMap(final Map<String, V> sourceMap, final InstanceFunction<D> instanceFunction,
 			final ConvertFunction<Map<String, V>, D> extraConvertFunction) {
-		return ConverterFactory.<V, D>newMapObjectConverter().convert(sourceMap, instanceFunction, extraConvertFunction);
+		return convertFromMap(sourceMap, instanceFunction, extraConvertFunction, Configuration.defaultConfiguration());
 	}
 
 	/**
