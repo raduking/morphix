@@ -69,5 +69,4 @@ public final class PrimitiveAssignment extends FieldHandler {
 		return isPrimitiveToClass(sClass, dClass)
 				|| isPrimitiveToClass(dClass, sClass);
 	}
-
 }

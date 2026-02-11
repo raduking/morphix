@@ -51,5 +51,4 @@ public final class AnyToCharArray extends FieldHandler {
 	protected Predicate<Type> destinationTypeConstraint() {
 		return isAClassAnd(isA(char[].class));
 	}
-
 }

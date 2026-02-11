@@ -54,8 +54,7 @@ public final class CharSequenceToEnum extends FieldHandler {
 			return BREAK;
 		}
 		Class<?> dClass = dfo.toClass();
-		// find a method in the dClass (Enum class) that can convert the
-		// value from a CharSequence / String value
+		// find a method in the dClass (Enum class) that can convert the value from a CharSequence / String value
 		List<Method> methods = getConverterMethods(dClass, CharSequence.class);
 		Method valueOfMethod = null;
 		for (Method method : methods) {
@@ -85,5 +84,4 @@ public final class CharSequenceToEnum extends FieldHandler {
 	protected Predicate<Type> destinationTypeConstraint() {
 		return isEnum();
 	}
-
 }

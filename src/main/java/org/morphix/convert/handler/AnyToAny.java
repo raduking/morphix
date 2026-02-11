@@ -93,5 +93,4 @@ public final class AnyToAny extends FieldHandler {
 	protected Predicate<Type> destinationTypeConstraint() {
 		return HANDLER_CONSTRAINT;
 	}
-
 }

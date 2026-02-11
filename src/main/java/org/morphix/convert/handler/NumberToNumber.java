@@ -130,5 +130,4 @@ public class NumberToNumber extends FieldHandler {
 	private static <K, V> AbstractMap.SimpleEntry<K, V> pair(final K k, final V v) {
 		return new AbstractMap.SimpleEntry<>(k, v);
 	}
-
 }

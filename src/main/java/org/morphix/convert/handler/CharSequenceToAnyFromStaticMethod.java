@@ -80,5 +80,4 @@ public final class CharSequenceToAnyFromStaticMethod extends FieldHandler {
 	protected Predicate<Type> destinationTypeConstraint() {
 		return not(isEnum().or(isCharSequence()));
 	}
-
 }

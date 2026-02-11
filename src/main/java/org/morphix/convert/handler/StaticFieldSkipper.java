@@ -42,5 +42,4 @@ public final class StaticFieldSkipper extends FieldHandler {
 		}
 		return SKIP;
 	}
-
 }

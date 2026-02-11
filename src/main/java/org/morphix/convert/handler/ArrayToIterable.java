@@ -80,5 +80,4 @@ public final class ArrayToIterable extends FieldHandler {
 	protected Predicate<Type> destinationTypeConstraint() {
 		return isIterable();
 	}
-
 }

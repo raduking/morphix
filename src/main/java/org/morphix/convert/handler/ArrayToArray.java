@@ -75,5 +75,4 @@ public final class ArrayToArray extends FieldHandler {
 	protected Predicate<Type> destinationTypeConstraint() {
 		return isArray();
 	}
-
 }

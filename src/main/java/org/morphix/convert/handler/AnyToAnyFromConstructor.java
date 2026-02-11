@@ -77,5 +77,4 @@ public final class AnyToAnyFromConstructor extends FieldHandler {
 		}
 		return true;
 	}
-
 }

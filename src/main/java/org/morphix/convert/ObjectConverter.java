@@ -216,7 +216,7 @@ public class ObjectConverter<S, D> implements
 	 * @param source source object
 	 * @return source field name
 	 */
-	public <T> String getSourceFieldName(final ExtendedField dfo, final T source) {
+	public static <T> String getSourceFieldName(final ExtendedField dfo, final T source) {
 		Src srcAnnotation = null;
 		Method getterMethod = dfo.getGetterMethod();
 		if (null != getterMethod) {
@@ -240,5 +240,4 @@ public class ObjectConverter<S, D> implements
 		}
 		return srcAnnotation.name().isEmpty() ? srcAnnotation.value() : srcAnnotation.name();
 	}
-
 }

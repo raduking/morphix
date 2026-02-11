@@ -86,5 +86,4 @@ public final class IterableToArray extends FieldHandler {
 	protected Predicate<Type> destinationTypeConstraint() {
 		return isArray();
 	}
-
 }

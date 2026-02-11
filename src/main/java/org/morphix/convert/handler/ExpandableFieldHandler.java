@@ -105,5 +105,4 @@ public final class ExpandableFieldHandler extends FieldHandler {
 		 */
 		T instance(ExtendedField fop);
 	}
-
 }

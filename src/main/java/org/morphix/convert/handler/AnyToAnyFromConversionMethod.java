@@ -76,5 +76,4 @@ public final class AnyToAnyFromConversionMethod<S, D> extends FieldHandler {
 		}
 		return null;
 	}
-
 }

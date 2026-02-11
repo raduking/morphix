@@ -114,5 +114,4 @@ public final class MapToMap extends FieldHandler {
 	private static <T extends Type> T getKeyType(final ExtendedField fop) {
 		return fop.getGenericReturnType(0);
 	}
-
 }

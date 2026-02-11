@@ -72,5 +72,4 @@ public final class AnyToAnyFromStaticMethod extends FieldHandler {
 	protected Predicate<Type> sourceTypeConstraint() {
 		return not(isCharSequence());
 	}
-
 }

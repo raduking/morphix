@@ -18,7 +18,6 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
-import org.morphix.lang.JavaObjects;
 import org.morphix.reflection.ExtendedField;
 
 /**
@@ -40,11 +39,10 @@ public class FieldNameMapStrategy implements ConversionStrategy {
 	 */
 	@Override
 	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
-		if (!(source instanceof Map)) {
-			return ExtendedField.EMPTY;
+		if (source instanceof Map<?, ?> sourceMap) {
+			return of((Field) null, sourceMap.get(sourceFieldName));
 		}
-		Map<String, ?> sourceMap = JavaObjects.cast(source);
-		return of((Field) null, sourceMap.get(sourceFieldName));
+		return ExtendedField.EMPTY;
 	}
 
 }

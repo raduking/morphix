@@ -56,5 +56,4 @@ public final class ExcludedFieldHandler extends FieldHandler {
 		}
 		return false;
 	}
-
 }

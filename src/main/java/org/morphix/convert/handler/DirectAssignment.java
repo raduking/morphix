@@ -63,5 +63,4 @@ public final class DirectAssignment extends FieldHandler {
 		Class<?> sClass = sfo.toClass();
 		return dClass.isAssignableFrom(sClass);
 	}
-
 }

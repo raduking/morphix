@@ -51,5 +51,4 @@ public final class AnyToString extends FieldHandler {
 	protected Predicate<Type> destinationTypeConstraint() {
 		return isAClassAnd(isA(String.class));
 	}
-
 }
