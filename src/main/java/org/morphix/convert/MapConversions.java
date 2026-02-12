@@ -12,9 +12,13 @@
  */
 package org.morphix.convert;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.morphix.convert.function.ConvertFunction;
 import org.morphix.convert.function.SimpleConverter;
@@ -229,5 +233,58 @@ public interface MapConversions {
 	static <S, H, D> Map<H, D> convertToMap(final S source, final SimpleConverter<String, H> keyConverter,
 			final SimpleConverter<Object, D> valueConverter) {
 		return convertToMap(source, keyConverter, valueConverter, Map::put);
+	}
+
+	/**
+	 * Convenience static method to convert an object to a properties map. The keys are the field names and the values are
+	 * the field values. The values are converted to simple types (e.g., String, Number, Boolean, Enum, UUID) or to maps or
+	 * collections of simple types. If a value is an object that is not a simple type, it is converted to a map recursively.
+	 * <p>
+	 * If the source is null, an empty map returned.
+	 * <p>
+	 * For sources that are already maps, use the {@link #convertMap(Map, SimpleConverter, SimpleConverter)}.
+	 *
+	 * @param <S> source type
+	 *
+	 * @param source source object
+	 * @return destination map
+	 */
+	static <S> Map<String, Object> toPropertiesMap(final S source) {
+		return MapConversions.convertToMap(source, k -> k, v -> convertValue(v));
+	}
+
+	/**
+	 * Convenience static method to convert a value to a simple type (e.g., String, Number, Boolean, Enum, UUID) or to a map
+	 * or collection of simple types. If the value is an object that is not a simple type, it is converted to a map
+	 * recursively.
+	 *
+	 * @param v value to convert
+	 * @return converted value
+	 */
+	private static Object convertValue(final Object v) {
+		return switch (v) {
+			case null -> null;
+
+			case CharSequence cs -> cs.toString();
+			case Number n -> n.toString();
+			case Boolean b -> b.toString();
+			case Enum<?> e -> e.name();
+			case UUID u -> u.toString();
+
+			case Optional<?> opt -> opt
+					.map(MapConversions::convertValue)
+					.orElse(null);
+
+			case Map<?, ?> map -> MapConversions.convertMap(map, String::valueOf, MapConversions::convertValue).toMap();
+			case Collection<?> col -> col.stream()
+					.map(MapConversions::convertValue)
+					.toList();
+
+			case Object[] arr -> Arrays.stream(arr)
+					.map(MapConversions::convertValue)
+					.toList();
+
+			default -> toPropertiesMap(v);
+		};
 	}
 }
