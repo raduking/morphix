@@ -213,7 +213,7 @@ class ObjectConverterTest {
 		}
 
 		List<Dst2> result = convertFromIterable(src2List,
-				ConverterFactory.<Src2, Dst2>newObjectConverter(Configuration.defaultConfiguration())::convert,
+				ConverterFactory.<Src2, Dst2>newObjectConverter(Configuration.defaults())::convert,
 				Dst2::new);
 
 		assertThat(result, hasSize(equalTo(src2List.size())));

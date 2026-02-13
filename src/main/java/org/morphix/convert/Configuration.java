@@ -227,7 +227,7 @@ public final class Configuration {
 			final SimpleConverters simpleConverters) {
 		Configuration configuration =
 				new Configuration(fieldHandlers, strategies, excludedFields, expandableFields, simpleConverters);
-		return configuration.isDefault() ? defaultConfiguration() : configuration;
+		return configuration.isDefault() ? Configuration.defaults() : configuration;
 	}
 
 	/**
@@ -323,7 +323,7 @@ public final class Configuration {
 	 *
 	 * @return a default configuration object
 	 */
-	public static Configuration defaultConfiguration() {
+	public static Configuration defaults() {
 		return Default.CONFIGURATION;
 	}
 

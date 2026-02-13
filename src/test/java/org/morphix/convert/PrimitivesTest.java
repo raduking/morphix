@@ -126,7 +126,7 @@ class PrimitivesTest {
 
 	@Test
 	void shouldNotConvertNullsToPrimitives() {
-		ObjectConverter<B, A> converter = spy(ConverterFactory.newObjectConverter(Configuration.defaultConfiguration()));
+		ObjectConverter<B, A> converter = spy(ConverterFactory.newObjectConverter(Configuration.defaults()));
 		PrimitiveAssignment primitiveAssignment = new PrimitiveAssignment();
 		doReturn(List.of(primitiveAssignment)).when(converter).getFieldHandlers();
 

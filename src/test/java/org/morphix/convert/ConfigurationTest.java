@@ -37,7 +37,7 @@ class ConfigurationTest {
 
 	@Test
 	void shouldFailEqualsOnWrongClass() {
-		Configuration config = Configuration.defaultConfiguration();
+		Configuration config = Configuration.defaults();
 		@SuppressWarnings("unlikely-arg-type")
 		boolean result = config.equals("config");
 
@@ -67,7 +67,7 @@ class ConfigurationTest {
 
 	@Test
 	void shouldReturnEqualOnDefaultConfigurations() {
-		boolean result = Configuration.defaultConfiguration().equals(Configuration.defaultConfiguration());
+		boolean result = Configuration.defaults().equals(Configuration.defaults());
 		assertThat(result, equalTo(true));
 	}
 
@@ -80,14 +80,14 @@ class ConfigurationTest {
 				Default.EXPANDABLE_FIELDS,
 				Default.SIMPLE_CONVERTERS);
 
-		System.out.println("" + configuration.getGenericTypesMap() + " - " + Configuration.defaultConfiguration().getGenericTypesMap());
+		System.out.println("" + configuration.getGenericTypesMap() + " - " + Configuration.defaults().getGenericTypesMap());
 
 		assertTrue(configuration.isDefault());
 	}
 
 	@Test
 	void shouldReturnFalseOnEqualsWithNull() {
-		Configuration configuration = Configuration.defaultConfiguration();
+		Configuration configuration = Configuration.defaults();
 
 		boolean result = configuration.equals(null);
 
@@ -96,7 +96,7 @@ class ConfigurationTest {
 
 	@Test
 	void shouldReturnTrueOnEqualsWithTheSameObject() {
-		Configuration configuration = Configuration.defaultConfiguration();
+		Configuration configuration = Configuration.defaults();
 
 		boolean result = configuration.equals(configuration);
 

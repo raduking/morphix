@@ -98,7 +98,7 @@ public abstract class FieldHandler {
 	 * @return the configuration
 	 */
 	protected Configuration getConfiguration() {
-		return null == configuration ? Configuration.defaultConfiguration() : configuration;
+		return null == configuration ? Configuration.defaults() : configuration;
 	}
 
 	/**

@@ -145,7 +145,7 @@ class ConversionConvertEnvelopedFromTest {
 		srcUser.y = STRING_THIRTEEN;
 
 		GenericType listType = GenericType.of(List.class, GenericType.Arguments.of(DstUser.class));
-		List<DstUser> dstUser = Conversions.convertEnvelopedFrom(srcUser, listType, Configuration.defaultConfiguration());
+		List<DstUser> dstUser = Conversions.convertEnvelopedFrom(srcUser, listType, Configuration.defaults());
 
 		assertThat(dstUser.getFirst().id, equalTo(STRING_ELEVEN));
 		assertThat(dstUser.getFirst().y, equalTo(LONG_THIRTEEN));
@@ -160,7 +160,7 @@ class ConversionConvertEnvelopedFromTest {
 		GenericType listType = GenericType.of(List.class,
 				GenericType.Arguments.of(GenericType.of(List.class,
 						GenericType.Arguments.of(DstUser.class))));
-		List<List<DstUser>> dstUser = Conversions.convertEnvelopedFrom(srcUser, listType, Configuration.defaultConfiguration());
+		List<List<DstUser>> dstUser = Conversions.convertEnvelopedFrom(srcUser, listType, Configuration.defaults());
 
 		assertThat(dstUser.getFirst().getFirst().id, equalTo(STRING_ELEVEN));
 		assertThat(dstUser.getFirst().getFirst().y, equalTo(LONG_THIRTEEN));

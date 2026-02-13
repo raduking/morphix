@@ -57,7 +57,7 @@ public class ObjectConverter<S, D> implements
 	 * Default constructor.
 	 */
 	public ObjectConverter() {
-		this(Configuration.defaultConfiguration());
+		this(Configuration.defaults());
 	}
 
 	/**

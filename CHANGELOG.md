@@ -5,6 +5,7 @@
 - Renamed `AnyFromMap` field handler to `MapToAny`.
 - Added map conversions as part of converter handler chain so that map conversions can be done by default.
 - Added `MapConversions.toPropertiesMap(Object)` method that deep converts an object to a map of field names and values.
+- Renamed `Configuration.defaultConfiguration` to `Configuration.defaults`.
 
 ---
 

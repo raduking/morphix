@@ -454,7 +454,7 @@ class AnyToAnyFromConversionMethodTest {
 
 	@Test
 	void shouldReturnFalseIfSourceIsNull() throws Exception {
-		AnyToAnyFromConversionMethod<?, ?> handler = new AnyToAnyFromConversionMethod<>(Configuration.defaultConfiguration());
+		AnyToAnyFromConversionMethod<?, ?> handler = new AnyToAnyFromConversionMethod<>(Configuration.defaults());
 
 		F a = new F();
 		F b = new F();
@@ -469,7 +469,7 @@ class AnyToAnyFromConversionMethodTest {
 
 	@Test
 	void shouldNotHaveSimpleConvertersForDefaultConfiguration() throws Exception {
-		AnyToAnyFromConversionMethod<?, ?> handler = new AnyToAnyFromConversionMethod<>(Configuration.defaultConfiguration());
+		AnyToAnyFromConversionMethod<?, ?> handler = new AnyToAnyFromConversionMethod<>(Configuration.defaults());
 
 		F a = new F();
 		F b = new F();

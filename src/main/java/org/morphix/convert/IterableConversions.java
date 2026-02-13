@@ -78,7 +78,7 @@ public interface IterableConversions {
 	static <S, D> IterableConversionPipeline<S, D> convertIterable(final Iterable<S> sourceIterable,
 			final InstanceFunction<D> elementInstanceFunction) {
 		return convertIterable(sourceIterable, elementInstanceFunction, ConvertFunction.empty(),
-				Configuration.defaultConfiguration());
+				Configuration.defaults());
 	}
 
 	/**

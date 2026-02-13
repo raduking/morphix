@@ -47,7 +47,7 @@ public interface MapConversions {
 	 * @return destination object
 	 */
 	static <V, D> D convertFromMap(final Map<String, V> sourceMap, final InstanceFunction<D> instanceFunction) {
-		return convertFromMap(sourceMap, instanceFunction, Configuration.defaultConfiguration());
+		return convertFromMap(sourceMap, instanceFunction, Configuration.defaults());
 	}
 
 	/**
@@ -98,7 +98,7 @@ public interface MapConversions {
 	 */
 	static <V, D> D convertFromMap(final Map<String, V> sourceMap, final InstanceFunction<D> instanceFunction,
 			final ConvertFunction<Map<String, V>, D> extraConvertFunction) {
-		return convertFromMap(sourceMap, instanceFunction, extraConvertFunction, Configuration.defaultConfiguration());
+		return convertFromMap(sourceMap, instanceFunction, extraConvertFunction, Configuration.defaults());
 	}
 
 	/**
@@ -182,7 +182,7 @@ public interface MapConversions {
 			return convertMap(Map.of(), keyConverter, valueConverter);
 		}
 		List<ExtendedField> fields = ConversionStrategy.findFields(source);
-		Map<String, Object> map = new HashMap<>(fields.size());
+		Map<String, Object> map = HashMap.newHashMap(fields.size());
 		for (ExtendedField field : fields) {
 			putFunction.put(map, field.getName(), field.getFieldValue());
 		}
