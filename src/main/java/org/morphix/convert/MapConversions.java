@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.morphix.convert.extras.ConversionContext;
 import org.morphix.convert.function.ConvertFunction;
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.convert.pipeline.MapConversionPipeline;
@@ -250,7 +251,36 @@ public interface MapConversions {
 	 * @return destination map
 	 */
 	static <S> Map<String, Object> toPropertiesMap(final S source) {
-		return MapConversions.convertToMap(source, k -> k, v -> convertValue(v));
+		return toPropertiesMap(source, new ConversionContext());
+	}
+
+	/**
+	 * Convenience static method to convert an object to a properties map. The keys are the field names and the values are
+	 * the field values. The values are converted to simple types (e.g., String, Number, Boolean, Enum, UUID) or to maps or
+	 * collections of simple types. If a value is an object that is not a simple type, it is converted to a map recursively.
+	 * <p>
+	 * If the source is null, an empty map returned.
+	 * <p>
+	 * For sources that are already maps, use the {@link #convertMap(Map, SimpleConverter, SimpleConverter)}.
+	 *
+	 * @param <S> source type
+	 *
+	 * @param source source object
+	 * @param ctx conversion context
+	 * @return destination map
+	 */
+	static <S> Map<String, Object> toPropertiesMap(final S source, final ConversionContext ctx) {
+		if (null == source) {
+			return Map.of();
+		}
+		if (!ctx.enter(source)) {
+			return Map.of("_cyclic_ref", source.getClass().getSimpleName());
+		}
+		try {
+			return MapConversions.convertToMap(source, k -> k, v -> convertValue(v, ctx));
+		} finally {
+			ctx.exit(source);
+		}
 	}
 
 	/**
@@ -259,9 +289,10 @@ public interface MapConversions {
 	 * recursively.
 	 *
 	 * @param v value to convert
+	 * @param ctx conversion context
 	 * @return converted value
 	 */
-	private static Object convertValue(final Object v) {
+	private static Object convertValue(final Object v, final ConversionContext ctx) {
 		return switch (v) {
 			case null -> null;
 
@@ -272,19 +303,19 @@ public interface MapConversions {
 			case UUID u -> u.toString();
 
 			case Optional<?> opt -> opt
-					.map(MapConversions::convertValue)
+					.map(o -> MapConversions.convertValue(o, ctx))
 					.orElse(null);
 
-			case Map<?, ?> map -> MapConversions.convertMap(map, String::valueOf, MapConversions::convertValue).toMap();
+			case Map<?, ?> map -> MapConversions.convertMap(map, String::valueOf, value -> convertValue(value, ctx)).toMap();
 			case Collection<?> col -> col.stream()
-					.map(MapConversions::convertValue)
+					.map(o -> MapConversions.convertValue(o, ctx))
 					.toList();
 
 			case Object[] arr -> Arrays.stream(arr)
-					.map(MapConversions::convertValue)
+					.map(o -> MapConversions.convertValue(o, ctx))
 					.toList();
 
-			default -> toPropertiesMap(v);
+			default -> toPropertiesMap(v, ctx);
 		};
 	}
 }
