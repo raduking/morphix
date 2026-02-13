@@ -266,21 +266,16 @@ public interface MapConversions {
 	 * @param <S> source type
 	 *
 	 * @param source source object
-	 * @param ctx conversion context
+	 * @param context conversion context
 	 * @return destination map
 	 */
-	static <S> Map<String, Object> toPropertiesMap(final S source, final ConversionContext ctx) {
+	static <S> Map<String, Object> toPropertiesMap(final S source, final ConversionContext context) {
 		if (null == source) {
 			return Map.of();
 		}
-		if (!ctx.enter(source)) {
-			return Map.of("_cyclic_ref", source.getClass().getSimpleName());
-		}
-		try {
-			return MapConversions.convertToMap(source, k -> k, v -> convertValue(v, ctx));
-		} finally {
-			ctx.exit(source);
-		}
+		return context.onObject(source,
+				() -> MapConversions.convertToMap(source, k -> k, v -> convertValue(v, context)),
+				() -> Map.of(ConversionContext.CYCLIC_REFERENCE, source.getClass().getSimpleName()));
 	}
 
 	/**
@@ -289,10 +284,10 @@ public interface MapConversions {
 	 * recursively.
 	 *
 	 * @param v value to convert
-	 * @param ctx conversion context
+	 * @param context conversion context
 	 * @return converted value
 	 */
-	private static Object convertValue(final Object v, final ConversionContext ctx) {
+	private static Object convertValue(final Object v, final ConversionContext context) {
 		return switch (v) {
 			case null -> null;
 
@@ -303,19 +298,19 @@ public interface MapConversions {
 			case UUID u -> u.toString();
 
 			case Optional<?> opt -> opt
-					.map(o -> MapConversions.convertValue(o, ctx))
+					.map(o -> MapConversions.convertValue(o, context))
 					.orElse(null);
 
-			case Map<?, ?> map -> MapConversions.convertMap(map, String::valueOf, value -> convertValue(value, ctx)).toMap();
+			case Map<?, ?> map -> MapConversions.convertMap(map, String::valueOf, value -> convertValue(value, context)).toMap();
 			case Collection<?> col -> col.stream()
-					.map(o -> MapConversions.convertValue(o, ctx))
+					.map(o -> MapConversions.convertValue(o, context))
 					.toList();
 
 			case Object[] arr -> Arrays.stream(arr)
-					.map(o -> MapConversions.convertValue(o, ctx))
+					.map(o -> MapConversions.convertValue(o, context))
 					.toList();
 
-			default -> toPropertiesMap(v, ctx);
+			default -> toPropertiesMap(v, context);
 		};
 	}
 }
