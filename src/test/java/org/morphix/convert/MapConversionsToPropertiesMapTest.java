@@ -429,4 +429,29 @@ class MapConversionsToPropertiesMapTest {
 
 		assertThat(params, equalTo(Map.of()));
 	}
+
+	record A(Optional<B> b) {
+		// empty
+	}
+
+	record B(Optional<A> a) {
+		// empty
+	}
+
+	@Test
+	void shouldHandleCyclicOptionals() {
+		A a = new A(Optional.empty());
+		B b = new B(Optional.of(a));
+		a = new A(Optional.of(b));
+
+		Map<String, Object> innerMap = new LinkedHashMap<>();
+		innerMap.put("b", null);
+		Map<String, Object> expected = Map.of(
+				"b", Map.of(
+						"a", innerMap));
+
+		Map<String, Object> params = MapConversions.toPropertiesMap(a);
+
+		assertThat(params, equalTo(expected));
+	}
 }

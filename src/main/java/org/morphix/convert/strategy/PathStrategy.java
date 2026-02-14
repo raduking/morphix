@@ -78,5 +78,4 @@ public class PathStrategy implements ConversionStrategy {
 		}
 		return of(resultField, resultObject);
 	}
-
 }

@@ -48,5 +48,4 @@ public class NamePathStrategy extends PathStrategy {
 		String[] tokens = sourceString.split("(?=\\p{Lu})");
 		return String.join(".", tokens).toLowerCase();
 	}
-
 }

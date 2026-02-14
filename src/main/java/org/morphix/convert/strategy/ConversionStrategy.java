@@ -122,5 +122,4 @@ public interface ConversionStrategy {
 	static Predicate<ExtendedField> noFilter() {
 		return Predicates.alwaysTrue();
 	}
-
 }

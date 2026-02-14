@@ -44,5 +44,4 @@ public class FieldNameMapStrategy implements ConversionStrategy {
 		}
 		return ExtendedField.EMPTY;
 	}
-
 }

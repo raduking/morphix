@@ -10,17 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.convert.extras;
+package org.morphix.convert.context;
 
 import java.util.IdentityHashMap;
-import java.util.function.Supplier;
 
 /**
  * Context for tracking visited objects during conversion to prevent infinite recursion in case of cyclic references.
  *
  * @author Radu Sebastian LAZIN
  */
-public final class ConversionContext {
+public class CyclicReferencesContext implements ConversionContext {
 
 	/**
 	 * Key used to indicate a cyclic reference in the conversion result. This can be used by converters to return a
@@ -35,9 +34,9 @@ public final class ConversionContext {
 	private final IdentityHashMap<Object, Object> visited = new IdentityHashMap<>();
 
 	/**
-	 * Creates a new instance of {@link ConversionContext}.
+	 * Creates a new instance of {@link CyclicReferencesContext}.
 	 */
-	public ConversionContext() {
+	public CyclicReferencesContext() {
 		// empty
 	}
 
@@ -48,6 +47,7 @@ public final class ConversionContext {
 	 * @param obj the object to mark as being visited
 	 * @return {@code true} if the object was already marked as being visited, {@code false} otherwise
 	 */
+	@Override
 	public boolean enter(final Object obj) {
 		return null != visited.put(obj, Boolean.TRUE);
 	}
@@ -58,31 +58,8 @@ public final class ConversionContext {
 	 *
 	 * @param obj the object to mark as no longer being visited
 	 */
+	@Override
 	public void exit(final Object obj) {
 		visited.remove(obj);
-	}
-
-	/**
-	 * Executes the given supplier function for the provided object, while tracking the object in the context to prevent
-	 * infinite recursion in case of cyclic references. If the object is already being tracked, the
-	 * {@code cyclicReferenceSupplier} will be executed instead.
-	 *
-	 * @param <T> the type of the result produced by the supplier functions
-	 *
-	 * @param obj the object to process
-	 * @param resultSupplier the supplier function to execute if the object is not already being tracked
-	 * @param cyclicReferenceSupplier the supplier to execute if the object is already being tracked (cyclic reference)
-	 * @return the result produced by either the {@code resultSupplier} or the {@code cyclicReferenceSupplier}, depending on
-	 * whether a cyclic reference was detected
-	 */
-	public <T> T onObject(final Object obj, final Supplier<T> resultSupplier, final Supplier<T> cyclicReferenceSupplier) {
-		if (enter(obj)) {
-			return cyclicReferenceSupplier.get();
-		}
-		try {
-			return resultSupplier.get();
-		} finally {
-			exit(obj);
-		}
 	}
 }

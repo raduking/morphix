@@ -20,7 +20,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.morphix.convert.extras.ConversionContext;
+import org.morphix.convert.context.ConversionContext;
+import org.morphix.convert.context.CyclicReferencesContext;
 import org.morphix.convert.function.ConvertFunction;
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.convert.pipeline.MapConversionPipeline;
@@ -251,7 +252,7 @@ public interface MapConversions {
 	 * @return destination map
 	 */
 	static <S> Map<String, Object> toPropertiesMap(final S source) {
-		return toPropertiesMap(source, new ConversionContext());
+		return toPropertiesMap(source, new CyclicReferencesContext());
 	}
 
 	/**
@@ -269,13 +270,12 @@ public interface MapConversions {
 	 * @param context conversion context
 	 * @return destination map
 	 */
-	static <S> Map<String, Object> toPropertiesMap(final S source, final ConversionContext context) {
+	private static <S> Map<String, Object> toPropertiesMap(final S source, final ConversionContext context) {
 		if (null == source) {
 			return Map.of();
 		}
-		return context.onObject(source,
-				() -> MapConversions.convertToMap(source, k -> k, v -> convertValue(v, context)),
-				() -> Map.of(ConversionContext.CYCLIC_REFERENCE, source.getClass().getSimpleName()));
+		return context.visit(source, () -> MapConversions.convertToMap(source, k -> k, v -> convertValue(v, context)),
+				() -> Map.of(CyclicReferencesContext.CYCLIC_REFERENCE, source.getClass().getSimpleName()));
 	}
 
 	/**
@@ -283,12 +283,12 @@ public interface MapConversions {
 	 * or collection of simple types. If the value is an object that is not a simple type, it is converted to a map
 	 * recursively.
 	 *
-	 * @param v value to convert
+	 * @param value value to convert
 	 * @param context conversion context
 	 * @return converted value
 	 */
-	private static Object convertValue(final Object v, final ConversionContext context) {
-		return switch (v) {
+	private static Object convertValue(final Object value, final ConversionContext context) {
+		return switch (value) {
 			case null -> null;
 
 			case CharSequence cs -> cs.toString();
@@ -301,16 +301,17 @@ public interface MapConversions {
 					.map(o -> MapConversions.convertValue(o, context))
 					.orElse(null);
 
-			case Map<?, ?> map -> MapConversions.convertMap(map, String::valueOf, value -> convertValue(value, context)).toMap();
-			case Collection<?> col -> col.stream()
-					.map(o -> MapConversions.convertValue(o, context))
-					.toList();
+			case Map<?, ?> map -> context.visit(map,
+					() -> MapConversions.convertMap(map, String::valueOf, v -> convertValue(v, context)).toMap(),
+					() -> Map.of(CyclicReferencesContext.CYCLIC_REFERENCE, value.getClass().getSimpleName()));
+			case Collection<?> col -> context.visit(col,
+					() -> col.stream().map(o -> MapConversions.convertValue(o, context)).toList(),
+					() -> List.of(CyclicReferencesContext.CYCLIC_REFERENCE));
+			case Object[] arr -> context.visit(arr,
+					() -> Arrays.stream(arr).map(o -> MapConversions.convertValue(o, context)).toList(),
+					() -> List.of(CyclicReferencesContext.CYCLIC_REFERENCE));
 
-			case Object[] arr -> Arrays.stream(arr)
-					.map(o -> MapConversions.convertValue(o, context))
-					.toList();
-
-			default -> toPropertiesMap(v, context);
+			default -> toPropertiesMap(value, context);
 		};
 	}
 }

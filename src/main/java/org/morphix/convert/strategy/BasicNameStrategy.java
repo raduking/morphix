@@ -59,5 +59,4 @@ public class BasicNameStrategy implements ConversionStrategy {
 		}
 		return Optional.empty();
 	}
-
 }

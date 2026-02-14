@@ -27,5 +27,4 @@ public class DeepNamePathStrategy extends NamePathStrategy {
 	public DeepNamePathStrategy() {
 		// empty
 	}
-
 }
