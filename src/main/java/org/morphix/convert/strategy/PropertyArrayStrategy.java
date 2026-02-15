@@ -28,15 +28,14 @@ import org.morphix.convert.context.CyclicReferencesContext;
 public class PropertyArrayStrategy implements PropertyConversionStrategy {
 
 	/**
-	 * Returns {@code true} if the given value is a non-null array, {@code false} otherwise.
+	 * Determines if the given type is an array type.
 	 *
-	 * @param obj the value to check
-	 * @return {@code true} if the given value is a non-null array, {@code false} otherwise
-	 * @see #convert(Object, ConversionEngine, ConversionContext)
+	 * @param type the type to check
+	 * @return {@code true} if the given type is an array type, or {@code false} otherwise
 	 */
 	@Override
-	public boolean supports(final Object obj) {
-		return obj != null && obj.getClass().isArray();
+	public boolean supportsType(final Class<?> type) {
+		return type.isArray();
 	}
 
 	/**

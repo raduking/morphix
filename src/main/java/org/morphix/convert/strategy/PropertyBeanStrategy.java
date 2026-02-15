@@ -30,14 +30,14 @@ import org.morphix.convert.context.CyclicReferencesContext;
 public class PropertyBeanStrategy implements PropertyConversionStrategy {
 
 	/**
-	 * Returns {@code true} for any object, indicating that this strategy supports converting any object to a map of its
+	 * Returns {@code true} for any type, indicating that this strategy supports converting any object to a map of its
 	 * properties.
 	 *
-	 * @param obj the object to check for support
-	 * @return {@code true} if this strategy supports converting the given object, {@code false} otherwise.
+	 * @param obj the type to check for support
+	 * @return {@code true} if this strategy supports converting the given type, {@code false} otherwise.
 	 */
 	@Override
-	public boolean supports(final Object obj) {
+	public boolean supportsType(final Class<?> type) {
 		return true;
 	}
 

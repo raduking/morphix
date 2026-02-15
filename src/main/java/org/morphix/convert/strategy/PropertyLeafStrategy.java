@@ -26,9 +26,8 @@ import org.morphix.convert.context.ConversionContext;
 public class PropertyLeafStrategy implements PropertyConversionStrategy {
 
 	/**
-	 * Checks if the given value is supported by this strategy. Supported types are:
+	 * Checks if the given type is supported by this strategy. Supported types are:
 	 * <ul>
-	 * <li>{@code null}</li>
 	 * <li>{@link CharSequence}</li>
 	 * <li>{@link Number}</li>
 	 * <li>{@link Boolean}</li>
@@ -36,18 +35,16 @@ public class PropertyLeafStrategy implements PropertyConversionStrategy {
 	 * <li>{@link UUID}</li>
 	 * </ul>
 	 *
-	 * @param v the value to check
-	 * @return {@code true} if the value is supported, {@code false} otherwise
-	 * @throws IllegalStateException if the value is not supported
+	 * @param type the type to check
+	 * @return {@code true} if the type is supported, {@code false} otherwise
 	 */
 	@Override
-	public boolean supports(final Object v) {
-		return v == null ||
-				v instanceof CharSequence ||
-				v instanceof Number ||
-				v instanceof Boolean ||
-				v instanceof Enum<?> ||
-				v instanceof UUID;
+	public boolean supportsType(final Class<?> type) {
+		return CharSequence.class.isAssignableFrom(type) ||
+				Number.class.isAssignableFrom(type) ||
+				Boolean.class.isAssignableFrom(type) ||
+				Enum.class.isAssignableFrom(type) ||
+				UUID.class.isAssignableFrom(type);
 	}
 
 	/**

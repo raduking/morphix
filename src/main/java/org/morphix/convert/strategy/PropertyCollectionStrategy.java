@@ -28,14 +28,14 @@ import org.morphix.convert.context.CyclicReferencesContext;
 public class PropertyCollectionStrategy implements PropertyConversionStrategy {
 
 	/**
-	 * Returns {@code true} if the provided object is an instance of {@link Collection}, {@code false} otherwise.
+	 * Checks if the provided type is a {@link Collection} or a subtype of it.
 	 *
-	 * @param obj the object to check
-	 * @return {@code true} if the provided object is an instance of {@link Collection}, {@code false} otherwise
+	 * @param type the type to check
+	 * @return true if the type is a {@link Collection} or a subtype of it, false otherwise
 	 */
 	@Override
-	public boolean supports(final Object obj) {
-		return obj instanceof Collection<?>;
+	public boolean supportsType(final Class<?> type) {
+		return Collection.class.isAssignableFrom(type);
 	}
 
 	/**

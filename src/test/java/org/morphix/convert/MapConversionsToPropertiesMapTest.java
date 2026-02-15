@@ -15,7 +15,9 @@ package org.morphix.convert;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.context.CyclicReferencesContext;
 
 /**
  * Test class for {@link MapConversions#toPropertiesMap(Object)}.
@@ -453,5 +456,192 @@ class MapConversionsToPropertiesMapTest {
 		Map<String, Object> params = MapConversions.toPropertiesMap(a);
 
 		assertThat(params, equalTo(expected));
+	}
+
+	static class MapHolder {
+
+		private Map<String, Object> map;
+
+		public Map<String, Object> getMap() {
+			return map;
+		}
+
+		public void setMap(final Map<String, Object> map) {
+			this.map = map;
+		}
+	}
+
+	@Test
+	void shouldHandleCyclicMapReference() {
+		MapHolder holder = new MapHolder();
+		Map<String, Object> map = new LinkedHashMap<>();
+
+		holder.setMap(map);
+		map.put("self", holder);
+
+		Map<String, Object> expected = Map.of(
+				"map", Map.of(
+						"self", Map.of(
+								"_cyclic_ref",
+								MapHolder.class.getSimpleName())));
+
+		Map<String, Object> result = MapConversions.toPropertiesMap(holder);
+
+		assertThat(result, equalTo(expected));
+	}
+
+	@Test
+	void shouldHandleSelfReferencingMap() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("self", map);
+
+		MapHolder holder = new MapHolder();
+		holder.setMap(map);
+
+		Map<String, Object> expected = Map.of(
+				"map", Map.of(
+						"self", Map.of(
+								CyclicReferencesContext.CYCLIC_REFERENCE, HashMap.class.getSimpleName())));
+
+		Map<String, Object> result = MapConversions.toPropertiesMap(holder);
+
+		assertThat(result, equalTo(expected));
+	}
+
+	static class CollectionHolder {
+
+		private List<Object> list;
+
+		public List<Object> getList() {
+			return list;
+		}
+
+		public void setList(final List<Object> list) {
+			this.list = list;
+		}
+	}
+
+	@Test
+	void shouldHandleCyclicCollectionReference() {
+		CollectionHolder holder = new CollectionHolder();
+		List<Object> list = new ArrayList<>();
+
+		holder.setList(list);
+		list.add(holder);
+
+		Map<String, Object> expected = Map.of(
+				"list", List.of(
+						Map.of(
+								"_cyclic_ref",
+								CollectionHolder.class.getSimpleName())));
+
+		Map<String, Object> result = MapConversions.toPropertiesMap(holder);
+
+		assertThat(result, equalTo(expected));
+	}
+
+	@Test
+	void shouldHandleSelfReferencingCollection() {
+		List<Object> list = new ArrayList<>();
+		list.add(list);
+		CollectionHolder holder = new CollectionHolder();
+		holder.setList(list);
+
+		Map<String, Object> expected = Map.of(
+				"list", List.of(
+						List.of(CyclicReferencesContext.CYCLIC_REFERENCE)));
+
+		Map<String, Object> result = MapConversions.toPropertiesMap(holder);
+
+		assertThat(result, equalTo(expected));
+	}
+
+	@Test
+	void shouldHandleNestedSelfReferencingCollection() {
+		List<Object> inner = new ArrayList<>();
+		List<Object> outer = new ArrayList<>();
+
+		inner.add(outer);
+		outer.add(inner);
+
+		CollectionHolder holder = new CollectionHolder();
+		holder.setList(outer);
+
+		Map<String, Object> expected = Map.of(
+				"list", List.of(
+						List.of(
+								List.of(CyclicReferencesContext.CYCLIC_REFERENCE))));
+
+		Map<String, Object> result = MapConversions.toPropertiesMap(holder);
+
+		assertThat(result, equalTo(expected));
+	}
+
+	static class ArrayHolder {
+
+		private Object[] array;
+
+		public Object[] getArray() {
+			return array;
+		}
+
+		public void setArray(final Object[] array) {
+			this.array = array;
+		}
+	}
+
+	@Test
+	void shouldHandleCyclicArrayReference() {
+		ArrayHolder holder = new ArrayHolder();
+		Object[] arr = new Object[1];
+
+		holder.setArray(arr);
+		arr[0] = holder;
+
+		Map<String, Object> expected = Map.of(
+				"array", List.of(
+						Map.of(
+								"_cyclic_ref",
+								ArrayHolder.class.getSimpleName())));
+
+		Map<String, Object> result = MapConversions.toPropertiesMap(holder);
+
+		assertThat(result, equalTo(expected));
+	}
+
+	@Test
+	void shouldHandleSelfReferencingArray() {
+		Object[] array = new Object[1];
+		array[0] = array;
+
+		ArrayHolder holder = new ArrayHolder();
+		holder.setArray(array);
+
+		Map<String, Object> expected = Map.of(
+				"array", List.of(
+						List.of(CyclicReferencesContext.CYCLIC_REFERENCE)));
+
+		Map<String, Object> result = MapConversions.toPropertiesMap(holder);
+
+		assertThat(result, equalTo(expected));
+	}
+
+	@Test
+	void shouldHandleNestedContainerCycle() {
+		Map<String, Object> map = new LinkedHashMap<>();
+		List<Object> list = new ArrayList<>();
+
+		map.put("list", list);
+		list.add(map);
+
+		Map<String, Object> expected = Map.of(
+				"list", List.of(
+						Map.of(
+								"_cyclic_ref",
+								LinkedHashMap.class.getSimpleName())));
+
+		Map<String, Object> result = MapConversions.toPropertiesMap(map);
+
+		assertThat(result, equalTo(expected));
 	}
 }

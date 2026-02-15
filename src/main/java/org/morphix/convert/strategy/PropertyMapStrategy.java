@@ -27,14 +27,15 @@ import org.morphix.convert.context.CyclicReferencesContext;
 public class PropertyMapStrategy implements PropertyConversionStrategy {
 
 	/**
-	 * Determines if the given object is an instance of {@link Map}.
+	 * Determines if the given type is supported by this conversion strategy. It returns true if the type is a {@link Map}
+	 * or a subclass of {@link Map}.
 	 *
-	 * @param obj the object to check
-	 * @return {@code true} if the object is a {@link Map}, {@code false} otherwise
+	 * @param type the class type to check for support
+	 * @return true if the type is a {@link Map} or a subclass of {@link Map}, false otherwise
 	 */
 	@Override
-	public boolean supports(final Object obj) {
-		return obj instanceof Map<?, ?>;
+	public boolean supportsType(final Class<?> type) {
+		return Map.class.isAssignableFrom(type);
 	}
 
 	/**

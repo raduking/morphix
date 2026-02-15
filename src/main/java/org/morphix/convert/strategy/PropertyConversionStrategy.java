@@ -24,12 +24,12 @@ import org.morphix.convert.context.ConversionContext;
 public interface PropertyConversionStrategy {
 
 	/**
-	 * Determines if this strategy supports converting the given value.
+	 * Determines if this strategy supports converting the given type.
 	 *
-	 * @param value the value to check for support
-	 * @return {@code true} if this strategy supports converting the value, {@code false} otherwise
+	 * @param type the type to check for support
+	 * @return {@code true} if this strategy supports converting the type, {@code false} otherwise
 	 */
-	boolean supports(Object value);
+	boolean supportsType(Class<?> type);
 
 	/**
 	 * Converts the given value using this strategy.

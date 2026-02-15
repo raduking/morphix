@@ -25,14 +25,14 @@ import org.morphix.convert.context.ConversionContext;
 public class PropertyOptionalStrategy implements PropertyConversionStrategy {
 
 	/**
-	 * Determines if the given object is an instance of {@link Optional}.
+	 * Determines if the given type is supported by this strategy, which is the case if it is an {@link Optional}.
 	 *
-	 * @param obj the object to check
-	 * @return {@code true} if the object is an instance of {@link Optional}, {@code false} otherwise
+	 * @param type the type to check for support
+	 * @return {@code true} if the type is an {@link Optional}, {@code false} otherwise
 	 */
 	@Override
-	public boolean supports(final Object obj) {
-		return obj instanceof Optional<?>;
+	public boolean supportsType(final Class<?> type) {
+		return Optional.class.isAssignableFrom(type);
 	}
 
 	/**

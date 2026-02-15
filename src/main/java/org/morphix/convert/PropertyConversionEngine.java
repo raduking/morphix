@@ -13,6 +13,8 @@
 package org.morphix.convert;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.morphix.convert.context.ConversionContext;
 import org.morphix.convert.strategy.PropertyArrayStrategy;
@@ -30,6 +32,12 @@ import org.morphix.convert.strategy.PropertyOptionalStrategy;
  * @author Radu Sebastian LAZIN
  */
 public class PropertyConversionEngine implements ConversionEngine {
+
+	/**
+	 * A cache to store the resolved property conversion strategy for each type. This improves performance by avoiding
+	 * repeated resolution of strategies for the same types.
+	 */
+	private final Map<Class<?>, PropertyConversionStrategy> strategyCache = new ConcurrentHashMap<>();
 
 	/**
 	 * The list of property conversion strategies used by this engine.
@@ -59,12 +67,9 @@ public class PropertyConversionEngine implements ConversionEngine {
 		if (null == value) {
 			return null;
 		}
-		for (var strategy : strategies) {
-			if (strategy.supports(value)) {
-				return strategy.convert(value, this, ctx);
-			}
-		}
-		throw new IllegalStateException("No property conversion strategy found for type: " + value.getClass());
+		Class<?> type = value.getClass();
+		PropertyConversionStrategy strategy = strategyCache.computeIfAbsent(type, this::resolve);
+		return strategy.convert(value, this, ctx);
 	}
 
 	/**
@@ -75,6 +80,24 @@ public class PropertyConversionEngine implements ConversionEngine {
 	 */
 	public static PropertyConversionEngine getDefault() {
 		return InstanceHolder.DEFAULT;
+	}
+
+	/**
+	 * Resolves the appropriate property conversion strategy for the given type by iterating through the list of strategies
+	 * and checking if each one supports the type. If a supporting strategy is found, it is returned. If no strategy
+	 * supports the type, an {@link IllegalStateException} is thrown.
+	 *
+	 * @param type the class type for which to resolve a property conversion strategy
+	 * @return the resolved property conversion strategy for the given type
+	 * @throws IllegalStateException if no property conversion strategy supports the given type
+	 */
+	private PropertyConversionStrategy resolve(final Class<?> type) {
+		for (var strategy : strategies) {
+			if (strategy.supportsType(type)) {
+				return strategy;
+			}
+		}
+		throw new IllegalStateException("No property conversion strategy found for type: " + type);
 	}
 
 	/**
