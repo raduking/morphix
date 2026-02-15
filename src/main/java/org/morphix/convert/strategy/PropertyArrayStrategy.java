@@ -28,6 +28,13 @@ import org.morphix.convert.context.CyclicReferencesContext;
 public class PropertyArrayStrategy implements PropertyConversionStrategy {
 
 	/**
+	 * Default constructor.
+	 */
+	public PropertyArrayStrategy() {
+		// empty
+	}
+
+	/**
 	 * Determines if the given type is an array type.
 	 *
 	 * @param type the type to check

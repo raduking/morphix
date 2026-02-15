@@ -26,6 +26,13 @@ import org.morphix.convert.context.ConversionContext;
 public class PropertyLeafStrategy implements PropertyConversionStrategy {
 
 	/**
+	 * Default constructor.
+	 */
+	public PropertyLeafStrategy() {
+		// empty
+	}
+
+	/**
 	 * Checks if the given type is supported by this strategy. Supported types are:
 	 * <ul>
 	 * <li>{@link CharSequence}</li>

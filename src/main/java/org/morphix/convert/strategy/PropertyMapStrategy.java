@@ -27,6 +27,13 @@ import org.morphix.convert.context.CyclicReferencesContext;
 public class PropertyMapStrategy implements PropertyConversionStrategy {
 
 	/**
+	 * Default constructor.
+	 */
+	public PropertyMapStrategy() {
+		// empty
+	}
+
+	/**
 	 * Determines if the given type is supported by this conversion strategy. It returns true if the type is a {@link Map}
 	 * or a subclass of {@link Map}.
 	 *

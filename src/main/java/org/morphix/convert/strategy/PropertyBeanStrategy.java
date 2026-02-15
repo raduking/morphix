@@ -30,10 +30,17 @@ import org.morphix.convert.context.CyclicReferencesContext;
 public class PropertyBeanStrategy implements PropertyConversionStrategy {
 
 	/**
+	 * Default constructor.
+	 */
+	public PropertyBeanStrategy() {
+		// empty
+	}
+
+	/**
 	 * Returns {@code true} for any type, indicating that this strategy supports converting any object to a map of its
 	 * properties.
 	 *
-	 * @param obj the type to check for support
+	 * @param type the type to check for support
 	 * @return {@code true} if this strategy supports converting the given type, {@code false} otherwise.
 	 */
 	@Override
@@ -47,16 +54,16 @@ public class PropertyBeanStrategy implements PropertyConversionStrategy {
 	 * with the key {@link CyclicReferencesContext#CYCLIC_REFERENCE} and the value being the simple name of the class of the
 	 * cyclic reference.
 	 *
-	 * @param v the object to convert
+	 * @param obj the object to convert
 	 * @param engine the conversion engine to use for converting property values
 	 * @param ctx the conversion context to use for tracking cyclic references
 	 * @return a map of property names to converted property values, or a map indicating a cyclic reference if one is
 	 * detected.
 	 */
 	@Override
-	public Object convert(final Object v, final ConversionEngine engine, final ConversionContext ctx) {
-		return ctx.visit(v,
-				() -> MapConversions.convertToMap(v, k -> k, val -> engine.convert(val, ctx)),
-				() -> Map.of(CyclicReferencesContext.CYCLIC_REFERENCE, v.getClass().getSimpleName()));
+	public Object convert(final Object obj, final ConversionEngine engine, final ConversionContext ctx) {
+		return ctx.visit(obj,
+				() -> MapConversions.convertToMap(obj, k -> k, val -> engine.convert(val, ctx)),
+				() -> Map.of(CyclicReferencesContext.CYCLIC_REFERENCE, obj.getClass().getSimpleName()));
 	}
 }

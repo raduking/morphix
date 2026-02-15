@@ -25,6 +25,13 @@ import org.morphix.convert.context.ConversionContext;
 public class PropertyOptionalStrategy implements PropertyConversionStrategy {
 
 	/**
+	 * Default constructor.
+	 */
+	public PropertyOptionalStrategy() {
+		// empty
+	}
+
+	/**
 	 * Determines if the given type is supported by this strategy, which is the case if it is an {@link Optional}.
 	 *
 	 * @param type the type to check for support

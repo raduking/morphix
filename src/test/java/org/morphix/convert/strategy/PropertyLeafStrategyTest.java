@@ -28,11 +28,11 @@ class PropertyLeafStrategyTest {
 
 	@Test
 	void shouldReturnNullForNullLeafValue() {
-	    PropertyLeafStrategy strategy = new PropertyLeafStrategy();
+		PropertyLeafStrategy strategy = new PropertyLeafStrategy();
 
-	    Object result = strategy.convert(null, null, null);
+		Object result = strategy.convert(null, null, null);
 
-	    assertThat(result, nullValue());
+		assertThat(result, nullValue());
 	}
 
 	static final class UnsupportedLeaf {
@@ -41,12 +41,12 @@ class PropertyLeafStrategyTest {
 
 	@Test
 	void shouldThrowIllegalStateExceptionForUnsupportedLeafType() {
-	    PropertyLeafStrategy strategy = new PropertyLeafStrategy();
+		PropertyLeafStrategy strategy = new PropertyLeafStrategy();
 
-	    UnsupportedLeaf value = new UnsupportedLeaf();
+		UnsupportedLeaf value = new UnsupportedLeaf();
 
-	    IllegalStateException e = assertThrows(IllegalStateException.class, () -> strategy.convert(value, null, null));
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> strategy.convert(value, null, null));
 
-	    assertThat(e.getMessage(), equalTo("Unsupported property leaf type: " + UnsupportedLeaf.class.getName()));
+		assertThat(e.getMessage(), equalTo("Unsupported property leaf type: " + UnsupportedLeaf.class.getName()));
 	}
 }

@@ -28,6 +28,13 @@ import org.morphix.convert.context.CyclicReferencesContext;
 public class PropertyCollectionStrategy implements PropertyConversionStrategy {
 
 	/**
+	 * Default constructor.
+	 */
+	public PropertyCollectionStrategy() {
+		// empty
+	}
+
+	/**
 	 * Checks if the provided type is a {@link Collection} or a subtype of it.
 	 *
 	 * @param type the type to check
