@@ -155,9 +155,9 @@ public interface MapConversions {
 	}
 
 	/**
-	 * Convenience static method to convert an object to a map conversion pipeline. If the source is null, an empty map is
-	 * returned. The putFunction is used to put values into the map and can be used to customize the behavior (e.g., to
-	 * handle specific types or to apply transformations or even filtering).
+	 * Convenience static method to convert an object to a map. If the source is null, an empty map is returned. The
+	 * putFunction is used to put values into the map and can be used to customize the behavior (e.g., to handle specific
+	 * types or to apply transformations or even filtering).
 	 * <p>
 	 * If the source is null, an empty map conversion pipeline is returned.
 	 * <p>
