@@ -80,8 +80,7 @@ class ConfigurationTest {
 				Default.EXPANDABLE_FIELDS,
 				Default.SIMPLE_CONVERTERS);
 
-		System.out.println("" + configuration.getGenericTypesMap() + " - " + Configuration.defaults().getGenericTypesMap());
-
+		assertThat(configuration.getGenericTypesMap(), equalTo(Configuration.defaults().getGenericTypesMap()));
 		assertTrue(configuration.isDefault());
 	}
 
@@ -222,5 +221,4 @@ class ConfigurationTest {
 
 		assertFalse(result);
 	}
-
 }
