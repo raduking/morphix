@@ -32,7 +32,7 @@ import org.morphix.reflection.predicates.MemberPredicates;
  *
  * @author Radu Sebastian LAZIN
  */
-public interface ConversionStrategy {
+public interface FieldFinderStrategy {
 
 	/**
 	 * Finds the source field object to convert to destination.
@@ -82,7 +82,7 @@ public interface ConversionStrategy {
 			}
 		}
 
-		List<Method> getterMethods = Methods.getAllDeclaredInHierarchy(obj.getClass(), MethodType.GETTER.getPredicate());
+		List<Method> getterMethods = Methods.getAllDeclaredInHierarchy(obj.getClass(), MethodType.GETTER.predicate());
 		for (Method getterMethod : getterMethods) {
 			String fieldName = MethodType.GETTER.getFieldName(getterMethod);
 			ExtendedField extendedField = nameToFieldMap.get(fieldName);

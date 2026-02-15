@@ -24,7 +24,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.junit.jupiter.api.Test;
-import org.morphix.convert.strategy.ConversionStrategy;
+import org.morphix.convert.strategy.FieldFinderStrategy;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.MemberAccessor;
 
@@ -35,7 +35,7 @@ import org.morphix.reflection.MemberAccessor;
  */
 class DefaultStrategiesTest {
 
-	static final ConversionStrategy[] STRATEGIES = {
+	static final FieldFinderStrategy[] STRATEGIES = {
 			STRATEGY_BASIC_NAME,
 			STRATEGY_FIELD_NAME_MAP,
 			STRATEGY_PATH,

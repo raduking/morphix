@@ -25,7 +25,7 @@ import org.morphix.convert.ConverterFactory.Constants;
 import org.morphix.convert.extras.ExcludedFields;
 import org.morphix.convert.extras.ExpandableFields;
 import org.morphix.convert.extras.SimpleConverters;
-import org.morphix.convert.strategy.ConversionStrategy;
+import org.morphix.convert.strategy.FieldFinderStrategy;
 
 /**
  * Configuration class for conversions.
@@ -50,7 +50,7 @@ public final class Configuration {
 	/**
 	 * List of name finding strategies.
 	 */
-	private final List<ConversionStrategy> strategies;
+	private final List<FieldFinderStrategy> strategies;
 
 	/**
 	 * Excluded fields object.
@@ -84,7 +84,7 @@ public final class Configuration {
 	 */
 	private Configuration(
 			final List<FieldHandler> fieldHandlers,
-			final List<ConversionStrategy> strategies,
+			final List<FieldFinderStrategy> strategies,
 			final ExcludedFields excludedFields,
 			final ExpandableFields expandableFields,
 			final SimpleConverters simpleConverters,
@@ -110,7 +110,7 @@ public final class Configuration {
 	 */
 	private Configuration(
 			final List<FieldHandler> fieldHandlers,
-			final List<ConversionStrategy> strategies,
+			final List<FieldFinderStrategy> strategies,
 			final ExcludedFields excludedFields,
 			final ExpandableFields expandableFields,
 			final SimpleConverters simpleConverters) {
@@ -196,7 +196,7 @@ public final class Configuration {
 	 *
 	 * @return the strategies list
 	 */
-	public List<ConversionStrategy> getStrategies() {
+	public List<FieldFinderStrategy> getStrategies() {
 		return strategies;
 	}
 
@@ -221,7 +221,7 @@ public final class Configuration {
 	 */
 	public static Configuration of(
 			final List<FieldHandler> fieldHandlers,
-			final List<ConversionStrategy> strategies,
+			final List<FieldFinderStrategy> strategies,
 			final ExcludedFields excludedFields,
 			final ExpandableFields expandableFields,
 			final SimpleConverters simpleConverters) {
@@ -437,7 +437,7 @@ public final class Configuration {
 		/**
 		 * Default strategies.
 		 */
-		private static final List<ConversionStrategy> STRATEGIES = DefaultStrategies.STRATEGIES_LIST;
+		private static final List<FieldFinderStrategy> STRATEGIES = DefaultStrategies.STRATEGIES_LIST;
 
 		/**
 		 * Default configuration.

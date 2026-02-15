@@ -14,11 +14,11 @@ package org.morphix.convert;
 
 import java.util.List;
 
-import org.morphix.convert.strategy.BasicNameStrategy;
-import org.morphix.convert.strategy.ConversionStrategy;
-import org.morphix.convert.strategy.FieldNameMapStrategy;
-import org.morphix.convert.strategy.NamePathStrategy;
-import org.morphix.convert.strategy.PathStrategy;
+import org.morphix.convert.strategy.FinderNameStrategy;
+import org.morphix.convert.strategy.FieldFinderStrategy;
+import org.morphix.convert.strategy.FinderMapKeyStrategy;
+import org.morphix.convert.strategy.FinderNamePathStrategy;
+import org.morphix.convert.strategy.FinderPathStrategy;
 import org.morphix.reflection.Constructors;
 
 /**
@@ -31,27 +31,27 @@ public final class DefaultStrategies {
 	/**
 	 * Basic name to name conversion strategy.
 	 */
-	static final ConversionStrategy STRATEGY_BASIC_NAME = new BasicNameStrategy();
+	static final FieldFinderStrategy STRATEGY_BASIC_NAME = new FinderNameStrategy();
 
 	/**
 	 * Strategy that searches fields in the given path to match.
 	 */
-	static final ConversionStrategy STRATEGY_PATH = new PathStrategy();
+	static final FieldFinderStrategy STRATEGY_PATH = new FinderPathStrategy();
 
 	/**
 	 * Strategy that searches fields in the given path with the given name to match.
 	 */
-	static final ConversionStrategy STRATEGY_NAME_PATH = new NamePathStrategy();
+	static final FieldFinderStrategy STRATEGY_NAME_PATH = new FinderNamePathStrategy();
 
 	/**
 	 * Strategy that searches fields given a field name map.
 	 */
-	static final ConversionStrategy STRATEGY_FIELD_NAME_MAP = new FieldNameMapStrategy();
+	static final FieldFinderStrategy STRATEGY_FIELD_NAME_MAP = new FinderMapKeyStrategy();
 
 	/**
 	 * The default strategy chain as array.
 	 */
-	static final ConversionStrategy[] STRATEGIES_CHAIN = {
+	static final FieldFinderStrategy[] STRATEGIES_CHAIN = {
 			STRATEGY_BASIC_NAME,
 			STRATEGY_FIELD_NAME_MAP,
 			STRATEGY_PATH,
@@ -61,14 +61,14 @@ public final class DefaultStrategies {
 	/**
 	 * The default strategy chain as {@link List}.
 	 */
-	static final List<ConversionStrategy> STRATEGIES_LIST = List.of(STRATEGIES_CHAIN);
+	static final List<FieldFinderStrategy> STRATEGIES_LIST = List.of(STRATEGIES_CHAIN);
 
 	/**
 	 * Returns the default strategies list.
 	 *
 	 * @return the default strategies list
 	 */
-	static List<ConversionStrategy> list() {
+	static List<FieldFinderStrategy> list() {
 		return STRATEGIES_LIST;
 	}
 

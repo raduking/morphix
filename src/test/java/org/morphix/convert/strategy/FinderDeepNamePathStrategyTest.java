@@ -28,7 +28,7 @@ import org.morphix.reflection.ExtendedField;
  *
  * @author Radu Sebastian LAZIN
  */
-class DeepNamePathStrategyTest {
+class FinderDeepNamePathStrategyTest {
 
 	private static final String TEST_STREET = "Str. Cimitirului";
 	private static final String TEST_CITY = "Smallville";
@@ -90,7 +90,7 @@ class DeepNamePathStrategyTest {
 
 	@Test
 	void shouldDeepConvertWithDeepNamePath() {
-		DeepNamePathStrategy strategy = new DeepNamePathStrategy();
+		FinderDeepNamePathStrategy strategy = new FinderDeepNamePathStrategy();
 
 		ExtendedField fop = strategy.find(strategy, Collections.emptyList(), "x");
 		assertThat(fop.getObject(), nullValue());

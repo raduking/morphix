@@ -7,6 +7,10 @@
 - Added `MapConversions.toPropertiesMap(Object)` method that deep converts an object to a map of field names and values with support for cyclic references.
 - Renamed `Configuration.defaultConfiguration` to `Configuration.defaults`.
 - Added `ConversionContext` to track cyclic references during conversions.
+- Renamed `MethodType.getPredicate` to `MethodType.predicate`.
+- Renamed `ConversionStrategy` to `FieldFinderStrategy` to better suit its intent.
+- Renamed all finder strategies, they were/are meant as internal classes they all implement `ConversionStrategy`.
+- Added strategy based implementation to `MapConversions.toPropertiesMap`.
 
 ---
 

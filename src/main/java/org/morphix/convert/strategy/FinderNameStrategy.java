@@ -24,17 +24,17 @@ import org.morphix.reflection.ExtendedField;
  *
  * @author Radu Sebastian LAZIN
  */
-public class BasicNameStrategy implements ConversionStrategy {
+public class FinderNameStrategy implements FieldFinderStrategy {
 
 	/**
 	 * Default constructor.
 	 */
-	public BasicNameStrategy() {
+	public FinderNameStrategy() {
 		// empty
 	}
 
 	/**
-	 * @see ConversionStrategy#find(Object, List, String)
+	 * @see FieldFinderStrategy#find(Object, List, String)
 	 */
 	@Override
 	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {

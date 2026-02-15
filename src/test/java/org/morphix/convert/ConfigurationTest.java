@@ -26,7 +26,7 @@ import org.morphix.convert.Configuration.Default;
 import org.morphix.convert.extras.ExcludedFields;
 import org.morphix.convert.extras.ExpandableFields;
 import org.morphix.convert.extras.SimpleConverters;
-import org.morphix.convert.strategy.ConversionStrategy;
+import org.morphix.convert.strategy.FieldFinderStrategy;
 
 /**
  * Test class for {@link Configuration}.
@@ -47,7 +47,7 @@ class ConfigurationTest {
 	@Test
 	void shouldUseAllMembersOnHashCode() {
 		List<FieldHandler> fieldHandlers = Collections.singletonList(DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_ANY);
-		List<ConversionStrategy> strategies = Collections.singletonList(DefaultStrategies.STRATEGY_BASIC_NAME);
+		List<FieldFinderStrategy> strategies = Collections.singletonList(DefaultStrategies.STRATEGY_BASIC_NAME);
 		ExcludedFields excludedFields = ExcludedFields.of(Collections.singletonList("y"));
 		ExpandableFields expandableFields = ExpandableFields.of(Collections.singletonList("x"));
 		SimpleConverters simpleConverters = SimpleConverters.empty();

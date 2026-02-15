@@ -245,7 +245,7 @@ public enum MethodType {
 	 *
 	 * @return a method type predicate
 	 */
-	public Predicate<Method> getPredicate() {
+	public Predicate<Method> predicate() {
 		return method -> {
 			if (method.getParameterCount() != getParameterCount()) {
 				return false;

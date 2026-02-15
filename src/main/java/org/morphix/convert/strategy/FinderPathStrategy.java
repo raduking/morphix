@@ -26,17 +26,17 @@ import org.morphix.reflection.Fields;
  *
  * @author Radu Sebastian LAZIN
  */
-public class PathStrategy implements ConversionStrategy {
+public class FinderPathStrategy implements FieldFinderStrategy {
 
 	/**
 	 * Default constructor.
 	 */
-	public PathStrategy() {
+	public FinderPathStrategy() {
 		// empty
 	}
 
 	/**
-	 * @see ConversionStrategy#find(Object, List, String)
+	 * @see FieldFinderStrategy#find(Object, List, String)
 	 */
 	@Override
 	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {

@@ -12,36 +12,40 @@
  */
 package org.morphix.convert.strategy;
 
-import static org.morphix.reflection.ExtendedField.of;
-
-import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
 
 import org.morphix.reflection.ExtendedField;
 
 /**
- * Map strategy.
+ * Strategy that searches a field by transforming the destination field name to a field path based on camel cases.
  *
  * @author Radu Sebastian LAZIN
  */
-public class FieldNameMapStrategy implements ConversionStrategy {
+public class FinderNamePathStrategy extends FinderPathStrategy {
 
 	/**
 	 * Default constructor.
 	 */
-	public FieldNameMapStrategy() {
+	public FinderNamePathStrategy() {
 		// empty
 	}
 
 	/**
-	 * @see ConversionStrategy#find(Object, List, String)
+	 * @see FieldFinderStrategy#find(Object, List, String)
 	 */
 	@Override
 	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
-		if (source instanceof Map<?, ?> sourceMap) {
-			return of((Field) null, sourceMap.get(sourceFieldName));
-		}
-		return ExtendedField.EMPTY;
+		return super.find(source, fields, convertToPath(sourceFieldName));
+	}
+
+	/**
+	 * Converts a camel case string to a path string.
+	 *
+	 * @param sourceString source string
+	 * @return transformed string
+	 */
+	protected static String convertToPath(final String sourceString) {
+		String[] tokens = sourceString.split("(?=\\p{Lu})");
+		return String.join(".", tokens).toLowerCase();
 	}
 }

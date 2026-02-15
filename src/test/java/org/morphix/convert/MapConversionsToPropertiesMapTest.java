@@ -427,7 +427,7 @@ class MapConversionsToPropertiesMapTest {
 	void shouldHandleNullInput() {
 		Map<String, Object> params = MapConversions.toPropertiesMap(null);
 
-		assertThat(params, equalTo(Map.of()));
+		assertThat(params, equalTo(null));
 	}
 
 	record A(Optional<B> b) {

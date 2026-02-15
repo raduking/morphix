@@ -12,20 +12,16 @@
  */
 package org.morphix.convert;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
-import org.morphix.convert.context.ConversionContext;
 import org.morphix.convert.context.CyclicReferencesContext;
 import org.morphix.convert.function.ConvertFunction;
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.convert.pipeline.MapConversionPipeline;
-import org.morphix.convert.strategy.ConversionStrategy;
+import org.morphix.convert.strategy.FieldFinderStrategy;
+import org.morphix.lang.JavaObjects;
 import org.morphix.lang.function.InstanceFunction;
 import org.morphix.lang.function.PutFunction;
 import org.morphix.reflection.ExtendedField;
@@ -183,7 +179,7 @@ public interface MapConversions {
 		if (source == null) {
 			return convertMap(Map.of(), keyConverter, valueConverter);
 		}
-		List<ExtendedField> fields = ConversionStrategy.findFields(source);
+		List<ExtendedField> fields = FieldFinderStrategy.findFields(source);
 		Map<String, Object> map = HashMap.newHashMap(fields.size());
 		for (ExtendedField field : fields) {
 			putFunction.put(map, field.getName(), field.getFieldValue());
@@ -252,66 +248,7 @@ public interface MapConversions {
 	 * @return destination map
 	 */
 	static <S> Map<String, Object> toPropertiesMap(final S source) {
-		return toPropertiesMap(source, new CyclicReferencesContext());
-	}
-
-	/**
-	 * Convenience static method to convert an object to a properties map. The keys are the field names and the values are
-	 * the field values. The values are converted to simple types (e.g., String, Number, Boolean, Enum, UUID) or to maps or
-	 * collections of simple types. If a value is an object that is not a simple type, it is converted to a map recursively.
-	 * <p>
-	 * If the source is null, an empty map returned.
-	 * <p>
-	 * For sources that are already maps, use the {@link #convertMap(Map, SimpleConverter, SimpleConverter)}.
-	 *
-	 * @param <S> source type
-	 *
-	 * @param source source object
-	 * @param context conversion context
-	 * @return destination map
-	 */
-	private static <S> Map<String, Object> toPropertiesMap(final S source, final ConversionContext context) {
-		if (null == source) {
-			return Map.of();
-		}
-		return context.visit(source, () -> MapConversions.convertToMap(source, k -> k, v -> convertValue(v, context)),
-				() -> Map.of(CyclicReferencesContext.CYCLIC_REFERENCE, source.getClass().getSimpleName()));
-	}
-
-	/**
-	 * Convenience static method to convert a value to a simple type (e.g., String, Number, Boolean, Enum, UUID) or to a map
-	 * or collection of simple types. If the value is an object that is not a simple type, it is converted to a map
-	 * recursively.
-	 *
-	 * @param value value to convert
-	 * @param context conversion context
-	 * @return converted value
-	 */
-	private static Object convertValue(final Object value, final ConversionContext context) {
-		return switch (value) {
-			case null -> null;
-
-			case CharSequence cs -> cs.toString();
-			case Number n -> n.toString();
-			case Boolean b -> b.toString();
-			case Enum<?> e -> e.name();
-			case UUID u -> u.toString();
-
-			case Optional<?> opt -> opt
-					.map(o -> MapConversions.convertValue(o, context))
-					.orElse(null);
-
-			case Map<?, ?> map -> context.visit(map,
-					() -> MapConversions.convertMap(map, String::valueOf, v -> convertValue(v, context)).toMap(),
-					() -> Map.of(CyclicReferencesContext.CYCLIC_REFERENCE, value.getClass().getSimpleName()));
-			case Collection<?> col -> context.visit(col,
-					() -> col.stream().map(o -> MapConversions.convertValue(o, context)).toList(),
-					() -> List.of(CyclicReferencesContext.CYCLIC_REFERENCE));
-			case Object[] arr -> context.visit(arr,
-					() -> Arrays.stream(arr).map(o -> MapConversions.convertValue(o, context)).toList(),
-					() -> List.of(CyclicReferencesContext.CYCLIC_REFERENCE));
-
-			default -> toPropertiesMap(value, context);
-		};
+		PropertyConversionEngine engine = PropertyConversionEngine.getDefault();
+		return JavaObjects.cast(engine.convert(source, new CyclicReferencesContext()));
 	}
 }
