@@ -58,22 +58,22 @@ public class PropertyLeafStrategy implements PropertyConversionStrategy {
 	 * <li>{@link UUID} is converted to its String representation</li>
 	 * </ul>
 	 *
-	 * @param v the value to convert
+	 * @param obj the value to convert
 	 * @param engine the conversion engine to use for nested conversions (not used in this strategy)
 	 * @param ctx the conversion context (not used in this strategy)
 	 * @return the converted value as a String, or {@code null} if the input value is {@code null}
 	 * @throws IllegalStateException if the value type is not supported
 	 */
 	@Override
-	public Object convert(final Object v, final ConversionEngine engine, final ConversionContext ctx) {
-		return switch (v) {
+	public Object convert(final Object obj, final ConversionEngine engine, final ConversionContext ctx) {
+		return switch (obj) {
 			case null -> null;
 			case CharSequence cs -> cs.toString();
 			case Number n -> n.toString();
 			case Boolean b -> b.toString();
 			case Enum<?> e -> e.name();
 			case UUID u -> u.toString();
-			default -> throw new IllegalStateException("Unsupported property leaf type: " + v.getClass());
+			default -> throw new IllegalStateException("Unsupported property leaf type: " + obj.getClass().getName());
 		};
 	}
 }

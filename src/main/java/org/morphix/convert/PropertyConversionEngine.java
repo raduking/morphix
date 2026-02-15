@@ -101,6 +101,15 @@ public class PropertyConversionEngine implements ConversionEngine {
 	}
 
 	/**
+	 * Returns the list of property conversion strategies used by this engine.
+	 *
+	 * @return the list of property conversion strategies used by this engine
+	 */
+	public List<? extends PropertyConversionStrategy> getStrategies() {
+		return strategies;
+	}
+
+	/**
 	 * The default instance is lazily initialized when the getDefault() method is called for the first time. This approach
 	 * ensures thread safety and avoids unnecessary initialization if the default instance is never used.
 	 *

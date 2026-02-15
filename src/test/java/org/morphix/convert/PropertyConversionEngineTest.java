@@ -20,6 +20,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.convert.context.CyclicReferencesContext;
+import org.morphix.convert.strategy.PropertyArrayStrategy;
+import org.morphix.convert.strategy.PropertyBeanStrategy;
+import org.morphix.convert.strategy.PropertyCollectionStrategy;
+import org.morphix.convert.strategy.PropertyLeafStrategy;
+import org.morphix.convert.strategy.PropertyMapStrategy;
+import org.morphix.convert.strategy.PropertyOptionalStrategy;
 
 /**
  * Test class for {@link PropertyConversionEngine}.
@@ -28,13 +34,27 @@ import org.morphix.convert.context.CyclicReferencesContext;
  */
 class PropertyConversionEngineTest {
 
+	private static final String TEST = "test";
+
 	@Test
 	void shouldThrowIllegalStateExceptionWhenNoStrategiesAreFound() {
 		PropertyConversionEngine engine = new PropertyConversionEngine(List.of());
 
-		IllegalStateException e = assertThrows(IllegalStateException.class, () -> engine.convert("test", new CyclicReferencesContext()));
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> engine.convert(TEST, new CyclicReferencesContext()));
 
 		assertThat(e.getMessage(), equalTo("No property conversion strategy found for type: " + String.class.getName()));
 	}
 
+	@Test
+	void shouldHaveCorrectDefaultStrategyOrder() {
+		PropertyConversionEngine engine = PropertyConversionEngine.getDefault();
+
+		assertThat(engine.getStrategies().get(0).getClass(), equalTo(PropertyLeafStrategy.class));
+		assertThat(engine.getStrategies().get(1).getClass(), equalTo(PropertyOptionalStrategy.class));
+		assertThat(engine.getStrategies().get(2).getClass(), equalTo(PropertyMapStrategy.class));
+		assertThat(engine.getStrategies().get(3).getClass(), equalTo(PropertyCollectionStrategy.class));
+		assertThat(engine.getStrategies().get(4).getClass(), equalTo(PropertyArrayStrategy.class));
+		assertThat(engine.getStrategies().get(5).getClass(), equalTo(PropertyBeanStrategy.class));
+		assertThat(engine.getStrategies().size(), equalTo(6));
+	}
 }
