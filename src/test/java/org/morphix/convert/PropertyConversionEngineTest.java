@@ -10,31 +10,31 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.convert.context;
+package org.morphix.convert;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.context.CyclicReferencesContext;
 
 /**
- * Test class for {@link ConversionContext}.
+ * Test class for {@link PropertyConversionEngine}.
  *
- * @author morphix
+ * @author Radu Sebastian LAZIN
  */
-class ConversionContextTest {
-
-	static class TestConversionContext implements ConversionContext {
-		// No need to override enter and exit for this test
-	}
+class PropertyConversionEngineTest {
 
 	@Test
-	void shouldReturnObjectOnVisitWithoutVisitedResultSupplier() {
-		final ConversionContext context = new TestConversionContext();
-		final Object obj = new Object();
+	void shouldThrowIllegalStateExceptionWhenNoStrategiesAreFound() {
+		PropertyConversionEngine engine = new PropertyConversionEngine(List.of());
 
-		final Object result = context.visit(obj, () -> obj, () -> null);
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> engine.convert("test", new CyclicReferencesContext()));
 
-		assertThat(result, equalTo(obj));
+		assertThat(e.getMessage(), equalTo("No property conversion strategy found for type: " + String.class.getName()));
 	}
+
 }

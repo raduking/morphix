@@ -97,7 +97,7 @@ public class PropertyConversionEngine implements ConversionEngine {
 				return strategy;
 			}
 		}
-		throw new IllegalStateException("No property conversion strategy found for type: " + type);
+		throw new IllegalStateException("No property conversion strategy found for type: " + type.getName());
 	}
 
 	/**
