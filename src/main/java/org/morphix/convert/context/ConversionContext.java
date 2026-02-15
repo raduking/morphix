@@ -14,8 +14,6 @@ package org.morphix.convert.context;
 
 import java.util.function.Supplier;
 
-import org.morphix.lang.function.Suppliers;
-
 /**
  * Context for tracking visited objects during conversion.
  *
@@ -66,20 +64,5 @@ public interface ConversionContext {
 		} finally {
 			exit(obj);
 		}
-	}
-
-	/**
-	 * Visits an object, returning a result from the provided supplier. If the object has already been visited, {@code null}
-	 * is returned. Otherwise, the {@code resultSupplier} is used to provide the result, and the object is marked as visited
-	 * during the execution of the supplier.
-	 *
-	 * @param <T> the type of the result
-	 *
-	 * @param obj the object being visited
-	 * @param resultSupplier the supplier to provide the result if the object has not been visited
-	 * @return the result of visiting the object, or {@code null} if the object has already been visited
-	 */
-	default <T> T visit(final Object obj, final Supplier<T> resultSupplier) {
-		return visit(obj, resultSupplier, Suppliers.supplyNull());
 	}
 }
