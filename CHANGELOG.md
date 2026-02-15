@@ -11,6 +11,8 @@
 - Renamed `ConversionStrategy` to `FieldFinderStrategy` to better suit its intent.
 - Renamed all finder strategies, they were/are meant as internal classes they all implement `ConversionStrategy`.
 - Added strategy based implementation to `MapConversions.toPropertiesMap`.
+- Added `ExtendedFields` interface with utility methods for `ExtendedField`.
+- Moved `FieldFinderStrategy.findFields` to `ExtendedFields.findAllNonStatic`.
 
 ---
 

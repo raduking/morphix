@@ -20,11 +20,11 @@ import org.morphix.convert.context.CyclicReferencesContext;
 import org.morphix.convert.function.ConvertFunction;
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.convert.pipeline.MapConversionPipeline;
-import org.morphix.convert.strategy.FieldFinderStrategy;
 import org.morphix.lang.JavaObjects;
 import org.morphix.lang.function.InstanceFunction;
 import org.morphix.lang.function.PutFunction;
 import org.morphix.reflection.ExtendedField;
+import org.morphix.reflection.ExtendedFields;
 
 /**
  * Utility interface for conversion static methods.
@@ -179,7 +179,7 @@ public interface MapConversions {
 		if (source == null) {
 			return convertMap(Map.of(), keyConverter, valueConverter);
 		}
-		List<ExtendedField> fields = FieldFinderStrategy.findFields(source);
+		List<ExtendedField> fields = ExtendedFields.findAllNonStatic(source);
 		Map<String, Object> map = HashMap.newHashMap(fields.size());
 		for (ExtendedField field : fields) {
 			putFunction.put(map, field.getName(), field.getFieldValue());

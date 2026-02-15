@@ -27,6 +27,7 @@ import org.morphix.convert.function.SimpleConverter;
 import org.morphix.convert.strategy.FieldFinderStrategy;
 import org.morphix.lang.function.InstanceFunction;
 import org.morphix.reflection.ExtendedField;
+import org.morphix.reflection.ExtendedFields;
 
 /**
  * Converter class that will try to convert an object of type S (source) to an object of type D (destination).
@@ -165,11 +166,11 @@ public class ObjectConverter<S, D> implements
 	 * @param destination destination object
 	 */
 	private void mainConvert(final S source, final D destination) {
-		List<ExtendedField> dstFields = FieldFinderStrategy.findFields(destination);
+		List<ExtendedField> dstFields = ExtendedFields.findAllNonStatic(destination);
 		if (dstFields.isEmpty()) {
 			return;
 		}
-		List<ExtendedField> srcFields = FieldFinderStrategy.findFields(source);
+		List<ExtendedField> srcFields = ExtendedFields.findAllNonStatic(source);
 		if (srcFields.isEmpty()) {
 			return;
 		}
