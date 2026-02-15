@@ -31,7 +31,7 @@ import org.morphix.reflection.predicates.MemberPredicates;
 public interface ExtendedFields {
 
 	/**
-	 * Returns a list of non static fields filtered by the given filter.
+	 * Returns a list of non-static fields filtered by the given filter.
 	 *
 	 * @param <T> source object type
 	 *
@@ -72,7 +72,7 @@ public interface ExtendedFields {
 	}
 
 	/**
-	 * Returns a lists of all non static fields.
+	 * Returns a lists of all non-static fields.
 	 *
 	 * @param <T> source object type
 	 *

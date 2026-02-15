@@ -74,7 +74,7 @@ public class PropertyArrayStrategy implements PropertyConversionStrategy {
 	 * @param ctx the conversion context to use for tracking visited objects and handling cyclic references
 	 * @return a {@link List} of converted elements
 	 */
-	private static List<? extends Object> convertArray(final Object obj, final ConversionEngine engine, final ConversionContext ctx) {
+	private static List<Object> convertArray(final Object obj, final ConversionEngine engine, final ConversionContext ctx) {
 		int len = Array.getLength(obj);
 		List<Object> list = new ArrayList<>(len);
 		for (int i = 0; i < len; ++i) {

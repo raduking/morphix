@@ -38,7 +38,7 @@ import org.morphix.reflection.predicates.MemberPredicates;
  * {@link Methods.Safe}.
  * <p>
  * Methods like {@link #getOneDeclaredInHierarchy(String, Class, Class[])} return null if the method is not found
- * because most of the times the caller just needs to check for null and not to handle exceptions (the implementation
+ * because most of the time the caller just needs to check for null and not to handle exceptions (the implementation
  * actually delegates to {@link Methods.Safe}).
  *
  * @author Radu Sebastian LAZIN
@@ -74,11 +74,11 @@ public interface Methods {
 
 	/**
 	 * Returns a method in the class given as parameter, also searching in all its super classes. This method does not
-	 * return methods from interfaces or from {@link Object} class because most of the times only the class hierarchy is
+	 * return methods from interfaces or from {@link Object} class because most of the time only the class hierarchy is
 	 * needed.
 	 * <p>
 	 * The method returns null if no method is found. The philosophy of this method is to return the method or null and not
-	 * to throw exceptions because most of the times the method may not be present and the caller just needs to check for
+	 * to throw exceptions because most of the time the method may not be present and the caller just needs to check for
 	 * null.
 	 *
 	 * @param <T> type to get the methods from
@@ -95,7 +95,7 @@ public interface Methods {
 	/**
 	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes. This
 	 * method does not return methods from interfaces or from {@link Object} class. This is a simpler version of
-	 * {@link Complete#getAllDeclaredInHierarchy(Class)} because most of the times only the class hierarchy is needed.
+	 * {@link Complete#getAllDeclaredInHierarchy(Class)} because most of the time only the class hierarchy is needed.
 	 * <p>
 	 * {@link LinkedList} is used because:
 	 * <ul>
@@ -128,7 +128,7 @@ public interface Methods {
 	/**
 	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes that
 	 * verify the given method predicate. This method does not return methods from interfaces or from {@link Object} class
-	 * because most of the times only the class hierarchy is needed.
+	 * because most of the time only the class hierarchy is needed.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -423,7 +423,7 @@ public interface Methods {
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
-	static class ErrorMessage {
+	class ErrorMessage {
 
 		/**
 		 * Error invoking method message.
@@ -652,7 +652,7 @@ public interface Methods {
 		 * @param <T> type to get the methods from
 		 *
 		 * @param cls class on which the methods are returned
-		 * @param excluded non null mutable set of classes/interfaces/enums/records to be excluded
+		 * @param excluded non-null mutable set of classes/interfaces/enums/records to be excluded
 		 * @return list of methods
 		 * @throws ReflectionException if the excluded set is null or unmodifiable
 		 */
