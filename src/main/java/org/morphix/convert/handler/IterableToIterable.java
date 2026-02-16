@@ -104,13 +104,13 @@ public final class IterableToIterable extends FieldHandler {
 	}
 
 	/**
-	 * Returns the element class from the destination Iterable field. It uses a trick where the JRE retains the generic type
-	 * information for method return types.
+	 * Returns the element class from the destination {@link Iterable} field. It uses a trick where the JRE retains the
+	 * generic type information for method return types.
 	 * <p>
 	 * Example: for <code>List&lt;String&gt;</code> the method will return <code>Class&lt;String&gt;</code>
 	 *
 	 * @param fop field object pair
-	 * @return the element class from the destination collection field
+	 * @return the element class from the destination iterable field
 	 */
 	static Type getIterableElementType(final ExtendedField fop) {
 		// TODO: add exception message to show the getter method need

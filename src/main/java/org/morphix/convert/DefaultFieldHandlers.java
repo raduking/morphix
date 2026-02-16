@@ -19,6 +19,7 @@ import org.morphix.convert.handler.AnyToAnyFromConstructor;
 import org.morphix.convert.handler.AnyToAnyFromStaticMethod;
 import org.morphix.convert.handler.AnyToCharArray;
 import org.morphix.convert.handler.AnyToIterable;
+import org.morphix.convert.handler.AnyToOptional;
 import org.morphix.convert.handler.AnyToString;
 import org.morphix.convert.handler.ArrayToArray;
 import org.morphix.convert.handler.ArrayToIterable;
@@ -31,6 +32,7 @@ import org.morphix.convert.handler.MapToAny;
 import org.morphix.convert.handler.MapToMap;
 import org.morphix.convert.handler.NullSourceSkipper;
 import org.morphix.convert.handler.NumberToNumber;
+import org.morphix.convert.handler.OptionalToAny;
 import org.morphix.convert.handler.PrimitiveAssignment;
 import org.morphix.convert.handler.StaticFieldSkipper;
 import org.morphix.reflection.Constructors;
@@ -72,6 +74,16 @@ public final class DefaultFieldHandlers {
 	 * {@link CharSequenceToEnum} default instance.
 	 */
 	public static final FieldHandler FIELD_HANDLER_CHAR_SEQUENCE_TO_ENUM = new CharSequenceToEnum();
+
+	/**
+	 * {@link OptionalToAny} default instance.
+	 */
+	public static final FieldHandler FIELD_HANDLER_OPTIONAL_TO_ANY = new OptionalToAny();
+
+	/**
+	 * {@link OptionalToAny} default instance.
+	 */
+	public static final FieldHandler FIELD_HANDLER_ANY_TO_OPTIONAL = new AnyToOptional();
 
 	/**
 	 * {@link AnyToString} default instance.
@@ -142,12 +154,14 @@ public final class DefaultFieldHandlers {
 	 * Default field handlers chain (as array).
 	 */
 	static final FieldHandler[] FIELD_HANDLERS_CHAIN = {
+			FIELD_HANDLER_ANY_TO_OPTIONAL,
 			FIELD_HANDLER_NULL_SOURCE_SKIPPER,
 			FIELD_HANDLER_STATIC_FIELD_SKIPPER,
 			FIELD_HANDLER_DIRECT_ASSIGNMENT,
 			FIELD_HANDLER_PRIMITIVE_ASSIGNMENT,
 			FIELD_HANDLER_NUMBER_TO_NUMBER,
 			FIELD_HANDLER_CHAR_SEQUENCE_TO_ENUM,
+			FIELD_HANDLER_OPTIONAL_TO_ANY,
 			FIELD_HANDLER_ANY_TO_STRING,
 			FIELD_HANDLER_ANY_TO_CHAR_ARRAY,
 			FIELD_HANDLER_CHAR_SEQUENCE_TO_ANY,

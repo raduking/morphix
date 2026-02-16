@@ -14,7 +14,6 @@ package org.morphix.convert.strategy;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.morphix.convert.annotation.Src;
 import org.morphix.reflection.ExtendedField;
@@ -39,8 +38,7 @@ public class FinderNameStrategy implements FieldFinderStrategy {
 	@Override
 	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
 		// TODO: implement for empty fields, assume fields are available for now
-		Optional<ExtendedField> sField = findFieldByName(fields, sourceFieldName);
-		return sField.orElse(ExtendedField.EMPTY);
+		return findFieldByName(fields, sourceFieldName);
 	}
 
 	/**
@@ -49,14 +47,14 @@ public class FinderNameStrategy implements FieldFinderStrategy {
 	 *
 	 * @param fields source object fields
 	 * @param fieldName field name
-	 * @return optional with field information
+	 * @return extended field if found, empty otherwise
 	 */
-	protected static Optional<ExtendedField> findFieldByName(final List<ExtendedField> fields, final String fieldName) {
+	protected static ExtendedField findFieldByName(final List<ExtendedField> fields, final String fieldName) {
 		for (ExtendedField extendedField : fields) {
 			if (Objects.equals(fieldName, extendedField.getName())) {
-				return Optional.of(extendedField);
+				return extendedField;
 			}
 		}
-		return Optional.empty();
+		return ExtendedField.EMPTY;
 	}
 }

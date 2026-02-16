@@ -13,6 +13,7 @@
 - Added strategy based implementation to `MapConversions.toPropertiesMap`.
 - Added `ExtendedFields` interface with utility methods for `ExtendedField`.
 - Moved `FieldFinderStrategy.findFields` to `ExtendedFields.findAllNonStatic`.
+- Added `Optional` fields support to object converter.
 
 ---
 

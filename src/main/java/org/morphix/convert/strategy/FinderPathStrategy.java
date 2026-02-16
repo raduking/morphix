@@ -76,6 +76,9 @@ public class FinderPathStrategy implements FieldFinderStrategy {
 				break;
 			}
 		}
+		if (null == resultObject) {
+			return ExtendedField.EMPTY;
+		}
 		return of(resultField, resultObject);
 	}
 }

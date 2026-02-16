@@ -179,7 +179,7 @@ public class ObjectConverter<S, D> implements
 			// apply source field finding strategies
 			for (FieldFinderStrategy strategy : getStrategies()) {
 				ExtendedField sfo = strategy.find(source, srcFields, srcFieldName);
-				if (sfo.hasObject()) {
+				if (ExtendedField.EMPTY != sfo) {
 					convertField(sfo, dfo);
 					break;
 				}

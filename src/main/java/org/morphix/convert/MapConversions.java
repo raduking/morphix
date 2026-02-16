@@ -251,4 +251,19 @@ public interface MapConversions {
 		PropertyConversionEngine engine = PropertyConversionEngine.getDefault();
 		return JavaObjects.cast(engine.convert(source, new CyclicReferencesContext()));
 	}
+
+	/**
+	 * Convenience static method to convert from a properties map to an object. The map contains field names as keys and
+	 * objects as values. The values are expected to be simple types (e.g., String, Number, Boolean, Enum, UUID) or maps or
+	 * collections of simple types. If a value is a map that is not a simple type, it is converted to an object recursively.
+	 *
+	 * @param <D> destination type
+	 *
+	 * @param sourceMap source map object
+	 * @param instanceFunction destination instance function
+	 * @return destination object
+	 */
+	static <D> D fromPropertiesMap(final Map<String, Object> sourceMap, final InstanceFunction<D> instanceFunction) {
+		return convertFromMap(sourceMap, instanceFunction, Configuration.defaults());
+	}
 }

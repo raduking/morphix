@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,6 +51,29 @@ class MapConversionsToPropertiesMapTest {
 		public void setNestedValue(final String nestedValue) {
 			this.nestedValue = nestedValue;
 		}
+
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj instanceof Nested that) {
+				return Objects.equals(this.nestedValue, that.nestedValue);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(nestedValue);
+		}
+
+		@Override
+		public String toString() {
+			return "Nested{" +
+					"nestedValue='" + nestedValue + '\'' +
+					'}';
+		}
 	}
 
 	static class Everything {
@@ -67,6 +91,55 @@ class MapConversionsToPropertiesMapTest {
 		private Object[] arrayValue;
 		private Nested nestedObject;
 		private String nullValue;
+
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj instanceof Everything that) {
+				return Objects.equals(this.stringValue, that.stringValue) &&
+						Objects.equals(this.charSequenceValue.toString(), that.charSequenceValue.toString()) &&
+						Objects.equals(this.numberValue, that.numberValue) &&
+						Objects.equals(this.booleanValue, that.booleanValue) &&
+						this.enumValue == that.enumValue &&
+						Objects.equals(this.uuidValue, that.uuidValue) &&
+						Objects.equals(this.optionalValue, that.optionalValue) &&
+						Objects.equals(this.emptyOptional, that.emptyOptional) &&
+						Objects.equals(this.mapValue, that.mapValue) &&
+						Objects.equals(this.collectionValue, that.collectionValue) &&
+						Arrays.equals(this.arrayValue, that.arrayValue) &&
+						Objects.equals(this.nestedObject, that.nestedObject) &&
+						Objects.equals(this.nullValue, that.nullValue);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(stringValue, charSequenceValue.toString(), numberValue, booleanValue, enumValue, uuidValue,
+					optionalValue, emptyOptional, mapValue, collectionValue, Arrays.hashCode(arrayValue), nestedObject,
+					nullValue);
+		}
+
+		@Override
+		public String toString() {
+			return "Everything{" +
+					"stringValue='" + stringValue + '\'' +
+					", charSequenceValue=" + charSequenceValue +
+					", numberValue=" + numberValue +
+					", booleanValue=" + booleanValue +
+					", enumValue=" + enumValue +
+					", uuidValue=" + uuidValue +
+					", optionalValue=" + optionalValue +
+					", emptyOptional=" + emptyOptional +
+					", mapValue=" + mapValue +
+					", collectionValue=" + collectionValue +
+					", arrayValue=" + Arrays.toString(arrayValue) +
+					", nestedObject=" + nestedObject +
+					", nullValue='" + nullValue + '\'' +
+					'}';
+		}
 
 		public String getStringValue() {
 			return stringValue;
@@ -232,6 +305,70 @@ class MapConversionsToPropertiesMapTest {
 		Map<String, Object> params = MapConversions.toPropertiesMap(everything);
 
 		assertThat(params, equalTo(expected));
+	}
+
+	@Test
+	void shouldConvertToMapAndBack() {
+		Everything everything = createEverything();
+		// since the map, collection and array is converted to a string, we need to set it to null
+		// to be able to compare the objects after converting back from the map
+		everything.setMapValue(null);
+		everything.setCollectionValue(null);
+		everything.setArrayValue(null);
+
+		Map<String, Object> params = MapConversions.toPropertiesMap(everything);
+
+		Everything convertedBack = MapConversions.fromPropertiesMap(params, Everything::new);
+
+		assertThat(convertedBack, equalTo(everything));
+	}
+
+	static class WithOptional {
+
+		private Optional<String> optional;
+
+		public Optional<String> getOptional() {
+			return optional;
+		}
+
+		public void setOptional(final Optional<String> optional) {
+			this.optional = optional;
+		}
+
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj instanceof WithOptional that) {
+				return Objects.equals(this.optional, that.optional);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(optional);
+		}
+
+		@Override
+		public String toString() {
+			return "WithOptional{" +
+					"optional=" + optional +
+					'}';
+		}
+	}
+
+	@Test
+	void shouldConvertToMapAndBackWithEmptyOptional() {
+		WithOptional pojo = new WithOptional();
+		pojo.setOptional(Optional.empty());
+
+		Map<String, Object> params = MapConversions.toPropertiesMap(pojo);
+
+		WithOptional convertedBack = MapConversions.fromPropertiesMap(params, WithOptional::new);
+
+		assertThat(convertedBack, equalTo(pojo));
 	}
 
 	enum Mode {

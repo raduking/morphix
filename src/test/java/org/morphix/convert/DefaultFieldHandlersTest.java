@@ -33,12 +33,14 @@ import org.morphix.reflection.MemberAccessor;
 class DefaultFieldHandlersTest {
 
 	static final FieldHandler[] FIELD_HANDLERS = {
+			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_OPTIONAL,
 			DefaultFieldHandlers.FIELD_HANDLER_NULL_SOURCE_SKIPPER,
 			DefaultFieldHandlers.FIELD_HANDLER_STATIC_FIELD_SKIPPER,
 			DefaultFieldHandlers.FIELD_HANDLER_DIRECT_ASSIGNMENT,
 			DefaultFieldHandlers.FIELD_HANDLER_PRIMITIVE_ASSIGNMENT,
 			DefaultFieldHandlers.FIELD_HANDLER_NUMBER_TO_NUMBER,
 			DefaultFieldHandlers.FIELD_HANDLER_CHAR_SEQUENCE_TO_ENUM,
+			DefaultFieldHandlers.FIELD_HANDLER_OPTIONAL_TO_ANY,
 			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_STRING,
 			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_CHAR_ARRAY,
 			DefaultFieldHandlers.FIELD_HANDLER_CHAR_SEQUENCE_TO_ANY,
