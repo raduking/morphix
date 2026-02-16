@@ -74,7 +74,7 @@
 		<!-- Benchmarking -->
 		<jmh.version>1.37</jmh.version>
 
-        <!-- JVM arguments for Morphix tests and mutation testing -->
+		<!-- JVM arguments for Morphix tests and mutation testing -->
 		<morphixArgLine>
 			-XX:+EnableDynamicAgentLoading
 			-Xshare:off
@@ -125,21 +125,21 @@
 			<scope>test</scope>
 		</dependency>
 
-        <!-- Benchmarking dependencies (scope=test so they don't affect the main build) -->
+		<!-- Benchmarking dependencies (scope=test so they don't affect the main build) -->
 		<dependency>
 			<groupId>org.openjdk.jmh</groupId>
 			<artifactId>jmh-core</artifactId>
 			<version>${jmh.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.openjdk.jmh</groupId>
 			<artifactId>jmh-generator-annprocess</artifactId>
 			<version>${jmh.version}</version>
 			<scope>test</scope>
 		</dependency>
-      
+
 	</dependencies>
 
 	<build>
@@ -284,7 +284,7 @@
 						<groupId>io.github.raduking</groupId>
 						<artifactId>code-format</artifactId>
 						<version>${code.format.version}</version>
-                    </dependency>
+					</dependency>
 				</dependencies>
 				<configuration>
 					<java>
@@ -292,8 +292,10 @@
 							<file>java-code-style.xml</file>
 							<version>${eclipse.formatter.version}</version>
 						</eclipse>
-						<removeUnusedImports/>
-						<trimTrailingWhitespace/>
+						<removeUnusedImports />
+						<forbidWildcardImports />
+						<trimTrailingWhitespace />
+						<endWithNewline />
 					</java>
 				</configuration>
 				<executions>
@@ -330,11 +332,11 @@
 						<version>${maven.gpg.plugin.version}</version>
 						<executions>
 							<execution>
-							<id>sign-artifacts</id>
-							<phase>verify</phase>
-							<goals>
-								<goal>sign</goal>
-							</goals>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
 							</execution>
 						</executions>
 						<configuration>
@@ -345,7 +347,7 @@
 							</gpgArguments>
 						</configuration>
 					</plugin>
-				
+
 					<!-- Publish to Maven Central -->
 					<plugin>
 						<groupId>org.sonatype.central</groupId>
@@ -362,8 +364,8 @@
 				</plugins>
 			</build>
 		</profile>
-    	
-    	<profile>
+
+		<profile>
 			<id>benchmark</id>
 			<properties>
 				<annotation.processing>full</annotation.processing>
@@ -402,10 +404,10 @@
 							<resultFormat>JSON</resultFormat>
 							<resultsFile>target/jmh-result-${maven.build.timestamp}.json</resultsFile>
 						</configuration>
-					</plugin>					
+					</plugin>
 				</plugins>
 			</build>
-    	</profile>
+		</profile>
 	</profiles>
 
 	<reporting>
@@ -457,10 +459,10 @@
 			<name>Central Repository Snapshots</name>
 			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
-  		<repository>
+		<repository>
 			<id>central</id>
 			<name>Central Repository</name>
-    		<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
 
