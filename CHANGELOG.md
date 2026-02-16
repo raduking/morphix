@@ -14,6 +14,8 @@
 - Added `ExtendedFields` interface with utility methods for `ExtendedField`.
 - Moved `FieldFinderStrategy.findFields` to `ExtendedFields.findAllNonStatic`.
 - Added `Optional` fields support to object converter.
+- Added `MethodPredicates.hasSignature` as an alias for `isMethodWith`.
+- Added `FieldPredicates` utility class for `Field` related predicates.
 
 ---
 
