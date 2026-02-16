@@ -33,10 +33,10 @@ public class FieldPredicates {
 	}
 
 	/**
-	 * Predicate that checks if a field is of a certain type.
+	 * Predicate that checks if a field's declared type is assignable to the given type.
 	 *
 	 * @param type the type to check against
-	 * @return a predicate that checks if a field is of a certain type
+	 * @return a predicate that checks if a field's declared type is assignable to the given type
 	 */
 	public static Predicate<Field> typeIsA(final Class<?> type) {
 		return field -> type.isAssignableFrom(field.getType());
