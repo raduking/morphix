@@ -1,5 +1,24 @@
 ## Release Notes
 
+`1.0.22`
+
+- Renamed `AnyFromMap` field handler to `MapToAny`.
+- Added map conversions as part of converter handler chain so that map conversions can be done by default.
+- Added `MapConversions.toPropertiesMap(Object)` method that deep converts an object to a map of field names and values with support for cyclic references.
+- Renamed `Configuration.defaultConfiguration` to `Configuration.defaults`.
+- Added `ConversionContext` to track cyclic references during conversions.
+- Renamed `MethodType.getPredicate` to `MethodType.predicate`.
+- Renamed `ConversionStrategy` to `FieldFinderStrategy` to better suit its intent.
+- Renamed all finder strategies, they were/are meant as internal classes they all implement `ConversionStrategy`.
+- Added strategy based implementation to `MapConversions.toPropertiesMap`.
+- Added `ExtendedFields` interface with utility methods for `ExtendedField`.
+- Moved `FieldFinderStrategy.findFields` to `ExtendedFields.findAllNonStatic`.
+- Added `Optional` fields support to object converter.
+- Added `MethodPredicates.hasSignature` as an alias for `isMethodWith`.
+- Added `FieldPredicates` utility class for `Field` related predicates.
+
+---
+
 `1.0.21`
 
 - Added `JavaArrays` utility interface with utility methods for Java arrays.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -26,17 +26,17 @@ import org.morphix.reflection.Fields;
  *
  * @author Radu Sebastian LAZIN
  */
-public class PathStrategy implements ConversionStrategy {
+public class FinderPathStrategy implements FieldFinderStrategy {
 
 	/**
 	 * Default constructor.
 	 */
-	public PathStrategy() {
+	public FinderPathStrategy() {
 		// empty
 	}
 
 	/**
-	 * @see ConversionStrategy#find(Object, List, String)
+	 * @see FieldFinderStrategy#find(Object, List, String)
 	 */
 	@Override
 	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
@@ -76,7 +76,9 @@ public class PathStrategy implements ConversionStrategy {
 				break;
 			}
 		}
+		if (null == resultObject) {
+			return ExtendedField.EMPTY;
+		}
 		return of(resultField, resultObject);
 	}
-
 }

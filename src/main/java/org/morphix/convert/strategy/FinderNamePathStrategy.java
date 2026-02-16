@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -21,17 +21,17 @@ import org.morphix.reflection.ExtendedField;
  *
  * @author Radu Sebastian LAZIN
  */
-public class NamePathStrategy extends PathStrategy {
+public class FinderNamePathStrategy extends FinderPathStrategy {
 
 	/**
 	 * Default constructor.
 	 */
-	public NamePathStrategy() {
+	public FinderNamePathStrategy() {
 		// empty
 	}
 
 	/**
-	 * @see ConversionStrategy#find(Object, List, String)
+	 * @see FieldFinderStrategy#find(Object, List, String)
 	 */
 	@Override
 	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
@@ -48,5 +48,4 @@ public class NamePathStrategy extends PathStrategy {
 		String[] tokens = sourceString.split("(?=\\p{Lu})");
 		return String.join(".", tokens).toLowerCase();
 	}
-
 }

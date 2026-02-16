@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -26,17 +26,24 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.lang.function.InstanceFunction;
 
 /**
- * Test class for map conversions.
+ * Test class for:
+ *
+ * <ul>
+ * <li>{@link MapConversions#convertMap(Map, InstanceFunction, InstanceFunction)}</li>
+ * <li>{@link MapConversions#convertMap(Map, Function, Function)}</li>
+ * </ul>
  *
  * @author Radu Sebastian LAZIN
  */
-class FromMapTest {
+class MapConversionsConvertMapTest {
 
 	private static final int SIZE = 10;
 
 	static class Src {
+
 		public Integer s;
 
 		public Src(final Integer s) {
@@ -65,6 +72,7 @@ class FromMapTest {
 	}
 
 	static class Dst {
+
 		public String s;
 
 		@Override
@@ -115,5 +123,4 @@ class FromMapTest {
 			assertThat(dst.s, equalTo(s));
 		}
 	}
-
 }

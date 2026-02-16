@@ -24,9 +24,10 @@ import org.morphix.convert.annotation.Src;
 import org.morphix.convert.function.ConvertFunction;
 import org.morphix.convert.function.InstanceConvertFunction;
 import org.morphix.convert.function.SimpleConverter;
-import org.morphix.convert.strategy.ConversionStrategy;
+import org.morphix.convert.strategy.FieldFinderStrategy;
 import org.morphix.lang.function.InstanceFunction;
 import org.morphix.reflection.ExtendedField;
+import org.morphix.reflection.ExtendedFields;
 
 /**
  * Converter class that will try to convert an object of type S (source) to an object of type D (destination).
@@ -57,7 +58,7 @@ public class ObjectConverter<S, D> implements
 	 * Default constructor.
 	 */
 	public ObjectConverter() {
-		this(Configuration.defaultConfiguration());
+		this(Configuration.defaults());
 	}
 
 	/**
@@ -83,7 +84,7 @@ public class ObjectConverter<S, D> implements
 	 *
 	 * @return a list of strategies with which to find the fields in the source
 	 */
-	public List<ConversionStrategy> getStrategies() {
+	public List<FieldFinderStrategy> getStrategies() {
 		return this.configuration.getStrategies();
 	}
 
@@ -165,20 +166,20 @@ public class ObjectConverter<S, D> implements
 	 * @param destination destination object
 	 */
 	private void mainConvert(final S source, final D destination) {
-		List<ExtendedField> dstFields = ConversionStrategy.findFields(destination);
+		List<ExtendedField> dstFields = ExtendedFields.findAllNonStatic(destination);
 		if (dstFields.isEmpty()) {
 			return;
 		}
-		List<ExtendedField> srcFields = ConversionStrategy.findFields(source);
+		List<ExtendedField> srcFields = ExtendedFields.findAllNonStatic(source);
 		if (srcFields.isEmpty()) {
 			return;
 		}
 		for (ExtendedField dfo : dstFields) {
 			String srcFieldName = getSourceFieldName(dfo, source);
 			// apply source field finding strategies
-			for (ConversionStrategy strategy : getStrategies()) {
+			for (FieldFinderStrategy strategy : getStrategies()) {
 				ExtendedField sfo = strategy.find(source, srcFields, srcFieldName);
-				if (sfo.hasObject()) {
+				if (ExtendedField.EMPTY != sfo) {
 					convertField(sfo, dfo);
 					break;
 				}
@@ -216,7 +217,7 @@ public class ObjectConverter<S, D> implements
 	 * @param source source object
 	 * @return source field name
 	 */
-	public <T> String getSourceFieldName(final ExtendedField dfo, final T source) {
+	public static <T> String getSourceFieldName(final ExtendedField dfo, final T source) {
 		Src srcAnnotation = null;
 		Method getterMethod = dfo.getGetterMethod();
 		if (null != getterMethod) {
@@ -240,5 +241,4 @@ public class ObjectConverter<S, D> implements
 		}
 		return srcAnnotation.name().isEmpty() ? srcAnnotation.value() : srcAnnotation.name();
 	}
-
 }

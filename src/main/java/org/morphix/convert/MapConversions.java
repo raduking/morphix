@@ -16,13 +16,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.morphix.convert.context.CyclicReferencesContext;
 import org.morphix.convert.function.ConvertFunction;
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.convert.pipeline.MapConversionPipeline;
-import org.morphix.convert.strategy.ConversionStrategy;
+import org.morphix.lang.JavaObjects;
 import org.morphix.lang.function.InstanceFunction;
 import org.morphix.lang.function.PutFunction;
 import org.morphix.reflection.ExtendedField;
+import org.morphix.reflection.ExtendedFields;
 
 /**
  * Utility interface for conversion static methods.
@@ -43,7 +45,41 @@ public interface MapConversions {
 	 * @return destination object
 	 */
 	static <V, D> D convertFromMap(final Map<String, V> sourceMap, final InstanceFunction<D> instanceFunction) {
-		return ConverterFactory.<V, D>newMapObjectConverter().convert(sourceMap, instanceFunction);
+		return convertFromMap(sourceMap, instanceFunction, Configuration.defaults());
+	}
+
+	/**
+	 * Convenience static conversion method to convert from a map to an object. The map contains field names as keys and
+	 * objects as values.
+	 *
+	 * @param <V> map value type
+	 * @param <D> destination type
+	 *
+	 * @param sourceMap source map object
+	 * @param instanceFunction destination instance function
+	 * @param configuration configuration object
+	 * @return destination object
+	 */
+	static <V, D> D convertFromMap(final Map<String, V> sourceMap, final InstanceFunction<D> instanceFunction, final Configuration configuration) {
+		return ConverterFactory.<V, D>newMapObjectConverter(configuration).convert(sourceMap, instanceFunction);
+	}
+
+	/**
+	 * Convenience static conversion method to convert from a map to an object. The map contains field names as keys and
+	 * objects as values.
+	 *
+	 * @param <V> map value type
+	 * @param <D> destination type
+	 *
+	 * @param sourceMap source map object
+	 * @param instanceFunction destination instance function
+	 * @param extraConvertFunction extra convert function
+	 * @param configuration configuration object
+	 * @return destination object
+	 */
+	static <V, D> D convertFromMap(final Map<String, V> sourceMap, final InstanceFunction<D> instanceFunction,
+			final ConvertFunction<Map<String, V>, D> extraConvertFunction, final Configuration configuration) {
+		return ConverterFactory.<V, D>newMapObjectConverter(configuration).convert(sourceMap, instanceFunction, extraConvertFunction);
 	}
 
 	/**
@@ -60,7 +96,7 @@ public interface MapConversions {
 	 */
 	static <V, D> D convertFromMap(final Map<String, V> sourceMap, final InstanceFunction<D> instanceFunction,
 			final ConvertFunction<Map<String, V>, D> extraConvertFunction) {
-		return ConverterFactory.<V, D>newMapObjectConverter().convert(sourceMap, instanceFunction, extraConvertFunction);
+		return convertFromMap(sourceMap, instanceFunction, extraConvertFunction, Configuration.defaults());
 	}
 
 	/**
@@ -119,9 +155,9 @@ public interface MapConversions {
 	}
 
 	/**
-	 * Convenience static method to convert an object to a map conversion pipeline. If the source is null, an empty map is
-	 * returned. The putFunction is used to put values into the map and can be used to customize the behavior (e.g., to
-	 * handle specific types or to apply transformations or even filtering).
+	 * Convenience static method to convert an object to a map. If the source is null, an empty map is returned. The
+	 * putFunction is used to put values into the map and can be used to customize the behavior (e.g., to handle specific
+	 * types or to apply transformations or even filtering).
 	 * <p>
 	 * If the source is null, an empty map conversion pipeline is returned.
 	 * <p>
@@ -143,8 +179,8 @@ public interface MapConversions {
 		if (source == null) {
 			return convertMap(Map.of(), keyConverter, valueConverter);
 		}
-		List<ExtendedField> fields = ConversionStrategy.findFields(source);
-		Map<String, Object> map = new HashMap<>(fields.size());
+		List<ExtendedField> fields = ExtendedFields.findAllNonStatic(source);
+		Map<String, Object> map = HashMap.newHashMap(fields.size());
 		for (ExtendedField field : fields) {
 			putFunction.put(map, field.getName(), field.getFieldValue());
 		}
@@ -195,5 +231,39 @@ public interface MapConversions {
 	static <S, H, D> Map<H, D> convertToMap(final S source, final SimpleConverter<String, H> keyConverter,
 			final SimpleConverter<Object, D> valueConverter) {
 		return convertToMap(source, keyConverter, valueConverter, Map::put);
+	}
+
+	/**
+	 * Convenience static method to convert an object to a properties map. The keys are the field names and the values are
+	 * the field values. The values are converted to simple types (e.g., String, Number, Boolean, Enum, UUID) or to maps or
+	 * collections of simple types. If a value is an object that is not a simple type, it is converted to a map recursively.
+	 * <p>
+	 * If the source is null, an empty map returned.
+	 * <p>
+	 * For sources that are already maps, use the {@link #convertMap(Map, SimpleConverter, SimpleConverter)}.
+	 *
+	 * @param <S> source type
+	 *
+	 * @param source source object
+	 * @return destination map
+	 */
+	static <S> Map<String, Object> toPropertiesMap(final S source) {
+		PropertyConversionEngine engine = PropertyConversionEngine.getDefault();
+		return JavaObjects.cast(engine.convert(source, new CyclicReferencesContext()));
+	}
+
+	/**
+	 * Convenience static method to convert from a properties map to an object. The map contains field names as keys and
+	 * objects as values. The values are expected to be simple types (e.g., String, Number, Boolean, Enum, UUID) or maps or
+	 * collections of simple types. If a value is a map that is not a simple type, it is converted to an object recursively.
+	 *
+	 * @param <D> destination type
+	 *
+	 * @param sourceMap source map object
+	 * @param instanceFunction destination instance function
+	 * @return destination object
+	 */
+	static <D> D fromPropertiesMap(final Map<String, Object> sourceMap, final InstanceFunction<D> instanceFunction) {
+		return convertFromMap(sourceMap, instanceFunction, Configuration.defaults());
 	}
 }

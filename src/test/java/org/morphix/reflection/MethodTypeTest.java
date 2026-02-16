@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -232,7 +232,7 @@ class MethodTypeTest {
 	void shouldReturnTrueForGetterPredicate() throws Exception {
 		Method method = C.class.getDeclaredMethod("getC");
 
-		boolean isGetter = MethodType.GETTER.getPredicate().test(method);
+		boolean isGetter = MethodType.GETTER.predicate().test(method);
 
 		assertTrue(isGetter);
 	}
@@ -241,7 +241,7 @@ class MethodTypeTest {
 	void shouldReturnTrueForIsGetterPredicate() throws Exception {
 		Method method = C.class.getDeclaredMethod("isX");
 
-		boolean isGetter = MethodType.GETTER.getPredicate().test(method);
+		boolean isGetter = MethodType.GETTER.predicate().test(method);
 
 		assertTrue(isGetter);
 	}
@@ -250,7 +250,7 @@ class MethodTypeTest {
 	void shouldReturnFalseForGetterPredicateOnNonGetter() throws Exception {
 		Method method = C.class.getDeclaredMethod("popX");
 
-		boolean isGetter = MethodType.GETTER.getPredicate().test(method);
+		boolean isGetter = MethodType.GETTER.predicate().test(method);
 
 		assertFalse(isGetter);
 	}
@@ -259,7 +259,7 @@ class MethodTypeTest {
 	void shouldReturnFalseForSetterPredicateOnNonSetter() throws Exception {
 		Method method = C.class.getDeclaredMethod("popX", String.class);
 
-		boolean isSetter = MethodType.SETTER.getPredicate().test(method);
+		boolean isSetter = MethodType.SETTER.predicate().test(method);
 
 		assertFalse(isSetter);
 	}
@@ -268,7 +268,7 @@ class MethodTypeTest {
 	void shouldReturnFalseForGetterPredicateOnNonGetterWithParameters() throws Exception {
 		Method method = C.class.getDeclaredMethod("getY", int.class);
 
-		boolean isGetter = MethodType.GETTER.getPredicate().test(method);
+		boolean isGetter = MethodType.GETTER.predicate().test(method);
 
 		assertFalse(isGetter);
 	}

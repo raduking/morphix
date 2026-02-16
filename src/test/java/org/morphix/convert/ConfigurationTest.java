@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -26,7 +26,7 @@ import org.morphix.convert.Configuration.Default;
 import org.morphix.convert.extras.ExcludedFields;
 import org.morphix.convert.extras.ExpandableFields;
 import org.morphix.convert.extras.SimpleConverters;
-import org.morphix.convert.strategy.ConversionStrategy;
+import org.morphix.convert.strategy.FieldFinderStrategy;
 
 /**
  * Test class for {@link Configuration}.
@@ -37,7 +37,7 @@ class ConfigurationTest {
 
 	@Test
 	void shouldFailEqualsOnWrongClass() {
-		Configuration config = Configuration.defaultConfiguration();
+		Configuration config = Configuration.defaults();
 		@SuppressWarnings("unlikely-arg-type")
 		boolean result = config.equals("config");
 
@@ -47,7 +47,7 @@ class ConfigurationTest {
 	@Test
 	void shouldUseAllMembersOnHashCode() {
 		List<FieldHandler> fieldHandlers = Collections.singletonList(DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_ANY);
-		List<ConversionStrategy> strategies = Collections.singletonList(DefaultStrategies.STRATEGY_BASIC_NAME);
+		List<FieldFinderStrategy> strategies = Collections.singletonList(DefaultStrategies.STRATEGY_BASIC_NAME);
 		ExcludedFields excludedFields = ExcludedFields.of(Collections.singletonList("y"));
 		ExpandableFields expandableFields = ExpandableFields.of(Collections.singletonList("x"));
 		SimpleConverters simpleConverters = SimpleConverters.empty();
@@ -67,7 +67,7 @@ class ConfigurationTest {
 
 	@Test
 	void shouldReturnEqualOnDefaultConfigurations() {
-		boolean result = Configuration.defaultConfiguration().equals(Configuration.defaultConfiguration());
+		boolean result = Configuration.defaults().equals(Configuration.defaults());
 		assertThat(result, equalTo(true));
 	}
 
@@ -80,14 +80,13 @@ class ConfigurationTest {
 				Default.EXPANDABLE_FIELDS,
 				Default.SIMPLE_CONVERTERS);
 
-		System.out.println("" + configuration.getGenericTypesMap() + " - " + Configuration.defaultConfiguration().getGenericTypesMap());
-
+		assertThat(configuration.getGenericTypesMap(), equalTo(Configuration.defaults().getGenericTypesMap()));
 		assertTrue(configuration.isDefault());
 	}
 
 	@Test
 	void shouldReturnFalseOnEqualsWithNull() {
-		Configuration configuration = Configuration.defaultConfiguration();
+		Configuration configuration = Configuration.defaults();
 
 		boolean result = configuration.equals(null);
 
@@ -96,7 +95,7 @@ class ConfigurationTest {
 
 	@Test
 	void shouldReturnTrueOnEqualsWithTheSameObject() {
-		Configuration configuration = Configuration.defaultConfiguration();
+		Configuration configuration = Configuration.defaults();
 
 		boolean result = configuration.equals(configuration);
 
@@ -222,5 +221,4 @@ class ConfigurationTest {
 
 		assertFalse(result);
 	}
-
 }

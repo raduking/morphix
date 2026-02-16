@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -16,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.morphix.convert.DefaultStrategies.STRATEGY_BASIC_NAME;
+import static org.morphix.convert.DefaultStrategies.STRATEGY_FIELD_NAME_MAP;
 import static org.morphix.convert.DefaultStrategies.STRATEGY_NAME_PATH;
 import static org.morphix.convert.DefaultStrategies.STRATEGY_PATH;
 
@@ -23,7 +24,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.junit.jupiter.api.Test;
-import org.morphix.convert.strategy.ConversionStrategy;
+import org.morphix.convert.strategy.FieldFinderStrategy;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.MemberAccessor;
 
@@ -34,8 +35,9 @@ import org.morphix.reflection.MemberAccessor;
  */
 class DefaultStrategiesTest {
 
-	static final ConversionStrategy[] STRATEGIES = {
+	static final FieldFinderStrategy[] STRATEGIES = {
 			STRATEGY_BASIC_NAME,
+			STRATEGY_FIELD_NAME_MAP,
 			STRATEGY_PATH,
 			STRATEGY_NAME_PATH
 	};
@@ -54,7 +56,7 @@ class DefaultStrategiesTest {
 	}
 
 	@Test
-	void shouldKeepTheHandlersOrder() {
+	void shouldKeepTheStrategiesOrder() {
 		for (int i = 0; i < STRATEGIES.length; ++i) {
 			assertThat(STRATEGIES[i], equalTo(DefaultStrategies.STRATEGIES_CHAIN[i]));
 		}

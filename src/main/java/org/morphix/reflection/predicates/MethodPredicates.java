@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -83,7 +83,7 @@ public final class MethodPredicates {
 	 * @param paramTypes parameter types
 	 * @return predicate
 	 */
-	public static Predicate<Method> isMethodWith(final Class<?> returnType, final Class<?>... paramTypes) {
+	public static Predicate<Method> hasSignature(final Class<?> returnType, final Class<?>... paramTypes) {
 		return method -> {
 			Class<?>[] methodParamTypes = method.getParameterTypes();
 			if (methodParamTypes.length != paramTypes.length) {
@@ -98,6 +98,17 @@ public final class MethodPredicates {
 	}
 
 	/**
+	 * Returns a predicate for method with given return type and parameters.
+	 *
+	 * @param returnType return type of the method
+	 * @param paramTypes parameter types
+	 * @return predicate
+	 */
+	public static Predicate<Method> isMethodWith(final Class<?> returnType, final Class<?>... paramTypes) {
+		return hasSignature(returnType, paramTypes);
+	}
+
+	/**
 	 * Returns a predicate that checks if the method is a getter for the given field.
 	 *
 	 * @param field for which to check getter
@@ -108,5 +119,4 @@ public final class MethodPredicates {
 				hasName(MethodType.GETTER.getMethodName(field))
 						.or(hasName(MethodType.getMethodName(Prefix.GET, field))));
 	}
-
 }

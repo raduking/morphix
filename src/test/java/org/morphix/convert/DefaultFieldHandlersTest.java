@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -33,12 +33,14 @@ import org.morphix.reflection.MemberAccessor;
 class DefaultFieldHandlersTest {
 
 	static final FieldHandler[] FIELD_HANDLERS = {
+			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_OPTIONAL,
 			DefaultFieldHandlers.FIELD_HANDLER_NULL_SOURCE_SKIPPER,
 			DefaultFieldHandlers.FIELD_HANDLER_STATIC_FIELD_SKIPPER,
 			DefaultFieldHandlers.FIELD_HANDLER_DIRECT_ASSIGNMENT,
 			DefaultFieldHandlers.FIELD_HANDLER_PRIMITIVE_ASSIGNMENT,
 			DefaultFieldHandlers.FIELD_HANDLER_NUMBER_TO_NUMBER,
 			DefaultFieldHandlers.FIELD_HANDLER_CHAR_SEQUENCE_TO_ENUM,
+			DefaultFieldHandlers.FIELD_HANDLER_OPTIONAL_TO_ANY,
 			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_STRING,
 			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_CHAR_ARRAY,
 			DefaultFieldHandlers.FIELD_HANDLER_CHAR_SEQUENCE_TO_ANY,
@@ -49,7 +51,8 @@ class DefaultFieldHandlersTest {
 			DefaultFieldHandlers.FIELD_HANDLER_MAP_TO_MAP,
 			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_ANY_FROM_STATIC_METHOD,
 			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_ANY_FROM_CONSTRUCTOR,
-			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_ITERABLE
+			DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_ITERABLE,
+			DefaultFieldHandlers.FIELD_HANDLER_MAP_TO_ANY,
 	};
 
 	@Test

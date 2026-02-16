@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,7 +14,6 @@ package org.morphix.convert.strategy;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.morphix.convert.annotation.Src;
 import org.morphix.reflection.ExtendedField;
@@ -24,23 +23,22 @@ import org.morphix.reflection.ExtendedField;
  *
  * @author Radu Sebastian LAZIN
  */
-public class BasicNameStrategy implements ConversionStrategy {
+public class FinderNameStrategy implements FieldFinderStrategy {
 
 	/**
 	 * Default constructor.
 	 */
-	public BasicNameStrategy() {
+	public FinderNameStrategy() {
 		// empty
 	}
 
 	/**
-	 * @see ConversionStrategy#find(Object, List, String)
+	 * @see FieldFinderStrategy#find(Object, List, String)
 	 */
 	@Override
 	public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
 		// TODO: implement for empty fields, assume fields are available for now
-		Optional<ExtendedField> sField = findFieldByName(fields, sourceFieldName);
-		return sField.orElse(ExtendedField.EMPTY);
+		return findFieldByName(fields, sourceFieldName);
 	}
 
 	/**
@@ -49,15 +47,14 @@ public class BasicNameStrategy implements ConversionStrategy {
 	 *
 	 * @param fields source object fields
 	 * @param fieldName field name
-	 * @return optional with field information
+	 * @return extended field if found, empty otherwise
 	 */
-	protected static Optional<ExtendedField> findFieldByName(final List<ExtendedField> fields, final String fieldName) {
+	protected static ExtendedField findFieldByName(final List<ExtendedField> fields, final String fieldName) {
 		for (ExtendedField extendedField : fields) {
 			if (Objects.equals(fieldName, extendedField.getName())) {
-				return Optional.of(extendedField);
+				return extendedField;
 			}
 		}
-		return Optional.empty();
+		return ExtendedField.EMPTY;
 	}
-
 }

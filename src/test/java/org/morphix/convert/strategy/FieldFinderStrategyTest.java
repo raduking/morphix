@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -22,11 +22,11 @@ import org.junit.jupiter.api.Test;
 import org.morphix.reflection.ExtendedField;
 
 /**
- * Test class for {@link ConversionStrategy}.
+ * Test class for {@link FieldFinderStrategy}.
  *
  * @author Radu Sebastian LAZIN
  */
-class ConversionStrategyTest {
+class FieldFinderStrategyTest {
 
 	public static class A {
 		String x;
@@ -48,7 +48,7 @@ class ConversionStrategyTest {
 		// empty
 	}
 
-	public static class TestStrategy implements ConversionStrategy {
+	public static class TestStrategy implements FieldFinderStrategy {
 		@Override
 		public <T> ExtendedField find(final T source, final List<ExtendedField> fields, final String sourceFieldName) {
 			return null;

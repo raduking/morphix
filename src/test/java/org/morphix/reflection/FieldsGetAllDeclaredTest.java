@@ -15,6 +15,8 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.morphix.reflection.predicates.FieldPredicates.typeIsA;
+import static org.morphix.reflection.predicates.MemberPredicates.isStatic;
 import static org.morphix.reflection.predicates.MemberPredicates.withAnnotation;
 
 import java.lang.reflect.Field;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.lang.function.Predicates;
 
 /**
  * Test class for:
@@ -185,5 +188,36 @@ class FieldsGetAllDeclaredTest {
 		Object cls = B.class;
 		List<Field> annotatedFields = Fields.getAllDeclared(cls, null);
 		assertThat(annotatedFields, hasSize(0));
+	}
+
+	static class S {
+
+		static final String STATIC_STRING_FIELD = "static";
+		static final CharSequence STATIC_CHAR_SEQUENCE_FIELD = "static char sequence";
+		static final Object STATIC_OBJECT_FIELD = "static object";
+
+		@SuppressWarnings("unused")
+		private String x;
+		@SuppressWarnings("unused")
+		private CharSequence y;
+		@SuppressWarnings("unused")
+		private Object z;
+	}
+
+	@Test
+	void shouldReturnOnlyCharSequenceFields() throws Exception {
+		List<Field> charSequenceFields = Fields.getAllDeclared(S.class, Predicates.allOf(isStatic(), typeIsA(CharSequence.class)));
+
+		assertThat(charSequenceFields, hasSize(2));
+		assertThat(charSequenceFields.get(0).getName(), equalTo("STATIC_STRING_FIELD"));
+		assertThat(charSequenceFields.get(1).getName(), equalTo("STATIC_CHAR_SEQUENCE_FIELD"));
+	}
+
+	@Test
+	void shouldReturnOnlyStringFields() throws Exception {
+		List<Field> charSequenceFields = Fields.getAllDeclared(S.class, Predicates.allOf(isStatic(), typeIsA(String.class)));
+
+		assertThat(charSequenceFields, hasSize(1));
+		assertThat(charSequenceFields.get(0).getName(), equalTo("STATIC_STRING_FIELD"));
 	}
 }

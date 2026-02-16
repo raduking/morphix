@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -22,7 +22,6 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 import org.morphix.lang.function.IntPredicates;
-import org.morphix.lang.function.Predicates;
 import org.morphix.reflection.Constructors;
 
 /**
@@ -60,10 +59,8 @@ public class MemberPredicates {
 	 * @return a predicate that tests for the given modifiers
 	 */
 	public static <T extends Member> Predicate<T> withAnyModifiers(final IntPredicate... modifierPredicates) {
-		return member -> {
-			IntPredicate predicate = IntPredicates.anyOf(modifierPredicates);
-			return predicate.test(member.getModifiers());
-		};
+		IntPredicate anyModifiers = IntPredicates.anyOf(modifierPredicates);
+		return member -> anyModifiers.test(member.getModifiers());
 	}
 
 	/**
@@ -75,10 +72,8 @@ public class MemberPredicates {
 	 * @return a predicate that tests for the given modifiers
 	 */
 	public static <T extends Member> Predicate<T> withAllModifiers(final IntPredicate... modifierPredicates) {
-		return member -> {
-			IntPredicate predicate = IntPredicates.allOf(modifierPredicates);
-			return predicate.test(member.getModifiers());
-		};
+		IntPredicate allModifiers = IntPredicates.allOf(modifierPredicates);
+		return member -> allModifiers.test(member.getModifiers());
 	}
 
 	/**
@@ -131,14 +126,14 @@ public class MemberPredicates {
 	}
 
 	/**
-	 * Returns a predicate that verifies if a member is static.
+	 * Returns a predicate that verifies if a member is not static.
 	 *
 	 * @param <T> member type, can be Field, Method, etc
 	 *
-	 * @return a predicate that verifies if a member is static
+	 * @return a predicate that verifies if a member is not static
 	 */
 	public static <T extends Member> Predicate<T> isNotStatic() {
-		return Predicates.cast(isStatic().negate());
+		return member -> !Modifier.isStatic(member.getModifiers());
 	}
 
 	/**

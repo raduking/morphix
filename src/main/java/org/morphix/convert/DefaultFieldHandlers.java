@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,12 +14,12 @@ package org.morphix.convert;
 
 import java.util.List;
 
-import org.morphix.convert.handler.AnyFromMap;
 import org.morphix.convert.handler.AnyToAny;
 import org.morphix.convert.handler.AnyToAnyFromConstructor;
 import org.morphix.convert.handler.AnyToAnyFromStaticMethod;
 import org.morphix.convert.handler.AnyToCharArray;
 import org.morphix.convert.handler.AnyToIterable;
+import org.morphix.convert.handler.AnyToOptional;
 import org.morphix.convert.handler.AnyToString;
 import org.morphix.convert.handler.ArrayToArray;
 import org.morphix.convert.handler.ArrayToIterable;
@@ -28,9 +28,11 @@ import org.morphix.convert.handler.CharSequenceToEnum;
 import org.morphix.convert.handler.DirectAssignment;
 import org.morphix.convert.handler.IterableToArray;
 import org.morphix.convert.handler.IterableToIterable;
+import org.morphix.convert.handler.MapToAny;
 import org.morphix.convert.handler.MapToMap;
 import org.morphix.convert.handler.NullSourceSkipper;
 import org.morphix.convert.handler.NumberToNumber;
+import org.morphix.convert.handler.OptionalToAny;
 import org.morphix.convert.handler.PrimitiveAssignment;
 import org.morphix.convert.handler.StaticFieldSkipper;
 import org.morphix.reflection.Constructors;
@@ -72,6 +74,16 @@ public final class DefaultFieldHandlers {
 	 * {@link CharSequenceToEnum} default instance.
 	 */
 	public static final FieldHandler FIELD_HANDLER_CHAR_SEQUENCE_TO_ENUM = new CharSequenceToEnum();
+
+	/**
+	 * {@link OptionalToAny} default instance.
+	 */
+	public static final FieldHandler FIELD_HANDLER_OPTIONAL_TO_ANY = new OptionalToAny();
+
+	/**
+	 * {@link OptionalToAny} default instance.
+	 */
+	public static final FieldHandler FIELD_HANDLER_ANY_TO_OPTIONAL = new AnyToOptional();
 
 	/**
 	 * {@link AnyToString} default instance.
@@ -129,25 +141,27 @@ public final class DefaultFieldHandlers {
 	public static final FieldHandler FIELD_HANDLER_ANY_TO_ITERABLE = new AnyToIterable();
 
 	/**
+	 * {@link MapToAny} default instance.
+	 */
+	public static final FieldHandler FIELD_HANDLER_MAP_TO_ANY = new MapToAny();
+
+	/**
 	 * {@link AnyToAny} default instance.
 	 */
 	public static final FieldHandler FIELD_HANDLER_ANY_TO_ANY = new AnyToAny();
 
 	/**
-	 * {@link AnyFromMap} default instance.
-	 */
-	public static final FieldHandler FIELD_HANDLER_ANY_FROM_MAP = new AnyFromMap();
-
-	/**
 	 * Default field handlers chain (as array).
 	 */
 	static final FieldHandler[] FIELD_HANDLERS_CHAIN = {
+			FIELD_HANDLER_ANY_TO_OPTIONAL,
 			FIELD_HANDLER_NULL_SOURCE_SKIPPER,
 			FIELD_HANDLER_STATIC_FIELD_SKIPPER,
 			FIELD_HANDLER_DIRECT_ASSIGNMENT,
 			FIELD_HANDLER_PRIMITIVE_ASSIGNMENT,
 			FIELD_HANDLER_NUMBER_TO_NUMBER,
 			FIELD_HANDLER_CHAR_SEQUENCE_TO_ENUM,
+			FIELD_HANDLER_OPTIONAL_TO_ANY,
 			FIELD_HANDLER_ANY_TO_STRING,
 			FIELD_HANDLER_ANY_TO_CHAR_ARRAY,
 			FIELD_HANDLER_CHAR_SEQUENCE_TO_ANY,
@@ -158,7 +172,8 @@ public final class DefaultFieldHandlers {
 			FIELD_HANDLER_MAP_TO_MAP,
 			FIELD_HANDLER_ANY_TO_ANY_FROM_STATIC_METHOD,
 			FIELD_HANDLER_ANY_TO_ANY_FROM_CONSTRUCTOR,
-			FIELD_HANDLER_ANY_TO_ITERABLE
+			FIELD_HANDLER_ANY_TO_ITERABLE,
+			FIELD_HANDLER_MAP_TO_ANY
 	};
 
 	/**

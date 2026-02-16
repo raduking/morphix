@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -103,15 +103,10 @@ public interface ConverterFactory {
 	 * @param <V> map key type
 	 * @param <D> destination type
 	 *
+	 * @param configuration conversion configuration
 	 * @return a new {@link ObjectConverter} for map conversions
 	 */
-	static <V, D> ObjectConverter<Map<String, V>, D> newMapObjectConverter() {
-		Configuration configuration = Configuration.of(
-				List.of(DefaultFieldHandlers.FIELD_HANDLER_ANY_FROM_MAP),
-				List.of(DefaultStrategies.STRATEGY_FIELD_NAME_MAP),
-				Configuration.Default.EXCLUDED_FIELDS,
-				Configuration.Default.EXPANDABLE_FIELDS,
-				Configuration.Default.SIMPLE_CONVERTERS);
-		return new ObjectConverter<>(configuration);
+	static <V, D> ObjectConverter<Map<String, V>, D> newMapObjectConverter(final Configuration configuration) {
+		return ConverterFactory.newObjectConverter(configuration);
 	}
 }

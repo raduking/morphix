@@ -116,12 +116,18 @@ public class MapConversionPipeline<I, S, J, D> {
 	 * @return destination map
 	 */
 	public <T extends Map<J, D>> T to(final Map<J, D> result) {
-		for (Map.Entry<I, S> entry : this.sourceMap.entrySet()) {
+		if (null == result) {
+			throw new IllegalArgumentException("Result map cannot be null");
+		}
+		if (null == sourceMap) {
+			return JavaObjects.cast(result);
+		}
+		for (Map.Entry<I, S> entry : sourceMap.entrySet()) {
 			J destinationKey = hasKeyInstanceFunction()
-					? convertEnvelopedFrom(entry.getKey(), keyInstanceFunction, Configuration.defaultConfiguration())
+					? convertEnvelopedFrom(entry.getKey(), keyInstanceFunction, Configuration.defaults())
 					: keyConverter.convert(entry.getKey());
 			D destinationValue = hasValueInstanceFunction()
-					? convertEnvelopedFrom(entry.getValue(), valueInstanceFunction, Configuration.defaultConfiguration())
+					? convertEnvelopedFrom(entry.getValue(), valueInstanceFunction, Configuration.defaults())
 					: valueConverter.convert(entry.getValue());
 			putFunction.put(result, destinationKey, destinationValue);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 the original author or authors.
+ * Copyright 2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -59,8 +59,7 @@ public interface Conversions {
 	 * @return destination object
 	 */
 	static <S, D> D convertFrom(final S source, final InstanceFunction<D> instanceFunction) {
-		return convertFrom(source, instanceFunction, ConvertFunction.empty(),
-				Configuration.defaultConfiguration());
+		return convertFrom(source, instanceFunction, ConvertFunction.empty(), Configuration.defaults());
 	}
 
 	/**
@@ -75,8 +74,7 @@ public interface Conversions {
 	 * @return destination object
 	 */
 	static <S, D> D convertFrom(final S source, final InstanceFunction<D> instanceFunction, final ConvertFunction<S, D> extraConvertFunction) {
-		return convertFrom(source, instanceFunction, extraConvertFunction,
-				Configuration.defaultConfiguration());
+		return convertFrom(source, instanceFunction, extraConvertFunction, Configuration.defaults());
 	}
 
 	/**
@@ -315,7 +313,7 @@ public interface Conversions {
 	 * @return destination object
 	 */
 	static <S, D> D convertFrom(final S source, final Class<D> destinationClass) {
-		return convertFrom(source, destinationClass, Configuration.defaultConfiguration());
+		return convertFrom(source, destinationClass, Configuration.defaults());
 	}
 
 	/**
@@ -385,7 +383,7 @@ public interface Conversions {
 	 * @return destination object
 	 */
 	static <S, D> D convertFrom(final S source, final Type type) {
-		return convertFrom(source, type, ConvertFunction.empty(), Configuration.defaultConfiguration());
+		return convertFrom(source, type, ConvertFunction.empty(), Configuration.defaults());
 	}
 
 	/**
