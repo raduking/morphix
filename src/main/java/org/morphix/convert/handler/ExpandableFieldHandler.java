@@ -56,6 +56,9 @@ public final class ExpandableFieldHandler extends FieldHandler {
 		super(configuration);
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		// see if we have specific instantiator first
@@ -73,6 +76,9 @@ public final class ExpandableFieldHandler extends FieldHandler {
 		return CONVERTED;
 	}
 
+	/**
+	 * @see FieldHandler#condition(ExtendedField, ExtendedField)
+	 */
 	@Override
 	protected boolean convert(final ExtendedField sfo, final ExtendedField dfo) {
 		if (condition(sfo, dfo)) {
@@ -82,6 +88,9 @@ public final class ExpandableFieldHandler extends FieldHandler {
 		return false;
 	}
 
+	/**
+	 * @see FieldHandler#condition(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
 		return getConfiguration().getExpandableFields().shouldNotExpandField(sfo);

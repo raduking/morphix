@@ -42,6 +42,9 @@ public final class AnyToOptional extends FieldHandler {
 		// empty
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object sValue = sfo.getFieldValue();
@@ -60,9 +63,25 @@ public final class AnyToOptional extends FieldHandler {
 		return CONVERTED;
 	}
 
+	/**
+	 * @see FieldHandler#destinationTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> destinationTypeConstraint() {
-		return isAClassAnd(isClass(Optional.class))
+		return PredicateHolder.DESTINATION_TYPE_CONSTRAINT;
+	}
+
+	/**
+	 * Holder for predicates to avoid unnecessary class loading of the predicates when the handler is not used.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class PredicateHolder {
+
+		/**
+		 * Destination type constraint for this handler.
+		 */
+		private static final Predicate<Type> DESTINATION_TYPE_CONSTRAINT = isAClassAnd(isClass(Optional.class))
 				.or(isParameterizedType().and(rawType(isAClassAnd(isClass(Optional.class)))));
 	}
 }

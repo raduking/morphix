@@ -47,6 +47,9 @@ public final class CharSequenceToEnum extends FieldHandler {
 		// empty
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object sValue = sfo.getFieldValue();
@@ -75,13 +78,37 @@ public final class CharSequenceToEnum extends FieldHandler {
 		return CONVERTED;
 	}
 
+	/**
+	 * @see FieldHandler#sourceTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> sourceTypeConstraint() {
-		return isCharSequence();
+		return PredicateHolder.SOURCE_TYPE_CONSTRAINT;
 	}
 
+	/**
+	 * @see FieldHandler#destinationTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> destinationTypeConstraint() {
-		return isEnum();
+		return PredicateHolder.DESTINATION_TYPE_CONSTRAINT;
+	}
+
+	/**
+	 * Holder for predicates to avoid unnecessary class loading of the predicates when the handler is not used.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class PredicateHolder {
+
+		/**
+		 * Source type constraint for this handler. It checks if the source type is a class and it is a {@link CharSequence}.
+		 */
+		private static final Predicate<Type> SOURCE_TYPE_CONSTRAINT = isCharSequence();
+
+		/**
+		 * Destination type constraint for this handler. It checks if the destination type is a class and it is an {@link Enum}.
+		 */
+		private static final Predicate<Type> DESTINATION_TYPE_CONSTRAINT = isEnum();
 	}
 }

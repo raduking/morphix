@@ -34,6 +34,9 @@ public final class NullSourceSkipper extends FieldHandler {
 		// empty
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		if (null == sfo.getFieldValue()) {

@@ -44,6 +44,9 @@ public final class MapToAny extends FieldHandler {
 		// empty
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		if (!sfo.hasObject()) {
@@ -59,13 +62,37 @@ public final class MapToAny extends FieldHandler {
 		return CONVERTED;
 	}
 
+	/**
+	 * @see FieldHandler#sourceTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> sourceTypeConstraint() {
-		return isMap();
+		return PredicateHolder.SOURCE_TYPE_CONSTRAINT;
 	}
 
+	/**
+	 * @see FieldHandler#destinationTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> destinationTypeConstraint() {
-		return not(isMap());
+		return PredicateHolder.DESTINATION_TYPE_CONSTRAINT;
+	}
+
+	/**
+	 * Holder for predicates to avoid unnecessary class loading of the predicates when the handler is not used.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class PredicateHolder {
+
+		/**
+		 * Source type constraint for map to map handler.
+		 */
+		private static final Predicate<Type> SOURCE_TYPE_CONSTRAINT = isMap();
+
+		/**
+		 * Destination type constraint for map to map handler.
+		 */
+		private static final Predicate<Type> DESTINATION_TYPE_CONSTRAINT = not(isMap());
 	}
 }

@@ -48,6 +48,9 @@ public final class AnyToAnyFromStaticMethod extends FieldHandler {
 		// empty
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object sValue = sfo.getFieldValue();
@@ -68,8 +71,24 @@ public final class AnyToAnyFromStaticMethod extends FieldHandler {
 		return SKIP;
 	}
 
+	/**
+	 * @see FieldHandler#sourceTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> sourceTypeConstraint() {
-		return not(isCharSequence());
+		return PredicateHolder.SOURCE_TYPE_CONSTRAINT;
+	}
+
+	/**
+	 * Holder for predicates to avoid unnecessary class loading of the predicates when the handler is not used.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class PredicateHolder {
+
+		/**
+		 * Source type constraint for iterable to iterable handler.
+		 */
+		private static final Predicate<Type> SOURCE_TYPE_CONSTRAINT = not(isCharSequence());
 	}
 }

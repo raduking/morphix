@@ -38,16 +38,25 @@ public final class ExcludedFieldHandler extends FieldHandler {
 		super(configuration);
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		return BREAK;
 	}
 
+	/**
+	 * @see FieldHandler#condition(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
 		return getConfiguration().getExcludedFields().shouldExcludeField(sfo);
 	}
 
+	/**
+	 * @see FieldHandler#convert(ExtendedField, ExtendedField)
+	 */
 	@Override
 	protected boolean convert(final ExtendedField sfo, final ExtendedField dfo) {
 		if (condition(sfo, dfo)) {

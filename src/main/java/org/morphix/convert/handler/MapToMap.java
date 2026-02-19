@@ -60,6 +60,9 @@ public final class MapToMap extends FieldHandler {
 		super(configuration);
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object sValue = sfo.getFieldValue();
@@ -81,14 +84,20 @@ public final class MapToMap extends FieldHandler {
 		return CONVERTED;
 	}
 
+	/**
+	 * @see FieldHandler#sourceTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> sourceTypeConstraint() {
-		return isMap();
+		return PredicateHolder.SOURCE_TYPE_CONSTRAINT;
 	}
 
+	/**
+	 * @see FieldHandler#destinationTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> destinationTypeConstraint() {
-		return isConvertibleMapType();
+		return PredicateHolder.DESTINATION_TYPE_CONSTRAINT;
 	}
 
 	/**
@@ -96,10 +105,12 @@ public final class MapToMap extends FieldHandler {
 	 * <p>
 	 * Example: for <code>Map&lt;String, Integer&gt;</code> the method will return <code>Class&lt;Integer&gt;</code>
 	 *
+	 * @param <T> the type of the value
+	 *
 	 * @param fop field object pair
 	 * @return the value type from the destination map field
 	 */
-	private static <T extends Type> T getValueType(final ExtendedField fop) {
+	public static <T extends Type> T getValueType(final ExtendedField fop) {
 		return fop.getGenericReturnType(1);
 	}
 
@@ -108,10 +119,30 @@ public final class MapToMap extends FieldHandler {
 	 * <p>
 	 * Example: for <code>Map&lt;String, Integer&gt;</code> the method will return <code>Class&lt;String&gt;</code>
 	 *
+	 * @param <T> the type of the value
+	 *
 	 * @param fop field object pair
 	 * @return the key type from the destination map field
 	 */
-	private static <T extends Type> T getKeyType(final ExtendedField fop) {
+	public static <T extends Type> T getKeyType(final ExtendedField fop) {
 		return fop.getGenericReturnType(0);
+	}
+
+	/**
+	 * Holder for predicates to avoid unnecessary class loading of the predicates when the handler is not used.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class PredicateHolder {
+
+		/**
+		 * Source type constraint for map to map handler.
+		 */
+		private static final Predicate<Type> SOURCE_TYPE_CONSTRAINT = isMap();
+
+		/**
+		 * Destination type constraint for map to map handler.
+		 */
+		private static final Predicate<Type> DESTINATION_TYPE_CONSTRAINT = isConvertibleMapType();
 	}
 }

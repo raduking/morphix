@@ -35,6 +35,9 @@ public final class StaticFieldSkipper extends FieldHandler {
 		// empty
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		if (Modifier.isStatic(sfo.getModifiers())) {

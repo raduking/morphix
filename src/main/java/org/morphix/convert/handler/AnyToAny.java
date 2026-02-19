@@ -45,15 +45,6 @@ import org.morphix.reflection.ExtendedField;
 public final class AnyToAny extends FieldHandler {
 
 	/**
-	 * Predicate list for conditions that must be false for both input classes source or destination for this handler to
-	 * begin handling the objects.
-	 */
-	private static final Predicate<Type> HANDLER_CONSTRAINT = allOf(
-			not(isIterable()),
-			not(isMap()),
-			not(isArray()));
-
-	/**
 	 * Default constructor.
 	 */
 	public AnyToAny() {
@@ -69,6 +60,9 @@ public final class AnyToAny extends FieldHandler {
 		super(configuration);
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object sValue = sfo.getFieldValue();
@@ -83,14 +77,47 @@ public final class AnyToAny extends FieldHandler {
 		return CONVERTED;
 	}
 
+	/**
+	 * @see FieldHandler#sourceTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> sourceTypeConstraint() {
-		return not(isCharSequence())
-				.and(HANDLER_CONSTRAINT);
+		return PredicateHolder.SOURCE_TYPE_CONSTRAINT;
 	}
 
+	/**
+	 * @see FieldHandler#destinationTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> destinationTypeConstraint() {
-		return HANDLER_CONSTRAINT;
+		return PredicateHolder.DESTINATION_TYPE_CONSTRAINT;
+	}
+
+	/**
+	 * Holder for predicates to avoid unnecessary class loading of the predicates when the handler is not used.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class PredicateHolder {
+
+		/**
+		 * Predicate list for conditions that must be false for both input classes source or destination for this handler to
+		 * begin handling the objects.
+		 */
+		private static final Predicate<Type> HANDLER_CONSTRAINT = allOf(
+				not(isIterable()),
+				not(isMap()),
+				not(isArray()));
+
+		/**
+		 * Source type constraint for iterable to iterable handler.
+		 */
+		private static final Predicate<Type> SOURCE_TYPE_CONSTRAINT = not(isCharSequence())
+				.and(HANDLER_CONSTRAINT);
+
+		/**
+		 * Destination type constraint for iterable to iterable handler.
+		 */
+		private static final Predicate<Type> DESTINATION_TYPE_CONSTRAINT = HANDLER_CONSTRAINT;
 	}
 }

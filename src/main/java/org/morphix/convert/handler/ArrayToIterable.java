@@ -52,6 +52,9 @@ public final class ArrayToIterable extends FieldHandler {
 		super(configuration);
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object[] sValue = (Object[]) sfo.getFieldValue();
@@ -71,13 +74,37 @@ public final class ArrayToIterable extends FieldHandler {
 		return CONVERTED;
 	}
 
+	/**
+	 * @see FieldHandler#sourceTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> sourceTypeConstraint() {
-		return isArray();
+		return PredicateHolder.SOURCE_TYPE_CONSTRAINT;
 	}
 
+	/**
+	 * @see FieldHandler#destinationTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> destinationTypeConstraint() {
-		return isIterable();
+		return PredicateHolder.DESTINATION_TYPE_CONSTRAINT;
+	}
+
+	/**
+	 * Holder for predicates to avoid unnecessary class loading of the predicates when the handler is not used.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class PredicateHolder {
+
+		/**
+		 * Source type constraint for this handler.
+		 */
+		private static final Predicate<Type> SOURCE_TYPE_CONSTRAINT = isArray();
+
+		/**
+		 * Destination type constraint for this handler.
+		 */
+		private static final Predicate<Type> DESTINATION_TYPE_CONSTRAINT = isIterable();
 	}
 }

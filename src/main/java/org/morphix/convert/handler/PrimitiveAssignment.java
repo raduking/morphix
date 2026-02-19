@@ -36,6 +36,32 @@ public final class PrimitiveAssignment extends FieldHandler {
 	}
 
 	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
+	@Override
+	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
+		Object sValue = sfo.getFieldValue();
+		if (null != sValue) {
+			dfo.setFieldValue(sValue);
+		}
+		return CONVERTED;
+	}
+
+	/**
+	 * @see FieldHandler#condition(ExtendedField, ExtendedField)
+	 */
+	@Override
+	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
+		Class<?> dClass = dfo.toClass();
+		Class<?> sClass = sfo.toClass();
+		if (Objects.equals(sClass, dClass)) {
+			return false;
+		}
+		return isPrimitiveToClass(sClass, dClass)
+				|| isPrimitiveToClass(dClass, sClass);
+	}
+
+	/**
 	 * Returns true if the first given class is the primitive class of the second given class.
 	 *
 	 * @param clsPrimitive primitive class
@@ -48,25 +74,5 @@ public final class PrimitiveAssignment extends FieldHandler {
 			return clsBoxed.isAssignableFrom(cls);
 		}
 		return false;
-	}
-
-	@Override
-	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
-		Object sValue = sfo.getFieldValue();
-		if (null != sValue) {
-			dfo.setFieldValue(sValue);
-		}
-		return CONVERTED;
-	}
-
-	@Override
-	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
-		Class<?> dClass = dfo.toClass();
-		Class<?> sClass = sfo.toClass();
-		if (Objects.equals(sClass, dClass)) {
-			return false;
-		}
-		return isPrimitiveToClass(sClass, dClass)
-				|| isPrimitiveToClass(dClass, sClass);
 	}
 }

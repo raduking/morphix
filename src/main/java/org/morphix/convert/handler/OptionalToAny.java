@@ -42,6 +42,9 @@ public final class OptionalToAny extends FieldHandler {
 		// empty
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Optional<?> optional = (Optional<?>) sfo.getFieldValue();
@@ -58,9 +61,12 @@ public final class OptionalToAny extends FieldHandler {
 		return CONVERTED;
 	}
 
+	/**
+	 * @see FieldHandler#sourceTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> sourceTypeConstraint() {
-		return isAClassAnd(isClass(Optional.class));
+		return PredicateHolder.SOURCE_TYPE_CONSTRAINT;
 	}
 
 	/**
@@ -70,8 +76,21 @@ public final class OptionalToAny extends FieldHandler {
 	 * @param fop source field
 	 * @return type of the value within the optional, null if the type cannot be determined
 	 */
-	static Type getOptionalType(final ExtendedField fop) {
+	public static Type getOptionalType(final ExtendedField fop) {
 		// TODO: add exception message to show the getter method need
 		return fop.getGenericReturnType(0);
+	}
+
+	/**
+	 * Holder for predicates to avoid unnecessary class loading of the predicates when the handler is not used.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class PredicateHolder {
+
+		/**
+		 * Source type constraint for this handler. It checks if the source type is a class and it is an {@link Optional}.
+		 */
+		private static final Predicate<Type> SOURCE_TYPE_CONSTRAINT = isAClassAnd(isClass(Optional.class));
 	}
 }

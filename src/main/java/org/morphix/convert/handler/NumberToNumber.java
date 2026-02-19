@@ -88,6 +88,9 @@ public class NumberToNumber extends FieldHandler {
 		// empty
 	}
 
+	/**
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object sValue = sfo.getFieldValue();
@@ -100,16 +103,25 @@ public class NumberToNumber extends FieldHandler {
 		return CONVERTED;
 	}
 
+	/**
+	 * @see FieldHandler#sourceTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> sourceTypeConstraint() {
-		return cast(isA(Number.class));
+		return PredicateHolder.NUMBER_TYPE_CONSTRAINT;
 	}
 
+	/**
+	 * @see FieldHandler#destinationTypeConstraint()
+	 */
 	@Override
 	protected Predicate<Type> destinationTypeConstraint() {
-		return cast(isA(Number.class));
+		return PredicateHolder.NUMBER_TYPE_CONSTRAINT;
 	}
 
+	/**
+	 * @see FieldHandler#condition(ExtendedField, ExtendedField)
+	 */
 	@Override
 	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
 		Class<?> dClass = dfo.toClass();
@@ -129,5 +141,18 @@ public class NumberToNumber extends FieldHandler {
 	 */
 	private static <K, V> AbstractMap.SimpleEntry<K, V> pair(final K k, final V v) {
 		return new AbstractMap.SimpleEntry<>(k, v);
+	}
+
+	/**
+	 * Holder for predicates to avoid unnecessary class loading of the predicates when the handler is not used.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class PredicateHolder {
+
+		/**
+		 * Type constraint for number to number handler.
+		 */
+		static final Predicate<Type> NUMBER_TYPE_CONSTRAINT = cast(isA(Number.class));
 	}
 }
