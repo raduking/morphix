@@ -14,7 +14,7 @@ package org.morphix.convert.handler;
 
 import static org.morphix.convert.Conversions.convertFrom;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.lang.function.InstanceFunction.to;
 import static org.morphix.lang.function.Predicates.allOf;
 import static org.morphix.lang.function.Predicates.not;
@@ -67,7 +67,7 @@ public final class AnyToAny extends FieldHandler {
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object sValue = sfo.getFieldValue();
 		if (null == sValue) {
-			return SKIP;
+			return SKIPPED;
 		}
 		Object dValue = dfo.getFieldValue();
 		dValue = null != dValue

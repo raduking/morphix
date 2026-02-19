@@ -13,7 +13,7 @@
 package org.morphix.convert.handler;
 
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 
 import org.morphix.convert.Configuration;
 import org.morphix.convert.FieldHandler;
@@ -49,11 +49,11 @@ public final class AnyToAnyFromConversionMethod<S, D> extends FieldHandler {
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		S sValue = JavaObjects.cast(sfo.getFieldValue());
 		if (null == sValue) {
-			return SKIP;
+			return SKIPPED;
 		}
 		SimpleConverter<S, D> converter = getSimpleConverter(sfo.toClass(), dfo.toClass());
 		if (null == converter) {
-			return SKIP;
+			return SKIPPED;
 		}
 
 		D dValue = converter.convert(sValue);

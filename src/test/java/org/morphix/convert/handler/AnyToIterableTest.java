@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.morphix.convert.Conversions.convertFrom;
 import static org.morphix.convert.Converter.convert;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.reflection.ExtendedField.of;
 
 import java.lang.reflect.Field;
@@ -102,7 +102,7 @@ class AnyToIterableTest {
 
 		FieldHandlerResult result = new AnyToIterable().handle(of(sField, src), of(dField, dst));
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 }

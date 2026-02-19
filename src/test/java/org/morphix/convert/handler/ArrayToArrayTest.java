@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.spy;
 import static org.morphix.convert.Conversions.convertFrom;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
 import static org.morphix.reflection.ExtendedField.of;
 
@@ -247,7 +247,7 @@ class ArrayToArrayTest {
 
 		FieldHandlerResult result = handler.handle(of(sii, src), of(dii, dst));
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 	@Test

@@ -13,7 +13,7 @@
 package org.morphix.convert.handler;
 
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 
 import java.lang.reflect.Constructor;
 
@@ -65,7 +65,7 @@ public final class AnyToAnyFromConstructor extends FieldHandler {
 			Constructor<?> constructor = dfo.toClass().getDeclaredConstructor(sfo.toClass());
 			dValue = constructor.newInstance(sfo.getFieldValue());
 		} catch (Exception e) {
-			return SKIP;
+			return SKIPPED;
 		}
 		dfo.setFieldValue(dValue);
 		return CONVERTED;

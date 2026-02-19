@@ -13,9 +13,9 @@
 package org.morphix.convert.handler;
 
 import static org.morphix.convert.Conversions.convertEnvelopedFrom;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.convert.IterableConversions.convertIterable;
 import static org.morphix.convert.extras.ConverterCollections.newCollectionInstance;
 import static org.morphix.lang.function.Predicates.allOf;
@@ -59,11 +59,11 @@ public final class AnyToIterable extends FieldHandler {
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object sValue = sfo.getFieldValue();
 		if (null == sValue) {
-			return SKIP;
+			return SKIPPED;
 		}
 		Type elementType = IterableToIterable.getIterableElementType(dfo);
 		if (null == elementType) {
-			return BREAK;
+			return HANDLED;
 		}
 		Iterable<?> sIterable = Collections.singletonList(sValue);
 		Iterable<?> dValue = convertIterable(sIterable,

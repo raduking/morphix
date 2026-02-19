@@ -17,7 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.morphix.convert.Conversions.convertFrom;
 import static org.morphix.convert.Conversions.convertFromIterable;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.lang.function.InstanceFunction.to;
 import static org.morphix.reflection.ExtendedField.of;
 
@@ -218,7 +218,7 @@ class AnyToAnyTest {
 
 		FieldHandlerResult result = new AnyToAny().handle(of(sField, src), of(dField, dst));
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 	@Test

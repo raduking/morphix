@@ -17,7 +17,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.morphix.convert.Conversions.convertFrom;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
 
 import java.util.ArrayList;
@@ -203,7 +203,7 @@ class IterableToArrayTest {
 
 		FieldHandlerResult result = handler.handle(scf, dcf);
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 	@Test
@@ -219,7 +219,7 @@ class IterableToArrayTest {
 
 		FieldHandlerResult result = handler.handle(scf, dcf);
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 	@Test
@@ -236,7 +236,7 @@ class IterableToArrayTest {
 
 		FieldHandlerResult result = handler.handle(scf, dcf);
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 	@Test

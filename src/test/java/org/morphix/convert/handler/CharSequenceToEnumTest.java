@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.morphix.convert.Conversions.convertFrom;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
 import static org.morphix.reflection.ExtendedField.of;
 
@@ -212,7 +212,7 @@ class CharSequenceToEnumTest {
 
 		FieldHandlerResult result = new CharSequenceToEnum().handle(of(sField, src), of(dField, dst));
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 	public static class Source5 {

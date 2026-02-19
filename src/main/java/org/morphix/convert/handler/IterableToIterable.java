@@ -13,7 +13,7 @@
 package org.morphix.convert.handler;
 
 import static org.morphix.convert.Conversions.convertEnvelopedFrom;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
 import static org.morphix.convert.IterableConversions.convertIterable;
 import static org.morphix.convert.extras.ConverterCollections.isConvertibleIterableType;
@@ -71,11 +71,11 @@ public final class IterableToIterable extends FieldHandler {
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object sValue = sfo.getFieldValue();
 		if (null == sValue) {
-			return BREAK;
+			return HANDLED;
 		}
 		Type elementType = getIterableElementType(dfo);
 		if (null == elementType) {
-			return BREAK;
+			return HANDLED;
 		}
 		if (isA(TypeVariable.class).test(elementType)) {
 			Type type = getConfiguration().getGenericType(elementType.getTypeName());

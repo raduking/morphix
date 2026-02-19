@@ -12,9 +12,9 @@
  */
 package org.morphix.convert.handler;
 
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.lang.function.Predicates.not;
 import static org.morphix.reflection.predicates.TypePredicates.isCharSequence;
 
@@ -58,7 +58,7 @@ public final class AnyToAnyFromStaticMethod extends FieldHandler {
 		Class<?> sClass = sfo.toClass();
 		List<Method> staticConvertMethods = getConverterMethods(dClass, sClass);
 		if (null == sValue && !staticConvertMethods.isEmpty()) {
-			return BREAK;
+			return HANDLED;
 		}
 		// find a method in the dClass that can convert the value from a source class value
 		for (Method method : staticConvertMethods) {
@@ -68,7 +68,7 @@ public final class AnyToAnyFromStaticMethod extends FieldHandler {
 				return CONVERTED;
 			}
 		}
-		return SKIP;
+		return SKIPPED;
 	}
 
 	/**

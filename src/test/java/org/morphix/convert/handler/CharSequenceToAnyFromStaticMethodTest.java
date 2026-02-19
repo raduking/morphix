@@ -14,9 +14,9 @@ package org.morphix.convert.handler;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.reflection.ExtendedField.of;
 
 import java.lang.reflect.Field;
@@ -72,7 +72,7 @@ class CharSequenceToAnyFromStaticMethodTest {
 
 		FieldHandlerResult result = new CharSequenceToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst));
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 	@Test
@@ -100,7 +100,7 @@ class CharSequenceToAnyFromStaticMethodTest {
 
 		FieldHandlerResult result = new CharSequenceToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst));
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 	@Test
@@ -114,7 +114,7 @@ class CharSequenceToAnyFromStaticMethodTest {
 
 		FieldHandlerResult result = new CharSequenceToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst));
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 }

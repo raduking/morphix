@@ -12,9 +12,9 @@
  */
 package org.morphix.convert.handler;
 
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.lang.function.Predicates.not;
 import static org.morphix.reflection.predicates.TypePredicates.isCharSequence;
 import static org.morphix.reflection.predicates.TypePredicates.isEnum;
@@ -60,7 +60,7 @@ public final class CharSequenceToAnyFromStaticMethod extends FieldHandler {
 		Class<?> dClass = dfo.toClass();
 		List<Method> staticConvertMethods = getConverterMethods(dClass, CharSequence.class);
 		if (null == sValue && !staticConvertMethods.isEmpty()) {
-			return BREAK;
+			return HANDLED;
 		}
 		// find a method in the dClass that can convert the value from a
 		// CharSequence value
@@ -71,7 +71,7 @@ public final class CharSequenceToAnyFromStaticMethod extends FieldHandler {
 				return CONVERTED;
 			}
 		}
-		return SKIP;
+		return SKIPPED;
 	}
 
 	/**

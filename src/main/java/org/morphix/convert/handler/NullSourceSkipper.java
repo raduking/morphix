@@ -12,8 +12,8 @@
  */
 package org.morphix.convert.handler;
 
-import static org.morphix.convert.FieldHandlerResult.BREAK;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 
 import org.morphix.convert.FieldHandler;
 import org.morphix.convert.FieldHandlerResult;
@@ -40,8 +40,8 @@ public final class NullSourceSkipper extends FieldHandler {
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		if (null == sfo.getFieldValue()) {
-			return BREAK;
+			return HANDLED;
 		}
-		return SKIP;
+		return SKIPPED;
 	}
 }

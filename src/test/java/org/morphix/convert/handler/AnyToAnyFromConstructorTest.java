@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.convert.Conversions;
@@ -197,7 +197,7 @@ class AnyToAnyFromConstructorTest {
 
 		FieldHandlerResult result = victim.handle(sfo, dfo);
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 		assertThat(dst.a, nullValue());
 	}
 

@@ -13,7 +13,7 @@
 package org.morphix.convert.handler;
 
 import static org.morphix.convert.Conversions.convertEnvelopedFrom;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
 import static org.morphix.reflection.predicates.TypePredicates.isArray;
 
@@ -56,7 +56,7 @@ public final class ArrayToArray extends FieldHandler {
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object[] sValue = (Object[]) sfo.getFieldValue();
 		if (null == sValue) {
-			return BREAK;
+			return HANDLED;
 		}
 
 		Class<?> elementClass = dfo.toClass().getComponentType();

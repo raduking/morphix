@@ -13,7 +13,7 @@
 package org.morphix.convert.handler;
 
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.lang.function.Predicates.not;
 import static org.morphix.reflection.predicates.TypePredicates.isMap;
 
@@ -50,7 +50,7 @@ public final class MapToAny extends FieldHandler {
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		if (!sfo.hasObject()) {
-			return SKIP;
+			return SKIPPED;
 		}
 		InstanceFunction<Object> instanceFunction =
 				() -> Constructors.IgnoreAccess.newInstance(dfo.toClass(), InstanceCreator.getInstance());

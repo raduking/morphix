@@ -12,7 +12,7 @@
  */
 package org.morphix.convert.handler;
 
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
 import static org.morphix.reflection.predicates.TypePredicates.isCharSequence;
 import static org.morphix.reflection.predicates.TypePredicates.isEnum;
@@ -54,7 +54,7 @@ public final class CharSequenceToEnum extends FieldHandler {
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object sValue = sfo.getFieldValue();
 		if (null == sValue) {
-			return BREAK;
+			return HANDLED;
 		}
 		Class<?> dClass = dfo.toClass();
 		// find a method in the dClass (Enum class) that can convert the value from a CharSequence / String value

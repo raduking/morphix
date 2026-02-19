@@ -14,7 +14,7 @@ package org.morphix.convert.handler;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.reflection.ExtendedField.of;
 
 import java.lang.reflect.Field;
@@ -47,6 +47,6 @@ class StaticFieldSkipperTest {
 
 		FieldHandlerResult result = new StaticFieldSkipper().handle(of(sField, src), of(dField, dst));
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 }

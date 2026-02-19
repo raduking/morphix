@@ -13,7 +13,7 @@
 package org.morphix.convert.handler;
 
 import static org.morphix.convert.Conversions.convertEnvelopedFrom;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
 import static org.morphix.convert.MapConversions.convertMap;
 import static org.morphix.convert.extras.ConverterCollections.isConvertibleMapType;
@@ -67,11 +67,11 @@ public final class MapToMap extends FieldHandler {
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object sValue = sfo.getFieldValue();
 		if (null == sValue) {
-			return BREAK;
+			return HANDLED;
 		}
 		Type keyType = getKeyType(dfo);
 		if (null == keyType) {
-			return BREAK;
+			return HANDLED;
 		}
 
 		Type valueType = getValueType(dfo);

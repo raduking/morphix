@@ -12,7 +12,7 @@
  */
 package org.morphix.convert.handler;
 
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 
 import org.morphix.convert.Configuration;
 import org.morphix.convert.FieldHandler;
@@ -43,7 +43,7 @@ public final class ExcludedFieldHandler extends FieldHandler {
 	 */
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
-		return BREAK;
+		return HANDLED;
 	}
 
 	/**

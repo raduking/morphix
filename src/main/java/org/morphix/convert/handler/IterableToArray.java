@@ -13,7 +13,7 @@
 package org.morphix.convert.handler;
 
 import static org.morphix.convert.Conversions.convertEnvelopedFrom;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
 import static org.morphix.convert.IterableConversions.convertIterable;
 import static org.morphix.reflection.predicates.TypePredicates.isArray;
@@ -59,15 +59,15 @@ public final class IterableToArray extends FieldHandler {
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object sValue = sfo.getFieldValue();
 		if (null == sValue) {
-			return BREAK;
+			return HANDLED;
 		}
 		Object[] dValue = (Object[]) dfo.getFieldValue();
 		if (null != dfo.getFieldValue() && dValue.length > 0) {
-			return BREAK;
+			return HANDLED;
 		}
 		Class<?> arrayElementClass = dfo.toClass().getComponentType();
 		if (null == arrayElementClass) {
-			return BREAK;
+			return HANDLED;
 		}
 
 		Collection<?> arrayList = convertIterable((Iterable<?>) sValue,

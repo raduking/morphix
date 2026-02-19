@@ -12,7 +12,7 @@
  */
 package org.morphix.convert.handler;
 
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
 import static org.morphix.reflection.predicates.ClassPredicates.isClass;
 import static org.morphix.reflection.predicates.TypePredicates.isAClassAnd;
@@ -50,12 +50,12 @@ public final class AnyToOptional extends FieldHandler {
 		Object sValue = sfo.getFieldValue();
 		if (null == sValue) {
 			dfo.setFieldValue(Optional.empty());
-			return BREAK;
+			return HANDLED;
 		}
 		Type optionalType = OptionalToAny.getOptionalType(dfo);
 		if (null == optionalType) {
 			dfo.setFieldValue(Optional.empty());
-			return BREAK;
+			return HANDLED;
 		}
 
 		Object dValue = Conversions.convertFrom(sValue, optionalType, getConfiguration());

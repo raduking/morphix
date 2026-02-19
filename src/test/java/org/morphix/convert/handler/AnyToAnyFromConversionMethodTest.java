@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.morphix.convert.Conversions.convertFrom;
 import static org.morphix.convert.Conversions.convertFromIterable;
 import static org.morphix.convert.Converter.convert;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -464,7 +464,7 @@ class AnyToAnyFromConversionMethodTest {
 
 		FieldHandlerResult result = handler.handle(scf, dcf);
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 	@Test

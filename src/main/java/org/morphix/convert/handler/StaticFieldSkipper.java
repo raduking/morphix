@@ -12,8 +12,8 @@
  */
 package org.morphix.convert.handler;
 
-import static org.morphix.convert.FieldHandlerResult.BREAK;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 
 import java.lang.reflect.Modifier;
 
@@ -41,8 +41,8 @@ public final class StaticFieldSkipper extends FieldHandler {
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		if (Modifier.isStatic(sfo.getModifiers())) {
-			return BREAK;
+			return HANDLED;
 		}
-		return SKIP;
+		return SKIPPED;
 	}
 }

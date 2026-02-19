@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.morphix.convert.Conversions.convertFrom;
 import static org.morphix.convert.Conversions.convertFromIterable;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
 
 import java.util.ArrayList;
@@ -590,7 +590,7 @@ class IterableToIterableTest {
 
 		FieldHandlerResult result = handler.handle(scf, dcf);
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 	@Test
@@ -606,7 +606,7 @@ class IterableToIterableTest {
 
 		FieldHandlerResult result = handler.handle(scf, dcf);
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 	@Test

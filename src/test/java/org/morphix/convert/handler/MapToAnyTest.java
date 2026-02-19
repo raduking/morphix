@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.convert.MapConversions.convertFromMap;
 import static org.morphix.reflection.ExtendedField.of;
 
@@ -202,7 +202,7 @@ class MapToAnyTest {
 	void shouldReturnSkipOnHandleIfSourceIsNull() {
 		FieldHandlerResult result = new MapToAny().handle(of((Field) null), of((Field) null));
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 }
