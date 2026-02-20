@@ -68,6 +68,9 @@ public interface Methods {
 	 */
 	static <T> List<Method> getAllDeclared(final Class<T> cls, final Predicate<? super Method> predicate) {
 		Method[] declared = cls.getDeclaredMethods();
+		if (declared.length == 0) {
+			return List.of();
+		}
 		List<Method> methods = new LinkedList<>();
 		for (int i = declared.length - 1; i >= 0; --i) {
 			if (predicate.test(declared[i])) {
