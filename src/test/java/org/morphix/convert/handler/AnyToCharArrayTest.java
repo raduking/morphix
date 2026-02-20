@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.convert.DefaultFieldHandlers;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 
 /**
@@ -79,7 +80,8 @@ class AnyToCharArrayTest {
 		Field sField = Source.class.getDeclaredField("id");
 		Field dField = Destination.class.getDeclaredField("id");
 
-		FieldHandlerResult result = DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_CHAR_ARRAY.handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result =
+				DefaultFieldHandlers.FIELD_HANDLER_ANY_TO_CHAR_ARRAY.handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}
@@ -92,7 +94,7 @@ class AnyToCharArrayTest {
 		Field sField = Source.class.getDeclaredField("id");
 		Field dField = Destination.class.getDeclaredField("id");
 
-		FieldHandlerResult result = new AnyToCharArray().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new AnyToCharArray().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}

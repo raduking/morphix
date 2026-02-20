@@ -17,6 +17,7 @@ import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 
 import org.morphix.convert.Configuration;
 import org.morphix.convert.FieldHandler;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.lang.JavaObjects;
@@ -43,10 +44,10 @@ public final class AnyToAnyFromConversionMethod<S, D> extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
+	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		S sValue = JavaObjects.cast(sfo.getFieldValue());
 		if (null == sValue) {
 			return SKIPPED;
@@ -62,10 +63,10 @@ public final class AnyToAnyFromConversionMethod<S, D> extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#condition(ExtendedField, ExtendedField)
+	 * @see FieldHandler#condition(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
+	public boolean condition(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		return getConfiguration().getSimpleConverters().hasConverters();
 	}
 

@@ -19,13 +19,14 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.morphix.convert.Conversions.convertFrom;
-import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.reflection.ExtendedField.of;
 
 import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.ObjectConverterException;
 
@@ -196,7 +197,7 @@ class CharSequenceToEnumTest {
 		Field sField = Source4.class.getDeclaredField("testEnum");
 		Field dField = Destination4.class.getDeclaredField("testEnum");
 
-		FieldHandlerResult result = new CharSequenceToEnum().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new CharSequenceToEnum().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}
@@ -210,7 +211,7 @@ class CharSequenceToEnumTest {
 		Field sField = Source4.class.getDeclaredField("testEnum");
 		Field dField = Destination4.class.getDeclaredField("testEnum");
 
-		FieldHandlerResult result = new CharSequenceToEnum().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new CharSequenceToEnum().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(HANDLED));
 	}
@@ -232,7 +233,7 @@ class CharSequenceToEnumTest {
 		Field sField = Source5.class.getDeclaredField("testEnum");
 		Field dField = Destination5.class.getDeclaredField("testEnum");
 
-		FieldHandlerResult result = new CharSequenceToEnum().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new CharSequenceToEnum().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}

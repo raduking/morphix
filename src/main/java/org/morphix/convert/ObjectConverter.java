@@ -196,8 +196,9 @@ public class ObjectConverter<S, D> implements
 	 */
 	private void convertField(final ExtendedField sfo, final ExtendedField dfo) {
 		try {
+			FieldHandlerContext ctx = new FieldHandlerContext();
 			for (FieldHandler handler : getFieldHandlers()) {
-				if (handler.convert(sfo, dfo)) {
+				if (handler.convert(sfo, dfo, ctx)) {
 					break;
 				}
 			}

@@ -59,18 +59,20 @@ public abstract class FieldHandler {
 	 *
 	 * @param sfo source field object pair
 	 * @param dfo destination field object pair
+	 * @param ctx the context which can be used to pass additional information to the handler
 	 * @return handler result which can be checked if the handling succeeded or not
 	 */
-	public abstract FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo);
+	public abstract FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx);
 
 	/**
 	 * Returns true if the handler should try to handle the fields, false otherwise.
 	 *
 	 * @param sfo source field object pair
 	 * @param dfo destination field object pair
+	 * @param ctx the context which can be used to pass additional information to the handler
 	 * @return true if the field should be handled, false otherwise
 	 */
-	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
+	public boolean condition(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		return true;
 	}
 
@@ -119,12 +121,13 @@ public abstract class FieldHandler {
 	 *
 	 * @param sfo source field object
 	 * @param dfo destination field object
+	 * @param ctx the context which can be used to pass additional information to the handler
 	 * @return true if conversion was successful false otherwise
 	 */
-	protected boolean convert(final ExtendedField sfo, final ExtendedField dfo) {
+	protected boolean convert(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		boolean typeConstraintsMet = sfo.typeMeets(sourceTypeConstraint()) && dfo.typeMeets(destinationTypeConstraint());
-		if (typeConstraintsMet && condition(sfo, dfo)) {
-			FieldHandlerResult result = handle(sfo, dfo);
+		if (typeConstraintsMet && condition(sfo, dfo, ctx)) {
+			FieldHandlerResult result = handle(sfo, dfo, ctx);
 			return result.isHandled();
 		}
 		return false;
@@ -153,4 +156,15 @@ public abstract class FieldHandler {
 		return getClass().hashCode();
 	}
 
+	/**
+	 * Builds a key based on the given key and the source and destination field objects.
+	 *
+	 * @param key the base key
+	 * @param sfo source field object
+	 * @param dfo destination field object
+	 * @return a key
+	 */
+	public String key(final String key, final ExtendedField sfo, final ExtendedField dfo) {
+		return key + System.identityHashCode(sfo) + System.identityHashCode(dfo);
+	}
 }

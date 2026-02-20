@@ -12,8 +12,8 @@
  */
 package org.morphix.convert.handler;
 
-import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.lang.function.Predicates.not;
 import static org.morphix.reflection.predicates.TypePredicates.isCharSequence;
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.morphix.convert.FieldHandler;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.reflection.ExtendedField;
 import org.morphix.reflection.Methods;
@@ -49,10 +50,10 @@ public final class AnyToAnyFromStaticMethod extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
+	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		Object sValue = sfo.getFieldValue();
 		Class<?> dClass = dfo.toClass();
 		Class<?> sClass = sfo.toClass();

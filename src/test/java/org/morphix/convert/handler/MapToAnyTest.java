@@ -32,6 +32,7 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.convert.Conversions;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.lang.function.InstanceFunction;
 
@@ -200,7 +201,7 @@ class MapToAnyTest {
 
 	@Test
 	void shouldReturnSkipOnHandleIfSourceIsNull() {
-		FieldHandlerResult result = new MapToAny().handle(of((Field) null), of((Field) null));
+		FieldHandlerResult result = new MapToAny().handle(of((Field) null), of((Field) null), new FieldHandlerContext());
 
 		assertThat(result, equalTo(SKIPPED));
 	}

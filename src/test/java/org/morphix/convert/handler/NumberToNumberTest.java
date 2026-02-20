@@ -20,6 +20,7 @@ import java.math.BigInteger;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.convert.Converter;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.reflection.ExtendedField;
 
@@ -91,7 +92,7 @@ class NumberToNumberTest {
 		ExtendedField sfo = ExtendedField.of(null);
 		ExtendedField dfo = ExtendedField.of(null);
 
-		FieldHandlerResult result = handler.handle(sfo, dfo);
+		FieldHandlerResult result = handler.handle(sfo, dfo, new FieldHandlerContext());
 
 		assertThat(result, equalTo(FieldHandlerResult.CONVERTED));
 	}

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import org.morphix.convert.FieldHandler;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.MapConversions;
 import org.morphix.lang.JavaObjects;
@@ -45,10 +46,10 @@ public final class MapToAny extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
+	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		if (!sfo.hasObject()) {
 			return SKIPPED;
 		}

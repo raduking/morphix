@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.ObjectConverter;
 
@@ -216,7 +217,7 @@ class AnyToAnyTest {
 		Field sField = SrcC.class.getDeclaredField("a");
 		Field dField = DstD.class.getDeclaredField("a");
 
-		FieldHandlerResult result = new AnyToAny().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new AnyToAny().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(SKIPPED));
 	}
@@ -232,7 +233,7 @@ class AnyToAnyTest {
 		Field sField = SrcC.class.getDeclaredField("a");
 		Field dField = DstD.class.getDeclaredField("a");
 
-		FieldHandlerResult result = new AnyToAny().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new AnyToAny().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}

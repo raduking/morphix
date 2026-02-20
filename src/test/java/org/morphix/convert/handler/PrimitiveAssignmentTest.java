@@ -20,6 +20,7 @@ import static org.morphix.reflection.ExtendedField.of;
 import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 
 /**
@@ -52,7 +53,7 @@ class PrimitiveAssignmentTest {
 		Field dField = A.class.getDeclaredField("testInt");
 		Field sField = B.class.getDeclaredField("testInt");
 
-		FieldHandlerResult result = new PrimitiveAssignment().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new PrimitiveAssignment().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 		assertThat(dst.testInt, equalTo(TEST_INTEGER));
@@ -69,7 +70,7 @@ class PrimitiveAssignmentTest {
 		Field dField = A.class.getDeclaredField("testInt");
 		Field sField = B.class.getDeclaredField("testInt");
 
-		FieldHandlerResult result = new PrimitiveAssignment().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new PrimitiveAssignment().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 		assertThat(dst.testInt, equalTo(TEST_PRIMITIVE_INT + 1));
@@ -90,7 +91,7 @@ class PrimitiveAssignmentTest {
 		Field sField = C.class.getDeclaredField("i");
 		Field dField = D.class.getDeclaredField("i");
 
-		boolean result = new PrimitiveAssignment().condition(of(sField), of(dField));
+		boolean result = new PrimitiveAssignment().condition(of(sField), of(dField), new FieldHandlerContext());
 
 		assertThat(result, equalTo(false));
 	}
@@ -102,14 +103,14 @@ class PrimitiveAssignmentTest {
 		Field sField = C.class.getDeclaredField("i");
 		Field dField = D.class.getDeclaredField("j");
 
-		boolean result = victim.condition(of(sField), of(dField));
+		boolean result = victim.condition(of(sField), of(dField), new FieldHandlerContext());
 
 		assertThat(result, equalTo(true));
 
 		sField = C.class.getDeclaredField("j");
 		dField = D.class.getDeclaredField("i");
 
-		result = victim.condition(of(sField), of(dField));
+		result = victim.condition(of(sField), of(dField), new FieldHandlerContext());
 
 		assertThat(result, equalTo(true));
 	}

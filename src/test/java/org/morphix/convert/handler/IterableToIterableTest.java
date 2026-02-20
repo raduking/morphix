@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.morphix.convert.Conversions.convertFrom;
 import static org.morphix.convert.Conversions.convertFromIterable;
-import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.ObjectConverterException;
 import org.morphix.convert.annotation.Expandable;
@@ -588,7 +589,7 @@ class IterableToIterableTest {
 		ExtendedField scf = ExtendedField.of(AA.class.getDeclaredField("x"), a);
 		ExtendedField dcf = ExtendedField.of(AA.class.getDeclaredField("x"), b);
 
-		FieldHandlerResult result = handler.handle(scf, dcf);
+		FieldHandlerResult result = handler.handle(scf, dcf, new FieldHandlerContext());
 
 		assertThat(result, equalTo(HANDLED));
 	}
@@ -604,7 +605,7 @@ class IterableToIterableTest {
 		ExtendedField scf = ExtendedField.of(AA.class.getDeclaredField("x"), a);
 		ExtendedField dcf = ExtendedField.of(AA.class.getDeclaredField("x"), b);
 
-		FieldHandlerResult result = handler.handle(scf, dcf);
+		FieldHandlerResult result = handler.handle(scf, dcf, new FieldHandlerContext());
 
 		assertThat(result, equalTo(HANDLED));
 	}
@@ -620,7 +621,7 @@ class IterableToIterableTest {
 		ExtendedField scf = ExtendedField.of(AA.class.getDeclaredMethod("getY"), a);
 		ExtendedField dcf = ExtendedField.of(BB.class.getDeclaredMethod("getY"), b);
 
-		FieldHandlerResult result = handler.handle(scf, dcf);
+		FieldHandlerResult result = handler.handle(scf, dcf, new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}

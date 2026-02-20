@@ -16,6 +16,7 @@ import static org.morphix.convert.FieldHandlerResult.HANDLED;
 
 import org.morphix.convert.Configuration;
 import org.morphix.convert.FieldHandler;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.extras.ExcludedFields;
 import org.morphix.reflection.ExtendedField;
@@ -39,28 +40,28 @@ public final class ExcludedFieldHandler extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
+	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		return HANDLED;
 	}
 
 	/**
-	 * @see FieldHandler#condition(ExtendedField, ExtendedField)
+	 * @see FieldHandler#condition(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
+	public boolean condition(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		return getConfiguration().getExcludedFields().shouldExcludeField(sfo);
 	}
 
 	/**
-	 * @see FieldHandler#convert(ExtendedField, ExtendedField)
+	 * @see FieldHandler#convert(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	protected boolean convert(final ExtendedField sfo, final ExtendedField dfo) {
-		if (condition(sfo, dfo)) {
-			FieldHandlerResult result = handle(sfo, dfo);
+	protected boolean convert(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
+		if (condition(sfo, dfo, ctx)) {
+			FieldHandlerResult result = handle(sfo, dfo, ctx);
 			return result.isHandled();
 		}
 		return false;

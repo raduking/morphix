@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.convert.Configuration;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.ObjectConverterException;
 import org.morphix.reflection.ExtendedField;
@@ -462,7 +463,7 @@ class AnyToAnyFromConversionMethodTest {
 		ExtendedField scf = ExtendedField.of(F.class.getDeclaredField("x"), a);
 		ExtendedField dcf = ExtendedField.of(F.class.getDeclaredField("x"), b);
 
-		FieldHandlerResult result = handler.handle(scf, dcf);
+		FieldHandlerResult result = handler.handle(scf, dcf, new FieldHandlerContext());
 
 		assertThat(result, equalTo(SKIPPED));
 	}
@@ -477,7 +478,7 @@ class AnyToAnyFromConversionMethodTest {
 		ExtendedField scf = ExtendedField.of(F.class.getDeclaredField("x"), a);
 		ExtendedField dcf = ExtendedField.of(F.class.getDeclaredField("x"), b);
 
-		boolean result = handler.condition(scf, dcf);
+		boolean result = handler.condition(scf, dcf, new FieldHandlerContext());
 
 		assertFalse(result);
 	}

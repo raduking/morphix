@@ -18,14 +18,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.spy;
 import static org.morphix.convert.Conversions.convertFrom;
-import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.annotation.Expandable;
 import org.morphix.reflection.ExtendedField;
@@ -224,7 +225,7 @@ class ArrayToIterableTest {
 		ExtendedField scf = ExtendedField.of(A1.class.getDeclaredField("x"), a);
 		ExtendedField dcf = ExtendedField.of(A1.class.getDeclaredField("x"), b);
 
-		FieldHandlerResult result = handler.handle(scf, dcf);
+		FieldHandlerResult result = handler.handle(scf, dcf, new FieldHandlerContext());
 
 		assertThat(result, equalTo(HANDLED));
 	}
@@ -240,7 +241,7 @@ class ArrayToIterableTest {
 		ExtendedField scf = ExtendedField.of(A1.class.getDeclaredField("x"), a);
 		ExtendedField dcf = ExtendedField.of(A1.class.getDeclaredField("x"), b);
 
-		FieldHandlerResult result = handler.handle(scf, dcf);
+		FieldHandlerResult result = handler.handle(scf, dcf, new FieldHandlerContext());
 
 		assertThat(result, equalTo(HANDLED));
 	}
@@ -256,7 +257,7 @@ class ArrayToIterableTest {
 		ExtendedField scf = ExtendedField.of(A1.class.getDeclaredMethod("getY"), a);
 		ExtendedField dcf = ExtendedField.of(B1.class.getDeclaredMethod("getY"), b);
 
-		FieldHandlerResult result = handler.handle(scf, dcf);
+		FieldHandlerResult result = handler.handle(scf, dcf, new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}

@@ -20,6 +20,7 @@ import static org.morphix.reflection.ExtendedField.of;
 import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 
 /**
@@ -39,7 +40,7 @@ class NullSourceSkipperTest {
 
 	@Test
 	void shouldReturnTrueOnConditionNoMatterTheArguments() {
-		boolean result = new NullSourceSkipper().condition(null, null);
+		boolean result = new NullSourceSkipper().condition(null, null, new FieldHandlerContext());
 
 		assertThat(result, equalTo(true));
 	}
@@ -52,7 +53,7 @@ class NullSourceSkipperTest {
 		Field sField = Source.class.getDeclaredField("s");
 		Field dField = Destination.class.getDeclaredField("s");
 
-		FieldHandlerResult result = new NullSourceSkipper().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new NullSourceSkipper().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(HANDLED));
 	}

@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 
 /**
@@ -100,7 +101,7 @@ class AnyToIterableTest {
 		Field sField = A.class.getDeclaredField("i");
 		Field dField = B.class.getDeclaredField("i");
 
-		FieldHandlerResult result = new AnyToIterable().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new AnyToIterable().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(SKIPPED));
 	}

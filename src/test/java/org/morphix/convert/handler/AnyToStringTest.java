@@ -21,6 +21,7 @@ import static org.morphix.reflection.ExtendedField.of;
 import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 
 /**
@@ -67,7 +68,7 @@ class AnyToStringTest {
 		Field sField = A.class.getDeclaredField("i");
 		Field dField = B.class.getDeclaredField("i");
 
-		FieldHandlerResult result = new AnyToString().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new AnyToString().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}
