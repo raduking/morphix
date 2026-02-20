@@ -58,8 +58,7 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a list with all the methods declared in the class given as parameter that verify the given method
-	 * predicate.
+	 * Returns a list with all the methods declared in the class given as parameter that verify the given method predicate.
 	 *
 	 * @param <T> type to get the methods from
 	 *
