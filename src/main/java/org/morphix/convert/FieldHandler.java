@@ -16,13 +16,13 @@ import static org.morphix.reflection.predicates.MethodPredicates.isConverterMeth
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.morphix.lang.function.Predicates;
 import org.morphix.reflection.ExtendedField;
+import org.morphix.reflection.Methods;
 import org.morphix.reflection.predicates.MethodPredicates;
 
 /**
@@ -111,9 +111,7 @@ public abstract class FieldHandler {
 	 * @return list of methods
 	 */
 	protected static List<Method> getConverterMethods(final Class<?> cls, final Class<?> srcClass) {
-		return Arrays.stream(cls.getDeclaredMethods())
-				.filter(isConverterMethod(srcClass))
-				.toList();
+		return Methods.getAllDeclared(cls, isConverterMethod(srcClass));
 	}
 
 	/**

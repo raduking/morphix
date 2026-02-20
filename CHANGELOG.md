@@ -5,6 +5,7 @@
 - Renamed `FieldHandlerResult.SKIP` to `SKIPPED`.
 - Renamed `FieldHandlerResult.BREAK` to `HANDLED`.
 - Added `FieldHandlerContext` to transmit information between field handlers.
+- Added `Methods.getAllDeclared(Class, Predicate)` to return all declared methods for a given class with a given predicate.
 
 ---
 
