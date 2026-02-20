@@ -39,16 +39,6 @@ import org.morphix.reflection.ExtendedField;
 public final class ExpandableFieldHandler extends FieldHandler {
 
 	/**
-	 * Map describing the instantiators for each supported expandable field types.
-	 */
-	private static final Map<Predicate<Type>, Instantiator<?>> INSTANTIATORS_MAP = new HashMap<>();
-	static {
-		INSTANTIATORS_MAP.put(isConvertibleIterableType(), ConverterCollections::newCollectionInstance);
-		INSTANTIATORS_MAP.put(isConvertibleMapType(), ConverterCollections::newMapInstance);
-		INSTANTIATORS_MAP.put(isArray(), ConverterCollections::newEmptyArrayInstance);
-	}
-
-	/**
 	 * Constructor for custom configuration.
 	 *
 	 * @param configuration configuration object
@@ -64,7 +54,7 @@ public final class ExpandableFieldHandler extends FieldHandler {
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		// see if we have specific instantiator first
 		boolean fieldSet = false;
-		for (Map.Entry<Predicate<Type>, Instantiator<?>> entry : INSTANTIATORS_MAP.entrySet()) {
+		for (Map.Entry<Predicate<Type>, Instantiator<?>> entry : InformationHolder.INSTANTIATORS_MAP.entrySet()) {
 			if (entry.getKey().test(dfo.getType())) {
 				dfo.setFieldValue(entry.getValue().instance(dfo));
 				fieldSet = true;
@@ -114,5 +104,23 @@ public final class ExpandableFieldHandler extends FieldHandler {
 		 * @return instance of the object declared by the given field
 		 */
 		T instance(ExtendedField fop);
+	}
+
+	/**
+	 * Holder for static data to avoid unnecessary class loading of the predicates when the handler is not used.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class InformationHolder {
+
+		/**
+		 * Map describing the instantiators for each supported expandable field types.
+		 */
+		private static final Map<Predicate<Type>, Instantiator<?>> INSTANTIATORS_MAP = new HashMap<>();
+		static {
+			INSTANTIATORS_MAP.put(isConvertibleIterableType(), ConverterCollections::newCollectionInstance);
+			INSTANTIATORS_MAP.put(isConvertibleMapType(), ConverterCollections::newMapInstance);
+			INSTANTIATORS_MAP.put(isArray(), ConverterCollections::newEmptyArrayInstance);
+		}
 	}
 }

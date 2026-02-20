@@ -4,6 +4,7 @@
 
 - Renamed `FieldHandlerResult.SKIP` to `SKIPPED`.
 - Renamed `FieldHandlerResult.BREAK` to `HANDLED`.
+- Added `FieldHandlerContext` to transmit information between field handlers.
 
 ---
 

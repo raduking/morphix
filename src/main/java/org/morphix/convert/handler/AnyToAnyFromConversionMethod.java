@@ -52,7 +52,9 @@ public final class AnyToAnyFromConversionMethod<S, D> extends FieldHandler {
 		if (null == sValue) {
 			return SKIPPED;
 		}
-		SimpleConverter<S, D> converter = getSimpleConverter(sfo.toClass(), dfo.toClass());
+		Class<?> sClass = ctx.getSClass(sfo);
+		Class<?> dClass = ctx.getDClass(dfo);
+		SimpleConverter<S, D> converter = getSimpleConverter(sClass, dClass);
 		if (null == converter) {
 			return SKIPPED;
 		}

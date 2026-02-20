@@ -57,7 +57,7 @@ public final class OptionalToAny extends FieldHandler {
 
 		dValue = null != dValue
 				? convertFrom(sValue, to(dValue), getConfiguration())
-				: convertFrom(sValue, dfo.toClass(), getConfiguration());
+				: convertFrom(sValue, ctx.getDClass(dfo), getConfiguration());
 		dfo.setFieldValue(dValue);
 		return CONVERTED;
 	}

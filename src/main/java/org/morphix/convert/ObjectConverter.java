@@ -174,13 +174,14 @@ public class ObjectConverter<S, D> implements
 		if (srcFields.isEmpty()) {
 			return;
 		}
+		FieldHandlerContext ctx = new FieldHandlerContext();
 		for (ExtendedField dfo : dstFields) {
 			String srcFieldName = getSourceFieldName(dfo, source);
 			// apply source field finding strategies
 			for (FieldFinderStrategy strategy : getStrategies()) {
 				ExtendedField sfo = strategy.find(source, srcFields, srcFieldName);
 				if (ExtendedField.EMPTY != sfo) {
-					convertField(sfo, dfo);
+					convertField(sfo, dfo, ctx);
 					break;
 				}
 			}
@@ -193,10 +194,10 @@ public class ObjectConverter<S, D> implements
 	 *
 	 * @param sfo source field object pair
 	 * @param dfo destination field object pair
+	 * @param ctx the field handler context
 	 */
-	private void convertField(final ExtendedField sfo, final ExtendedField dfo) {
+	private void convertField(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		try {
-			FieldHandlerContext ctx = new FieldHandlerContext();
 			for (FieldHandler handler : getFieldHandlers()) {
 				if (handler.convert(sfo, dfo, ctx)) {
 					break;

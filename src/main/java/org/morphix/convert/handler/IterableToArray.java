@@ -66,7 +66,8 @@ public final class IterableToArray extends FieldHandler {
 		if (null != dfo.getFieldValue() && dValue.length > 0) {
 			return HANDLED;
 		}
-		Class<?> arrayElementClass = dfo.toClass().getComponentType();
+		Class<?> dClass = ctx.getDClass(dfo);
+		Class<?> arrayElementClass = dClass.getComponentType();
 		if (null == arrayElementClass) {
 			return HANDLED;
 		}

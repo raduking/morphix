@@ -58,7 +58,7 @@ public final class CharSequenceToAnyFromStaticMethod extends FieldHandler {
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		Object sValue = sfo.getFieldValue();
-		Class<?> dClass = dfo.toClass();
+		Class<?> dClass = ctx.getDClass(dfo);
 		List<Method> staticConvertMethods = getConverterMethods(dClass, CharSequence.class);
 		if (null == sValue && !staticConvertMethods.isEmpty()) {
 			return HANDLED;

@@ -72,8 +72,8 @@ public final class DirectAssignment extends FieldHandler {
 	 */
 	@Override
 	public boolean condition(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
-		Class<?> dClass = dfo.toClass();
-		Class<?> sClass = sfo.toClass();
+		Class<?> dClass = ctx.getDClass(dfo);
+		Class<?> sClass = ctx.getSClass(sfo);
 		return dClass.isAssignableFrom(sClass);
 	}
 

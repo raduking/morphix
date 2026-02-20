@@ -164,7 +164,7 @@ public abstract class FieldHandler {
 	 * @param dfo destination field object
 	 * @return a key
 	 */
-	public String key(final String key, final ExtendedField sfo, final ExtendedField dfo) {
+	public String key(final String key, final Object sfo, final Object dfo) {
 		return key + System.identityHashCode(sfo) + System.identityHashCode(dfo);
 	}
 }

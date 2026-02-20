@@ -54,7 +54,7 @@ public final class MapToAny extends FieldHandler {
 			return SKIPPED;
 		}
 		InstanceFunction<Object> instanceFunction =
-				() -> Constructors.IgnoreAccess.newInstance(dfo.toClass(), InstanceCreator.getInstance());
+				() -> Constructors.IgnoreAccess.newInstance(ctx.getDClass(dfo), InstanceCreator.getInstance());
 		Map<String, Object> map = JavaObjects.cast(sfo.getObject());
 
 		Object value = MapConversions.convertFromMap(map, instanceFunction, getConfiguration());
