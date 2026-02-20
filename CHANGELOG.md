@@ -1,5 +1,12 @@
 ## Release Notes
 
+`1.0.23`
+
+- Renamed `FieldHandlerResult.SKIP` to `SKIPPED`.
+- Renamed `FieldHandlerResult.BREAK` to `HANDLED`.
+
+---
+
 `1.0.22`
 
 - Renamed `AnyFromMap` field handler to `MapToAny`.

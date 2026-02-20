@@ -19,6 +19,7 @@ import java.lang.reflect.Constructor;
 
 import org.morphix.convert.FieldHandler;
 import org.morphix.convert.FieldHandlerResult;
+import org.morphix.reflection.Constructors;
 import org.morphix.reflection.ExtendedField;
 
 /**
@@ -62,7 +63,7 @@ public final class AnyToAnyFromConstructor extends FieldHandler {
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
 		Object dValue;
 		try {
-			Constructor<?> constructor = dfo.toClass().getDeclaredConstructor(sfo.toClass());
+			Constructor<?> constructor = Constructors.Safe.getDeclared(dfo.toClass(), sfo.toClass());
 			dValue = constructor.newInstance(sfo.getFieldValue());
 		} catch (Exception e) {
 			return SKIPPED;
@@ -76,11 +77,6 @@ public final class AnyToAnyFromConstructor extends FieldHandler {
 	 */
 	@Override
 	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
-		try {
-			dfo.toClass().getDeclaredConstructor(sfo.toClass());
-		} catch (NoSuchMethodException e) {
-			return false;
-		}
-		return true;
+		return null != Constructors.Safe.getDeclared(dfo.toClass(), sfo.toClass());
 	}
 }
