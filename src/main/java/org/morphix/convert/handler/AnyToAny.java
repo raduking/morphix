@@ -73,7 +73,7 @@ public final class AnyToAny extends FieldHandler {
 		Object dValue = dfo.getFieldValue();
 		dValue = null != dValue
 				? convertFrom(sValue, to(dValue), getConfiguration())
-				: convertFrom(sValue, ctx.getDClass(dfo), getConfiguration());
+				: convertFrom(sValue, dfo.toClass(), getConfiguration());
 		dfo.setFieldValue(dValue);
 		return CONVERTED;
 	}

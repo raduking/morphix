@@ -83,8 +83,8 @@ public final class AnyToAnyFromConstructor extends FieldHandler {
 	 */
 	@Override
 	public boolean condition(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
-		Class<?> sClass = ctx.getSClass(sfo);
-		Class<?> dClass = ctx.getDClass(dfo);
+		Class<?> sClass = sfo.toClass();
+		Class<?> dClass = dfo.toClass();
 		Constructor<?> constructor = Constructors.Safe.getDeclared(dClass, sClass);
 		if (null == constructor) {
 			return false;

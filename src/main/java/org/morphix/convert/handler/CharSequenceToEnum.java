@@ -57,7 +57,7 @@ public final class CharSequenceToEnum extends FieldHandler {
 		if (null == sValue) {
 			return HANDLED;
 		}
-		Class<?> dClass = ctx.getDClass(dfo);
+		Class<?> dClass = dfo.toClass();
 		// find a method in the dClass (Enum class) that can convert the value from a CharSequence / String value
 		List<Method> methods = getConverterMethods(dClass, CharSequence.class);
 		Method valueOfMethod = null;

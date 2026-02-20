@@ -85,11 +85,11 @@ public class NumberToNumber extends FieldHandler {
 	 */
 	@Override
 	public boolean condition(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
-		Integer s = InformationHolder.TYPE_COERTION_INDEX.get(ctx.getSClass(sfo));
+		Integer s = InformationHolder.TYPE_COERTION_INDEX.get(sfo.toClass());
 		if (null == s) {
 			return false;
 		}
-		Integer d = InformationHolder.TYPE_COERTION_INDEX.get(ctx.getDClass(dfo));
+		Integer d = InformationHolder.TYPE_COERTION_INDEX.get(dfo.toClass());
 		if (null == d) {
 			return false;
 		}

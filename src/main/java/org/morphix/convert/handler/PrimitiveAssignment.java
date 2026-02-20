@@ -53,8 +53,8 @@ public final class PrimitiveAssignment extends FieldHandler {
 	 */
 	@Override
 	public boolean condition(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
-		Class<?> sClass = ctx.getSClass(sfo);
-		Class<?> dClass = ctx.getDClass(dfo);
+		Class<?> sClass = sfo.toClass();
+		Class<?> dClass = dfo.toClass();
 		if (Objects.equals(sClass, dClass)) {
 			return false;
 		}

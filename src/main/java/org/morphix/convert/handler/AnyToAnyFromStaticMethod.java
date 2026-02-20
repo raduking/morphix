@@ -55,8 +55,8 @@ public final class AnyToAnyFromStaticMethod extends FieldHandler {
 	@Override
 	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		Object sValue = sfo.getFieldValue();
-		Class<?> dClass = ctx.getDClass(dfo);
-		Class<?> sClass = ctx.getSClass(sfo);
+		Class<?> dClass = dfo.toClass();
+		Class<?> sClass = sfo.toClass();
 		List<Method> staticConvertMethods = getConverterMethods(dClass, sClass);
 		if (null == sValue && !staticConvertMethods.isEmpty()) {
 			return HANDLED;

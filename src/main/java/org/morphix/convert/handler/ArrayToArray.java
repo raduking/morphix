@@ -60,7 +60,7 @@ public final class ArrayToArray extends FieldHandler {
 			return HANDLED;
 		}
 
-		Class<?> dClass = ctx.getDClass(dfo);
+		Class<?> dClass = dfo.toClass();
 		Class<?> elementClass = dClass.getComponentType();
 		Object[] dValue = (Object[]) Array.newInstance(elementClass, sValue.length);
 

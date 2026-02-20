@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.morphix.lang.JavaObjects;
-import org.morphix.reflection.ExtendedField;
 
 /**
  * Context for field handlers, it can be used to store any information that the handlers need to share between them.
@@ -24,18 +23,6 @@ import org.morphix.reflection.ExtendedField;
  * @author Radu Sebastian LAZIN
  */
 public class FieldHandlerContext {
-
-	/**
-	 * The key for the source class in the context map. This is used to store the source class in the context map, so that
-	 * it can be reused by the handlers that need it.
-	 */
-	private static final String SRC_CLASS = "sClass";
-
-	/**
-	 * The key for the destination class in the context map. This is used to store the destination class in the context map,
-	 * so that it can be reused by the handlers that need it.
-	 */
-	private static final String DST_CLASS = "dClass";
 
 	/**
 	 * Context map, it can store any information that the handlers need to share between them.
@@ -69,51 +56,5 @@ public class FieldHandlerContext {
 	 */
 	public <T> T get(final String key) {
 		return JavaObjects.cast(context.get(key));
-	}
-
-	/**
-	 * Returns the source class from the context map, if it is not present, it will be obtained from the source field and
-	 * stored in the context map for future use.
-	 *
-	 * @param sfo the source field
-	 * @return the source class
-	 */
-	public Class<?> getSClass(final ExtendedField sfo) {
-		String key = key(SRC_CLASS, sfo);
-		Class<?> sClass = get(key);
-		if (null == sClass) {
-			sClass = sfo.toClass();
-			put(key, sClass);
-		}
-		return sClass;
-	}
-
-	/**
-	 * Returns the destination class from the context map, if it is not present, it will be obtained from the destination
-	 * field and stored in the context map for future use.
-	 *
-	 * @param dfo the destination field
-	 * @return the destination class
-	 */
-	public Class<?> getDClass(final ExtendedField dfo) {
-		String key = key(DST_CLASS, dfo);
-		Class<?> dClass = get(key);
-		if (null == dClass) {
-			dClass = dfo.toClass();
-			put(key, dClass);
-		}
-		return dClass;
-	}
-
-	/**
-	 * Returns a unique key for the given key and object. This is used to store information in the context map that is
-	 * specific to a field, for example, the converted value of a field.
-	 *
-	 * @param key the key to use as a prefix for the unique key
-	 * @param obj the object to use to generate the unique key
-	 * @return a unique key for the given key and object
-	 */
-	public String key(final String key, final Object obj) {
-		return key + System.identityHashCode(obj);
 	}
 }
