@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 
 import org.morphix.convert.Configuration;
 import org.morphix.convert.FieldHandler;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.annotation.Expandable;
 import org.morphix.convert.extras.ConverterCollections;
@@ -38,16 +39,6 @@ import org.morphix.reflection.ExtendedField;
 public final class ExpandableFieldHandler extends FieldHandler {
 
 	/**
-	 * Map describing the instantiators for each supported expandable field types.
-	 */
-	private static final Map<Predicate<Type>, Instantiator<?>> INSTANTIATORS_MAP = new HashMap<>();
-	static {
-		INSTANTIATORS_MAP.put(isConvertibleIterableType(), ConverterCollections::newCollectionInstance);
-		INSTANTIATORS_MAP.put(isConvertibleMapType(), ConverterCollections::newMapInstance);
-		INSTANTIATORS_MAP.put(isArray(), ConverterCollections::newEmptyArrayInstance);
-	}
-
-	/**
 	 * Constructor for custom configuration.
 	 *
 	 * @param configuration configuration object
@@ -57,13 +48,13 @@ public final class ExpandableFieldHandler extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
+	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		// see if we have specific instantiator first
 		boolean fieldSet = false;
-		for (Map.Entry<Predicate<Type>, Instantiator<?>> entry : INSTANTIATORS_MAP.entrySet()) {
+		for (Map.Entry<Predicate<Type>, Instantiator<?>> entry : InformationHolder.INSTANTIATORS_MAP.entrySet()) {
 			if (entry.getKey().test(dfo.getType())) {
 				dfo.setFieldValue(entry.getValue().instance(dfo));
 				fieldSet = true;
@@ -77,22 +68,22 @@ public final class ExpandableFieldHandler extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#condition(ExtendedField, ExtendedField)
+	 * @see FieldHandler#condition(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	protected boolean convert(final ExtendedField sfo, final ExtendedField dfo) {
-		if (condition(sfo, dfo)) {
-			FieldHandlerResult result = handle(sfo, dfo);
+	protected boolean convert(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
+		if (condition(sfo, dfo, ctx)) {
+			FieldHandlerResult result = handle(sfo, dfo, ctx);
 			return result.isHandled();
 		}
 		return false;
 	}
 
 	/**
-	 * @see FieldHandler#condition(ExtendedField, ExtendedField)
+	 * @see FieldHandler#condition(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
+	public boolean condition(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext context) {
 		return getConfiguration().getExpandableFields().shouldNotExpandField(sfo);
 	}
 
@@ -113,5 +104,23 @@ public final class ExpandableFieldHandler extends FieldHandler {
 		 * @return instance of the object declared by the given field
 		 */
 		T instance(ExtendedField fop);
+	}
+
+	/**
+	 * Holder for static data to avoid unnecessary class loading of the predicates when the handler is not used.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class InformationHolder {
+
+		/**
+		 * Map describing the instantiators for each supported expandable field types.
+		 */
+		private static final Map<Predicate<Type>, Instantiator<?>> INSTANTIATORS_MAP = new HashMap<>();
+		static {
+			INSTANTIATORS_MAP.put(isConvertibleIterableType(), ConverterCollections::newCollectionInstance);
+			INSTANTIATORS_MAP.put(isConvertibleMapType(), ConverterCollections::newMapInstance);
+			INSTANTIATORS_MAP.put(isArray(), ConverterCollections::newEmptyArrayInstance);
+		}
 	}
 }

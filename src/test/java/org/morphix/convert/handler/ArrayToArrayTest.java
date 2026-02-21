@@ -18,14 +18,15 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.spy;
 import static org.morphix.convert.Conversions.convertFrom;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.reflection.ExtendedField.of;
 
 import java.lang.reflect.Field;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.annotation.Expandable;
 
@@ -245,9 +246,9 @@ class ArrayToArrayTest {
 		Field sii = Src.class.getDeclaredField("ii");
 		Field dii = Dst.class.getDeclaredField("ii");
 
-		FieldHandlerResult result = handler.handle(of(sii, src), of(dii, dst));
+		FieldHandlerResult result = handler.handle(of(sii, src), of(dii, dst), new FieldHandlerContext());
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 	@Test
@@ -260,7 +261,7 @@ class ArrayToArrayTest {
 		Field sii = Src.class.getDeclaredField("ii");
 		Field dii = Dst.class.getDeclaredField("ii");
 
-		FieldHandlerResult result = handler.handle(of(sii, src), of(dii, dst));
+		FieldHandlerResult result = handler.handle(of(sii, src), of(dii, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 		assertThat(dst.ii[0], equalTo(TEST_LONG));

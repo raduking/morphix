@@ -78,6 +78,11 @@ public class ExtendedField {
 	private String name;
 
 	/**
+	 * Class of the field. It is used for caching the class of the field when it is calculated for the first time.
+	 */
+	private Class<?> cls;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param field field
@@ -276,19 +281,25 @@ public class ExtendedField {
 	 * @return type of the field
 	 */
 	public Class<?> toClass() {
+		if (null != cls) {
+			return cls;
+		}
 		if (hasObject()) {
 			Object value = getFieldValue();
 			if (null != value) {
-				return value.getClass();
+				cls = value.getClass();
 			}
 		}
-		if (null != field) {
-			return field.getType();
+		if (null == cls && null != field) {
+			cls = field.getType();
 		}
-		if (null != getterMethod) {
-			return getterMethod.getReturnType();
+		if (null == cls && null != getterMethod) {
+			cls = getterMethod.getReturnType();
 		}
-		return DEFAULT_CLASS;
+		if (null == cls) {
+			cls = DEFAULT_CLASS;
+		}
+		return cls;
 	}
 
 	/**

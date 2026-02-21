@@ -27,15 +27,15 @@ public enum FieldHandlerResult {
 	/**
 	 * Tells the converter to move to the next handler in the chain.
 	 */
-	SKIP(false),
+	SKIPPED(false),
 
 	/**
 	 * Tells the converter to break the chain and consider the value handled but not converted.
 	 */
-	BREAK(true);
+	HANDLED(true);
 
 	/**
-	 * handled flag
+	 * Handled flag, faster than comparing to enum values.
 	 */
 	private final boolean handled;
 

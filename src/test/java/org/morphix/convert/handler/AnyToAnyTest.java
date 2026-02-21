@@ -17,7 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.morphix.convert.Conversions.convertFrom;
 import static org.morphix.convert.Conversions.convertFromIterable;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.lang.function.InstanceFunction.to;
 import static org.morphix.reflection.ExtendedField.of;
 
@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.ObjectConverter;
 
@@ -216,9 +217,9 @@ class AnyToAnyTest {
 		Field sField = SrcC.class.getDeclaredField("a");
 		Field dField = DstD.class.getDeclaredField("a");
 
-		FieldHandlerResult result = new AnyToAny().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new AnyToAny().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 	@Test
@@ -232,7 +233,7 @@ class AnyToAnyTest {
 		Field sField = SrcC.class.getDeclaredField("a");
 		Field dField = DstD.class.getDeclaredField("a");
 
-		FieldHandlerResult result = new AnyToAny().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new AnyToAny().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}

@@ -13,12 +13,14 @@
 package org.morphix.convert.handler;
 
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 
 import java.lang.reflect.Constructor;
 
 import org.morphix.convert.FieldHandler;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
+import org.morphix.reflection.Constructors;
 import org.morphix.reflection.ExtendedField;
 
 /**
@@ -49,6 +51,11 @@ import org.morphix.reflection.ExtendedField;
 public final class AnyToAnyFromConstructor extends FieldHandler {
 
 	/**
+	 * Key base for saved constructor.
+	 */
+	private static final String CONSTRUCTOR = "constructor";
+
+	/**
 	 * Default constructor.
 	 */
 	public AnyToAnyFromConstructor() {
@@ -56,31 +63,33 @@ public final class AnyToAnyFromConstructor extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
+	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		Object dValue;
+		Constructor<?> constructor = ctx.get(key(CONSTRUCTOR, sfo, dfo));
 		try {
-			Constructor<?> constructor = dfo.toClass().getDeclaredConstructor(sfo.toClass());
 			dValue = constructor.newInstance(sfo.getFieldValue());
 		} catch (Exception e) {
-			return SKIP;
+			return SKIPPED;
 		}
 		dfo.setFieldValue(dValue);
 		return CONVERTED;
 	}
 
 	/**
-	 * @see FieldHandler#condition(ExtendedField, ExtendedField)
+	 * @see FieldHandler#condition(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
-		try {
-			dfo.toClass().getDeclaredConstructor(sfo.toClass());
-		} catch (NoSuchMethodException e) {
+	public boolean condition(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
+		Class<?> sClass = sfo.toClass();
+		Class<?> dClass = dfo.toClass();
+		Constructor<?> constructor = Constructors.Safe.getDeclared(dClass, sClass);
+		if (null == constructor) {
 			return false;
 		}
+		ctx.put(key(CONSTRUCTOR, sfo, dfo), constructor);
 		return true;
 	}
 }

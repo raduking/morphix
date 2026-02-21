@@ -13,9 +13,9 @@
 package org.morphix.convert.handler;
 
 import static org.morphix.convert.Conversions.convertEnvelopedFrom;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.convert.IterableConversions.convertIterable;
 import static org.morphix.convert.extras.ConverterCollections.newCollectionInstance;
 import static org.morphix.lang.function.Predicates.allOf;
@@ -31,6 +31,7 @@ import java.util.function.Predicate;
 
 import org.morphix.convert.Conversions;
 import org.morphix.convert.FieldHandler;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.reflection.ExtendedField;
 
@@ -53,17 +54,17 @@ public final class AnyToIterable extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
+	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		Object sValue = sfo.getFieldValue();
 		if (null == sValue) {
-			return SKIP;
+			return SKIPPED;
 		}
 		Type elementType = IterableToIterable.getIterableElementType(dfo);
 		if (null == elementType) {
-			return BREAK;
+			return HANDLED;
 		}
 		Iterable<?> sIterable = Collections.singletonList(sValue);
 		Iterable<?> dValue = convertIterable(sIterable,

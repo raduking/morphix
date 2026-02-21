@@ -14,14 +14,15 @@ package org.morphix.convert.handler;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.reflection.ExtendedField.of;
 
 import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 
 /**
@@ -70,9 +71,9 @@ class CharSequenceToAnyFromStaticMethodTest {
 		Field sField = Src.class.getDeclaredField("a");
 		Field dField = Dst.class.getDeclaredField("a");
 
-		FieldHandlerResult result = new CharSequenceToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new CharSequenceToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 	@Test
@@ -84,7 +85,7 @@ class CharSequenceToAnyFromStaticMethodTest {
 		Field sField = Src.class.getDeclaredField("a");
 		Field dField = Dst.class.getDeclaredField("a");
 
-		FieldHandlerResult result = new CharSequenceToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new CharSequenceToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}
@@ -98,9 +99,9 @@ class CharSequenceToAnyFromStaticMethodTest {
 		Field sField = Src.class.getDeclaredField("c");
 		Field dField = Dst.class.getDeclaredField("c");
 
-		FieldHandlerResult result = new CharSequenceToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new CharSequenceToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 	@Test
@@ -112,9 +113,9 @@ class CharSequenceToAnyFromStaticMethodTest {
 		Field sField = Src.class.getDeclaredField("c");
 		Field dField = Dst.class.getDeclaredField("c");
 
-		FieldHandlerResult result = new CharSequenceToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new CharSequenceToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 }

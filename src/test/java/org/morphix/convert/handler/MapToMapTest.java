@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.morphix.convert.Conversions.convertFrom;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.reflection.ExtendedField.of;
 
 import java.io.Serial;
@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.ObjectConverterException;
 
@@ -299,7 +300,7 @@ class MapToMapTest {
 		Field sField = Source.class.getDeclaredField("m");
 		Field dField = Destination.class.getDeclaredField("m");
 
-		FieldHandlerResult result = new MapToMap().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new MapToMap().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}
@@ -312,9 +313,9 @@ class MapToMapTest {
 		Field sField = Source.class.getDeclaredField("m");
 		Field dField = Destination.class.getDeclaredField("m");
 
-		FieldHandlerResult result = new MapToMap().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new MapToMap().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 	public static class Destination2 {
@@ -330,9 +331,9 @@ class MapToMapTest {
 		Field sField = Source.class.getDeclaredField("m");
 		Field dField = Destination2.class.getDeclaredField("m");
 
-		FieldHandlerResult result = new MapToMap().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new MapToMap().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 }
