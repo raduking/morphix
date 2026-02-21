@@ -1,10 +1,13 @@
 package org.morphix.lang.thread;
 
+import java.util.Objects;
 import java.util.Stack;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.morphix.lang.function.Runnables;
@@ -25,25 +28,31 @@ public abstract class StackedContextHolder<T> {
 	private static final Logger LOGGER = Logger.getLogger(StackedContextHolder.class.getName());
 
 	/**
+	 * The current element tracked to reconcile setting of wrong element via {@link #setElement(Object)}. The method throws
+	 * so the stack should not be pop-ed since it is never pushed.
+	 */
+	private static final ThreadLocal<Object> currentElement = new ThreadLocal<>();
+
+	/**
 	 * Stack element name for logging purposes.
 	 */
 	private final String elementName;
 
 	/**
-	 * Predicate to test wrong elements. This predicate is used to validate the element before adding it to the stack. If
-	 * the predicate returns true, an exception is thrown and the element is not added to the stack.
+	 * Predicate to test valid elements. This predicate is used to validate the element before adding it to the stack. If
+	 * the predicate returns {@code false} an exception is thrown and the element is not added to the stack.
 	 */
-	private final Predicate<T> wrongElementPredicate;
+	private final Predicate<T> validElement;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param elementName stack element name
-	 * @param wrongElementPredicate predicate to test wrong elements
+	 * @param validElement predicate to test wrong elements
 	 */
-	protected StackedContextHolder(final String elementName, final Predicate<T> wrongElementPredicate) {
+	protected StackedContextHolder(final String elementName, final Predicate<T> validElement) {
 		this.elementName = elementName;
-		this.wrongElementPredicate = wrongElementPredicate;
+		this.validElement = validElement;
 	}
 
 	/**
@@ -56,12 +65,12 @@ public abstract class StackedContextHolder<T> {
 	}
 
 	/**
-	 * Returns the wrong element predicate.
+	 * Returns the valid element predicate.
 	 *
-	 * @return the wrong element predicate
+	 * @return the valid element predicate
 	 */
-	public Predicate<T> getWrongElementPredicate() {
-		return wrongElementPredicate;
+	public Predicate<T> validElement() {
+		return validElement;
 	}
 
 	/**
@@ -76,6 +85,7 @@ public abstract class StackedContextHolder<T> {
 	 */
 	public void clearThreadStack() {
 		getThreadStack().remove();
+		currentElement.remove();
 	}
 
 	/**
@@ -94,15 +104,18 @@ public abstract class StackedContextHolder<T> {
 	 * @param <U> return type
 	 *
 	 * @param element element
+	 * @param elementSetter function to set the element in the stack
+	 * @param elementRemover function to remove the element from the stack
 	 * @param statements statements to run
 	 * @return statements result
 	 */
-	public static <E, U> U on(final E element, final SetterFunction<E> elementSetter, final Runnable elementRemover, final Supplier<U> statements) {
+	public static <E, U> U on(final E element, final SetterFunction<E> elementSetter, final Consumer<E> elementRemover,
+			final Supplier<U> statements) {
 		try {
 			elementSetter.set(element);
 			return statements.get();
 		} finally {
-			elementRemover.run();
+			elementRemover.accept(element);
 		}
 	}
 
@@ -130,17 +143,19 @@ public abstract class StackedContextHolder<T> {
 	 * @param <R> function return type
 	 *
 	 * @param element element
+	 * @param elementSetter function to set the element in the stack
+	 * @param elementRemover function to remove the element from the stack
 	 * @param function function to run
 	 * @param arg function argument
 	 * @return function result
 	 */
-	public static <E, U, R> R on(final E element, final SetterFunction<E> elementSetter, final Runnable elementRemover, final Function<U, R> function,
-			final U arg) {
+	public static <E, U, R> R on(final E element, final SetterFunction<E> elementSetter, final Consumer<E> elementRemover,
+			final Function<U, R> function, final U arg) {
 		try {
 			elementSetter.set(element);
 			return function.apply(arg);
 		} finally {
-			elementRemover.run();
+			elementRemover.accept(element);
 		}
 	}
 
@@ -169,9 +184,11 @@ public abstract class StackedContextHolder<T> {
 	 * @param <E> element type
 	 *
 	 * @param element element
+	 * @param elementSetter function to set the element in the stack
+	 * @param elementRemover function to remove the element from the stack
 	 * @param runnable runnable to run
 	 */
-	public static <E> void on(final E element, final SetterFunction<E> elementSetter, final Runnable elementRemover, final Runnable runnable) {
+	public static <E> void on(final E element, final SetterFunction<E> elementSetter, final Consumer<E> elementRemover, final Runnable runnable) {
 		on(element, elementSetter, elementRemover, Runnables.toSupplier(runnable));
 	}
 
@@ -195,13 +212,14 @@ public abstract class StackedContextHolder<T> {
 	 * @param element element to add to the stack
 	 */
 	public void setElement(final T element) {
-		debug(LOGGER, "[START:on{}]: {}", getElementName(), element);
-		if (getWrongElementPredicate().test(element)) {
+		debug("[START:on{}]: {}", getElementName(), element);
+		currentElement.set(element);
+		if (!validElement().test(element)) {
 			throw new ThreadContextException(getElementName() + " cannot be: " + element);
 		}
 		Stack<T> currentStack = getStack();
 		if (!isInitialized(currentStack)) {
-			currentStack = new Stack<>();
+			currentStack = newStack();
 			getThreadStack().set(currentStack);
 		}
 		currentStack.push(element);
@@ -218,41 +236,62 @@ public abstract class StackedContextHolder<T> {
 	}
 
 	/**
+	 * Creates a new stack instance. Override this method to provide a custom stack implementation.
+	 *
+	 * @return a new stack instance
+	 */
+	protected Stack<T> newStack() {
+		return new Stack<>();
+	}
+
+	/**
 	 * Changes the current element.
 	 *
 	 * @param element new element
 	 */
 	public void changeElement(final T element) {
-		debug(LOGGER, "[change{}]: {}", getElementName(), element);
+		debug("[change{}]: {}", getElementName(), element);
 		if (null == element) {
 			throw new ThreadContextException(getElementName() + " cannot be null.");
 		}
 		Stack<T> currentStack = getStack();
 		if (!isEmpty(currentStack)) {
 			currentStack.set(currentStack.size() - 1, element);
+			currentElement.set(element);
 		}
 	}
 
 	/**
 	 * Clears the current direction from the stack.
+	 *
+	 * @param element element that is being cleared (might be invalid because this method is called in finally).
 	 */
-	protected void clearElement() {
+	protected void clearElement(final T element) {
 		Stack<T> currentStack = getStack();
-		T element = null;
+		// the element might be different than the stack peek element if the stack was changed by a changeElement() call, so we
+		// need to check if the current element is the same as the stack peek element before popping it.
+		T peekElement = element;
 		if (isEmpty(currentStack)) {
 			clearThreadStack();
 		} else {
-			element = currentStack.pop();
+			if (Objects.equals(currentStack.peek(), currentElement.get())) {
+				peekElement = currentStack.pop();
+			}
 			if (isEmpty(currentStack)) {
 				clearThreadStack();
+			} else {
+				currentElement.set(currentStack.peek());
 			}
 		}
-		debug(LOGGER, "[END:on{}]: {}", getElementName(), element);
+		debug("[END:on{}]: {}", getElementName(), peekElement);
 	}
 
 	/**
 	 * Returns true if the current stack was initialized, false otherwise.
 	 *
+	 * @param <T> stack element type
+	 *
+	 * @param currentStack the current stack to check
 	 * @return true if the current stack was initialized, false otherwise
 	 */
 	protected static <T> boolean isInitialized(final Stack<T> currentStack) {
@@ -262,6 +301,9 @@ public abstract class StackedContextHolder<T> {
 	/**
 	 * Returns true if the current stack is empty, false otherwise.
 	 *
+	 * @param <T> stack element type
+	 *
+	 * @param currentStack the current stack to check
 	 * @return true if the current stack is empty, false otherwise
 	 */
 	protected static <T> boolean isEmpty(final Stack<T> currentStack) {
@@ -271,13 +313,15 @@ public abstract class StackedContextHolder<T> {
 	/**
 	 * Logs the given message and arguments on debug level.
 	 *
-	 * @param logger logger to log with
 	 * @param message message to log
 	 * @param args message arguments
 	 */
-	protected static void debug(final Logger logger, final String message, final Object... args) {
-		if (logger.isLoggable(Level.FINE)) {
-			logger.fine(String.format(message, args));
+	protected void debug(final String message, final Object... args) {
+		if (LOGGER.isLoggable(Level.FINE)) {
+			LogRecord logRecord = new LogRecord(Level.FINE, message);
+			logRecord.setParameters(args);
+			logRecord.setLoggerName(getClass().getName());
+			LOGGER.log(logRecord);
 		}
 	}
 }

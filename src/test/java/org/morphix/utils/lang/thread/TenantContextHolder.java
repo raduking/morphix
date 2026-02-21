@@ -1,8 +1,10 @@
-package org.morphix.lang.thread;
+package org.morphix.utils.lang.thread;
 
 import java.util.Stack;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import org.morphix.lang.thread.StackedContextHolder;
 
 /**
  * Context holder for current tenant ID.
@@ -34,7 +36,7 @@ public class TenantContextHolder extends StackedContextHolder<String> {
 	 * Set the name to {@code "Tenant"}.
 	 */
 	protected TenantContextHolder() {
-		super("Tenant", TenantContextHolder::isTenantIdInvalid);
+		super("Tenant", TenantContextHolder::isValidTenantId);
 	}
 
 	/**
@@ -112,13 +114,13 @@ public class TenantContextHolder extends StackedContextHolder<String> {
 	}
 
 	/**
-	 * Checks if the given tenant ID is invalid.
+	 * Checks if the given tenant ID is valid.
 	 *
 	 * @param tenantId tenant ID to check
-	 * @return true if the tenant ID is invalid, false otherwise
+	 * @return true if the tenant ID is valid, false otherwise
 	 */
-	private static boolean isTenantIdInvalid(final String tenantId) {
-		return tenantId == null || tenantId.isBlank();
+	private static boolean isValidTenantId(final String tenantId) {
+		return tenantId != null && !tenantId.isBlank();
 	}
 
 	/**
