@@ -251,8 +251,8 @@ public abstract class StackedContextHolder<T> {
 	 */
 	public void changeElement(final T element) {
 		debug("[change{}]: {}", getElementName(), element);
-		if (null == element) {
-			throw new ThreadContextException(getElementName() + " cannot be null.");
+		if (!validElement().test(element)) {
+			throw new ThreadContextException(getElementName() + " cannot be: " + element);
 		}
 		Stack<T> currentStack = getStack();
 		if (!isEmpty(currentStack)) {

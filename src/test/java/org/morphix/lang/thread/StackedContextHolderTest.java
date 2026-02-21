@@ -2,6 +2,7 @@ package org.morphix.lang.thread;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -125,6 +126,32 @@ class StackedContextHolderTest {
 				"push: " + TENANT_ID,
 				"change: " + TENANT_ID + "Changed",
 				"pop: " + TENANT_ID + "Changed")));
+	}
+
+	@Test
+	void shouldHandleChangeTenantIdWithWrongTenantId() {
+		String wrongTenantId = " ";
+		Executable executable = () -> DummyTenantContextHolder.onTenant(TENANT_ID, () -> {
+			DummyTenantContextHolder.changeTenantId(wrongTenantId);
+		});
+		ThreadContextException e = assertThrows(ThreadContextException.class, executable);
+
+		assertThat(e.getMessage(), equalTo("Tenant cannot be: " + wrongTenantId));
+
+		assertThat(DummyTenantContextHolder.INSTANCE.dummyStack.operations, equalTo(List.of(
+				"push: " + TENANT_ID,
+				"pop: " + TENANT_ID)));
+	}
+
+	@Test
+	void shouldReturnNullTenantIdWhenStackIsEmpty() {
+		assertThat(TenantContextHolder.getTenantId(), equalTo(null));
+	}
+
+	@Test
+	void shouldNotChangeTenantIdWhenStackIsEmpty() {
+		assertDoesNotThrow(() -> TenantContextHolder.changeTenantId(TENANT_ID));
+		assertThat(TenantContextHolder.getTenantId(), equalTo(null));
 	}
 
 	/**
