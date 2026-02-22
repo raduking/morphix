@@ -1,7 +1,20 @@
+/*
+ * Copyright 2026 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.morphix.lang.thread;
 
 import java.util.Objects;
 import java.util.Stack;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -98,6 +111,15 @@ public abstract class StackedContextHolder<T> {
 	}
 
 	/**
+	 * Creates a new stack instance. Override this method to provide a custom stack implementation.
+	 *
+	 * @return a new stack instance
+	 */
+	protected Stack<T> newStack() {
+		return new Stack<>();
+	}
+
+	/**
 	 * Runs the given statements on the given element as context and returns the result from the statements.
 	 *
 	 * @param <E> element type
@@ -133,6 +155,49 @@ public abstract class StackedContextHolder<T> {
 	 */
 	public static <E, U, V extends StackedContextHolder<E>> U on(final E element, final V contextHolder, final Supplier<U> statements) {
 		return on(element, contextHolder::setElement, contextHolder::clearElement, statements);
+	}
+
+	/**
+	 * Runs the given statements on the current element as context and returns the result from the statements. This method
+	 * should be used with {@link CompletableFuture#supplyAsync(Supplier)} to propagate the current context to the new
+	 * thread. The context is propagated by getting the current element and setting it as context in the new thread before
+	 * running the statements. The context is cleared after the statements are run.
+	 *
+	 * @param <E> element type
+	 * @param <U> return type
+	 * @param <V> stacked context holder type
+	 *
+	 * @param contextHolder stacked context holder instance
+	 * @param statements statements to run
+	 * @return statements result
+	 */
+	public static <E, U, V extends StackedContextHolder<E>> Supplier<U> onCurrent(final V contextHolder, final Supplier<U> statements) {
+		E currentElement = contextHolder.getElement();
+		if (null == currentElement) {
+			return statements;
+		}
+		return () -> on(currentElement, contextHolder, statements);
+	}
+
+	/**
+	 * Runs the given runnable on the current element as context. This method should be used with
+	 * {@link CompletableFuture#runAsync(Runnable)} to propagate the current context to the new thread. The context is
+	 * propagated by getting the current element and setting it as context in the new thread before running the runnable.
+	 * The context is cleared after the runnable is run.
+	 *
+	 * @param <E> element type
+	 * @param <V> stacked context holder type
+	 *
+	 * @param contextHolder stacked context holder instance
+	 * @param runnable runnable to run
+	 * @return a runnable that runs the given runnable on the current element as context
+	 */
+	public static <E, V extends StackedContextHolder<E>> Runnable onCurrent(final V contextHolder, final Runnable runnable) {
+		E currentElement = contextHolder.getElement();
+		if (null == currentElement) {
+			return runnable;
+		}
+		return () -> on(currentElement, contextHolder, runnable);
 	}
 
 	/**
@@ -233,15 +298,6 @@ public abstract class StackedContextHolder<T> {
 	public T getElement() {
 		Stack<T> currentStack = getStack();
 		return isEmpty(currentStack) ? null : currentStack.peek();
-	}
-
-	/**
-	 * Creates a new stack instance. Override this method to provide a custom stack implementation.
-	 *
-	 * @return a new stack instance
-	 */
-	protected Stack<T> newStack() {
-		return new Stack<>();
 	}
 
 	/**

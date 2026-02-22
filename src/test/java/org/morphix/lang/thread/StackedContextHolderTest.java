@@ -1,3 +1,15 @@
+/*
+ * Copyright 2026 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.morphix.lang.thread;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -7,8 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.logging.LogManager;
 
@@ -108,7 +127,7 @@ class StackedContextHolderTest {
 
 		assertThat(e.getMessage(), equalTo("Tenant cannot be: " + wrongTenantId));
 
-		assertThat(DummyTenantContextHolder.INSTANCE.dummyStack.operations, equalTo(List.of(
+		assertThat(DummyTenantContextHolder.INSTANCE.getDummyStack().operations, equalTo(List.of(
 				"push: " + TENANT_ID,
 				"push: " + TENANT_ID + "Nested",
 				"pop: " + TENANT_ID + "Nested",
@@ -122,7 +141,7 @@ class StackedContextHolderTest {
 			assertThat(DummyTenantContextHolder.getTenantId(), equalTo(TENANT_ID + "Changed"));
 		});
 
-		assertThat(DummyTenantContextHolder.INSTANCE.dummyStack.operations, equalTo(List.of(
+		assertThat(DummyTenantContextHolder.INSTANCE.getDummyStack().operations, equalTo(List.of(
 				"push: " + TENANT_ID,
 				"change: " + TENANT_ID + "Changed",
 				"pop: " + TENANT_ID + "Changed")));
@@ -138,7 +157,7 @@ class StackedContextHolderTest {
 
 		assertThat(e.getMessage(), equalTo("Tenant cannot be: " + wrongTenantId));
 
-		assertThat(DummyTenantContextHolder.INSTANCE.dummyStack.operations, equalTo(List.of(
+		assertThat(DummyTenantContextHolder.INSTANCE.getDummyStack().operations, equalTo(List.of(
 				"push: " + TENANT_ID,
 				"pop: " + TENANT_ID)));
 	}
@@ -156,6 +175,101 @@ class StackedContextHolderTest {
 		assertThat(TenantContextHolder.getTenantId(), equalTo(null));
 	}
 
+	@Test
+	void shouldPropagateCurrentTenantToCompletedFuture() {
+		String result = TenantContextHolder.onTenant(TENANT_ID, () -> {
+			CompletableFuture<String> future =
+					CompletableFuture.supplyAsync(TenantContextHolder.onCurrentTenant(() -> {
+						String tenantId = TenantContextHolder.getTenantId();
+						assertThat(tenantId, equalTo(TENANT_ID));
+						return tenantId;
+					}));
+			return future.join();
+		});
+
+		assertThat(result, equalTo(TENANT_ID));
+	}
+
+	@Test
+	void shouldPropagateInnerMostTenantToCompletedFuture() {
+		String result = DummyTenantContextHolder.onTenant(TENANT_ID,
+				() -> DummyTenantContextHolder.onTenant(TENANT_ID + "Nested",
+						() -> {
+							CompletableFuture<String> future =
+									CompletableFuture.supplyAsync(DummyTenantContextHolder.onCurrentTenant(() -> {
+										String tenantId = DummyTenantContextHolder.getTenantId();
+										assertThat(tenantId, equalTo(TENANT_ID + "Nested"));
+										return tenantId;
+									}));
+							return future.join();
+						}));
+
+		assertThat(result, equalTo(TENANT_ID + "Nested"));
+
+		assertThat(DummyTenantContextHolder.INSTANCE.getDummyStack().operations, equalTo(List.of(
+				"push: " + TENANT_ID,
+				"push: " + TENANT_ID + "Nested",
+				"pop: " + TENANT_ID + "Nested",
+				"pop: " + TENANT_ID)));
+	}
+
+	@Test
+	void shouldNotPropagateCurrentTenantIfCurrentTenantIsNotSetToCompletedFuture() {
+		CompletableFuture<String> future =
+				CompletableFuture.supplyAsync(TenantContextHolder.onCurrentTenant(() -> {
+					String tenantId = TenantContextHolder.getTenantId();
+					assertThat(tenantId, equalTo(null));
+					return tenantId;
+				}));
+		String result = future.join();
+
+		assertThat(result, equalTo(null));
+	}
+
+	@Test
+	void shouldPropagateCurrentTenantOnScheduledTask() {
+		try (ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()) {
+			AtomicReference<String> tenantIdRef = new AtomicReference<>();
+
+			TenantContextHolder.onTenant(TENANT_ID, () -> {
+				executor.schedule(TenantContextHolder.onCurrentTenant(() -> {
+					String tenantId = TenantContextHolder.getTenantId();
+					tenantIdRef.set(tenantId);
+				}), 50, TimeUnit.MILLISECONDS);
+			});
+
+			// Wait for the scheduled task to complete
+			int retryCount = 0;
+			while (tenantIdRef.get() == null && retryCount < 5) {
+				Threads.safeSleep(20, TimeUnit.MILLISECONDS);
+				++retryCount;
+			}
+
+			assertThat(tenantIdRef.get(), equalTo(TENANT_ID));
+		}
+	}
+
+	@Test
+	void shouldNotPropagateCurrentTenantOnScheduledTaskIfCurrentTenantIsNotSet() {
+		try (ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()) {
+			AtomicReference<String> tenantIdRef = new AtomicReference<>();
+
+			executor.schedule(TenantContextHolder.onCurrentTenant(() -> {
+				String tenantId = TenantContextHolder.getTenantId();
+				tenantIdRef.set(tenantId);
+			}), 50, TimeUnit.MILLISECONDS);
+
+			// Wait for the scheduled task to complete
+			int retryCount = 0;
+			while (tenantIdRef.get() == null && retryCount < 5) {
+				Threads.safeSleep(20, TimeUnit.MILLISECONDS);
+				++retryCount;
+			}
+
+			assertThat(tenantIdRef.get(), equalTo(null));
+		}
+	}
+
 	/**
 	 * Dummy Context holder example.
 	 *
@@ -167,7 +281,7 @@ class StackedContextHolderTest {
 
 		private static final DummyTenantContextHolder INSTANCE = new DummyTenantContextHolder();
 
-		private DummyStack<String> dummyStack;
+		private Map<String, DummyStack<String>> dummyStackMap = new HashMap<>();
 
 		public static <T> T onTenant(final String tenantId, final Supplier<T> statements) {
 			return on(tenantId, INSTANCE, statements::get);
@@ -175,6 +289,10 @@ class StackedContextHolderTest {
 
 		public static void onTenant(final String tenantId, final Runnable statements) {
 			on(tenantId, INSTANCE, statements::run);
+		}
+
+		public static <T> Supplier<T> onCurrentTenant(final Supplier<T> statements) {
+			return onCurrent(INSTANCE, statements::get);
 		}
 
 		public static void changeTenantId(final String tenantId) {
@@ -193,8 +311,12 @@ class StackedContextHolderTest {
 		@Override
 		protected Stack<String> newStack() {
 			DummyStack<String> newStack = new DummyStack<>();
-			this.dummyStack = newStack;
+			this.dummyStackMap.put(Thread.currentThread().getName(), newStack);
 			return newStack;
+		}
+
+		public DummyStack<String> getDummyStack() {
+			return this.dummyStackMap.get(Thread.currentThread().getName());
 		}
 	}
 

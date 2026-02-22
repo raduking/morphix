@@ -1,3 +1,15 @@
+/*
+ * Copyright 2026 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.morphix.utils.lang.thread;
 
 import java.util.Stack;
@@ -7,7 +19,7 @@ import java.util.function.Supplier;
 import org.morphix.lang.thread.StackedContextHolder;
 
 /**
- * Context holder for current tenant ID.
+ * This is an example on how to build a context holder for current tenant.
  * <p>
  * Singleton class. The {@link #instance()} method is not needed to be accessible from the outside since only the
  * following methods
@@ -111,6 +123,31 @@ public class TenantContextHolder extends StackedContextHolder<String> {
 	 */
 	public static void onTenant(final String tenantId, final Runnable runnable) {
 		on(tenantId, instance(), runnable);
+	}
+
+	/**
+	 * Runs the given statements on the current tenant and returns the result from the statements.
+	 *
+	 * @param <T> return type
+	 * @param statements statements to run
+	 * @return statements result
+	 */
+	public static <T> Supplier<T> onCurrentTenant(final Supplier<T> statements) {
+		return onCurrent(instance(), statements::get);
+	}
+
+	/**
+	 * Runs the given function on the current tenant and returns its result.
+	 *
+	 * @param <T> function parameter type
+	 * @param <R> function return type
+	 *
+	 * @param function function to run
+	 * @param arg function argument
+	 * @return function result
+	 */
+	public static Runnable onCurrentTenant(final Runnable runnable) {
+		return onCurrent(instance(), runnable);
 	}
 
 	/**
