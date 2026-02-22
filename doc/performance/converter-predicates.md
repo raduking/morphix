@@ -1,5 +1,5 @@
 
-### Converter Predicates
+### Converter Predicates Benchmark Results
 
 | Date       | Rev | Mode | Cnt | Score    | Error    | Units |
 |------------|-----|------|-----|----------|----------|-------|
