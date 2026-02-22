@@ -17,6 +17,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -32,15 +33,17 @@ import org.morphix.lang.Nullables;
  * <li>getter method</li>
  * <li>reflection field object</li>
  * </ol>
+ * Operations are thread safe.
+ * <p>
+ * The field value, type and class are cached when they are calculated for the first time.
+ * <p>
+ * The field value is cached only if it is not null, otherwise it is calculated every time. The field type and class are
+ * cached even if they are null, because they are calculated based on the field or getter method and they will not
+ * change during the lifetime of the object.
  *
  * @author Radu Sebastian LAZIN
  */
 public class ExtendedField {
-
-	/**
-	 * Default class for a field.
-	 */
-	private static final Class<?> DEFAULT_CLASS = Object.class;
 
 	/**
 	 * Empty extended field.
@@ -65,7 +68,7 @@ public class ExtendedField {
 	/**
 	 * Actual field value.
 	 */
-	private Object fieldValue;
+	private AtomicReference<Object> fieldValue = new AtomicReference<>();
 
 	/**
 	 * Field modifiers.
@@ -209,16 +212,24 @@ public class ExtendedField {
 	 * @return the field value
 	 */
 	public Object getFieldValue() {
-		if (null == fieldValue && null != getterMethod) {
-			fieldValue = Methods.IgnoreAccess.invoke(getterMethod, object);
+		Object value = fieldValue.get();
+		if (null != value) {
+			return value;
 		}
-		if (null == fieldValue && null != field) {
-			fieldValue = Fields.IgnoreAccess.get(object, field);
+		if (null != getterMethod) {
+			value = Methods.IgnoreAccess.invoke(getterMethod, object);
 		}
-		if (null == fieldValue && null == field && null == getterMethod && hasObject()) {
-			fieldValue = object;
+		if (null == value && null != field) {
+			value = Fields.IgnoreAccess.get(object, field);
 		}
-		return fieldValue;
+		if (null == value && null == field && null == getterMethod && hasObject()) {
+			value = object;
+		}
+		if (null != value) {
+			// only cache non null values
+			fieldValue.compareAndSet(null, value);
+		}
+		return fieldValue.get();
 	}
 
 	/**
@@ -229,10 +240,10 @@ public class ExtendedField {
 	public void setFieldValue(final Object value) {
 		if (null != field) {
 			Reflection.setFieldValue(object, field, value);
-			fieldValue = value;
+			fieldValue.set(value);
 		} else if (null != getterMethod) {
 			Reflection.setFieldValue(object, name, getterMethod.getReturnType(), value);
-			fieldValue = value;
+			fieldValue.set(value);
 		}
 	}
 
@@ -249,18 +260,26 @@ public class ExtendedField {
 		if (hasObject()) {
 			Object value = getFieldValue();
 			if (null != value) {
-				type = value.getClass();
+				return setType(value.getClass());
 			}
 		}
-		if (null == type && null != field) {
-			type = field.getGenericType();
+		if (null != field) {
+			return setType(field.getGenericType());
 		}
 		if (null == type && null != getterMethod) {
-			type = getterMethod.getGenericReturnType();
+			return setType(getterMethod.getGenericReturnType());
 		}
-		if (null == type) {
-			type = DEFAULT_CLASS;
-		}
+		return setType(Default.CLASS);
+	}
+
+	/**
+	 * Sets the type of the field. It is used for caching the type of the field when it is calculated for the first time.
+	 *
+	 * @param type the type to set.
+	 * @return the cached type;
+	 */
+	protected Type setType(final Type type) {
+		this.type = type;
 		return type;
 	}
 
@@ -295,21 +314,32 @@ public class ExtendedField {
 		if (null != cls) {
 			return cls;
 		}
+		if (type instanceof Class<?> classType) {
+			return setClass(classType);
+		}
 		if (hasObject()) {
 			Object value = getFieldValue();
 			if (null != value) {
-				cls = value.getClass();
+				return setClass(value.getClass());
 			}
 		}
-		if (null == cls && null != field) {
-			cls = field.getType();
+		if (null != field) {
+			return setClass(field.getType());
 		}
 		if (null == cls && null != getterMethod) {
-			cls = getterMethod.getReturnType();
+			return setClass(getterMethod.getReturnType());
 		}
-		if (null == cls) {
-			cls = DEFAULT_CLASS;
-		}
+		return setClass(Default.CLASS);
+	}
+
+	/**
+	 * Sets the class of the field. It is used for caching the class of the field when it is calculated for the first time.
+	 *
+	 * @param cls the class to set.
+	 * @return the cached class;
+	 */
+	protected Class<?> setClass(final Class<?> cls) {
+		this.cls = cls;
 		return cls;
 	}
 
@@ -397,5 +427,25 @@ public class ExtendedField {
 			sb.append("Object: ").append(object);
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Namespace class for defaults.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	public static class Default {
+
+		/**
+		 * Default class for a field.
+		 */
+		private static final Class<?> CLASS = Object.class;
+
+		/**
+		 * Hide constructor.
+		 */
+		private Default() {
+			throw Constructors.unsupportedOperationException();
+		}
 	}
 }
