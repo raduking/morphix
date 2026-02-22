@@ -31,7 +31,7 @@ public abstract class StackedContextHolder<T> {
 	 * The current element tracked to reconcile setting of wrong element via {@link #setElement(Object)}. The method throws
 	 * so the stack should not be pop-ed since it is never pushed.
 	 */
-	private static final ThreadLocal<Object> currentElement = new ThreadLocal<>();
+	private final ThreadLocal<Object> currentElement = new ThreadLocal<>();
 
 	/**
 	 * Stack element name for logging purposes.
@@ -212,7 +212,7 @@ public abstract class StackedContextHolder<T> {
 	 * @param element element to add to the stack
 	 */
 	public void setElement(final T element) {
-		debug("[START:on{}]: {}", getElementName(), element);
+		debug("[START:on{}:{}]", getElementName(), element);
 		currentElement.set(element);
 		if (!validElement().test(element)) {
 			throw new ThreadContextException(getElementName() + " cannot be: " + element);
@@ -250,7 +250,7 @@ public abstract class StackedContextHolder<T> {
 	 * @param element new element
 	 */
 	public void changeElement(final T element) {
-		debug("[change{}]: {}", getElementName(), element);
+		debug("[change{}:{}]", getElementName(), element);
 		if (!validElement().test(element)) {
 			throw new ThreadContextException(getElementName() + " cannot be: " + element);
 		}
@@ -283,7 +283,7 @@ public abstract class StackedContextHolder<T> {
 				currentElement.set(currentStack.peek());
 			}
 		}
-		debug("[END:on{}]: {}", getElementName(), peekElement);
+		debug("[END:on{}:{}]", getElementName(), peekElement);
 	}
 
 	/**

@@ -20,7 +20,7 @@ public class OneLineFormatter extends Formatter {
 	/**
 	 * Date pattern for the timestamp.
 	 */
-	private static final String DATE_PATTERN = "YYYY-MM-dd HH:mm:ss.SSS";
+	private static final String DATE_PATTERN = "HH:mm:ss.SSS";
 
 	/**
 	 * The date format used to format the timestamp in log records.
@@ -33,6 +33,11 @@ public class OneLineFormatter extends Formatter {
 
 		// timestamp
 		sb.append(dateFormat.format(new Date(logRecord.getMillis())));
+		sb.append(" ");
+
+		// thread name
+		String threadName = Thread.currentThread().getName();
+		sb.append(String.format("[%s]", threadName));
 		sb.append(" ");
 
 		// level (padded to 7 characters for alignment)
