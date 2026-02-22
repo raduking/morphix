@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 
 /**
@@ -213,7 +214,7 @@ class DirectAssignmentTest {
 		Field sField = AA.class.getDeclaredField("i");
 		Field dField = BB.class.getDeclaredField("i");
 
-		FieldHandlerResult result = new DirectAssignment().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new DirectAssignment().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}

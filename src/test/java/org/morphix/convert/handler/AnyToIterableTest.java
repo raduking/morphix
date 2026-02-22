@@ -18,13 +18,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.morphix.convert.Conversions.convertFrom;
 import static org.morphix.convert.Converter.convert;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.reflection.ExtendedField.of;
 
 import java.lang.reflect.Field;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 
 /**
@@ -100,9 +101,9 @@ class AnyToIterableTest {
 		Field sField = A.class.getDeclaredField("i");
 		Field dField = B.class.getDeclaredField("i");
 
-		FieldHandlerResult result = new AnyToIterable().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new AnyToIterable().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 }

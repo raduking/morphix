@@ -16,7 +16,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
-import org.morphix.invoke.HandleMethods;
+import org.morphix.invoke.Handles;
 import org.morphix.reflection.Methods;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -28,7 +28,7 @@ import org.openjdk.jmh.annotations.State;
 
 /**
  * Benchmarks for {@link Methods.IgnoreAccess#invoke(Method, Object, Object...)} and
- * {@link HandleMethods#invoke(MethodHandle, Object...)}.
+ * {@link Handles#invoke(MethodHandle, Object...)}.
  *
  * <pre>
  * mvn jmh:benchmark -Pbenchmark -Djmh.benchmarks=org.morphix.benchmark.MethodInvocation
@@ -65,8 +65,8 @@ public class MethodInvocation {
 
 	@Benchmark
 	public Integer testHandleMethodsInvoke() {
-		MethodHandle method = HandleMethods.get("sum", A.class, Integer.class, Integer.class, int.class);
+		MethodHandle method = Handles.get("sum", A.class, Integer.class, Integer.class, int.class);
 
-		return HandleMethods.invoke(method, a, 10, 10);
+		return Handles.invoke(method, a, 10, 10);
 	}
 }

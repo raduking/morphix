@@ -12,23 +12,19 @@
  */
 package org.morphix.convert.handler;
 
-import static java.lang.Boolean.TRUE;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
 import static org.morphix.lang.function.Predicates.cast;
 import static org.morphix.reflection.predicates.ClassPredicates.isA;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
 import org.morphix.convert.FieldHandler;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
+import org.morphix.convert.function.SimpleConverter;
 import org.morphix.reflection.ExtendedField;
-import org.morphix.reflection.Methods;
 
 /**
  * Handles number conversions for number classes covering type coercion for non-primitive number types.
@@ -38,50 +34,6 @@ import org.morphix.reflection.Methods;
 public class NumberToNumber extends FieldHandler {
 
 	/**
-	 * Type coertion map for all primitive boxed classes.
-	 */
-	private static final Map<AbstractMap.SimpleEntry<Class<?>, Class<?>>, Boolean> TYPE_COERTION_MAP = new HashMap<>();
-	static {
-		// Byte -> Short -> Integer -> Float -> Double
-		TYPE_COERTION_MAP.put(pair(Byte.class, Short.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Byte.class, Integer.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Byte.class, Long.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Byte.class, Float.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Byte.class, Double.class), TRUE);
-		// Short -> Integer -> Float -> Double
-		TYPE_COERTION_MAP.put(pair(Short.class, Integer.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Short.class, Long.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Short.class, Float.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Short.class, Double.class), TRUE);
-		// Character -> Short -> Integer -> Float -> Double
-		TYPE_COERTION_MAP.put(pair(Character.class, Integer.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Character.class, Long.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Character.class, Float.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Character.class, Double.class), TRUE);
-		// Integer -> Float -> Double
-		TYPE_COERTION_MAP.put(pair(Integer.class, Long.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Integer.class, Float.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Integer.class, Double.class), TRUE);
-		// Long -> Float -> Double
-		TYPE_COERTION_MAP.put(pair(Long.class, Float.class), TRUE);
-		TYPE_COERTION_MAP.put(pair(Long.class, Double.class), TRUE);
-		// Float -> Double
-		TYPE_COERTION_MAP.put(pair(Float.class, Double.class), TRUE);
-	}
-
-	/**
-	 * Boxed primitive to primitive value supplier method name.
-	 */
-	private static final Map<Class<?>, String> NUMBER_SUPPLIER_MAP = new HashMap<>();
-	static {
-		NUMBER_SUPPLIER_MAP.put(Short.class, "shortValue");
-		NUMBER_SUPPLIER_MAP.put(Integer.class, "intValue");
-		NUMBER_SUPPLIER_MAP.put(Long.class, "longValue");
-		NUMBER_SUPPLIER_MAP.put(Float.class, "floatValue");
-		NUMBER_SUPPLIER_MAP.put(Double.class, "doubleValue");
-	}
-
-	/**
 	 * Default constructor.
 	 */
 	public NumberToNumber() {
@@ -89,17 +41,26 @@ public class NumberToNumber extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
+	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		Object sValue = sfo.getFieldValue();
-		if (null != sValue) {
-			String methodName = NUMBER_SUPPLIER_MAP.get(dfo.toClass());
-			Method method = Methods.Safe.getOneDeclaredInHierarchy(methodName, sfo.toClass());
-			Object dValue = Methods.IgnoreAccess.invoke(method, sValue);
-			dfo.setFieldValue(dValue);
+		if (null == sValue) {
+			return CONVERTED;
 		}
+
+		int s = ctx.get(key("sTypeIndex", sfo, dfo));
+		int d = ctx.get(key("dTypeIndex", sfo, dfo));
+
+		SimpleConverter<Object, Object> converter = InformationHolder.CONVERTERS[s][d];
+		if (null == converter) {
+			return CONVERTED;
+		}
+
+		Object converted = converter.convert(sValue);
+		dfo.setFieldValue(converted);
+
 		return CONVERTED;
 	}
 
@@ -108,7 +69,7 @@ public class NumberToNumber extends FieldHandler {
 	 */
 	@Override
 	protected Predicate<Type> sourceTypeConstraint() {
-		return PredicateHolder.NUMBER_TYPE_CONSTRAINT;
+		return InformationHolder.NUMBER_TYPE_CONSTRAINT;
 	}
 
 	/**
@@ -116,43 +77,84 @@ public class NumberToNumber extends FieldHandler {
 	 */
 	@Override
 	protected Predicate<Type> destinationTypeConstraint() {
-		return PredicateHolder.NUMBER_TYPE_CONSTRAINT;
+		return InformationHolder.NUMBER_TYPE_CONSTRAINT;
 	}
 
 	/**
-	 * @see FieldHandler#condition(ExtendedField, ExtendedField)
+	 * @see FieldHandler#condition(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
-		Class<?> dClass = dfo.toClass();
-		Class<?> sClass = sfo.toClass();
-		return TYPE_COERTION_MAP.containsKey(pair(sClass, dClass));
+	public boolean condition(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
+		Integer s = InformationHolder.TYPE_COERTION_INDEX.get(sfo.toClass());
+		if (null == s) {
+			return false;
+		}
+		Integer d = InformationHolder.TYPE_COERTION_INDEX.get(dfo.toClass());
+		if (null == d) {
+			return false;
+		}
+		ctx.put(key("sTypeIndex", sfo, dfo), s);
+		ctx.put(key("dTypeIndex", sfo, dfo), d);
+		return true;
 	}
 
 	/**
-	 * Creates a {@link SimpleEntry} given the key and value.
-	 *
-	 * @param <K> key type
-	 * @param <V> value type
-	 *
-	 * @param k key
-	 * @param v value
-	 * @return a simple entry with the give key and value
-	 */
-	private static <K, V> AbstractMap.SimpleEntry<K, V> pair(final K k, final V v) {
-		return new AbstractMap.SimpleEntry<>(k, v);
-	}
-
-	/**
-	 * Holder for predicates to avoid unnecessary class loading of the predicates when the handler is not used.
+	 * Holder for static data to avoid unnecessary class loading of the predicates when the handler is not used.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
-	private static class PredicateHolder {
+	private static class InformationHolder {
 
 		/**
 		 * Type constraint for number to number handler.
 		 */
-		static final Predicate<Type> NUMBER_TYPE_CONSTRAINT = cast(isA(Number.class));
+		static final Predicate<Type> NUMBER_TYPE_CONSTRAINT = cast(isA(Number.class).or(isA(Character.class)));
+
+		/**
+		 * Type coercion index for all primitive boxed classes.
+		 */
+		private static final Map<Class<?>, Integer> TYPE_COERTION_INDEX = Map.of(
+				Byte.class, 0,
+				Character.class, 1,
+				Short.class, 2,
+				Integer.class, 3,
+				Long.class, 4,
+				Float.class, 5,
+				Double.class, 6);
+
+		/**
+		 * Array of converters for all primitive boxed classes. The first index is the source type and the second index is the
+		 * destination type. The value is a converter from the source type to the destination type. The array is sparse and only
+		 * contains converters for valid coercions.
+		 */
+		@SuppressWarnings("unchecked")
+		private static final SimpleConverter<Object, Object>[][] CONVERTERS = new SimpleConverter[7][7];
+		static {
+			// Byte -> Short -> Integer -> Float -> Double
+			CONVERTERS[0][2] = n -> ((Byte) n).shortValue();
+			CONVERTERS[0][3] = n -> ((Byte) n).intValue();
+			CONVERTERS[0][4] = n -> ((Byte) n).longValue();
+			CONVERTERS[0][5] = n -> ((Byte) n).floatValue();
+			CONVERTERS[0][6] = n -> ((Byte) n).doubleValue();
+			// Character -> Short -> Integer -> Float -> Double
+			CONVERTERS[1][3] = o -> (int) ((Character) o).charValue();
+			CONVERTERS[1][4] = o -> (long) ((Character) o).charValue();
+			CONVERTERS[1][5] = o -> (float) ((Character) o).charValue();
+			CONVERTERS[1][6] = o -> (double) ((Character) o).charValue();
+			// Short -> Integer -> Float -> Double
+			CONVERTERS[2][3] = o -> ((Short) o).intValue();
+			CONVERTERS[2][4] = o -> ((Short) o).longValue();
+			CONVERTERS[2][5] = o -> ((Short) o).floatValue();
+			CONVERTERS[2][6] = o -> ((Short) o).doubleValue();
+			// Integer -> Float -> Double
+			CONVERTERS[3][4] = o -> ((Integer) o).longValue();
+			CONVERTERS[3][5] = o -> ((Integer) o).floatValue();
+			CONVERTERS[3][6] = o -> ((Integer) o).doubleValue();
+			// Long -> Float -> Double
+			CONVERTERS[4][5] = o -> ((Long) o).floatValue();
+			CONVERTERS[4][6] = o -> ((Long) o).doubleValue();
+			// Float -> Double
+			CONVERTERS[5][6] = o -> ((Float) o).doubleValue();
+		}
 	}
 }

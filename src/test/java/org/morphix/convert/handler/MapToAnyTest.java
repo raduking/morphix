@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.convert.MapConversions.convertFromMap;
 import static org.morphix.reflection.ExtendedField.of;
 
@@ -32,6 +32,7 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.convert.Conversions;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.lang.function.InstanceFunction;
 
@@ -200,9 +201,9 @@ class MapToAnyTest {
 
 	@Test
 	void shouldReturnSkipOnHandleIfSourceIsNull() {
-		FieldHandlerResult result = new MapToAny().handle(of((Field) null), of((Field) null));
+		FieldHandlerResult result = new MapToAny().handle(of((Field) null), of((Field) null), new FieldHandlerContext());
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 }

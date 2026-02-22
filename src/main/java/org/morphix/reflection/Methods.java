@@ -58,6 +58,29 @@ public interface Methods {
 	}
 
 	/**
+	 * Returns a list with all the methods declared in the class given as parameter that verify the given method predicate.
+	 *
+	 * @param <T> type to get the methods from
+	 *
+	 * @param cls class on which the methods are returned
+	 * @param predicate filter predicate for methods
+	 * @return list of methods
+	 */
+	static <T> List<Method> getAllDeclared(final Class<T> cls, final Predicate<? super Method> predicate) {
+		Method[] declared = cls.getDeclaredMethods();
+		if (declared.length == 0) {
+			return List.of();
+		}
+		List<Method> methods = new LinkedList<>();
+		for (int i = declared.length - 1; i >= 0; --i) {
+			if (predicate.test(declared[i])) {
+				methods.addFirst(declared[i]);
+			}
+		}
+		return methods;
+	}
+
+	/**
 	 * Returns the method with the given name and given parameter types from the given class.
 	 *
 	 * @param <T> type to get the method from

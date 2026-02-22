@@ -14,9 +14,9 @@ package org.morphix.convert.handler;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
 import static org.morphix.lang.function.InstanceFunction.to;
 import static org.morphix.reflection.ExtendedField.of;
 
@@ -26,6 +26,7 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.convert.Conversions;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 
 /**
@@ -177,7 +178,7 @@ class AnyToAnyFromStaticMethodTest {
 		Field sField = Src3.class.getDeclaredField("l");
 		Field dField = Dst3.class.getDeclaredField("l");
 
-		boolean result = new AnyToAnyFromStaticMethod().condition(of(sField), of(dField));
+		boolean result = new AnyToAnyFromStaticMethod().condition(of(sField), of(dField), new FieldHandlerContext());
 
 		assertThat(result, equalTo(true));
 	}
@@ -190,9 +191,9 @@ class AnyToAnyFromStaticMethodTest {
 		Field sField = Src3.class.getDeclaredField("f");
 		Field dField = Dst3.class.getDeclaredField("f");
 
-		FieldHandlerResult result = new AnyToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new AnyToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 
 	@Test
@@ -203,9 +204,9 @@ class AnyToAnyFromStaticMethodTest {
 		Field sField = Src3.class.getDeclaredField("g");
 		Field dField = Dst3.class.getDeclaredField("g");
 
-		FieldHandlerResult result = new AnyToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new AnyToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 	@Test
@@ -218,7 +219,7 @@ class AnyToAnyFromStaticMethodTest {
 		Field sField = Src3.class.getDeclaredField("f");
 		Field dField = Dst3.class.getDeclaredField("f");
 
-		FieldHandlerResult result = new AnyToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new AnyToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
 		assertThat(result, equalTo(CONVERTED));
 	}
@@ -233,9 +234,9 @@ class AnyToAnyFromStaticMethodTest {
 		Field sField = Src3.class.getDeclaredField("g");
 		Field dField = Dst3.class.getDeclaredField("g");
 
-		FieldHandlerResult result = new AnyToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new AnyToAnyFromStaticMethod().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 	}
 
 }

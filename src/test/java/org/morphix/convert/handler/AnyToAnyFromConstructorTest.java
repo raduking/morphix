@@ -19,11 +19,15 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
-import static org.morphix.convert.FieldHandlerResult.SKIP;
+import static org.morphix.convert.FieldHandlerResult.SKIPPED;
+
+import java.lang.reflect.Constructor;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.convert.Conversions;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
+import org.morphix.reflection.Constructors;
 import org.morphix.reflection.ExtendedField;
 
 /**
@@ -158,7 +162,7 @@ class AnyToAnyFromConstructorTest {
 		ExtendedField sfo = ExtendedField.of(Src3.class.getDeclaredField("a"));
 		ExtendedField dfo = ExtendedField.of(Dst3.class.getDeclaredField("a"));
 
-		boolean result = victim.condition(sfo, dfo);
+		boolean result = victim.condition(sfo, dfo, new FieldHandlerContext());
 
 		assertTrue(result);
 	}
@@ -168,7 +172,7 @@ class AnyToAnyFromConstructorTest {
 		ExtendedField sfo = ExtendedField.of(Src3.class.getDeclaredField("b"));
 		ExtendedField dfo = ExtendedField.of(Dst3.class.getDeclaredField("b"));
 
-		boolean result = victim.condition(sfo, dfo);
+		boolean result = victim.condition(sfo, dfo, new FieldHandlerContext());
 
 		assertFalse(result);
 	}
@@ -181,7 +185,11 @@ class AnyToAnyFromConstructorTest {
 		ExtendedField sfo = ExtendedField.of(Src3.class.getDeclaredField("a"), src);
 		ExtendedField dfo = ExtendedField.of(Dst3.class.getDeclaredField("a"), dst);
 
-		FieldHandlerResult result = victim.handle(sfo, dfo);
+		FieldHandlerContext ctx = new FieldHandlerContext();
+		Constructor<F> ctr = Constructors.getDeclared(F.class, E.class);
+		ctx.put(victim.key("constructor", sfo, dfo), ctr);
+
+		FieldHandlerResult result = victim.handle(sfo, dfo, ctx);
 
 		assertThat(result, equalTo(CONVERTED));
 		assertThat(dst.a, notNullValue());
@@ -195,9 +203,9 @@ class AnyToAnyFromConstructorTest {
 		ExtendedField sfo = ExtendedField.of(Src3.class.getDeclaredField("b"), src);
 		ExtendedField dfo = ExtendedField.of(Dst3.class.getDeclaredField("b"), dst);
 
-		FieldHandlerResult result = victim.handle(sfo, dfo);
+		FieldHandlerResult result = victim.handle(sfo, dfo, new FieldHandlerContext());
 
-		assertThat(result, equalTo(SKIP));
+		assertThat(result, equalTo(SKIPPED));
 		assertThat(dst.a, nullValue());
 	}
 
@@ -208,7 +216,7 @@ class AnyToAnyFromConstructorTest {
 		ExtendedField sfo = ExtendedField.of(Src3.class.getDeclaredField("c"));
 		ExtendedField dfo = ExtendedField.of(Dst3.class.getDeclaredField("c"));
 
-		boolean result = victim.condition(sfo, dfo);
+		boolean result = victim.condition(sfo, dfo, new FieldHandlerContext());
 
 		assertFalse(result);
 	}

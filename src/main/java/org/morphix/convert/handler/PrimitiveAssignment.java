@@ -17,6 +17,7 @@ import static org.morphix.convert.FieldHandlerResult.CONVERTED;
 import java.util.Objects;
 
 import org.morphix.convert.FieldHandler;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.reflection.ExtendedField;
 import org.morphix.reflection.Primitives;
@@ -36,10 +37,10 @@ public final class PrimitiveAssignment extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
+	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext context) {
 		Object sValue = sfo.getFieldValue();
 		if (null != sValue) {
 			dfo.setFieldValue(sValue);
@@ -48,12 +49,12 @@ public final class PrimitiveAssignment extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#condition(ExtendedField, ExtendedField)
+	 * @see FieldHandler#condition(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public boolean condition(final ExtendedField sfo, final ExtendedField dfo) {
-		Class<?> dClass = dfo.toClass();
+	public boolean condition(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		Class<?> sClass = sfo.toClass();
+		Class<?> dClass = dfo.toClass();
 		if (Objects.equals(sClass, dClass)) {
 			return false;
 		}

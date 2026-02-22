@@ -12,14 +12,16 @@
  */
 package org.morphix.reflection;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.utils.Tests;
 
 /**
  * Test class for {@link ExtendedField}.
@@ -118,9 +120,9 @@ class ExtendedFieldTest {
 
 		ef.setFieldValue("test");
 
-		Object result = Fields.IgnoreAccess.get(ef, "fieldValue");
+		AtomicReference<Object> result = Fields.IgnoreAccess.get(ef, "fieldValue");
 
-		assertThat(result, equalTo(null));
+		assertThat(result.get(), equalTo(null));
 	}
 
 	@Test
@@ -184,5 +186,12 @@ class ExtendedFieldTest {
 		Deprecated annotation = ef.getAnnotation(Deprecated.class);
 
 		assertThat(annotation, equalTo(method.getAnnotation(Deprecated.class)));
+	}
+
+	@Test
+	void shouldThrowExceptionWhenTryingToInstantiate() {
+		UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(ExtendedField.Default.class);
+
+		assertThat(e.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 	}
 }

@@ -81,7 +81,7 @@ public final class ParameterizedTypeConversions {
 	 * Constraint for the destination type for known conversions like lists, maps, arrays, sets, queues, etc. These
 	 * conversions are defined by convention in converter.
 	 */
-	private static final Predicate<Class<?>> KNOWN_CONVERSION_DESTINATION_CONSTRAINT =
+	private static final Predicate<Class<?>> SUPPORTED_CONVERSION_DESTINATION_CONSTRAINT =
 			isConvertibleIterableClass()
 					.or(isConvertibleMapClass())
 					.or(isArray());
@@ -223,7 +223,7 @@ public final class ParameterizedTypeConversions {
 	 * @return a parameterized conversion method
 	 */
 	private static <S, D> ParameterizedConvertMethod getParameterizedConvertMethod(final Class<S> sClass, final Class<D> dClass) {
-		if (KNOWN_CONVERSION_DESTINATION_CONSTRAINT.test(dClass)) {
+		if (SUPPORTED_CONVERSION_DESTINATION_CONSTRAINT.test(dClass)) {
 			for (Map.Entry<Predicate<Class<?>>, ParameterizedConvertMethod> sEntry : KNOWN_CONVERSION_METHODS_MAP.entrySet()) {
 				if (sEntry.getKey().test(sClass)) {
 					return sEntry.getValue();

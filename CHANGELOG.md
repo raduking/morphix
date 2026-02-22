@@ -1,5 +1,17 @@
 ## Release Notes
 
+`1.0.23`
+
+- Renamed `FieldHandlerResult.SKIP` to `SKIPPED`.
+- Renamed `FieldHandlerResult.BREAK` to `HANDLED`.
+- Added `FieldHandlerContext` to transmit information between field handlers.
+- Added `Methods.getAllDeclared(Class, Predicate)` to return all declared methods for a given class with a given predicate.
+- Added `StackedContextHolder` abstract class with a thread local stack that provides the appropriate context even in recursive calls.
+- Added `ThreadContextException` exception for thread context errors.
+- Renamed `HandleMethods` to `Handles`.
+
+---
+
 `1.0.22`
 
 - Renamed `AnyFromMap` field handler to `MapToAny`.

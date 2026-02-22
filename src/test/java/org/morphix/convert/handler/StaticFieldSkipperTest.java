@@ -14,12 +14,13 @@ package org.morphix.convert.handler;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.reflection.ExtendedField.of;
 
 import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 
 /**
@@ -45,8 +46,8 @@ class StaticFieldSkipperTest {
 		Field sField = Source.class.getDeclaredField("x");
 		Field dField = Destination.class.getDeclaredField("x");
 
-		FieldHandlerResult result = new StaticFieldSkipper().handle(of(sField, src), of(dField, dst));
+		FieldHandlerResult result = new StaticFieldSkipper().handle(of(sField, src), of(dField, dst), new FieldHandlerContext());
 
-		assertThat(result, equalTo(BREAK));
+		assertThat(result, equalTo(HANDLED));
 	}
 }

@@ -13,8 +13,8 @@
 package org.morphix.convert.handler;
 
 import static org.morphix.convert.Conversions.convertEnvelopedFrom;
-import static org.morphix.convert.FieldHandlerResult.BREAK;
 import static org.morphix.convert.FieldHandlerResult.CONVERTED;
+import static org.morphix.convert.FieldHandlerResult.HANDLED;
 import static org.morphix.convert.IterableConversions.convertIterable;
 import static org.morphix.reflection.predicates.TypePredicates.isArray;
 import static org.morphix.reflection.predicates.TypePredicates.isIterable;
@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 
 import org.morphix.convert.Configuration;
 import org.morphix.convert.FieldHandler;
+import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.reflection.ExtendedField;
 
@@ -53,21 +54,22 @@ public final class IterableToArray extends FieldHandler {
 	}
 
 	/**
-	 * @see FieldHandler#handle(ExtendedField, ExtendedField)
+	 * @see FieldHandler#handle(ExtendedField, ExtendedField, FieldHandlerContext)
 	 */
 	@Override
-	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo) {
+	public FieldHandlerResult handle(final ExtendedField sfo, final ExtendedField dfo, final FieldHandlerContext ctx) {
 		Object sValue = sfo.getFieldValue();
 		if (null == sValue) {
-			return BREAK;
+			return HANDLED;
 		}
 		Object[] dValue = (Object[]) dfo.getFieldValue();
 		if (null != dfo.getFieldValue() && dValue.length > 0) {
-			return BREAK;
+			return HANDLED;
 		}
-		Class<?> arrayElementClass = dfo.toClass().getComponentType();
+		Class<?> dClass = dfo.toClass();
+		Class<?> arrayElementClass = dClass.getComponentType();
 		if (null == arrayElementClass) {
-			return BREAK;
+			return HANDLED;
 		}
 
 		Collection<?> arrayList = convertIterable((Iterable<?>) sValue,
