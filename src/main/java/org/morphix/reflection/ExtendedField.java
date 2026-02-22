@@ -83,6 +83,11 @@ public class ExtendedField {
 	private Class<?> cls;
 
 	/**
+	 * Type of the field. It is used for caching the type of the field when it is calculated for the first time.
+	 */
+	private Type type;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param field field
@@ -238,19 +243,25 @@ public class ExtendedField {
 	 * @return type of the field
 	 */
 	public Type getType() {
+		if (null != type) {
+			return type;
+		}
 		if (hasObject()) {
 			Object value = getFieldValue();
 			if (null != value) {
-				return value.getClass();
+				type = value.getClass();
 			}
 		}
-		if (null != field) {
-			return field.getGenericType();
+		if (null == type && null != field) {
+			type = field.getGenericType();
 		}
-		if (null != getterMethod) {
-			return getterMethod.getGenericReturnType();
+		if (null == type && null != getterMethod) {
+			type = getterMethod.getGenericReturnType();
 		}
-		return DEFAULT_CLASS;
+		if (null == type) {
+			type = DEFAULT_CLASS;
+		}
+		return type;
 	}
 
 	/**
