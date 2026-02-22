@@ -8,6 +8,7 @@
 - Added `Methods.getAllDeclared(Class, Predicate)` to return all declared methods for a given class with a given predicate.
 - Added `StackedContextHolder` abstract class with a thread local stack that provides the appropriate context even in recursive calls.
 - Added `ThreadContextException` exception for thread context errors.
+- Renamed `HandleMethods` to `Handles`.
 
 ---
 

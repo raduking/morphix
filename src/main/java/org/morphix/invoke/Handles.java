@@ -17,10 +17,11 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.morphix.lang.JavaObjects;
+import org.morphix.reflection.Constructors;
 import org.morphix.reflection.ReflectionException;
 
 /**
@@ -36,23 +37,23 @@ import org.morphix.reflection.ReflectionException;
  * Example usage:
  *
  * <pre>{@code
- * MethodHandle handle = HandleMethods.getStatic("staticMethod", MyClass.class, void.class);
+ * MethodHandle handle = Handles.getStatic("staticMethod", MyClass.class, void.class);
  * HandleMethods.invoke(handle);
  * }</pre>
  *
  * @author Radu Sebastian LAZIN
  */
-public class HandleMethods {
+public class Handles {
 
 	/**
 	 * Cache for Lookup instances per class.
 	 */
-	private static final ConcurrentMap<Class<?>, MethodHandles.Lookup> LOOKUP_CACHE = new ConcurrentHashMap<>();
+	private static final Map<Class<?>, MethodHandles.Lookup> LOOKUP_CACHE = new ConcurrentHashMap<>();
 
 	/**
 	 * Cache for resolved {@link MethodHandle}s per class and method signature.
 	 */
-	private static final ConcurrentMap<Class<?>, ConcurrentMap<MethodSignature, MethodHandle>> METHOD_CACHE = new ConcurrentHashMap<>();
+	private static final Map<Class<?>, Map<MethodSignature, MethodHandle>> METHOD_CACHE = new ConcurrentHashMap<>();
 
 	/**
 	 * Retrieves a {@link MethodHandle} for an instance method of the given class. The result is cached for subsequent
@@ -122,7 +123,7 @@ public class HandleMethods {
 	 * @throws ReflectionException If the method cannot be found or accessed.
 	 */
 	private static <T> MethodHandle get(final String methodName, final Class<T> cls, final MethodType methodType, final boolean isStatic) {
-		ConcurrentMap<MethodSignature, MethodHandle> classMethods = METHOD_CACHE
+		Map<MethodSignature, MethodHandle> classMethods = METHOD_CACHE
 				.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
 
 		MethodSignature signature = MethodSignature.of(cls, methodName, methodType, isStatic);
@@ -154,7 +155,7 @@ public class HandleMethods {
 	 * @return a lookup instance for the given class from cache
 	 */
 	private static <T> Lookup getLookup(final Class<T> cls) {
-		return LOOKUP_CACHE.computeIfAbsent(cls, HandleMethods::getPrivateLookupIn);
+		return LOOKUP_CACHE.computeIfAbsent(cls, Handles::getPrivateLookupIn);
 	}
 
 	/**
@@ -178,7 +179,7 @@ public class HandleMethods {
 	/**
 	 * Hide constructor.
 	 */
-	private HandleMethods() {
-		// empty
+	private Handles() {
+		throw Constructors.unsupportedOperationException();
 	}
 }

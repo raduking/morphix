@@ -20,14 +20,16 @@ import java.lang.invoke.MethodHandle;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.reflection.Constructors;
 import org.morphix.reflection.ReflectionException;
+import org.morphix.utils.Tests;
 
 /**
- * Test class for {@link HandleMethods}.
+ * Test class for {@link Handles}.
  *
  * @author Radu Sebastian LAZIN
  */
-class HandleMethodsTest {
+class HandlesTest {
 
 	private static final String SOME_STRING = "mumu";
 	private static final String UNKNOWN = "unknown";
@@ -48,17 +50,17 @@ class HandleMethodsTest {
 
 	@Test
 	void shouldInvokePublicMethodWithNoParams() throws Throwable {
-		MethodHandle method = HandleMethods.get("getS", A.class, String.class);
+		MethodHandle method = Handles.get("getS", A.class, String.class);
 		A a = new A();
 
-		String result = HandleMethods.invoke(method, a);
+		String result = Handles.invoke(method, a);
 
 		assertThat(result, equalTo(SOME_STRING));
 	}
 
 	@Test
 	void shouldInvokePublicMethodWithNoParamsWithMethodHandleInvokeExact() throws Throwable {
-		MethodHandle method = HandleMethods.get("getS", A.class, String.class);
+		MethodHandle method = Handles.get("getS", A.class, String.class);
 		A a = new A();
 
 		String result = (String) method.invokeExact(a);
@@ -68,16 +70,16 @@ class HandleMethodsTest {
 
 	@Test
 	void shouldInvokePublicStaticMethodWithNoParams() throws Throwable {
-		MethodHandle method = HandleMethods.getStatic("getStaticS", A.class, String.class);
+		MethodHandle method = Handles.getStatic("getStaticS", A.class, String.class);
 
-		String result = HandleMethods.invoke(method);
+		String result = Handles.invoke(method);
 
 		assertThat(result, equalTo(SOME_STRING));
 	}
 
 	@Test
 	void shouldInvokePublicStaticMethodWithNoParamsWithMethodHandleInvokeExact() throws Throwable {
-		MethodHandle method = HandleMethods.getStatic("getStaticS", A.class, String.class);
+		MethodHandle method = Handles.getStatic("getStaticS", A.class, String.class);
 
 		String result = (String) method.invokeExact();
 
@@ -86,7 +88,7 @@ class HandleMethodsTest {
 
 	@Test
 	void shouldThrowExceptionForPrivateLookupInNotOpenPackages() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> HandleMethods.getPrivateLookupIn(Function.class));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Handles.getPrivateLookupIn(Function.class));
 
 		assertThat(e.getMessage(), equalTo("Failed to get lookup for " + Function.class
 				+ " because " + Function.class.getModule() + " does not open " + Function.class.getPackage()));
@@ -95,20 +97,26 @@ class HandleMethodsTest {
 
 	@Test
 	void shouldTransformAnyThrowanleToReflectionExceptionOnInvoke() {
-		MethodHandle method = HandleMethods.getStatic("getStaticS", A.class, String.class);
+		MethodHandle method = Handles.getStatic("getStaticS", A.class, String.class);
 		A a = new A();
 
-		ReflectionException e = assertThrows(ReflectionException.class, () -> HandleMethods.invoke(method, a));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Handles.invoke(method, a));
 
 		assertThat(e.getMessage(), equalTo("Error invoking method " + method));
 	}
 
 	@Test
 	void shouldThrowExceptionForPrivateLookupInMethodDoesNotExist() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> HandleMethods.get(UNKNOWN, A.class, String.class));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Handles.get(UNKNOWN, A.class, String.class));
 
 		assertThat(e.getMessage(), equalTo("Method handle creation failed for " + A.class.getName() + "#" + UNKNOWN));
 		assertThat(e.getCause().getClass(), equalTo(NoSuchMethodException.class));
 	}
 
+	@Test
+	void shouldThrowExceptionWhenTryingToInstantiate() {
+		UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(Handles.class);
+
+		assertThat(e.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
+	}
 }
