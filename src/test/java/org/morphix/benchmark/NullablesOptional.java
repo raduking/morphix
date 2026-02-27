@@ -91,4 +91,10 @@ public class NullablesOptional {
 	public List<String> testTernary() {
 		return hotel.images() != null ? hotel.images().names() : null;
 	}
+
+	@Benchmark
+	public List<String> testNullablesChain() {
+		return Nullables.whenNotNull(hotel.images())
+				.thenReturn(Images::names);
+	}
 }
