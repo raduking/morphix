@@ -18,6 +18,7 @@ import org.morphix.convert.ConversionEngine;
 import org.morphix.convert.MapConversions;
 import org.morphix.convert.context.ConversionContext;
 import org.morphix.convert.context.CyclicReferencesContext;
+import org.morphix.convert.function.SimpleConverter;
 
 /**
  * A {@link PropertyConversionStrategy} for converting {@link Map} objects to a map of string keys and converted values.
@@ -57,8 +58,10 @@ public class PropertyMapStrategy implements PropertyConversionStrategy {
 	 */
 	@Override
 	public Object convert(final Object obj, final ConversionEngine engine, final ConversionContext ctx) {
+		SimpleConverter<String, String> propertyNameConverter = PropertyBeanStrategy.getPropertyNameConverter(engine);
 		return ctx.visit(obj,
-				() -> MapConversions.convertMap((Map<?, ?>) obj, String::valueOf, val -> engine.convert(val, ctx)).toMap(),
+				() -> MapConversions.convertMap((Map<?, ?>) obj,
+						key -> propertyNameConverter.apply(String.valueOf(key)), val -> engine.convert(val, ctx)).toMap(),
 				() -> Map.of(CyclicReferencesContext.CYCLIC_REFERENCE, obj.getClass().getSimpleName()));
 	}
 }

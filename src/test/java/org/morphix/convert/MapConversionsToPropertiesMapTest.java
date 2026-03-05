@@ -307,6 +307,46 @@ class MapConversionsToPropertiesMapTest {
 		assertThat(params, equalTo(expected));
 	}
 
+	static String toKebabCase(final String str) {
+		String regex = "([a-z])([A-Z]+)";
+		String replacement = "$1-$2";
+		return str.replaceAll(regex, replacement).toLowerCase();
+	}
+
+	@Test
+	void shouldConvertComplexObjectAndUseKebabCase() {
+		Everything everything = createEverything();
+
+		Map<String, Object> expected = new LinkedHashMap<>();
+		expected.put("string-value", "hello");
+		expected.put("char-sequence-value", "builder");
+		expected.put("number-value", "123");
+		expected.put("boolean-value", "true");
+		expected.put("enum-value", "INACTIVE");
+		expected.put("uuid-value", "123e4567-e89b-12d3-a456-426614174000");
+		expected.put("optional-value", "optional");
+		expected.put("empty-optional", null);
+		expected.put("map-value", Map.of(
+				"inner-key1", "innerValue",
+				"inner-key2", "42",
+				"inner-key3", "ACTIVE"));
+		expected.put("collection-value", List.of(
+				"listValue",
+				"99",
+				"ACTIVE"));
+		expected.put("array-value", List.of(
+				"arrayValue",
+				"77",
+				"false"));
+		expected.put("nested-object", Map.of(
+				"nested-value", "nested"));
+		expected.put("null-value", null);
+
+		Map<String, Object> params = MapConversions.toPropertiesMap(everything, MapConversionsToPropertiesMapTest::toKebabCase);
+
+		assertThat(params, equalTo(expected));
+	}
+
 	@Test
 	void shouldConvertToMapAndBack() {
 		Everything everything = createEverything();

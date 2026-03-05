@@ -16,8 +16,10 @@ import java.util.Map;
 
 import org.morphix.convert.ConversionEngine;
 import org.morphix.convert.MapConversions;
+import org.morphix.convert.PropertyConversionEngine;
 import org.morphix.convert.context.ConversionContext;
 import org.morphix.convert.context.CyclicReferencesContext;
+import org.morphix.convert.function.SimpleConverter;
 
 /**
  * A {@link PropertyConversionStrategy} that converts any object to a map of its properties. The keys of the map are the
@@ -28,6 +30,12 @@ import org.morphix.convert.context.CyclicReferencesContext;
  * @author Radu Sebastian LAZIN
  */
 public class PropertyBeanStrategy implements PropertyConversionStrategy {
+
+	/**
+	 * A default property name converter that simply returns the input key as is. This can be used when no custom property
+	 * name converter is provided by the conversion engine.
+	 */
+	private static final SimpleConverter<String, String> DEFAULT_PROPERTY_NAME_CONVERTER = k -> k;
 
 	/**
 	 * Default constructor.
@@ -62,8 +70,27 @@ public class PropertyBeanStrategy implements PropertyConversionStrategy {
 	 */
 	@Override
 	public Object convert(final Object obj, final ConversionEngine engine, final ConversionContext ctx) {
+		SimpleConverter<String, String> propertyNameConverter = getPropertyNameConverter(engine);
 		return ctx.visit(obj,
-				() -> MapConversions.convertToMap(obj, k -> k, val -> engine.convert(val, ctx)),
+				() -> MapConversions.convertToMap(obj, propertyNameConverter, val -> engine.convert(val, ctx)),
 				() -> Map.of(CyclicReferencesContext.CYCLIC_REFERENCE, obj.getClass().getSimpleName()));
+	}
+
+	/**
+	 * Retrieves a property name converter from the conversion engine if it is an instance of
+	 * {@link PropertyConversionEngine}. If the engine is a {@link PropertyConversionEngine} and it has a custom property
+	 * name converter, that converter is returned.
+	 *
+	 * @param engine the conversion engine to check for a custom property name converter
+	 * @return a property name converter to use for converting property names
+	 */
+	public static SimpleConverter<String, String> getPropertyNameConverter(final ConversionEngine engine) {
+		if (engine instanceof PropertyConversionEngine propertyConversionEngine) {
+			SimpleConverter<String, String> customConverter = propertyConversionEngine.getPropertyNameConverter();
+			if (null != customConverter) {
+				return customConverter;
+			}
+		}
+		return DEFAULT_PROPERTY_NAME_CONVERTER;
 	}
 }
