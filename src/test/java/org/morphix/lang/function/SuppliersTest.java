@@ -18,6 +18,8 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.function.Supplier;
+
 import org.junit.jupiter.api.Test;
 import org.morphix.reflection.Constructors;
 import org.morphix.utils.Tests;
@@ -44,5 +46,47 @@ class SuppliersTest {
 
 		assertThat(result, nullValue());
 		verify(runnable).run();
+	}
+
+	@Test
+	void shouldReturnTrueWhenSupplyingTrue() {
+		assertThat(Suppliers.supplyTrue().get(), equalTo(true));
+	}
+
+	@Test
+	void shouldReturnFalseWhenSupplyingFalse() {
+		assertThat(Suppliers.supplyFalse().get(), equalTo(false));
+	}
+
+	@Test
+	void shouldReturnNullWhenSupplyingNull() {
+		assertThat(Suppliers.supplyNull().get(), nullValue());
+	}
+
+	@Test
+	void shouldReturnNullWhenSupplyingNullWithRunnable() {
+		assertThat(Suppliers.supplyNull(() -> {
+			// empty
+		}).get(), nullValue());
+	}
+
+	@Test
+	void shouldReturnSuppliedValueOnSafeGet() {
+		Supplier<String> supplier = () -> "test";
+
+		String result = Suppliers.safeGet(supplier);
+
+		assertThat(result, equalTo("test"));
+	}
+
+	@Test
+	void shouldReturnNullOnSafeGetWhenSupplierThrowsException() {
+		Supplier<String> supplier = () -> {
+			throw new RuntimeException("test");
+		};
+
+		String result = Suppliers.safeGet(supplier);
+
+		assertThat(result, nullValue());
 	}
 }
