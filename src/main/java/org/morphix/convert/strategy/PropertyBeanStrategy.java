@@ -32,12 +32,6 @@ import org.morphix.convert.function.SimpleConverter;
 public class PropertyBeanStrategy implements PropertyConversionStrategy {
 
 	/**
-	 * A default property name converter that simply returns the input key as is. This can be used when no custom property
-	 * name converter is provided by the conversion engine.
-	 */
-	private static final SimpleConverter<String, String> DEFAULT_PROPERTY_NAME_CONVERTER = k -> k;
-
-	/**
 	 * Default constructor.
 	 */
 	public PropertyBeanStrategy() {
@@ -86,11 +80,8 @@ public class PropertyBeanStrategy implements PropertyConversionStrategy {
 	 */
 	public static SimpleConverter<String, String> getPropertyNameConverter(final ConversionEngine engine) {
 		if (engine instanceof PropertyConversionEngine propertyConversionEngine) {
-			SimpleConverter<String, String> customConverter = propertyConversionEngine.getPropertyNameConverter();
-			if (null != customConverter) {
-				return customConverter;
-			}
+			return propertyConversionEngine.getPropertyNameConverter();
 		}
-		return DEFAULT_PROPERTY_NAME_CONVERTER;
+		return PropertyConversionEngine.getDefaultPropertyNameConverter();
 	}
 }

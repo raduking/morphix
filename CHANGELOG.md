@@ -5,6 +5,9 @@
 - Added `Suppliers.safeGet(Supplier, Supplier)` static method to safely get the supplied value or return a default value.
 - Added `Suppliers.safeGet(Supplier)` static method to safely get the supplied value or return `null`.
 - Added `MapConversions.toPropertiesMap(Object, SimpleConverter)` with property name conversion to be able to convert to snake case for example.
+- Added property name converter to the `PropertyConversionEngine`.
+- Added `PropertyConversionEngine.getPropertyNameConverter` to retrieve the property name converter.
+- Added `PropertyConversionEngine.getDefaultPropertyNameConverter` to retrieve the default property name converter.
 
 ---
 

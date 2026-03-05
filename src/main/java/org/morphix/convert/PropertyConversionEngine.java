@@ -59,18 +59,19 @@ public class PropertyConversionEngine implements ConversionEngine {
 	 * @param strategies the list of property conversion strategies to use
 	 */
 	public PropertyConversionEngine(final List<? extends PropertyConversionStrategy> strategies) {
-		this(strategies, null);
+		this(strategies, getDefaultPropertyNameConverter());
 	}
 
 	/**
 	 * Constructs a new {@code PropertyConversionEngine} with the specified list of strategies.
 	 *
 	 * @param strategies the list of property conversion strategies to use
+	 * @param propertyNameConverter a simple converter to convert property names, used by strategies that need to convert
 	 */
 	public PropertyConversionEngine(final List<? extends PropertyConversionStrategy> strategies,
 			final SimpleConverter<String, String> propertyNameConverter) {
 		this.strategies = Objects.requireNonNull(strategies, "Strategies list cannot be null");
-		this.propertyNameConverter = propertyNameConverter;
+		this.propertyNameConverter = Objects.requireNonNull(propertyNameConverter, "Property name converter cannot be null");
 	}
 
 	/**
@@ -110,6 +111,17 @@ public class PropertyConversionEngine implements ConversionEngine {
 	 */
 	public static List<PropertyConversionStrategy> getDefaultStrategies() {
 		return InstanceHolder.DEFAULT_STRATEGIES;
+	}
+
+	/**
+	 * Returns the default property name converter used by the default instance of {@code PropertyConversionEngine}. The
+	 * default converter simply returns the input key as is, without applying any transformations. This can be used when no
+	 * custom property name converter is provided by the conversion engine.
+	 *
+	 * @return the default property name converter
+	 */
+	public static SimpleConverter<String, String> getDefaultPropertyNameConverter() {
+		return InstanceHolder.DEFAULT_PROPERTY_NAME_CONVERTER;
 	}
 
 	/**
@@ -157,6 +169,12 @@ public class PropertyConversionEngine implements ConversionEngine {
 	 * @author Radu Sebastian LAZIN
 	 */
 	private static class InstanceHolder {
+
+		/**
+		 * A default property name converter that simply returns the input key as is. This can be used when no custom property
+		 * name converter is provided by the conversion engine.
+		 */
+		private static final SimpleConverter<String, String> DEFAULT_PROPERTY_NAME_CONVERTER = k -> k;
 
 		/**
 		 * The default list of property conversion strategies used by the default instance of {@code PropertyConversionEngine}.
