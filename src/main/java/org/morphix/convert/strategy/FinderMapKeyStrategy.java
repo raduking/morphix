@@ -15,7 +15,6 @@ package org.morphix.convert.strategy;
 import static org.morphix.reflection.ExtendedField.of;
 
 import java.lang.reflect.Field;
-import java.rmi.Naming;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +33,7 @@ public class FinderMapKeyStrategy implements FieldFinderStrategy {
 	 * List of key converters to apply to the source field name when searching for a value in the map. The converters are
 	 * applied in order, and the search stops as soon as a value is found for a converted key. The converters include:
 	 * <ul>
-	 * <li>{@link Naming#kebabCase(String)}</li>
+	 * <li>{@link Case#KEBAB}</li>
 	 * </ul>
 	 */
 	private static final List<SimpleConverter<String, String>> KEY_CONVERTERS = List.of(
