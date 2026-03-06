@@ -2,12 +2,15 @@ package org.morphix.lang;
 
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 /**
  * Enum representing different naming cases for strings. Each enum constant provides a method to format an array of
  * words into the corresponding case style and methods to convert from one case to another and to convert an arbitrary
  * {@link String} input into the specified case.
+ * <p>
+ * It uses a tokenization approach to split the input string into words based on common delimiters (hyphens,
+ * underscores) and camel case boundaries without relying on regular expressions. The tokenization method processes the
+ * input string character by character to identify word boundaries and extract the individual words.
  * <p>
  * The case styles supported by this enum include:
  * <ul>
@@ -28,12 +31,12 @@ public enum Case {
 	 */
 	LOWER_CAMEL {
 		@Override
-		public String format(final String[] words) {
+		public String format(final String[] words, final Locale locale) {
 			if (words.length == 0) {
 				return "";
 			}
-			StringBuilder sb = new StringBuilder(words[0].toLowerCase(Locale.ROOT));
-			for (int i = 1; i < words.length; i++) {
+			StringBuilder sb = new StringBuilder(words[0].toLowerCase(locale));
+			for (int i = 1; i < words.length; ++i) {
 				sb.append(capitalize(words[i]));
 			}
 			return sb.toString();
@@ -45,7 +48,7 @@ public enum Case {
 	 */
 	UPPER_CAMEL {
 		@Override
-		public String format(final String[] words) {
+		public String format(final String[] words, final Locale locale) {
 			StringBuilder sb = new StringBuilder();
 			for (String word : words) {
 				sb.append(capitalize(word));
@@ -59,8 +62,8 @@ public enum Case {
 	 */
 	SNAKE {
 		@Override
-		public String format(final String[] words) {
-			return join(words, "_", Letter.LOWER);
+		public String format(final String[] words, final Locale locale) {
+			return join(words, "_", locale, Letter.LOWER);
 		}
 	},
 
@@ -69,8 +72,8 @@ public enum Case {
 	 */
 	UPPER_SNAKE {
 		@Override
-		public String format(final String[] words) {
-			return join(words, "_", Letter.UPPER);
+		public String format(final String[] words, final Locale locale) {
+			return join(words, "_", locale, Letter.UPPER);
 		}
 	},
 
@@ -79,8 +82,8 @@ public enum Case {
 	 */
 	KEBAB {
 		@Override
-		public String format(final String[] words) {
-			return join(words, "-", Letter.LOWER);
+		public String format(final String[] words, final Locale locale) {
+			return join(words, "-", locale, Letter.LOWER);
 		}
 	};
 
@@ -102,34 +105,51 @@ public enum Case {
 	}
 
 	/**
-	 * Format an array of words into the specific case style defined by the enum constant. The implementation of this method
-	 * is provided by each enum constant to define how the words should be formatted according to the case style.
-	 *
-	 * @param words the array of words to format
-	 * @return the formatted string in the specific case style
-	 */
-	public abstract String format(String[] words);
-
-	/**
 	 * Convert an arbitrary input name into this case.
 	 *
 	 * @param name the name to convert
 	 * @return the converted name in this case
 	 */
 	public String convert(final String name) {
-		if (null == name || name.isEmpty()) {
-			return name;
-		}
-		return format(tokenize(name));
+		return convert(name, Locale.ROOT);
 	}
 
 	/**
-	 * Regular expression pattern to split camel case words. It matches the boundaries between lowercase letters or digits
-	 * followed by uppercase letters, and between uppercase letters followed by uppercase letters and then lowercase
-	 * letters. This allows for proper tokenization of camel case strings into individual words.
+	 * Convert an arbitrary input name into this case.
+	 *
+	 * @param name the name to convert
+	 * @param locale the locale to use for any locale-specific formatting
+	 * @return the converted name in this case
 	 */
-	private static final Pattern CAMEL_BOUNDARY =
-			Pattern.compile("(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])");
+	public String convert(final String name, final Locale locale) {
+		if (null == name || name.isEmpty()) {
+			return name;
+		}
+		return format(tokenize(name), locale);
+	}
+
+	/**
+	 * Format an array of words into the specific case style defined by the enum constant. The implementation of this method
+	 * is provided by each enum constant to define how the words should be formatted according to the case style.
+	 *
+	 * @param words the array of words to format
+	 * @return the formatted string in the specific case style
+	 */
+	public String format(final String[] words) {
+		return format(words, Locale.ROOT);
+	}
+
+	/**
+	 * Format an array of words into the specific case style defined by the enum constant, using the provided locale for any
+	 * locale-specific formatting. The implementation of this method is provided by each enum constant to define how the
+	 * words should be formatted according to the case style and locale.
+	 *
+	 * @param words the array of words to format
+	 * @param locale the locale to use for formatting
+	 *
+	 * @return the formatted string in the specific case style and locale
+	 */
+	public abstract String format(String[] words, Locale locale);
 
 	/**
 	 * Tokenizes the input name into an array of words by splitting on hyphens, underscores, and camel case boundaries. The
@@ -140,12 +160,47 @@ public enum Case {
 	 * @param name the input name to tokenize
 	 * @return an array of words extracted from the input name
 	 */
-	private static String[] tokenize(final String name) {
-		String normalized = name.replace('-', '_');
-		return Arrays.stream(normalized.split("_"))
-				.flatMap(part -> Arrays.stream(CAMEL_BOUNDARY.split(part)))
-				.filter(s -> !s.isEmpty())
-				.toArray(String[]::new);
+	public static String[] tokenize(final String name) {
+		if (null == name || name.isEmpty()) {
+			return new String[0];
+		}
+		int length = name.length();
+		// the worst cases would be "a_b_c_d_e_f_g_h" or "aBcdEfgH", which would result in length / 2 + 1 words
+		// so we allocate an array of that size plus one extra for safety
+		String[] words = new String[(length / 2 + 1) + 1];
+		int wordCount = 0;
+
+		int start = -1;
+		for (int i = 0; i < length; ++i) {
+			char c = name.charAt(i);
+			if (c == '_' || c == '-') {
+				if (start >= 0) {
+					words[wordCount] = name.substring(start, i);
+					++wordCount;
+					start = -1;
+				}
+				continue;
+			}
+			if (start < 0) {
+				start = i;
+				continue;
+			}
+			char prev = name.charAt(i - 1);
+
+			boolean wordEnded = (Character.isLowerCase(prev) && Character.isUpperCase(c))
+					|| (Character.isDigit(prev) && Character.isLetter(c))
+					|| (Character.isUpperCase(prev) && Character.isUpperCase(c)
+							&& i + 1 < length && Character.isLowerCase(name.charAt(i + 1)));
+
+			if (wordEnded) {
+				words[wordCount] = name.substring(start, i);
+				++wordCount;
+				start = i;
+			}
+		}
+		words[wordCount] = name.substring(start);
+		++wordCount;
+		return Arrays.copyOf(words, wordCount);
 	}
 
 	/**
@@ -158,11 +213,11 @@ public enum Case {
 	 * @param letter the letter case to apply to the joined string (either LOWER or UPPER)
 	 * @return the joined string with the specified separator and letter case
 	 */
-	private static String join(final String[] words, final String sep, final Letter letter) {
+	private static String join(final String[] words, final String sep, final Locale locale, final Letter letter) {
 		String joined = String.join(sep, words);
 		return switch (letter) {
-			case LOWER -> joined.toLowerCase(Locale.ROOT);
-			case UPPER -> joined.toUpperCase(Locale.ROOT);
+			case LOWER -> joined.toLowerCase(locale);
+			case UPPER -> joined.toUpperCase(locale);
 		};
 	}
 

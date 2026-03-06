@@ -95,6 +95,51 @@ class CaseTest {
 		assertEquals("", Case.capitalize(""));
 	}
 
+	@Test
+	void shouldTokenizeCamelCase() {
+		String name = "helloWorld";
+
+		String[] expectedTokens = { "hello", "World" };
+
+		assertThat(Case.tokenize(name), equalTo(expectedTokens));
+	}
+
+	@Test
+	void shouldTokenizeMixedCase() {
+		String name = "HTTPServerUserId";
+
+		String[] expectedTokens = { "HTTP", "Server", "User", "Id" };
+
+		assertThat(Case.tokenize(name), equalTo(expectedTokens));
+	}
+
+	@Test
+	void shouldTokenizeEmpty() {
+		String name = "";
+
+		String[] expectedTokens = { };
+
+		assertThat(Case.tokenize(name), equalTo(expectedTokens));
+	}
+
+	@Test
+	void shouldTokenizeNull() {
+		String name = null;
+
+		String[] expectedTokens = { };
+
+		assertThat(Case.tokenize(name), equalTo(expectedTokens));
+	}
+
+	@Test
+	void shouldTokenizeSingleWord() {
+		String name = "hello";
+
+		String[] expectedTokens = { "hello" };
+
+		assertThat(Case.tokenize(name), equalTo(expectedTokens));
+	}
+
 	@ParameterizedTest
 	@MethodSource("provideValuesForCamelToSnakeCase")
 	void shouldTransformCamelToSnakeCaseVariousInputs(final String input, final String expectedOutput) {
@@ -117,7 +162,7 @@ class CaseTest {
 
 	@ParameterizedTest
 	@MethodSource("provideValuesForCamelToKebabCase")
-	void shouldTransformCamelToCebabCaseVariousInputs(final String input, final String expectedOutput) {
+	void shouldTransformCamelToKebabCaseVariousInputs(final String input, final String expectedOutput) {
 		String result = Case.KEBAB.convert(input);
 
 		assertThat(result, equalTo(expectedOutput));
@@ -136,14 +181,14 @@ class CaseTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("provideValuesForSnakeToCamelCase")
-	void shouldTransformSnakeToCamelCaseVariousInputs(final String input, final String expectedOutput) {
+	@MethodSource("provideValuesForMixedCaseToCamelCase")
+	void shouldTransformMixedCaseToCamelCase(final String input, final String expectedOutput) {
 		String result = Case.LOWER_CAMEL.convert(input);
 
 		assertThat(result, equalTo(expectedOutput));
 	}
 
-	private static Stream<Arguments> provideValuesForSnakeToCamelCase() {
+	private static Stream<Arguments> provideValuesForMixedCaseToCamelCase() {
 		return Stream.of(
 				Arguments.of("simple_test", "simpleTest"),
 				Arguments.of("Test_With_Uppercase_Start", "testWithUppercaseStart"),
@@ -151,7 +196,16 @@ class CaseTest {
 				Arguments.of("mixedCase_InputString", "mixedCaseInputString"),
 				Arguments.of("_half_snake", "halfSnake"),
 				Arguments.of("", ""),
-				Arguments.of("a", "a"));
+				Arguments.of("a", "a"),
+				Arguments.of("__HTTPServer__user-id", "httpServerUserId"),
+				Arguments.of("JSONValue", "jsonValue"),
+				Arguments.of("ipv6_address", "ipv6Address"),
+				Arguments.of("CSS4Version", "css4Version"),
+				Arguments.of("user2FA", "user2Fa"),
+				Arguments.of("BEAST666", "beast666"),
+				Arguments.of("Number-of-the-BEAST-666", "numberOfTheBeast666"),
+				Arguments.of("a_b_c_d_e", "aBCDE"),
+				Arguments.of("aBaBaBaB", "aBaBaBaB"));
 	}
 
 }
