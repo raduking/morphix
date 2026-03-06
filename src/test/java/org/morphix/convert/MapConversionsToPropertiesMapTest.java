@@ -91,6 +91,7 @@ class MapConversionsToPropertiesMapTest {
 		private Object[] arrayValue;
 		private Nested nestedObject;
 		private String nullValue;
+		private String numberAsString;
 
 		@Override
 		public boolean equals(final Object obj) {
@@ -98,19 +99,20 @@ class MapConversionsToPropertiesMapTest {
 				return true;
 			}
 			if (obj instanceof Everything that) {
-				return Objects.equals(this.stringValue, that.stringValue) &&
-						Objects.equals(this.charSequenceValue.toString(), that.charSequenceValue.toString()) &&
-						Objects.equals(this.numberValue, that.numberValue) &&
-						Objects.equals(this.booleanValue, that.booleanValue) &&
-						this.enumValue == that.enumValue &&
-						Objects.equals(this.uuidValue, that.uuidValue) &&
-						Objects.equals(this.optionalValue, that.optionalValue) &&
-						Objects.equals(this.emptyOptional, that.emptyOptional) &&
-						Objects.equals(this.mapValue, that.mapValue) &&
-						Objects.equals(this.collectionValue, that.collectionValue) &&
-						Arrays.equals(this.arrayValue, that.arrayValue) &&
-						Objects.equals(this.nestedObject, that.nestedObject) &&
-						Objects.equals(this.nullValue, that.nullValue);
+				return Objects.equals(this.stringValue, that.stringValue)
+						&& Objects.equals(this.charSequenceValue.toString(), that.charSequenceValue.toString())
+						&& Objects.equals(this.numberValue, that.numberValue)
+						&& Objects.equals(this.booleanValue, that.booleanValue)
+						&& this.enumValue == that.enumValue
+						&& Objects.equals(this.uuidValue, that.uuidValue)
+						&& Objects.equals(this.optionalValue, that.optionalValue)
+						&& Objects.equals(this.emptyOptional, that.emptyOptional)
+						&& Objects.equals(this.mapValue, that.mapValue)
+						&& Objects.equals(this.collectionValue, that.collectionValue)
+						&& Arrays.equals(this.arrayValue, that.arrayValue)
+						&& Objects.equals(this.nestedObject, that.nestedObject)
+						&& Objects.equals(this.nullValue, that.nullValue)
+						&& Objects.equals(this.numberAsString, that.numberAsString);
 			}
 			return false;
 		}
@@ -119,7 +121,7 @@ class MapConversionsToPropertiesMapTest {
 		public int hashCode() {
 			return Objects.hash(stringValue, charSequenceValue.toString(), numberValue, booleanValue, enumValue, uuidValue,
 					optionalValue, emptyOptional, mapValue, collectionValue, Arrays.hashCode(arrayValue), nestedObject,
-					nullValue);
+					nullValue, numberAsString);
 		}
 
 		@Override
@@ -138,6 +140,7 @@ class MapConversionsToPropertiesMapTest {
 					", arrayValue=" + Arrays.toString(arrayValue) +
 					", nestedObject=" + nestedObject +
 					", nullValue='" + nullValue + '\'' +
+					", numberAsString='" + numberAsString + '\'' +
 					'}';
 		}
 
@@ -244,18 +247,22 @@ class MapConversionsToPropertiesMapTest {
 		public void setNullValue(final String nullValue) {
 			this.nullValue = nullValue;
 		}
+
+		public String getNumberAsString() {
+			return numberAsString;
+		}
+
+		public void setNumberAsString(final String numberAsString) {
+			this.numberAsString = numberAsString;
+		}
 	}
 
 	static Everything createEverything() {
 		Nested nested = new Nested();
 		nested.setNestedValue("nested");
 
-		Map<String, Object> innerMap = Map.of(
-				"innerKey1", "innerValue",
-				"innerKey2", 42,
-				"innerKey3", Status.ACTIVE);
-
 		Everything e = new Everything();
+
 		e.setStringValue("hello");
 		e.setCharSequenceValue(new StringBuilder("builder"));
 		e.setNumberValue(123);
@@ -264,11 +271,15 @@ class MapConversionsToPropertiesMapTest {
 		e.setUuidValue(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
 		e.setOptionalValue(Optional.of("optional"));
 		e.setEmptyOptional(Optional.empty());
-		e.setMapValue(innerMap);
+		e.setMapValue(Map.of(
+				"innerKey1", "innerValue",
+				"innerKey2", 42,
+				"innerKey3", Status.ACTIVE));
 		e.setCollectionValue(List.of("listValue", 99, Status.ACTIVE));
 		e.setArrayValue(new Object[] { "arrayValue", 77, false });
 		e.setNestedObject(nested);
 		e.setNullValue(null);
+		e.setNumberAsString("123");
 
 		return e;
 	}
@@ -280,27 +291,28 @@ class MapConversionsToPropertiesMapTest {
 		Map<String, Object> expected = new LinkedHashMap<>();
 		expected.put("stringValue", "hello");
 		expected.put("charSequenceValue", "builder");
-		expected.put("numberValue", "123");
-		expected.put("booleanValue", "true");
+		expected.put("numberValue", 123);
+		expected.put("booleanValue", true);
 		expected.put("enumValue", "INACTIVE");
 		expected.put("uuidValue", "123e4567-e89b-12d3-a456-426614174000");
 		expected.put("optionalValue", "optional");
 		expected.put("emptyOptional", null);
 		expected.put("mapValue", Map.of(
 				"innerKey1", "innerValue",
-				"innerKey2", "42",
+				"innerKey2", 42,
 				"innerKey3", "ACTIVE"));
 		expected.put("collectionValue", List.of(
 				"listValue",
-				"99",
+				99,
 				"ACTIVE"));
 		expected.put("arrayValue", List.of(
 				"arrayValue",
-				"77",
-				"false"));
+				77,
+				false));
 		expected.put("nestedObject", Map.of(
 				"nestedValue", "nested"));
 		expected.put("nullValue", null);
+		expected.put("numberAsString", "123");
 
 		Map<String, Object> params = MapConversions.toPropertiesMap(everything);
 
@@ -320,27 +332,28 @@ class MapConversionsToPropertiesMapTest {
 		Map<String, Object> expected = new LinkedHashMap<>();
 		expected.put("string-value", "hello");
 		expected.put("char-sequence-value", "builder");
-		expected.put("number-value", "123");
-		expected.put("boolean-value", "true");
+		expected.put("number-value", 123);
+		expected.put("boolean-value", true);
 		expected.put("enum-value", "INACTIVE");
 		expected.put("uuid-value", "123e4567-e89b-12d3-a456-426614174000");
 		expected.put("optional-value", "optional");
 		expected.put("empty-optional", null);
 		expected.put("map-value", Map.of(
 				"inner-key1", "innerValue",
-				"inner-key2", "42",
+				"inner-key2", 42,
 				"inner-key3", "ACTIVE"));
 		expected.put("collection-value", List.of(
 				"listValue",
-				"99",
+				99,
 				"ACTIVE"));
 		expected.put("array-value", List.of(
 				"arrayValue",
-				"77",
-				"false"));
+				77,
+				false));
 		expected.put("nested-object", Map.of(
 				"nested-value", "nested"));
 		expected.put("null-value", null);
+		expected.put("number-as-string", "123");
 
 		Map<String, Object> params = MapConversions.toPropertiesMap(everything, MapConversionsToPropertiesMapTest::toKebabCase);
 
@@ -350,13 +363,29 @@ class MapConversionsToPropertiesMapTest {
 	@Test
 	void shouldConvertToMapAndBack() {
 		Everything everything = createEverything();
-		// since the map, collection and array is converted to a string, we need to set it to null
-		// to be able to compare the objects after converting back from the map
+		// since the map, collection and array elements (for example enums which cannot be left as enums) are converted to a
+		// string, we need to set them to null to be able to compare the objects after converting back from the map
 		everything.setMapValue(null);
 		everything.setCollectionValue(null);
 		everything.setArrayValue(null);
 
 		Map<String, Object> params = MapConversions.toPropertiesMap(everything);
+
+		Everything convertedBack = MapConversions.fromPropertiesMap(params, Everything::new);
+
+		assertThat(convertedBack, equalTo(everything));
+	}
+
+	@Test
+	void shouldConvertToMapAndBackWithKebabCase() {
+		Everything everything = createEverything();
+		// since the map, collection and array elements (for example enums which cannot be left as enums) are converted to a
+		// string, we need to set them to null to be able to compare the objects after converting back from the map
+		everything.setMapValue(null);
+		everything.setCollectionValue(null);
+		everything.setArrayValue(null);
+
+		Map<String, Object> params = MapConversions.toPropertiesMap(everything, MapConversionsToPropertiesMapTest::toKebabCase);
 
 		Everything convertedBack = MapConversions.fromPropertiesMap(params, Everything::new);
 
@@ -525,15 +554,16 @@ class MapConversionsToPropertiesMapTest {
 		Map<String, Object> expected = new LinkedHashMap<>();
 
 		Map<String, Object> innerMap = new LinkedHashMap<>();
-		innerMap.put("level1", Map.of(
-				"level2", List.of(
-						Map.of(
-								"arrayInside", List.of(
-										"SLOW",
-										"99",
-										Map.of(
-												"name", "deepPojo",
-												"count", "5"))))));
+		innerMap.put("level1",
+				Map.of(
+						"level2", List.of(
+								Map.of(
+										"arrayInside", List.of(
+												"SLOW",
+												99,
+												Map.of(
+														"name", "deepPojo",
+														"count", 5))))));
 		innerMap.put("nullInside", null);
 
 		expected.put("map", innerMap);
@@ -543,27 +573,27 @@ class MapConversionsToPropertiesMapTest {
 				Map.of(
 						"pojo", Map.of(
 								"name", "deepPojo",
-								"count", "5"),
+								"count", 5),
 						"mode", "FAST",
-						"numbers", List.of("1", "2", "3")),
+						"numbers", List.of(1, 2, 3)),
 				Arrays.asList(
 						Map.of(
 								"name", "deepPojo",
-								"count", "5"),
+								"count", 5),
 						null)));
 
 		expected.put("optional", List.of(
 				Map.of(
 						"inner", Map.of(
 								"name", "deepPojo",
-								"count", "5"))));
+								"count", 5))));
 
 		expected.put("array", Arrays.asList(
 				Map.of(
 						"collectionInside", List.of(
 								Map.of(
 										"name", "deepPojo",
-										"count", "5"),
+										"count", 5),
 								"FAST")),
 				null));
 

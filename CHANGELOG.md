@@ -8,6 +8,7 @@
 - Added property name converter to the `PropertyConversionEngine`.
 - Added `PropertyConversionEngine.getPropertyNameConverter` to retrieve the property name converter.
 - Added `PropertyConversionEngine.getDefaultPropertyNameConverter` to retrieve the default property name converter.
+- Added `Case` enum with string converters between different cases `LOWER_CAMEL`, `SNAKE`, `KEBAB`, etc.
 
 ---
 

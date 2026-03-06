@@ -241,6 +241,7 @@ class MapConversionsConvertToMapTest {
 		private Object[] arrayValue;
 		private Nested nestedObject;
 		private String nullValue;
+		private String numberAsString;
 
 		public String getStringValue() {
 			return stringValue;
@@ -345,6 +346,14 @@ class MapConversionsConvertToMapTest {
 		public void setNullValue(final String nullValue) {
 			this.nullValue = nullValue;
 		}
+
+		public String getNumberAsString() {
+			return numberAsString;
+		}
+
+		public void setNumberAsString(final String numberAsString) {
+			this.numberAsString = numberAsString;
+		}
 	}
 
 	static Everything createEverything() {
@@ -370,6 +379,7 @@ class MapConversionsConvertToMapTest {
 		e.setArrayValue(new Object[] { "arrayValue", 77, false });
 		e.setNestedObject(nested);
 		e.setNullValue(null);
+		e.setNumberAsString("456");
 
 		return e;
 	}
@@ -381,27 +391,28 @@ class MapConversionsConvertToMapTest {
 		Map<String, Object> expected = new LinkedHashMap<>();
 		expected.put("stringValue", "hello");
 		expected.put("charSequenceValue", "builder");
-		expected.put("numberValue", "123");
-		expected.put("booleanValue", "true");
+		expected.put("numberValue", 123);
+		expected.put("booleanValue", true);
 		expected.put("enumValue", "INACTIVE");
 		expected.put("uuidValue", "123e4567-e89b-12d3-a456-426614174000");
 		expected.put("optionalValue", "optional");
 		expected.put("emptyOptional", null);
 		expected.put("mapValue", Map.of(
 				"innerKey1", "innerValue",
-				"innerKey2", "42",
+				"innerKey2", 42,
 				"innerKey3", "ACTIVE"));
 		expected.put("collectionValue", List.of(
 				"listValue",
-				"99",
+				99,
 				"ACTIVE"));
 		expected.put("arrayValue", List.of(
 				"arrayValue",
-				"77",
-				"false"));
+				77,
+				false));
 		expected.put("nestedObject", Map.of(
 				"nestedValue", "nested"));
 		expected.put("nullValue", null);
+		expected.put("numberAsString", "456");
 
 		Map<String, Object> params = MapConversions.toPropertiesMap(everything);
 
