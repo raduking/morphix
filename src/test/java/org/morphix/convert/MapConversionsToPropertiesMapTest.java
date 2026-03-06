@@ -15,6 +15,8 @@ package org.morphix.convert;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -92,6 +94,8 @@ class MapConversionsToPropertiesMapTest {
 		private Nested nestedObject;
 		private String nullValue;
 		private String numberAsString;
+		private BigDecimal bigDecimalValue;
+		private BigInteger bigIntegerValue;
 
 		@Override
 		public boolean equals(final Object obj) {
@@ -112,7 +116,9 @@ class MapConversionsToPropertiesMapTest {
 						&& Arrays.equals(this.arrayValue, that.arrayValue)
 						&& Objects.equals(this.nestedObject, that.nestedObject)
 						&& Objects.equals(this.nullValue, that.nullValue)
-						&& Objects.equals(this.numberAsString, that.numberAsString);
+						&& Objects.equals(this.numberAsString, that.numberAsString)
+						&& Objects.equals(this.bigDecimalValue, that.bigDecimalValue)
+						&& Objects.equals(this.bigIntegerValue, that.bigIntegerValue);
 			}
 			return false;
 		}
@@ -121,7 +127,7 @@ class MapConversionsToPropertiesMapTest {
 		public int hashCode() {
 			return Objects.hash(stringValue, charSequenceValue.toString(), numberValue, booleanValue, enumValue, uuidValue,
 					optionalValue, emptyOptional, mapValue, collectionValue, Arrays.hashCode(arrayValue), nestedObject,
-					nullValue, numberAsString);
+					nullValue, numberAsString, bigDecimalValue, bigIntegerValue);
 		}
 
 		@Override
@@ -141,6 +147,8 @@ class MapConversionsToPropertiesMapTest {
 					", nestedObject=" + nestedObject +
 					", nullValue='" + nullValue + '\'' +
 					", numberAsString='" + numberAsString + '\'' +
+					", bigDecimalValue=" + bigDecimalValue + '\'' +
+					", bigIntegerValue=" + bigIntegerValue +
 					'}';
 		}
 
@@ -255,6 +263,22 @@ class MapConversionsToPropertiesMapTest {
 		public void setNumberAsString(final String numberAsString) {
 			this.numberAsString = numberAsString;
 		}
+
+		public BigDecimal getBigDecimalValue() {
+			return bigDecimalValue;
+		}
+
+		public void setBigDecimalValue(final BigDecimal bigDecimalValue) {
+			this.bigDecimalValue = bigDecimalValue;
+		}
+
+		public BigInteger getBigIntegerValue() {
+			return bigIntegerValue;
+		}
+
+		public void setBigIntegerValue(final BigInteger bigIntegerValue) {
+			this.bigIntegerValue = bigIntegerValue;
+		}
 	}
 
 	static Everything createEverything() {
@@ -280,6 +304,8 @@ class MapConversionsToPropertiesMapTest {
 		e.setNestedObject(nested);
 		e.setNullValue(null);
 		e.setNumberAsString("123");
+		e.setBigDecimalValue(new BigDecimal("123.45"));
+		e.setBigIntegerValue(new BigInteger("12345678901234567890"));
 
 		return e;
 	}
@@ -313,6 +339,8 @@ class MapConversionsToPropertiesMapTest {
 				"nestedValue", "nested"));
 		expected.put("nullValue", null);
 		expected.put("numberAsString", "123");
+		expected.put("bigDecimalValue", new BigDecimal("123.45"));
+		expected.put("bigIntegerValue", new BigInteger("12345678901234567890"));
 
 		Map<String, Object> params = MapConversions.toPropertiesMap(everything);
 
@@ -354,6 +382,8 @@ class MapConversionsToPropertiesMapTest {
 				"nested-value", "nested"));
 		expected.put("null-value", null);
 		expected.put("number-as-string", "123");
+		expected.put("big-decimal-value", new BigDecimal("123.45"));
+		expected.put("big-integer-value", new BigInteger("12345678901234567890"));
 
 		Map<String, Object> params = MapConversions.toPropertiesMap(everything, MapConversionsToPropertiesMapTest::toKebabCase);
 
