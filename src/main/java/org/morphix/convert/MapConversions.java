@@ -253,6 +253,22 @@ public interface MapConversions {
 	}
 
 	/**
+	 * Convenience static method to convert an object to a properties map. The keys are the field names and the values are
+	 * the field values. The values are converted to simple types (e.g., String, Number, Boolean, Enum, UUID) or to maps or
+	 * collections of simple types. If a value is an object that is not a simple type, it is converted to a map recursively.
+	 *
+	 * @param <S> source type
+	 *
+	 * @param source source object
+	 * @param propertyNameConverter a simple converter to convert property names
+	 * @return destination map
+	 */
+	static <S> Map<String, Object> toPropertiesMap(final S source, final SimpleConverter<String, String> propertyNameConverter) {
+		PropertyConversionEngine engine = new PropertyConversionEngine(PropertyConversionEngine.getDefaultStrategies(), propertyNameConverter);
+		return JavaObjects.cast(engine.convert(source, new CyclicReferencesContext()));
+	}
+
+	/**
 	 * Convenience static method to convert from a properties map to an object. The map contains field names as keys and
 	 * objects as values. The values are expected to be simple types (e.g., String, Number, Boolean, Enum, UUID) or maps or
 	 * collections of simple types. If a value is a map that is not a simple type, it is converted to an object recursively.

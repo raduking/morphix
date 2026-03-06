@@ -101,4 +101,35 @@ public final class Suppliers {
 			return supplier.get();
 		};
 	}
+
+	/**
+	 * Executes the given supplier and returns its result. If the supplier throws an exception, the default value supplier
+	 * is executed and its result is returned instead.
+	 *
+	 * @param <T> the type of the value supplied
+	 *
+	 * @param supplier the supplier to execute
+	 * @param defaultValueSupplier the supplier to execute if the main supplier throws an exception
+	 * @return the result of the main supplier, or the result of the default value supplier if an exception occurs
+	 */
+	public static <T> T safeGet(final Supplier<T> supplier, final Supplier<T> defaultValueSupplier) {
+		try {
+			return supplier.get();
+		} catch (Exception e) {
+			return defaultValueSupplier.get();
+		}
+	}
+
+	/**
+	 * Executes the given supplier and returns its result. If the supplier throws an exception, <code>null</code> is
+	 * returned instead.
+	 *
+	 * @param <T> the type of the value supplied
+	 *
+	 * @param supplier the supplier to execute
+	 * @return the result of the supplier, or <code>null</code> if an exception occurs
+	 */
+	public static <T> T safeGet(final Supplier<T> supplier) {
+		return safeGet(supplier, Suppliers.supplyNull());
+	}
 }

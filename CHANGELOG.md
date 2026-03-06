@@ -1,5 +1,17 @@
 ## Release Notes
 
+`1.0.24`
+
+- Added `Suppliers.safeGet(Supplier, Supplier)` static method to safely get the supplied value or return a default value.
+- Added `Suppliers.safeGet(Supplier)` static method to safely get the supplied value or return `null`.
+- Added `MapConversions.toPropertiesMap(Object, SimpleConverter)` with property name conversion to be able to convert to snake case for example.
+- Added property name converter to the `PropertyConversionEngine`.
+- Added `PropertyConversionEngine.getPropertyNameConverter` to retrieve the property name converter.
+- Added `PropertyConversionEngine.getDefaultPropertyNameConverter` to retrieve the default property name converter.
+- Added `Case` enum with string converters between different cases `LOWER_CAMEL`, `SNAKE`, `KEBAB`, etc.
+
+---
+
 `1.0.23`
 
 - Renamed `FieldHandlerResult.SKIP` to `SKIPPED`.

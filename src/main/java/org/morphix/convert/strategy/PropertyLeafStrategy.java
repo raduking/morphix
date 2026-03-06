@@ -76,8 +76,8 @@ public class PropertyLeafStrategy implements PropertyConversionStrategy {
 		return switch (obj) {
 			case null -> null;
 			case CharSequence cs -> cs.toString();
-			case Number n -> n.toString();
-			case Boolean b -> b.toString();
+			case Number n -> n;
+			case Boolean b -> b;
 			case Enum<?> e -> e.name();
 			case UUID u -> u.toString();
 			default -> throw new IllegalStateException("Unsupported property leaf type: " + obj.getClass().getName());
