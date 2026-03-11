@@ -3,6 +3,11 @@
 `1.0.25`
 
 - Added `Ids` class with utility methods to generate, convert, transform `UUID`s to/from `BigInteger`s.
+- Added `Ids.UUIDStyle` to specify the `UUID` style, currently `NO_DASHES`, `UPPERCASE` and `LOWERCASE`.
+- Upgraded parent to `4.0.3`.
+- Upgraded `central-publishing-maven-plugin` to `0.10.0`.
+- Upgraded `spotless-maven-plugin` to `3.3.0`.
+- Upgraded `pitest-maven` to `1.22.1`.
 
 ---
 
