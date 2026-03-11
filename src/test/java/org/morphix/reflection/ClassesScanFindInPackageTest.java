@@ -73,7 +73,7 @@ class ClassesScanFindInPackageTest {
 		var classesFunction = Classes.Scan.findInPackage("org.morphix.lang.function", Path.of(TARGET_CLASSES));
 		var classesThread = Classes.Scan.findInPackage("org.morphix.lang.thread", Path.of(TARGET_CLASSES));
 
-		int langClassesCount = 16;
+		int langClassesCount = 19;
 		// Classes found directly in org.morphix.lang:
 		// Case
 		// Case$1
@@ -91,6 +91,9 @@ class ClassesScanFindInPackageTest {
 		// Nullables$Chain
 		// Unchecked
 		// Unchecked$Undeclared
+		// UUIDIds
+		// UUIDIds$1
+		// UUIDIds$1IdExctractor
 
 		assertThat(classes.size(), equalTo(langClassesCount + classesFunction.size() + classesThread.size()));
 	}
