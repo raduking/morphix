@@ -1,5 +1,11 @@
 ## Release Notes
 
+`1.0.25`
+
+- Added `Ids` class with utility methods to generate, convert, transform `UUID`s to/from `BigInteger`s.
+
+---
+
 `1.0.24`
 
 - Added `Suppliers.safeGet(Supplier, Supplier)` static method to safely get the supplied value or return a default value.

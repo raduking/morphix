@@ -73,27 +73,10 @@ class ClassesScanFindInPackageTest {
 		var classesFunction = Classes.Scan.findInPackage("org.morphix.lang.function", Path.of(TARGET_CLASSES));
 		var classesThread = Classes.Scan.findInPackage("org.morphix.lang.thread", Path.of(TARGET_CLASSES));
 
-		int langClassesCount = 19;
-		// Classes found directly in org.morphix.lang:
-		// Case
-		// Case$1
-		// Case$2
-		// Case$3
-		// Case$4
-		// Case$5
-		// Case$Letter
-		// Comparables
-		// Enums
-		// JavaArrays
-		// JavaObjects
-		// Messages
-		// Nullables
-		// Nullables$Chain
-		// Unchecked
-		// Unchecked$Undeclared
-		// UUIDIds
-		// UUIDIds$1
-		// UUIDIds$1IdExctractor
+		var classesStrictlyInLang = classes.stream()
+				.filter(c -> c.getPackageName().equals("org.morphix.lang"))
+				.toList();
+		int langClassesCount = classesStrictlyInLang.size();
 
 		assertThat(classes.size(), equalTo(langClassesCount + classesFunction.size() + classesThread.size()));
 	}

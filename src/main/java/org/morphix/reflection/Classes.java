@@ -145,8 +145,8 @@ public interface Classes {
 			if (!directory.exists() || !directory.isDirectory()) {
 				return Collections.emptySet();
 			}
-			ClassLoader cl = Thread.currentThread().getContextClassLoader();
-			return findInDirectory(directory, basePackage, cl);
+			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			return findInDirectory(directory, basePackage, classLoader);
 		}
 
 		/**
