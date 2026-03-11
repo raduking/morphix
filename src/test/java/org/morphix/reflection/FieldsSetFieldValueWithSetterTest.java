@@ -29,7 +29,7 @@ class FieldsSetFieldValueWithSetterTest {
 		Integer x;
 		Integer y;
 
-		public void setX(@SuppressWarnings("unused") final Integer x) {
+		public void setX(@SuppressWarnings("unused") final Integer x) { // NOSONAR need to have a setter for testing
 			this.x = 4;
 		}
 	}

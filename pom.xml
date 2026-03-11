@@ -13,13 +13,13 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.2</version>
+		<version>4.0.3</version>
 		<relativePath />
 	</parent>
 
 	<groupId>io.github.raduking</groupId>
 	<artifactId>morphix-all</artifactId>
-	<version>1.0.24</version>
+	<version>1.0.25</version>
 	<packaging>jar</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -56,17 +56,17 @@
 
 		<!-- Publishing dependencies versions -->
 		<maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
-		<central.publishing.maven.plugin.version>0.9.0</central.publishing.maven.plugin.version>
+		<central.publishing.maven.plugin.version>0.10.0</central.publishing.maven.plugin.version>
 
 		<!-- Other plugin versions -->
-		<spotless.maven.plugin.version>3.1.0</spotless.maven.plugin.version>
+		<spotless.maven.plugin.version>3.3.0</spotless.maven.plugin.version>
 		<org.eclipse.jdt.core.version>3.44.0</org.eclipse.jdt.core.version>
 		<eclipse.formatter.version>4.38</eclipse.formatter.version>
 		<code.format.version>1.0.0</code.format.version>
 		<properties.maven.plugin.version>1.2.1</properties.maven.plugin.version>
 
 		<!-- Testing dependencies versions -->
-		<pitest.maven.plugin.version>1.22.0</pitest.maven.plugin.version>
+		<pitest.maven.plugin.version>1.22.1</pitest.maven.plugin.version>
 		<pitest.plugin.junit5.version>1.2.3</pitest.plugin.junit5.version>
 		<jacoco.maven.plugin.version>0.8.14</jacoco.maven.plugin.version>
 		<maven.project.info.reports.plugin.version>3.9.0</maven.project.info.reports.plugin.version>
@@ -441,7 +441,7 @@
 			<plugin>
 				<groupId>org.pitest</groupId>
 				<artifactId>pitest-maven</artifactId>
-				<version>${pitest.plugin.version}</version>
+				<version>${pitest.maven.plugin.version}</version>
 				<reportSets>
 					<reportSet>
 						<reports>

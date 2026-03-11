@@ -205,7 +205,7 @@ class FieldsGetAllDeclaredTest {
 	}
 
 	@Test
-	void shouldReturnOnlyCharSequenceFields() throws Exception {
+	void shouldReturnOnlyCharSequenceFields() {
 		List<Field> charSequenceFields = Fields.getAllDeclared(S.class, Predicates.allOf(isStatic(), typeIsA(CharSequence.class)));
 
 		assertThat(charSequenceFields, hasSize(2));
@@ -214,7 +214,7 @@ class FieldsGetAllDeclaredTest {
 	}
 
 	@Test
-	void shouldReturnOnlyStringFields() throws Exception {
+	void shouldReturnOnlyStringFields() {
 		List<Field> charSequenceFields = Fields.getAllDeclared(S.class, Predicates.allOf(isStatic(), typeIsA(String.class)));
 
 		assertThat(charSequenceFields, hasSize(1));

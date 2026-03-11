@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.convert.context.ConversionContext;
 import org.morphix.convert.context.CyclicReferencesContext;
 import org.morphix.convert.strategy.PropertyArrayStrategy;
 import org.morphix.convert.strategy.PropertyBeanStrategy;
@@ -40,7 +41,8 @@ class PropertyConversionEngineTest {
 	void shouldThrowIllegalStateExceptionWhenNoStrategiesAreFound() {
 		PropertyConversionEngine engine = new PropertyConversionEngine(List.of());
 
-		IllegalStateException e = assertThrows(IllegalStateException.class, () -> engine.convert(TEST, new CyclicReferencesContext()));
+		ConversionContext context = new CyclicReferencesContext();
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> engine.convert(TEST, context));
 
 		assertThat(e.getMessage(), equalTo("No property conversion strategy found for type: " + String.class.getName()));
 	}

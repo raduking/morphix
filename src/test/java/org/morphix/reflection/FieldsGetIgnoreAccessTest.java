@@ -26,7 +26,7 @@ import org.morphix.reflection.testdata.B;
  *
  * @author Radu Sebastian LAZIN
  */
-public class FieldsGetIgnoreAccessTest {
+class FieldsGetIgnoreAccessTest {
 
 	private static final String TEST_STRING = "testString";
 	private static final Long TEST_LONG = 17L;

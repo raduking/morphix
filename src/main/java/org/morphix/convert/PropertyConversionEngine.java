@@ -26,6 +26,7 @@ import org.morphix.convert.strategy.PropertyConversionStrategy;
 import org.morphix.convert.strategy.PropertyLeafStrategy;
 import org.morphix.convert.strategy.PropertyMapStrategy;
 import org.morphix.convert.strategy.PropertyOptionalStrategy;
+import org.morphix.lang.JavaObjects;
 
 /**
  * A {@link ConversionEngine} implementation that uses a list of {@link PropertyConversionStrategy} instances to convert
@@ -147,8 +148,8 @@ public class PropertyConversionEngine implements ConversionEngine {
 	 *
 	 * @return the list of property conversion strategies used by this engine
 	 */
-	public List<? extends PropertyConversionStrategy> getStrategies() {
-		return strategies;
+	public List<PropertyConversionStrategy> getStrategies() {
+		return JavaObjects.cast(strategies);
 	}
 
 	/**

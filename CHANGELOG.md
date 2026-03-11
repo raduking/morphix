@@ -1,5 +1,18 @@
 ## Release Notes
 
+`1.0.25`
+
+- Added `ThrowingUnaryOperator` similar to `ThrowingFunction`.
+- Added `Ids` class with utility methods to generate, convert, transform `UUID`s to/from `BigInteger`s.
+- Added `Ids.UUIDStyle` to specify the `UUID` style, currently `NO_DASHES`, `UPPERCASE` and `LOWERCASE`.
+- Upgraded parent to `4.0.3`.
+- Upgraded `central-publishing-maven-plugin` to `0.10.0`.
+- Upgraded `spotless-maven-plugin` to `3.3.0`.
+- Upgraded `pitest-maven` to `1.22.1`.
+- Upgraded JUnit to `6.0.3`.
+
+---
+
 `1.0.24`
 
 - Added `Suppliers.safeGet(Supplier, Supplier)` static method to safely get the supplied value or return a default value.

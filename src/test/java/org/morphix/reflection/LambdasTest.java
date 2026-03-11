@@ -57,7 +57,6 @@ class LambdasTest {
 		public void foo() {
 			// empty
 		}
-
 	}
 
 	@Test
@@ -159,10 +158,9 @@ class LambdasTest {
 			return null;
 		}
 
-		public B foo4(@SuppressWarnings("unused") final C c) {
+		public B foo4(@SuppressWarnings("unused") final C c) { // NOSONAR need to have a method with one parameter for testing
 			return null;
 		}
-
 	}
 
 	@Test
