@@ -160,7 +160,7 @@ public enum Case {
 	 * @param name the input name to tokenize
 	 * @return an array of words extracted from the input name
 	 */
-	public static String[] tokenize(final String name) {
+	public static String[] tokenize(final String name) { // NOSONAR sometimes tokenization is harder to read, deal with it
 		if (null == name || name.isEmpty()) {
 			return new String[0];
 		}

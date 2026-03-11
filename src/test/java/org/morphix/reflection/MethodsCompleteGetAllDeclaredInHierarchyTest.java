@@ -101,8 +101,9 @@ class MethodsCompleteGetAllDeclaredInHierarchyTest {
 
 	@Test
 	void shouldThrowExceptionForNonModifiableExcludedClassesSet() {
+		Set<Class<?>> emptySet = Set.of();
 		ReflectionException exception =
-				assertThrows(ReflectionException.class, () -> Methods.Complete.getAllDeclaredInHierarchy(Object.class, Set.of()));
+				assertThrows(ReflectionException.class, () -> Methods.Complete.getAllDeclaredInHierarchy(Object.class, emptySet));
 
 		assertThat(exception.getMessage(), equalTo("The excluded set is unmodifiable. Please provide a non null modifiable set."));
 	}

@@ -88,10 +88,6 @@ class DirectAssignmentTest {
 		DestinationB dst = convertFrom(src, DestinationB::new);
 
 		assertThat(dst.id, equalTo(TEST_LONG));
-		// the introduction of 'any to any' conversion makes this test
-		// deprecated
-		//
-		// assertThat(dst.a, equalTo(null));
 	}
 
 	public static class Source1 {

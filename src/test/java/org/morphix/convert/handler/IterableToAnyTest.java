@@ -83,7 +83,6 @@ class IterableToAnyTest {
 		a1.x = TEST_INTEGER_1;
 		List<A> as = List.of(a1);
 
-		// List<B> bs = convertFrom(as, ArrayList::new);
 		List<B> bs = convertIterable(as, B::new).toList();
 
 		assertThat(bs.get(0).x, equalTo(TEST_STRING_1));
