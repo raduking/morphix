@@ -70,6 +70,7 @@ class ClassesScanFindInPackageTest {
 	void shouldFindClassesInSubpackages() {
 		var classes = Classes.Scan.findInPackage("org.morphix.lang", Path.of(TARGET_CLASSES));
 
+		var classesCache = Classes.Scan.findInPackage("org.morphix.lang.cache", Path.of(TARGET_CLASSES));
 		var classesFunction = Classes.Scan.findInPackage("org.morphix.lang.function", Path.of(TARGET_CLASSES));
 		var classesThread = Classes.Scan.findInPackage("org.morphix.lang.thread", Path.of(TARGET_CLASSES));
 
@@ -78,6 +79,7 @@ class ClassesScanFindInPackageTest {
 				.toList();
 		int langClassesCount = classesStrictlyInLang.size();
 
-		assertThat(classes.size(), equalTo(langClassesCount + classesFunction.size() + classesThread.size()));
+		assertThat(classes.size(), equalTo(langClassesCount
+				+ classesCache.size() + classesFunction.size() + classesThread.size()));
 	}
 }
