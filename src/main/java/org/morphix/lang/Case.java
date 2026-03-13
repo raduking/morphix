@@ -235,21 +235,27 @@ public enum Case {
 		String[] words = new String[(length / 2 + 1) + 1];
 		int wordCount = 0;
 
-		int start = -1;
+		int wordStartIndex = -1;
 		for (int i = 0; i < length; ++i) {
 			char c = name.charAt(i);
-			if (c == '_' || c == '-') {
-				if (start >= 0) {
-					words[wordCount] = name.substring(start, i);
+			boolean isWordSeparator = c == '_' || c == '-';
+			if (isWordSeparator) {
+				if (wordStartIndex >= 0) {
+					words[wordCount] = name.substring(wordStartIndex, i);
 					++wordCount;
-					start = -1;
+					wordStartIndex = -1;
 				}
+			} else if (wordStartIndex < 0) {
+				wordStartIndex = i;
+				isWordSeparator = true;
+			}
+			if (isWordSeparator) {
 				continue;
 			}
-			if (start < 0) {
-				start = i;
-				continue;
-			}
+			// this part is an optimization to avoid checking for camel case boundaries on every character, we only check when the
+			// previous character is a letter or a digit and the current character is a letter, or when the previous character is an
+			// uppercase letter and the current character is an uppercase letter followed by a lowercase letter (e.g. "JSONValue"
+			// should be split into "JSON" and "Value")
 			char prev = name.charAt(i - 1);
 
 			boolean wordEnded = (Character.isLowerCase(prev) && Character.isUpperCase(c))
@@ -258,12 +264,12 @@ public enum Case {
 							&& i + 1 < length && Character.isLowerCase(name.charAt(i + 1)));
 
 			if (wordEnded) {
-				words[wordCount] = name.substring(start, i);
+				words[wordCount] = name.substring(wordStartIndex, i);
 				++wordCount;
-				start = i;
+				wordStartIndex = i;
 			}
 		}
-		words[wordCount] = name.substring(start);
+		words[wordCount] = name.substring(wordStartIndex);
 		++wordCount;
 		return Arrays.copyOf(words, wordCount);
 	}
