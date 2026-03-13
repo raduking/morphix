@@ -1,5 +1,12 @@
 ## Release Notes
 
+`1.0.26`
+
+- Updated `Case.capitalize` to use `Locale.ROOT`.
+- Added `Case.capitalize(String, Locale)` to be able to capitalize a word with the given `Locale`.
+
+---
+
 `1.0.25`
 
 - Added `ThrowingUnaryOperator` similar to `ThrowingFunction`.
