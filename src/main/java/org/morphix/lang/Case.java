@@ -68,7 +68,7 @@ public enum Case {
 	 */
 	SNAKE {
 		/**
-		 * The separator used for joining words in kebab case style, which is a hyphen ("-").
+		 * The separator used for joining words in snake case style, which is an underscore ("_").
 		 */
 		public static final String SEPARATOR = "_";
 
@@ -94,7 +94,7 @@ public enum Case {
 	 */
 	UPPER_SNAKE {
 		/**
-		 * The separator used for joining words in kebab case style, which is a hyphen ("-").
+		 * The separator used for joining words in upper snake case style, which is an underscore ("_").
 		 */
 		public static final String SEPARATOR = "_";
 
