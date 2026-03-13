@@ -208,4 +208,12 @@ class CaseTest {
 				Arguments.of("aBaBaBaB", "aBaBaBaB"));
 	}
 
+	@Test
+	void shouldReturnTheCorrectSeparatorForEachCase() {
+		assertEquals("", Case.LOWER_CAMEL.wordSeparator());
+		assertEquals("", Case.UPPER_CAMEL.wordSeparator());
+		assertEquals("_", Case.SNAKE.wordSeparator());
+		assertEquals("_", Case.UPPER_SNAKE.wordSeparator());
+		assertEquals("-", Case.KEBAB.wordSeparator());
+	}
 }

@@ -30,6 +30,9 @@ public enum Case {
 	 * "lowerCamelCase").
 	 */
 	LOWER_CAMEL {
+		/**
+		 * @see Case#format(String[], Locale)
+		 */
 		@Override
 		public String format(final String[] words, final Locale locale) {
 			if (words.length == 0) {
@@ -37,7 +40,7 @@ public enum Case {
 			}
 			StringBuilder sb = new StringBuilder(words[0].toLowerCase(locale));
 			for (int i = 1; i < words.length; ++i) {
-				sb.append(capitalize(words[i]));
+				sb.append(capitalize(words[i], locale));
 			}
 			return sb.toString();
 		}
@@ -47,11 +50,14 @@ public enum Case {
 	 * Upper camel case style, where all words are capitalized (e.g. "UpperCamelCase").
 	 */
 	UPPER_CAMEL {
+		/**
+		 * @see Case#format(String[], Locale)
+		 */
 		@Override
 		public String format(final String[] words, final Locale locale) {
 			StringBuilder sb = new StringBuilder();
 			for (String word : words) {
-				sb.append(capitalize(word));
+				sb.append(capitalize(word, locale));
 			}
 			return sb.toString();
 		}
@@ -61,9 +67,25 @@ public enum Case {
 	 * Snake case style, where all words are in lowercase and separated by underscores (e.g. "snake_case").
 	 */
 	SNAKE {
+		/**
+		 * The separator used for joining words in kebab case style, which is a hyphen ("-").
+		 */
+		public static final String SEPARATOR = "_";
+
+		/**
+		 * @see Case#format(String[], Locale)
+		 */
 		@Override
 		public String format(final String[] words, final Locale locale) {
-			return join(words, "_", locale, Letter.LOWER);
+			return join(words, SEPARATOR, locale, Letter.LOWER);
+		}
+
+		/**
+		 * @see Case#wordSeparator()
+		 */
+		@Override
+		public String wordSeparator() {
+			return SEPARATOR;
 		}
 	},
 
@@ -71,9 +93,25 @@ public enum Case {
 	 * Upper snake case style, where all words are in uppercase and separated by underscores (e.g. "UPPER_SNAKE_CASE").
 	 */
 	UPPER_SNAKE {
+		/**
+		 * The separator used for joining words in kebab case style, which is a hyphen ("-").
+		 */
+		public static final String SEPARATOR = "_";
+
+		/**
+		 * @see Case#format(String[], Locale)
+		 */
 		@Override
 		public String format(final String[] words, final Locale locale) {
-			return join(words, "_", locale, Letter.UPPER);
+			return join(words, SEPARATOR, locale, Letter.UPPER);
+		}
+
+		/**
+		 * @see Case#wordSeparator()
+		 */
+		@Override
+		public String wordSeparator() {
+			return SEPARATOR;
 		}
 	},
 
@@ -81,9 +119,25 @@ public enum Case {
 	 * Kebab case style, where all words are in lowercase and separated by hyphens (e.g. "kebab-case").
 	 */
 	KEBAB {
+		/**
+		 * The separator used for joining words in kebab case style, which is a hyphen ("-").
+		 */
+		public static final String SEPARATOR = "-";
+
+		/**
+		 * @see Case#format(String[], Locale)
+		 */
 		@Override
 		public String format(final String[] words, final Locale locale) {
-			return join(words, "-", locale, Letter.LOWER);
+			return join(words, SEPARATOR, locale, Letter.LOWER);
+		}
+
+		/**
+		 * @see Case#wordSeparator()
+		 */
+		@Override
+		public String wordSeparator() {
+			return SEPARATOR;
 		}
 	};
 
@@ -150,6 +204,17 @@ public enum Case {
 	 * @return the formatted string in the specific case style and locale
 	 */
 	public abstract String format(String[] words, Locale locale);
+
+	/**
+	 * Returns the separator used for joining words in this case style. By default, it returns an empty string, but it can
+	 * be overridden by specific case styles that use a separator (e.g. SNAKE, UPPER_SNAKE, KEBAB) to return the appropriate
+	 * separator (e.g. "_" for snake case and "-" for kebab case).
+	 *
+	 * @return the separator used for joining words in this case style
+	 */
+	public String wordSeparator() {
+		return "";
+	}
 
 	/**
 	 * Tokenizes the input name into an array of words by splitting on hyphens, underscores, and camel case boundaries. The
@@ -230,10 +295,26 @@ public enum Case {
 	 * @return the capitalized word with the first letter in uppercase and the rest in lowercase
 	 */
 	public static String capitalize(final String word) {
+		return capitalize(word, Locale.ROOT);
+	}
+
+	/**
+	 * Capitalizes the first letter of the given word and converts the rest of the letters to lowercase. If the input word
+	 * is empty, it returns the empty string. This method is used to convert words to a format suitable for camel case
+	 * styles.
+	 *
+	 * @param word the input word to capitalize
+	 * @param locale the locale to use for any locale-specific formatting
+	 * @return the capitalized word with the first letter in uppercase and the rest in lowercase
+	 */
+	public static String capitalize(final String word, final Locale locale) {
 		if (null == word || word.isEmpty()) {
 			return word;
 		}
-		return Character.toUpperCase(word.charAt(0)) +
-				word.substring(1).toLowerCase(Locale.ROOT);
+		if (word.length() == 1) {
+			return word.toUpperCase(locale);
+		}
+		return word.substring(0, 1).toUpperCase(locale) +
+				word.substring(1).toLowerCase(locale);
 	}
 }
