@@ -115,6 +115,8 @@ public class ConcurrentThreadLRUCache<K, V> implements LRUCache<K, V> {
 	 * Constructor for the concurrent LRU cache. Initializes the cache with the specified maximum size.
 	 *
 	 * @param capacity the maximum size of the cache
+	 * @param sampleSize the number of entries to sample when evicting the least recently used entry, if set to 0 then all
+	 *     entries are checked for eviction
 	 */
 	public ConcurrentThreadLRUCache(final int capacity, final int sampleSize) {
 		this.capacity = capacity;

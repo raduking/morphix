@@ -288,6 +288,7 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 				node.next.prev = node.prev;
 			}
 		}
+		// add the node to the tail
 		if (null == tail) {
 			head = node;
 			tail = node;
@@ -314,15 +315,15 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 		if (null == head) {
 			return;
 		}
-		Node<K, V> oldHead = head;
-		head = oldHead.next;
+		Node<K, V> node = head;
+		head = node.next;
 
 		if (null == head) {
 			tail = null;
 		} else {
 			head.prev = null;
 		}
-		cache.remove(oldHead.key, oldHead);
+		cache.remove(node.key, node);
 	}
 
 	/**
