@@ -39,9 +39,9 @@ class StrictLRUCacheTest {
 
 	private static final Logger LOGGER = Logger.getLogger(StrictLRUCacheTest.class.getName());
 
-	private static final int CACHE_CAPACITY = 3;
+	static final int CACHE_CAPACITY = 3;
 
-	private StrictLRUCache<String, String> cache;
+	StrictLRUCache<String, String> cache;
 
 	StrictLRUCache<String, String> newCache() {
 		return new StrictLRUCache<>(CACHE_CAPACITY);

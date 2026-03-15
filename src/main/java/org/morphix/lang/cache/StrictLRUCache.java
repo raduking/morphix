@@ -134,8 +134,8 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 		}
 
 		/**
-		 * Sets the previous node in the doubly linked list. This method is primarily intended for testing purposes to verify the
-		 * internal state of the cache and ensure that the eviction order is maintained correctly.
+		 * Sets the previous node in the doubly linked list. This method is primarily intended for testing purposes to verify
+		 * the internal state of the cache and ensure that the eviction order is maintained correctly.
 		 *
 		 * @param prev the previous node in the doubly linked list
 		 */
@@ -363,6 +363,16 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 	 */
 	void setTail(final Node<K, V> tail) {
 		this.tail = tail;
+	}
+
+	/**
+	 * Returns the internal cache map that stores the key-node pairs. This method is primarily intended for testing purposes
+	 * to verify the internal state of the cache and ensure that the eviction order is maintained correctly.
+	 *
+	 * @return the internal cache map that stores the key-node pairs
+	 */
+	Map<K, Node<K, V>> storage() {
+		return cache;
 	}
 
 	/**

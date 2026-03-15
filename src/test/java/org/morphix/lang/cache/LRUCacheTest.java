@@ -34,6 +34,11 @@ import org.morphix.lang.thread.Threads;
  */
 class LRUCacheTest {
 
+	static final int THREAD_COUNT = 100;
+	static final int ITERATIONS_PER_THREAD = 1000;
+	static final int KEY_SPACE = 7;
+	static final Duration TIMEOUT = Duration.ofSeconds(1);
+
 	@Test
 	void shouldCreateConcurrencyTestPropertiesWithDefaults() {
 		ConcurrencyTestProperties properties = new ConcurrencyTestProperties.Builder().build();
@@ -66,10 +71,10 @@ class LRUCacheTest {
 
 		static class Builder {
 
-			private int threadCount = 10;
-			private int iterationsPerThread = 1000;
-			private int keySpace = 7;
-			private Duration timeout = Duration.ofSeconds(30);
+			private int threadCount = THREAD_COUNT;
+			private int iterationsPerThread = ITERATIONS_PER_THREAD;
+			private int keySpace = KEY_SPACE;
+			private Duration timeout = TIMEOUT;
 			private Logger logger;
 
 			public Builder threadCount(final int threadCount) {
