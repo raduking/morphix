@@ -19,13 +19,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.lang.thread.Threads;
+import org.morphix.utils.ConcurrencyTestProperties;
+import org.morphix.utils.ConcurrencyTestResults;
 
 /**
  * Test class for {@link LRUCache}.
@@ -47,74 +46,13 @@ class LRUCacheTest {
 		assertNotNull(properties.logger());
 	}
 
-	record ConcurrencyResult(
-			AtomicBoolean finished,
-			AtomicLong failedThreads) {
-
-		ConcurrencyResult() {
-			this(new AtomicBoolean(false), new AtomicLong(0));
-		}
-	}
-
-	record ConcurrencyTestProperties(
-			int threadCount,
-			int iterationsPerThread,
-			int keySpace,
-			Duration timeout,
-			Logger logger) {
-
-		ConcurrencyTestProperties {
-			if (null == logger) {
-				logger = Logger.getLogger(LRUCacheTest.class.getName());
-			}
-		}
-
-		static class Builder {
-
-			private int threadCount = THREAD_COUNT;
-			private int iterationsPerThread = ITERATIONS_PER_THREAD;
-			private int keySpace = KEY_SPACE;
-			private Duration timeout = TIMEOUT;
-			private Logger logger;
-
-			public Builder threadCount(final int threadCount) {
-				this.threadCount = threadCount;
-				return this;
-			}
-
-			public Builder iterationsPerThread(final int iterationsPerThread) {
-				this.iterationsPerThread = iterationsPerThread;
-				return this;
-			}
-
-			public Builder keySpace(final int keySpace) {
-				this.keySpace = keySpace;
-				return this;
-			}
-
-			public Builder timeout(final Duration timeout) {
-				this.timeout = timeout;
-				return this;
-			}
-
-			public Builder logger(final Logger logger) {
-				this.logger = logger;
-				return this;
-			}
-
-			public ConcurrencyTestProperties build() {
-				return new ConcurrencyTestProperties(threadCount, iterationsPerThread, keySpace, timeout, logger);
-			}
-		}
-	}
-
 	@SuppressWarnings("resource")
-	static LRUCacheTest.ConcurrencyResult hit(final LRUCache<String, String> cache, final ConcurrencyTestProperties properties)
+	static ConcurrencyTestResults hit(final LRUCache<String, String> cache, final ConcurrencyTestProperties properties)
 			throws InterruptedException {
 		CountDownLatch start = new CountDownLatch(1);
 		CountDownLatch done = new CountDownLatch(properties.threadCount());
 
-		LRUCacheTest.ConcurrencyResult result = new LRUCacheTest.ConcurrencyResult();
+		ConcurrencyTestResults result = new ConcurrencyTestResults();
 
 		ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 		try {

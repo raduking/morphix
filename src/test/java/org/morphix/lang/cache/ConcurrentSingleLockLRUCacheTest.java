@@ -23,7 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Test;
-import org.morphix.lang.cache.LRUCacheTest.ConcurrencyTestProperties;
+import org.morphix.utils.ConcurrencyTestProperties;
+import org.morphix.utils.ConcurrencyTestResults;
 
 /**
  * Test class for {@link StrictLRUCache}.
@@ -59,7 +60,7 @@ class ConcurrentSingleLockLRUCacheTest extends StrictLRUCacheTest {
 				.logger(LOGGER)
 				.build();
 
-		LRUCacheTest.ConcurrencyResult result = LRUCacheTest.hit(cache, properties);
+		ConcurrencyTestResults result = LRUCacheTest.hit(cache, properties);
 
 		assertTrue(result.finished().get(), "All threads should complete in reasonable time");
 		assertThat(result.failedThreads().get(), is(0L));
