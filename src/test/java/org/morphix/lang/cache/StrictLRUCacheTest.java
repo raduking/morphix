@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashSet;
@@ -42,9 +43,13 @@ class StrictLRUCacheTest {
 
 	private StrictLRUCache<String, String> cache;
 
+	StrictLRUCache<String, String> newCache() {
+		return new StrictLRUCache<>(CACHE_CAPACITY);
+	}
+
 	@BeforeEach
 	void setUp() {
-		cache = new StrictLRUCache<>(CACHE_CAPACITY);
+		cache = newCache();
 	}
 
 	@Nested
@@ -190,8 +195,9 @@ class StrictLRUCacheTest {
 
 		@Test
 		void shouldMoveGetAccessedHeadEntryToTail() {
+			int initialIndex = 1;
 			for (int i = 0; i < CACHE_CAPACITY; ++i) {
-				int index = i + 1;
+				int index = initialIndex + i;
 				cache.computeIfAbsent("key" + index, k -> "value" + index);
 			}
 			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
@@ -210,9 +216,10 @@ class StrictLRUCacheTest {
 
 			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
 
+			initialIndex = CACHE_CAPACITY;
+
 			// check from head
 			Node<String, String> current = cache.head();
-			int initialIndex = 3;
 			for (int i = 0, j = 0; i < CACHE_CAPACITY; ++i) {
 				if (i + 1 == CACHE_CAPACITY - 1) {
 					assertThat(current.key(), is(equalTo("key" + accessedIndex)));
@@ -243,9 +250,13 @@ class StrictLRUCacheTest {
 				int index = initialIndex + i;
 				cache.computeIfAbsent("key" + index, k -> "value" + index);
 			}
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
+
 			int accessedIndex = 2;
 			// move "key2" to tail by accessing middle key with get()
 			cache.get("key" + accessedIndex);
+
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
 
 			assertThat(cache.head().value(), is(equalTo("value" + initialIndex)));
 
@@ -253,11 +264,32 @@ class StrictLRUCacheTest {
 			// remove head ("key1") and add new entry at tail
 			cache.computeIfAbsent("key" + newIndex, k -> "value" + newIndex);
 
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
+
+			initialIndex = CACHE_CAPACITY;
+
+			// check from head
 			Node<String, String> current = cache.head();
-			for (int i = 3; i <= CACHE_CAPACITY; ++i) {
-				int index = i;
-				assertThat(current.key(), is(equalTo("key" + index)));
+			for (int i = 0, j = 0; i < CACHE_CAPACITY; ++i) {
+				if (i + 1 == CACHE_CAPACITY - 1) {
+					assertThat(current.key(), is(equalTo("key" + accessedIndex)));
+				} else {
+					assertThat(current.key(), is(equalTo("key" + (j + initialIndex))));
+					++j;
+				}
 				current = current.next();
+			}
+
+			// check from tail
+			current = cache.tail();
+			for (int i = CACHE_CAPACITY - 1, j = CACHE_CAPACITY + 1; i >= 0; --i) {
+				if (i + 1 == CACHE_CAPACITY - 1) {
+					assertThat(current.key(), is(equalTo("key" + accessedIndex)));
+				} else {
+					assertThat(current.key(), is(equalTo("key" + j)));
+					--j;
+				}
+				current = current.prev();
 			}
 		}
 
@@ -268,9 +300,13 @@ class StrictLRUCacheTest {
 				int index = initialIndex + i;
 				cache.computeIfAbsent("key" + index, k -> "value" + index);
 			}
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
+
 			int accessedIndex = CACHE_CAPACITY;
 			// keep tail the same by accessing tail with get()
 			cache.get("key" + accessedIndex);
+
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
 
 			assertThat(cache.head().value(), is(equalTo("value" + initialIndex)));
 
@@ -278,33 +314,72 @@ class StrictLRUCacheTest {
 			// remove head ("key1") and add new entry at tail
 			cache.computeIfAbsent("key" + newIndex, k -> "value" + newIndex);
 
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
+
+			initialIndex = 2;
+
+			// check from head
 			Node<String, String> current = cache.head();
-			for (int i = 2; i <= CACHE_CAPACITY; ++i) {
-				int index = i;
-				assertThat(current.key(), is(equalTo("key" + index)));
+			for (int i = 0; i < CACHE_CAPACITY; ++i) {
+				assertThat(current.key(), is(equalTo("key" + (i + initialIndex))));
 				current = current.next();
+			}
+
+			// check from tail
+			current = cache.tail();
+			for (int i = CACHE_CAPACITY - 1; i >= 0; --i) {
+				assertThat(current.key(), is(equalTo("key" + (i + initialIndex))));
+				current = current.prev();
 			}
 		}
 
 		@Test
 		void shouldMoveComputeIfAbsentAccessedHeadEntryToTail() {
+			int initialIndex = 1;
 			for (int i = 0; i < CACHE_CAPACITY; ++i) {
-				int index = i + 1;
+				int index = initialIndex + i;
 				cache.computeIfAbsent("key" + index, k -> "value" + index);
 			}
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
+
 			int accessedIndex = 1;
 			// move "key1" to tail by accessing head with get()
 			cache.computeIfAbsent("key" + accessedIndex, k -> "doNotCompute");
+
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
+
+			assertThat(cache.head().value(), is(equalTo("value" + (accessedIndex + 1))));
 
 			int newIndex = CACHE_CAPACITY + 1;
 			// remove head ("key2") and add new entry at tail
 			cache.computeIfAbsent("key" + newIndex, k -> "value" + newIndex);
 
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
+
+			initialIndex = CACHE_CAPACITY;
+
+			// check from head
 			Node<String, String> current = cache.head();
-			for (int i = 3; i <= CACHE_CAPACITY; ++i) {
-				int index = i;
-				assertThat(current.key(), is(equalTo("key" + index)));
+			for (int i = 0, j = 0; i < CACHE_CAPACITY; ++i) {
+				if (i + 1 == CACHE_CAPACITY - 1) {
+					assertThat(current.key(), is(equalTo("key" + accessedIndex)));
+				} else {
+					assertThat(current.key(), is(equalTo("key" + (j + initialIndex))));
+					++j;
+				}
 				current = current.next();
+			}
+
+			// check from tail
+			current = cache.tail();
+			for (int i = CACHE_CAPACITY - 1, j = CACHE_CAPACITY + 1; i >= 0; --i) {
+				if (i + 1 == CACHE_CAPACITY - 1) {
+					assertThat(current.key(), is(equalTo("key" + accessedIndex)));
+				} else {
+					assertThat(current.key(), is(equalTo("key" + j)));
+					--j;
+				}
+				current = current.prev();
 			}
 		}
 
@@ -315,9 +390,13 @@ class StrictLRUCacheTest {
 				int index = initialIndex + i;
 				cache.computeIfAbsent("key" + index, k -> "value" + index);
 			}
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
+
 			int accessedIndex = 2;
 			// move "key2" to tail by accessing middle key with get()
 			cache.computeIfAbsent("key" + accessedIndex, k -> "doNotCompute");
+
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
 
 			assertThat(cache.head().value(), is(equalTo("value" + initialIndex)));
 
@@ -325,11 +404,32 @@ class StrictLRUCacheTest {
 			// remove head ("key1") and add new entry at tail
 			cache.computeIfAbsent("key" + newIndex, k -> "value" + newIndex);
 
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
+
+			initialIndex = CACHE_CAPACITY;
+
+			// check from head
 			Node<String, String> current = cache.head();
-			for (int i = 3; i <= CACHE_CAPACITY; ++i) {
-				int index = i;
-				assertThat(current.key(), is(equalTo("key" + index)));
+			for (int i = 0, j = 0; i < CACHE_CAPACITY; ++i) {
+				if (i + 1 == CACHE_CAPACITY - 1) {
+					assertThat(current.key(), is(equalTo("key" + accessedIndex)));
+				} else {
+					assertThat(current.key(), is(equalTo("key" + (j + initialIndex))));
+					++j;
+				}
 				current = current.next();
+			}
+
+			// check from tail
+			current = cache.tail();
+			for (int i = CACHE_CAPACITY - 1, j = CACHE_CAPACITY + 1; i >= 0; --i) {
+				if (i + 1 == CACHE_CAPACITY - 1) {
+					assertThat(current.key(), is(equalTo("key" + accessedIndex)));
+				} else {
+					assertThat(current.key(), is(equalTo("key" + j)));
+					--j;
+				}
+				current = current.prev();
 			}
 		}
 
@@ -340,9 +440,13 @@ class StrictLRUCacheTest {
 				int index = initialIndex + i;
 				cache.computeIfAbsent("key" + index, k -> "value" + index);
 			}
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
+
 			int accessedIndex = CACHE_CAPACITY;
 			// keep tail the same by accessing tail with get()
 			cache.computeIfAbsent("key" + accessedIndex, k -> "doNotCompute");
+
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
 
 			assertThat(cache.head().value(), is(equalTo("value" + initialIndex)));
 
@@ -350,11 +454,22 @@ class StrictLRUCacheTest {
 			// remove head ("key1") and add new entry at tail
 			cache.computeIfAbsent("key" + newIndex, k -> "value" + newIndex);
 
+			LOGGER.info("LRU cache: " + StrictLRUCacheTest.toString(cache.head()));
+
+			initialIndex = 2;
+
+			// check from head
 			Node<String, String> current = cache.head();
-			for (int i = 2; i <= CACHE_CAPACITY; ++i) {
-				int index = i;
-				assertThat(current.key(), is(equalTo("key" + index)));
+			for (int i = 0; i < CACHE_CAPACITY; ++i) {
+				assertThat(current.key(), is(equalTo("key" + (i + initialIndex))));
 				current = current.next();
+			}
+
+			// check from tail
+			current = cache.tail();
+			for (int i = CACHE_CAPACITY - 1; i >= 0; --i) {
+				assertThat(current.key(), is(equalTo("key" + (i + initialIndex))));
+				current = current.prev();
 			}
 		}
 	}
@@ -376,6 +491,154 @@ class StrictLRUCacheTest {
 				int index = i + 1;
 				assertThat(cache.get("key" + index), is(nullValue()));
 			}
+		}
+	}
+
+	@Nested
+	class RemoveHeadTests {
+
+		@Test
+		void shouldRemoveHeadEntry() {
+			for (int i = 0; i < CACHE_CAPACITY; ++i) {
+				int index = i + 1;
+				cache.computeIfAbsent("key" + index, k -> "value" + index);
+			}
+
+			cache.removeHead();
+
+			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY - 1)));
+			assertThat(cache.get("key1"), is(nullValue()));
+			for (int i = 1; i < CACHE_CAPACITY; ++i) {
+				int index = i + 1;
+				assertThat(cache.get("key" + index), is(equalTo("value" + index)));
+			}
+		}
+
+		@Test
+		void shouldNotRemoveHeadWhenCacheIsEmpty() {
+			assertThat(cache.size(), is(equalTo(0)));
+
+			cache.removeHead();
+
+			assertThat(cache.size(), is(equalTo(0)));
+			assertThat(cache.head(), is(nullValue()));
+			assertThat(cache.tail(), is(nullValue()));
+		}
+
+		@Test
+		void shouldRemoveHeadWhenCacheHasOneEntry() {
+			cache.computeIfAbsent("key1", k -> "value1");
+
+			assertThat(cache.size(), is(equalTo(1)));
+
+			cache.removeHead();
+
+			assertThat(cache.size(), is(equalTo(0)));
+			assertThat(cache.get("key1"), is(nullValue()));
+
+			assertThat(cache.size(), is(equalTo(0)));
+			assertThat(cache.head(), is(nullValue()));
+			assertThat(cache.tail(), is(nullValue()));
+		}
+	}
+
+	@Nested
+	class AddToTailTests {
+
+		@Test
+		void shouldAddNewNodeToTail() {
+			Node<String, String> node = new Node<>("key1", "value1");
+			cache.setHead(node);
+			cache.setTail(node);
+
+			cache.addToTail(node);
+
+			assertThat(cache.head(), sameInstance(node));
+			assertThat(cache.tail(), sameInstance(node));
+		}
+
+		@Test
+		void shouldAddNewNodeToTailOnTwoNodes() {
+			Node<String, String> node1 = new Node<>("key1", "value1");
+			Node<String, String> node2 = new Node<>("key2", "value2");
+			node1.setNext(node2);
+			node2.setPrev(node1);
+
+			cache.setHead(node1);
+			cache.setTail(node2);
+
+			cache.addToTail(node1);
+
+			assertThat(cache.head(), sameInstance(node2));
+			assertThat(cache.tail(), sameInstance(node1));
+		}
+
+		@Test
+		void shouldAddHeadNodeToTail() {
+			Node<String, String> node1 = new Node<>("key1", "value1");
+			Node<String, String> node2 = new Node<>("key2", "value2");
+			Node<String, String> node3 = new Node<>("key3", "value3");
+			node1.setNext(node2);
+			node2.setPrev(node1);
+			node2.setNext(node3);
+			node3.setPrev(node2);
+
+			cache.setHead(node1);
+			cache.setTail(node3);
+
+			cache.addToTail(node1);
+
+			assertThat(cache.head(), sameInstance(node2));
+			assertThat(cache.tail(), sameInstance(node1));
+		}
+
+		@Test
+		void shouldAddMiddleNodeToTail() {
+			Node<String, String> node1 = new Node<>("key1", "value1");
+			Node<String, String> node2 = new Node<>("key2", "value2");
+			Node<String, String> node3 = new Node<>("key3", "value3");
+			node1.setNext(node2);
+			node2.setPrev(node1);
+			node2.setNext(node3);
+			node3.setPrev(node2);
+
+			cache.setHead(node1);
+			cache.setTail(node3);
+
+			cache.addToTail(node2);
+
+			assertThat(cache.head(), sameInstance(node1));
+			assertThat(cache.tail(), sameInstance(node2));
+		}
+
+		@Test
+		void shouldAddTailNodeToTail() {
+			Node<String, String> node1 = new Node<>("key1", "value1");
+			Node<String, String> node2 = new Node<>("key2", "value2");
+			Node<String, String> node3 = new Node<>("key3", "value3");
+			node1.setNext(node2);
+			node2.setPrev(node1);
+			node2.setNext(node3);
+			node3.setPrev(node2);
+
+			cache.setHead(node1);
+			cache.setTail(node3);
+
+			cache.addToTail(node3);
+
+			assertThat(cache.head(), sameInstance(node1));
+			assertThat(cache.tail(), sameInstance(node3));
+		}
+
+		@Test
+		void shouldNotAddNullNodeToTail() {
+			cache.setHead(null);
+			cache.setTail(null);
+
+			cache.addToTail(null);
+
+			assertThat(cache.head(), is(nullValue()));
+			assertThat(cache.tail(), is(nullValue()));
 		}
 	}
 

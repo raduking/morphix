@@ -89,7 +89,7 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 		 *
 		 * @return the key associated with this node
 		 */
-		protected K key() {
+		K key() {
 			return key;
 		}
 
@@ -99,7 +99,7 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 		 *
 		 * @return the value associated with this node
 		 */
-		protected V value() {
+		V value() {
 			return value;
 		}
 
@@ -109,7 +109,7 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 		 *
 		 * @return the previous node in the doubly linked list
 		 */
-		protected Node<K, V> prev() {
+		Node<K, V> prev() {
 			return prev;
 		}
 
@@ -119,8 +119,28 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 		 *
 		 * @return the next node in the doubly linked list
 		 */
-		protected Node<K, V> next() {
+		Node<K, V> next() {
 			return next;
+		}
+
+		/**
+		 * Sets the next node in the doubly linked list. This method is primarily intended for testing purposes to verify the
+		 * internal state of the cache and ensure that the eviction order is maintained correctly.
+		 *
+		 * @param next the next node in the doubly linked list
+		 */
+		void setNext(final Node<K, V> next) {
+			this.next = next;
+		}
+
+		/**
+		 * Sets the previous node in the doubly linked list. This method is primarily intended for testing purposes to verify the
+		 * internal state of the cache and ensure that the eviction order is maintained correctly.
+		 *
+		 * @param prev the previous node in the doubly linked list
+		 */
+		void setPrev(final Node<K, V> prev) {
+			this.prev = prev;
 		}
 	}
 
@@ -211,7 +231,7 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 		if (null == node) {
 			return null;
 		}
-		moveToTail(node);
+		addToTail(node);
 		return node.value;
 	}
 
@@ -238,11 +258,7 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 		if (null == node) {
 			return null;
 		}
-		if (null == node.prev && null == node.next) {
-			addToTail(node);
-		} else {
-			moveToTail(node);
-		}
+		addToTail(node);
 		return node.value;
 	}
 
@@ -254,9 +270,23 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 	 *
 	 * @param node the node to be added to the tail of the list
 	 */
-	protected void addToTail(final Node<K, V> node) {
+	void addToTail(final Node<K, V> node) {
 		if (null == node || tail == node) {
 			return;
+		}
+		// unlink the node from its current position first
+		if (head == node) {
+			head = node.next;
+			if (null != head) {
+				head.prev = null;
+			}
+		} else {
+			if (null != node.prev) {
+				node.prev.next = node.next;
+			}
+			if (null != node.next) {
+				node.next.prev = node.prev;
+			}
 		}
 		if (null == tail) {
 			head = node;
@@ -275,43 +305,14 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 	}
 
 	/**
-	 * Moves the specified node to the tail of the doubly linked list. If the node is already at the tail, this method does
-	 * nothing. If the node is at the head, the head reference is updated to point to the next node, and the previous
-	 * reference of the new head is set to null. If the node is in the middle of the list, its previous and next nodes are
-	 * linked together to bypass it. Finally, the node is added to the tail of the list.
-	 *
-	 * @param node the node to be moved to the tail of the list
-	 */
-	protected void moveToTail(final Node<K, V> node) {
-		if (null == node || tail == node) {
-			return;
-		}
-		// unlink the node from its current position first
-		if (head == node) {
-			head = node.next;
-			if (null != head) {
-				head.prev = null;
-			}
-		} else {
-			if (null != node.prev) {
-				node.prev.next = node.next;
-			}
-			if (null != node.next) {
-				node.next.prev = node.prev;
-			}
-		}
-		addToTail(node);
-	}
-
-	/**
 	 * Removes the head node from the doubly linked list. If the list is empty, this method does nothing. Otherwise, the
 	 * head reference is updated to point to the next node in the list, and the previous reference of the new head is set to
 	 * null. If the list becomes empty after removal, the tail reference is also set to null. The removed node's key is also
 	 * removed from the cache.
 	 */
-	protected void removeHead() {
+	void removeHead() {
 		if (null == head) {
-			throw new IllegalStateException("Cannot remove head from an empty list");
+			return;
 		}
 		Node<K, V> oldHead = head;
 		head = oldHead.next;
@@ -330,7 +331,7 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 	 *
 	 * @return the head node of the doubly linked list
 	 */
-	protected Node<K, V> head() {
+	Node<K, V> head() {
 		return head;
 	}
 
@@ -340,8 +341,28 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 	 *
 	 * @return the tail node of the doubly linked list
 	 */
-	protected Node<K, V> tail() {
+	Node<K, V> tail() {
 		return tail;
+	}
+
+	/**
+	 * Sets the head node of the doubly linked list. This method is primarily intended for testing purposes to verify the
+	 * internal state of the cache and ensure that the eviction order is maintained correctly.
+	 *
+	 * @param head the new head node of the doubly linked list
+	 */
+	void setHead(final Node<K, V> head) {
+		this.head = head;
+	}
+
+	/**
+	 * Sets the tail node of the doubly linked list. This method is primarily intended for testing purposes to verify the
+	 * internal state of the cache and ensure that the eviction order is maintained correctly.
+	 *
+	 * @param tail the new tail node of the doubly linked list
+	 */
+	void setTail(final Node<K, V> tail) {
+		this.tail = tail;
 	}
 
 	/**
