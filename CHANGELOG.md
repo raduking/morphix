@@ -4,6 +4,9 @@
 
 - Updated `Case.capitalize` to use `Locale.ROOT`.
 - Added `Case.capitalize(String, Locale)` to be able to capitalize a word with the given `Locale`.
+- Added `Cache` interface to allow for cache implementations.
+- Added `LRUCache` interface which extends the `Cache` interface to allow for least recently used (LRU) cache implementations.
+- Added `StrictLRUCache` as a LRU cache implementation with O(1) operations, this implementation is not thread safe.
 
 ---
 

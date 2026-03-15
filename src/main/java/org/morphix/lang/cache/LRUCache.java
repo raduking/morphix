@@ -12,8 +12,6 @@
  */
 package org.morphix.lang.cache;
 
-import java.util.function.Function;
-
 /**
  * An interface representing a Least Recently Used (LRU) cache. An LRU cache is a data structure that stores a limited
  * number of key-value pairs and evicts the least recently used entry when the cache exceeds its maximum size. This
@@ -24,25 +22,7 @@ import java.util.function.Function;
  *
  * @author Radu Sebastian LAZIN
  */
-public interface LRUCache<K, V> {
+public interface LRUCache<K, V> extends Cache<K, V> {
 
-	/**
-	 * Retrieves the value associated with the specified key from the cache. If the key is not present in the cache, this
-	 * method returns {@code null}.
-	 *
-	 * @param key the key whose associated value is to be returned
-	 * @return the value associated with the specified key, or {@code null} if the key is not present in the cache
-	 */
-	V get(K key);
-
-	/**
-	 * Computes a value for the specified key using the given mapping function and enters it into the cache if it is not
-	 * already present. If the cache exceeds its maximum size after adding the new entry, it evicts the least recently used
-	 * entry to make room for the new one.
-	 *
-	 * @param key the key for which a value is to be computed and entered into the cache
-	 * @param valueFunction a function that computes a value for the specified key
-	 * @return the current (existing or computed) value associated with the specified key
-	 */
-	V computeIfAbsent(K key, Function<? super K, ? extends V> valueFunction);
+	// empty
 }
