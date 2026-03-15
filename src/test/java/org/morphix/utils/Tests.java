@@ -13,12 +13,16 @@
 package org.morphix.utils;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.FileInputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 import java.util.Properties;
+import java.util.function.BooleanSupplier;
 
 import org.morphix.lang.JavaObjects;
+import org.morphix.lang.thread.Threads;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.ReflectionException;
 
@@ -46,4 +50,20 @@ public interface Tests {
 		}
 	}
 
+	static void waitUntil(final BooleanSupplier condition, final Duration timeout, final Duration pollInterval) {
+		long startTime = System.currentTimeMillis();
+		long endTime = startTime + timeout.toMillis();
+
+		while (System.currentTimeMillis() < endTime || timeout.isZero()) {
+			if (condition.getAsBoolean()) {
+				return;
+			}
+			Threads.safeSleep(pollInterval);
+		}
+		fail("Condition not met within: " + timeout);
+	}
+
+	static void waitUntil(final BooleanSupplier condition) {
+		waitUntil(condition, Duration.ZERO, Duration.ofMillis(50));
+	}
 }

@@ -231,7 +231,7 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 		if (null == node) {
 			return null;
 		}
-		addToTail(node);
+		toTail(node);
 		return node.value;
 	}
 
@@ -258,19 +258,19 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 		if (null == node) {
 			return null;
 		}
-		addToTail(node);
+		toTail(node);
 		return node.value;
 	}
 
 	/**
-	 * Adds the specified node to the tail of the doubly linked list. If the list is empty, the node becomes both the head
-	 * and tail. Otherwise, the node is added after the current tail, and the tail reference is updated to point to the new
-	 * node. If the cache size exceeds the maximum size after adding the new node, the head node (the least recently used
-	 * entry) is removed from the list and the cache to maintain the size constraint.
+	 * Adds or moves the specified node to the tail of the doubly linked list. If the list is empty, the node becomes both
+	 * the head and tail. Otherwise, the node is added after the current tail, and the tail reference is updated to point to
+	 * the new node. If the cache size exceeds the maximum size after adding the new node, the head node (the least recently
+	 * used entry) is removed from the list and the cache to maintain the size constraint.
 	 *
 	 * @param node the node to be added to the tail of the list
 	 */
-	void addToTail(final Node<K, V> node) {
+	void toTail(final Node<K, V> node) {
 		if (null == node || tail == node) {
 			return;
 		}
@@ -378,6 +378,7 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 	/**
 	 * Clears the cache by removing all key-value pairs and resetting the head and tail of the doubly linked list.
 	 */
+	@Override
 	public void clear() {
 		cache.clear();
 		head = null;

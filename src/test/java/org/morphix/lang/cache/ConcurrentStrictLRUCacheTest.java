@@ -27,22 +27,22 @@ import org.morphix.utils.ConcurrencyTestProperties;
 import org.morphix.utils.ConcurrencyTestResults;
 
 /**
- * Test class for {@link StrictLRUCache}.
+ * Test class for {@link TestStrictLRUCache}.
  *
  * @author Radu Sebastian LAZIN
  */
-class ConcurrentSingleLockLRUCacheTest extends StrictLRUCacheTest {
+class ConcurrentStrictLRUCacheTest extends StrictLRUCacheTest {
 
-	private static final Logger LOGGER = Logger.getLogger(ConcurrentSingleLockLRUCacheTest.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(ConcurrentStrictLRUCacheTest.class.getName());
 
 	@Override
 	StrictLRUCache<String, String> newCache() {
-		return new ConcurrentSingleLockLRUCache<>(CACHE_CAPACITY);
+		return new ConcurrentStrictLRUCache<>(CACHE_CAPACITY);
 	}
 
 	@Test
 	void shouldHaveTheCorrectCacheInstance() {
-		assertThat(cache, is(instanceOf(ConcurrentSingleLockLRUCache.class)));
+		assertThat(cache, is(instanceOf(ConcurrentStrictLRUCache.class)));
 	}
 
 	@Test
@@ -60,7 +60,7 @@ class ConcurrentSingleLockLRUCacheTest extends StrictLRUCacheTest {
 				.logger(LOGGER)
 				.build();
 
-		ConcurrencyTestResults result = LRUCacheTest.hit(cache, properties);
+		ConcurrencyTestResults result = stressTest(cache, properties);
 
 		assertTrue(result.finished().get(), "All threads should complete in reasonable time");
 		assertThat(result.failedThreads().get(), is(0L));

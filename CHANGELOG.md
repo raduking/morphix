@@ -7,6 +7,7 @@
 - Added `Cache` interface to allow for cache implementations.
 - Added `LRUCache` interface which extends the `Cache` interface to allow for least recently used (LRU) cache implementations.
 - Added `StrictLRUCache` as a LRU cache implementation with O(1) operations, this implementation is not thread safe.
+- Added `ConcurrentStrictLRUCache` as a thread safe strict LRU cache.
 
 ---
 

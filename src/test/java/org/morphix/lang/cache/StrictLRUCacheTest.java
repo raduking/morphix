@@ -21,13 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.morphix.lang.JavaObjects;
 import org.morphix.lang.cache.StrictLRUCache.Node;
 
 /**
@@ -35,158 +34,32 @@ import org.morphix.lang.cache.StrictLRUCache.Node;
  *
  * @author Radu Sebastian LAZIN
  */
-class StrictLRUCacheTest {
+class StrictLRUCacheTest extends LRUCacheTest {
 
 	private static final Logger LOGGER = Logger.getLogger(StrictLRUCacheTest.class.getName());
 
-	static final int CACHE_CAPACITY = 3;
-
 	StrictLRUCache<String, String> cache;
 
-	StrictLRUCache<String, String> newCache() {
+	@Override
+	LRUCache<String, String> newCache() {
 		return new StrictLRUCache<>(CACHE_CAPACITY);
 	}
 
+	@Override
 	@BeforeEach
 	void setUp() {
-		cache = newCache();
+		super.setUp();
+		cache = JavaObjects.cast(cache());
 	}
 
 	@Nested
 	class ConstructionTests {
 
 		@Test
-		void shouldHaveInitialSizeZero() {
-			assertThat(cache.size(), is(equalTo(0)));
-		}
-
-		@Test
-		void shouldHaveCorrectCapacity() {
-			assertThat(cache.capacity(), is(equalTo(CACHE_CAPACITY)));
-		}
-
-		@Test
 		void shouldThrowExceptionForNonPositiveCapacity() {
 			IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new StrictLRUCache<String, String>(0));
 
 			assertThat(exception.getMessage(), is(equalTo("Cache capacity must be greater than 0")));
-		}
-	}
-
-	@Nested
-	class GetTests {
-
-		@Test
-		void shouldReturnNullForNonExistentKey() {
-			assertThat(cache.get("missing"), is(nullValue()));
-		}
-
-		@Test
-		void shouldReturnValueForExistingKey() {
-			cache.computeIfAbsent("key1", k -> "value1");
-
-			assertThat(cache.get("key1"), is(equalTo("value1")));
-		}
-
-		@Test
-		void shouldNotChangeSizeWhenGettingExistingKey() {
-			cache.computeIfAbsent("key1", k -> "value1");
-			assertThat(cache.size(), is(equalTo(1)));
-
-			cache.get("key1");
-			assertThat(cache.size(), is(equalTo(1)));
-		}
-	}
-
-	@Nested
-	class ComputeIfAbsentTests {
-
-		@Test
-		void shouldAddNewKeyValuePair() {
-			String result = cache.computeIfAbsent("key1", k -> "value1");
-
-			assertThat(result, is(equalTo("value1")));
-			assertThat(cache.get("key1"), is(equalTo("value1")));
-			assertThat(cache.size(), is(equalTo(1)));
-		}
-
-		@Test
-		void shouldNotAddEntryWhenMappingFunctionReturnsNull() {
-			String result = cache.computeIfAbsent("key1", k -> null);
-
-			assertThat(result, is(nullValue()));
-			assertThat(cache.get("key1"), is(nullValue()));
-			assertThat(cache.size(), is(equalTo(0)));
-		}
-
-		@Test
-		void shouldReturnExistingValueWithoutRecomputing() {
-			AtomicInteger computeCount = new AtomicInteger(0);
-			Function<String, String> valueFunction = k -> {
-				computeCount.incrementAndGet();
-				return "value1";
-			};
-
-			cache.computeIfAbsent("key1", valueFunction);
-			String result = cache.computeIfAbsent("key1", valueFunction);
-
-			assertThat(result, is(equalTo("value1")));
-			assertThat(computeCount.get(), is(equalTo(1)));
-		}
-	}
-
-	@Nested
-	class EvictionTests {
-
-		@Test
-		void shouldEvictHeadWhenAddingBeyondCapacity() {
-			for (int i = 0; i <= CACHE_CAPACITY; ++i) {
-				int index = i + 1;
-				cache.computeIfAbsent("key" + index, k -> "value" + index);
-			}
-
-			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
-			assertThat(cache.get("key1"), is(nullValue()));
-
-			for (int i = 1; i <= CACHE_CAPACITY; ++i) {
-				int index = i + 1;
-				assertThat(cache.get("key" + index), is(equalTo("value" + index)));
-			}
-		}
-
-		@Test
-		void shouldEvictLeastRecentlyUsedEntryWhenAddingBeyondCapacity() {
-			for (int i = 0; i < CACHE_CAPACITY; ++i) {
-				int index = i + 1;
-				cache.computeIfAbsent("key" + index, k -> "value" + index);
-			}
-			int lruIndex = 1;
-			cache.get("key" + lruIndex);
-
-			int newIndex = CACHE_CAPACITY + 1;
-			// should evict lruIndex + 1, which is the least recently used entry after accessing lruIndex
-			cache.computeIfAbsent("key" + newIndex, k -> "value" + newIndex);
-
-			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
-			assertThat(cache.get("key" + lruIndex), is(equalTo("value" + lruIndex)));
-			assertThat(cache.get("key" + (lruIndex + 1)), is(nullValue()));
-			for (int i = lruIndex + 2; i <= newIndex; ++i) {
-				assertThat(cache.get("key" + i), is(equalTo("value" + i)));
-			}
-		}
-
-		@Test
-		void shouldNotEvictWhenAddingToNonFullCache() {
-			for (int i = 0; i < CACHE_CAPACITY; ++i) {
-				int index = i + 1;
-				cache.computeIfAbsent("key" + index, k -> "value" + index);
-			}
-
-			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
-			for (int i = 0; i < CACHE_CAPACITY; ++i) {
-				int index = i + 1;
-				assertThat(cache.get("key" + index), is(equalTo("value" + index)));
-			}
 		}
 	}
 
@@ -475,26 +348,6 @@ class StrictLRUCacheTest {
 	}
 
 	@Nested
-	class ClearTests {
-
-		@Test
-		void shouldClearAllEntries() {
-			for (int i = 0; i < CACHE_CAPACITY; ++i) {
-				int index = i + 1;
-				cache.computeIfAbsent("key" + index, k -> "value" + index);
-			}
-
-			cache.clear();
-
-			assertThat(cache.size(), is(equalTo(0)));
-			for (int i = 0; i < CACHE_CAPACITY; ++i) {
-				int index = i + 1;
-				assertThat(cache.get("key" + index), is(nullValue()));
-			}
-		}
-	}
-
-	@Nested
 	class RemoveHeadTests {
 
 		@Test
@@ -551,7 +404,7 @@ class StrictLRUCacheTest {
 			cache.setHead(node);
 			cache.setTail(node);
 
-			cache.addToTail(node);
+			cache.toTail(node);
 
 			assertThat(cache.head(), sameInstance(node));
 			assertThat(cache.tail(), sameInstance(node));
@@ -567,7 +420,7 @@ class StrictLRUCacheTest {
 			cache.setHead(node1);
 			cache.setTail(node2);
 
-			cache.addToTail(node1);
+			cache.toTail(node1);
 
 			assertThat(cache.head(), sameInstance(node2));
 			assertThat(cache.tail(), sameInstance(node1));
@@ -586,7 +439,7 @@ class StrictLRUCacheTest {
 			cache.setHead(node1);
 			cache.setTail(node3);
 
-			cache.addToTail(node1);
+			cache.toTail(node1);
 
 			assertThat(cache.head(), sameInstance(node2));
 			assertThat(cache.tail(), sameInstance(node1));
@@ -605,7 +458,7 @@ class StrictLRUCacheTest {
 			cache.setHead(node1);
 			cache.setTail(node3);
 
-			cache.addToTail(node2);
+			cache.toTail(node2);
 
 			assertThat(cache.head(), sameInstance(node1));
 			assertThat(cache.tail(), sameInstance(node2));
@@ -624,7 +477,7 @@ class StrictLRUCacheTest {
 			cache.setHead(node1);
 			cache.setTail(node3);
 
-			cache.addToTail(node3);
+			cache.toTail(node3);
 
 			assertThat(cache.head(), sameInstance(node1));
 			assertThat(cache.tail(), sameInstance(node3));
@@ -635,7 +488,7 @@ class StrictLRUCacheTest {
 			cache.setHead(null);
 			cache.setTail(null);
 
-			cache.addToTail(null);
+			cache.toTail(null);
 
 			assertThat(cache.head(), is(nullValue()));
 			assertThat(cache.tail(), is(nullValue()));

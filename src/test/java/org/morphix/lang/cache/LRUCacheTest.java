@@ -12,16 +12,24 @@
  */
 package org.morphix.lang.cache;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
+import static org.morphix.utils.Tests.waitUntil;
 
-import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.logging.Level;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.morphix.lang.thread.Threads;
 import org.morphix.utils.ConcurrencyTestProperties;
 import org.morphix.utils.ConcurrencyTestResults;
@@ -33,21 +41,186 @@ import org.morphix.utils.ConcurrencyTestResults;
  */
 class LRUCacheTest {
 
-	static final int THREAD_COUNT = 100;
-	static final int ITERATIONS_PER_THREAD = 1000;
-	static final int KEY_SPACE = 7;
-	static final Duration TIMEOUT = Duration.ofSeconds(1);
+	static final int CACHE_CAPACITY = 3;
 
-	@Test
-	void shouldCreateConcurrencyTestPropertiesWithDefaults() {
-		ConcurrencyTestProperties properties = new ConcurrencyTestProperties.Builder().build();
+	LRUCache<String, String> cache;
 
-		assertNotNull(properties);
-		assertNotNull(properties.logger());
+	LRUCache<String, String> newCache() {
+		return new TestStrictLRUCache<>(CACHE_CAPACITY);
+	}
+
+	LRUCache<String, String> cache() {
+		return cache;
+	}
+
+	@BeforeEach
+	void setUp() {
+		this.cache = newCache();
+	}
+
+	@Nested
+	class SizeTests {
+
+		@Test
+		void shouldHaveCorrectCapacity() {
+			assertThat(cache.capacity(), is(equalTo(CACHE_CAPACITY)));
+		}
+	}
+
+	@Nested
+	class CapacityTests {
+
+		@Test
+		void shouldHaveInitialSizeZero() {
+			assertThat(cache.size(), is(equalTo(0)));
+		}
+	}
+
+	@Nested
+	class GetTests {
+
+		@Test
+		void shouldReturnNullForNonExistentKey() {
+			assertThat(cache.get("missing"), is(nullValue()));
+		}
+
+		@Test
+		void shouldReturnValueForExistingKey() {
+			cache.computeIfAbsent("key1", k -> "value1");
+
+			assertThat(cache.get("key1"), is(equalTo("value1")));
+		}
+
+		@Test
+		void shouldNotChangeSizeWhenGettingExistingKey() {
+			cache.computeIfAbsent("key1", k -> "value1");
+			assertThat(cache.size(), is(equalTo(1)));
+
+			cache.get("key1");
+			assertThat(cache.size(), is(equalTo(1)));
+		}
+	}
+
+	@Nested
+	class ComputeIfAbsentTests {
+
+		@Test
+		void shouldAddNewKeyValuePair() {
+			String result = cache.computeIfAbsent("key1", k -> "value1");
+
+			assertThat(result, is(equalTo("value1")));
+			assertThat(cache.get("key1"), is(equalTo("value1")));
+			assertThat(cache.size(), is(equalTo(1)));
+		}
+
+		@Test
+		void shouldNotAddEntryWhenMappingFunctionReturnsNull() {
+			String result = cache.computeIfAbsent("key1", k -> null);
+
+			assertThat(result, is(nullValue()));
+			assertThat(cache.get("key1"), is(nullValue()));
+			assertThat(cache.size(), is(equalTo(0)));
+		}
+
+		@Test
+		void shouldReturnExistingValueWithoutRecomputing() {
+			AtomicInteger computeCount = new AtomicInteger(0);
+			Function<String, String> valueFunction = k -> {
+				computeCount.incrementAndGet();
+				return "value1";
+			};
+
+			cache.computeIfAbsent("key1", valueFunction);
+			String result = cache.computeIfAbsent("key1", valueFunction);
+
+			assertThat(result, is(equalTo("value1")));
+			assertThat(computeCount.get(), is(equalTo(1)));
+		}
+	}
+
+	@Nested
+	class EvictionTests {
+
+		@Test
+		@Timeout(5)
+		void shouldEvictHeadWhenAddingBeyondCapacity() {
+			for (int i = 0; i <= CACHE_CAPACITY; ++i) {
+				int index = i + 1;
+				cache.computeIfAbsent("key" + index, k -> "value" + index);
+			}
+
+			waitUntil(() -> cache.size() == CACHE_CAPACITY);
+
+			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
+			assertThat(cache.get("key1"), is(nullValue()));
+
+			for (int i = 1; i <= CACHE_CAPACITY; ++i) {
+				int index = i + 1;
+				assertThat(cache.get("key" + index), is(equalTo("value" + index)));
+			}
+		}
+
+		@Test
+		@Timeout(5)
+		void shouldEvictLeastRecentlyUsedEntryWhenAddingBeyondCapacity() {
+			for (int i = 0; i < CACHE_CAPACITY; ++i) {
+				int index = i + 1;
+				cache.computeIfAbsent("key" + index, k -> "value" + index);
+			}
+			int lruIndex = 1;
+			cache.get("key" + lruIndex);
+
+			int newIndex = CACHE_CAPACITY + 1;
+			// should evict lruIndex + 1, which is the least recently used entry after accessing lruIndex
+			cache.computeIfAbsent("key" + newIndex, k -> "value" + newIndex);
+
+			waitUntil(() -> cache.size() == CACHE_CAPACITY);
+
+			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
+			assertThat(cache.get("key" + lruIndex), is(equalTo("value" + lruIndex)));
+			assertThat(cache.get("key" + (lruIndex + 1)), is(nullValue()));
+			for (int i = lruIndex + 2; i <= newIndex; ++i) {
+				assertThat(cache.get("key" + i), is(equalTo("value" + i)));
+			}
+		}
+
+		@Test
+		void shouldNotEvictWhenAddingToNonFullCache() {
+			for (int i = 0; i < CACHE_CAPACITY; ++i) {
+				int index = i + 1;
+				cache.computeIfAbsent("key" + index, k -> "value" + index);
+			}
+
+			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
+			for (int i = 0; i < CACHE_CAPACITY; ++i) {
+				int index = i + 1;
+				assertThat(cache.get("key" + index), is(equalTo("value" + index)));
+			}
+		}
+	}
+
+	@Nested
+	class ClearTests {
+
+		@Test
+		void shouldClearAllEntries() {
+			for (int i = 0; i < CACHE_CAPACITY; ++i) {
+				int index = i + 1;
+				cache.computeIfAbsent("key" + index, k -> "value" + index);
+			}
+
+			cache.clear();
+
+			assertThat(cache.size(), is(equalTo(0)));
+			for (int i = 0; i < CACHE_CAPACITY; ++i) {
+				int index = i + 1;
+				assertThat(cache.get("key" + index), is(nullValue()));
+			}
+		}
 	}
 
 	@SuppressWarnings("resource")
-	static ConcurrencyTestResults hit(final LRUCache<String, String> cache, final ConcurrencyTestProperties properties)
+	static ConcurrencyTestResults stressTest(final LRUCache<String, String> cache, final ConcurrencyTestProperties properties)
 			throws InterruptedException {
 		CountDownLatch start = new CountDownLatch(1);
 		CountDownLatch done = new CountDownLatch(properties.threadCount());

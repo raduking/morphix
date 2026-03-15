@@ -34,7 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author Radu Sebastian LAZIN
  */
-public class ConcurrentSingleLockLRUCache<K, V> extends StrictLRUCache<K, V> {
+public class ConcurrentStrictLRUCache<K, V> extends StrictLRUCache<K, V> {
 
 	/**
 	 * A lock used to synchronize write operations on the cache.
@@ -46,22 +46,22 @@ public class ConcurrentSingleLockLRUCache<K, V> extends StrictLRUCache<K, V> {
 	 *
 	 * @param capacity the maximum size of the cache
 	 */
-	public ConcurrentSingleLockLRUCache(final int capacity) {
+	public ConcurrentStrictLRUCache(final int capacity) {
 		super(capacity, ConcurrentHashMap::new);
 	}
 
 	/**
-	 * Concurrently adds a node to the tail of the doubly linked list that maintains the order of access in the LRU cache.
-	 * This method acquires the modify lock to ensure that only one thread can modify the access order list at a time,
-	 * preventing race conditions and ensuring thread safety when adding new entries to the cache.
+	 * Concurrently adds or moves a node to the tail of the doubly linked list that maintains the order of access in the LRU
+	 * cache. This method acquires the modify lock to ensure that only one thread can modify the access order list at a
+	 * time, preventing race conditions and ensuring thread safety when adding new entries to the cache.
 	 *
-	 * @see StrictLRUCache#addToTail(Node)
+	 * @see TestStrictLRUCache#addToTail(Node)
 	 */
 	@Override
-	void addToTail(final Node<K, V> node) {
+	void toTail(final Node<K, V> node) {
 		modifyLock.lock();
 		try {
-			super.addToTail(node);
+			super.toTail(node);
 		} finally {
 			modifyLock.unlock();
 		}

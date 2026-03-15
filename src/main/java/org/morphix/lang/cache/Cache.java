@@ -61,4 +61,10 @@ public interface Cache<K, V> {
 	 * @return the maximum number of entries that the cache can hold
 	 */
 	int capacity();
+
+	/**
+	 * Clears all entries from the cache. This method can be used to reset the cache to an empty state, removing all stored
+	 * key-value pairs and freeing up any resources associated with them.
+	 */
+	void clear();
 }
