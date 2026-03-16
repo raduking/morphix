@@ -15,7 +15,6 @@ package org.morphix.lang.cache;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.morphix.utils.Tests.waitUntil;
 
@@ -266,40 +265,6 @@ class LRUCacheTest {
 	}
 
 	@SuppressWarnings("resource")
-	static ConcurrencyTestResults sizeStressTest(final LRUCache<Integer, Integer> cache, final ConcurrencyTestProperties properties)
-			throws InterruptedException, ExecutionException {
-		ConcurrencyTestResults results = new ConcurrencyTestResults();
-
-		ExecutorService executor = Executors.newFixedThreadPool(properties.threadCount());
-		List<Future<?>> futures = new ArrayList<>();
-		for (int t = 0; t < properties.threadCount(); ++t) {
-			futures.add(executor.submit(() -> {
-				ThreadLocalRandom rnd = ThreadLocalRandom.current();
-				for (int i = 0; i < properties.iterationsPerThread(); ++i) {
-					int key = rnd.nextInt(properties.keySpace());
-					if ((i & 3) == 0) {
-						// 25% writes
-						cache.computeIfAbsent(key, k -> k * 31);
-					} else {
-						// 75% reads
-						cache.get(key);
-					}
-					if ((i & 1023) == 0) {
-						assertThat(cache.size(), lessThanOrEqualTo(properties.cacheCapacity()));
-					}
-				}
-			}));
-		}
-		for (Future<?> future : futures) {
-			future.get();
-		}
-		executor.shutdown();
-		executor.awaitTermination(5, TimeUnit.SECONDS);
-
-		return results;
-	}
-
-	@SuppressWarnings("resource")
 	static ConcurrencyTestResults stateStressTest(final LRUCache<Integer, Integer> cache, final ConcurrencyTestProperties properties)
 			throws InterruptedException, ExecutionException {
 		ConcurrencyTestResults results = new ConcurrencyTestResults();
@@ -318,8 +283,8 @@ class LRUCacheTest {
 						// 75% reads
 						cache.get(key);
 					}
-					if ((i & 4095) == 0) {
-						properties.cacheConsumer().accept(cache);
+					if ((i & properties.frequencyModulo()) == 0) {
+						properties.cacheConsumer().accept(cache, properties);
 					}
 				}
 			}));

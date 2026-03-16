@@ -199,7 +199,7 @@ public class ConcurrentThreadLRUCache<K, V> implements LRUCache<K, V> {
 			return null;
 		}
 
-		if (cache.size() > capacity) {
+		if (size() > capacity()) {
 			if (!writeLock.tryLock()) {
 				return node.value;
 			}
@@ -221,7 +221,7 @@ public class ConcurrentThreadLRUCache<K, V> implements LRUCache<K, V> {
 		}
 		try {
 			while (cache.size() > capacity) {
-				evictLastRecentlyUsed();
+				evictLeastRecentlyUsed();
 			}
 		} finally {
 			writeLock.unlock();
@@ -232,7 +232,7 @@ public class ConcurrentThreadLRUCache<K, V> implements LRUCache<K, V> {
 	 * Evicts the least recently used entry from the cache. This method iterates through the entries in the cache to find
 	 * the node with the oldest last access time and removes it from the cache.
 	 */
-	void evictLastRecentlyUsed() {
+	void evictLeastRecentlyUsed() {
 		Node<K, V> leastRecentlyUsed = null;
 		int count = 0;
 		for (Node<K, V> node : cache.values()) {

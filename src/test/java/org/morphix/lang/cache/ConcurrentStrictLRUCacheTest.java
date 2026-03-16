@@ -83,13 +83,20 @@ class ConcurrentStrictLRUCacheTest extends StrictLRUCacheTest {
 				.iterationsPerThread(200_000)
 				.cacheCapacity(capacity)
 				.keySpace(64)
+				.cacheConsumer(ConcurrentStrictLRUCacheTest::assertSizeInvariant)
 				.timeout(Duration.ofSeconds(5))
+				.frequencyModulo(1023)
 				.logger(LOGGER)
 				.build();
 
-		sizeStressTest(cache, properties);
+		stateStressTest(cache, properties);
 
 		assertThat(cache.size(), lessThanOrEqualTo(capacity));
+	}
+
+	static <K, V> void assertSizeInvariant(final Cache<?, ?> cache, final ConcurrencyTestProperties properties) {
+		ConcurrentStrictLRUCache<K, V> cc = JavaObjects.cast(cache);
+		assertThat(cc.size(), lessThanOrEqualTo(properties.cacheCapacity()));
 	}
 
 	@Test
@@ -104,6 +111,7 @@ class ConcurrentStrictLRUCacheTest extends StrictLRUCacheTest {
 				.keySpace(64)
 				.cacheConsumer(ConcurrentStrictLRUCacheTest::assertInternalState)
 				.timeout(Duration.ofSeconds(5))
+				.frequencyModulo(4095)
 				.logger(LOGGER)
 				.build();
 
@@ -112,7 +120,7 @@ class ConcurrentStrictLRUCacheTest extends StrictLRUCacheTest {
 		assertThat(cache.size(), lessThanOrEqualTo(capacity));
 	}
 
-	static <K, V> void assertInternalState(final Cache<?, ?> cache) {
+	static <K, V> void assertInternalState(final Cache<?, ?> cache, final ConcurrencyTestProperties properties) {
 		ConcurrentStrictLRUCache<K, V> cc = JavaObjects.cast(cache);
 		cc.locked(() -> {
 			Node<K, V> head = cc.head();
@@ -174,6 +182,9 @@ class ConcurrentStrictLRUCacheTest extends StrictLRUCacheTest {
 			// size consistency
 			if (count != cc.size()) {
 				throw new IllegalStateException("List size (" + count + ") != cache size (" + cc.size() + ")");
+			}
+			if (cc.size() > properties.cacheCapacity()) {
+				throw new IllegalStateException("Cache size exceeds capacity: " + cc.size() + " > " + properties.cacheCapacity());
 			}
 		});
 	}

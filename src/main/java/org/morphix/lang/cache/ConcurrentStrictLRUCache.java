@@ -81,10 +81,10 @@ public class ConcurrentStrictLRUCache<K, V> extends StrictLRUCache<K, V> {
 	 */
 	@Override
 	void toTail(final Node<K, V> node) {
+		if (null == node || tail() == node) {
+			return;
+		}
 		locked(() -> {
-			if (null == node) {
-				return;
-			}
 			// ensure node still belongs to map
 			if (storage().get(node.key()) != node) {
 				return;

@@ -13,7 +13,7 @@
 package org.morphix.utils;
 
 import java.time.Duration;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.logging.Logger;
 
 import org.morphix.lang.cache.Cache;
@@ -31,8 +31,9 @@ public record ConcurrencyTestProperties(
 		int iterationsPerThread,
 		int cacheCapacity,
 		int keySpace,
-		Consumer<Cache<?, ?>> cacheConsumer,
+		BiConsumer<Cache<?, ?>, ConcurrencyTestProperties> cacheConsumer,
 		Duration timeout,
+		int frequencyModulo,
 		Logger logger) {
 
 	public static class Default {
@@ -42,6 +43,7 @@ public record ConcurrencyTestProperties(
 		public static final int CACHE_CAPACITY = 3;
 		public static final int KEY_SPACE = 7;
 		public static final Duration TIMEOUT = Duration.ofSeconds(1);
+		public static final int FREQUENCY_MODULO = 1023;
 
 		private Default() {
 			// hide constructor
@@ -60,8 +62,9 @@ public record ConcurrencyTestProperties(
 		private int iterationsPerThread = Default.ITERATIONS_PER_THREAD;
 		private int cacheCapacity;
 		private int keySpace = Default.KEY_SPACE;
-		private Consumer<Cache<?, ?>> cacheConsumer = Consumers.noConsumer();
+		private BiConsumer<Cache<?, ?>, ConcurrencyTestProperties> cacheConsumer = Consumers.noBiConsumer();
 		private Duration timeout = Default.TIMEOUT;
+		private int frequencyModulo = Default.FREQUENCY_MODULO;
 		private Logger logger;
 
 		public Builder threadCount(final int threadCount) {
@@ -84,13 +87,18 @@ public record ConcurrencyTestProperties(
 			return this;
 		}
 
-		public Builder cacheConsumer(final Consumer<Cache<?, ?>> cacheConsumer) {
+		public Builder cacheConsumer(final BiConsumer<Cache<?, ?>, ConcurrencyTestProperties> cacheConsumer) {
 			this.cacheConsumer = cacheConsumer;
 			return this;
 		}
 
 		public Builder timeout(final Duration timeout) {
 			this.timeout = timeout;
+			return this;
+		}
+
+		public Builder frequencyModulo(final int frequencyModulo) {
+			this.frequencyModulo = frequencyModulo;
 			return this;
 		}
 
@@ -107,6 +115,7 @@ public record ConcurrencyTestProperties(
 					keySpace,
 					cacheConsumer,
 					timeout,
+					frequencyModulo,
 					logger);
 		}
 	}
