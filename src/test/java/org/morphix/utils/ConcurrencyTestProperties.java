@@ -13,7 +13,11 @@
 package org.morphix.utils;
 
 import java.time.Duration;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
+
+import org.morphix.lang.cache.Cache;
+import org.morphix.lang.function.Consumers;
 
 /**
  * Properties for concurrency tests. This record encapsulates the configuration parameters for running concurrency
@@ -27,6 +31,7 @@ public record ConcurrencyTestProperties(
 		int iterationsPerThread,
 		int cacheCapacity,
 		int keySpace,
+		Consumer<Cache<?, ?>> cacheConsumer,
 		Duration timeout,
 		Logger logger) {
 
@@ -55,6 +60,7 @@ public record ConcurrencyTestProperties(
 		private int iterationsPerThread = Default.ITERATIONS_PER_THREAD;
 		private int cacheCapacity;
 		private int keySpace = Default.KEY_SPACE;
+		private Consumer<Cache<?, ?>> cacheConsumer = Consumers.noConsumer();
 		private Duration timeout = Default.TIMEOUT;
 		private Logger logger;
 
@@ -68,8 +74,18 @@ public record ConcurrencyTestProperties(
 			return this;
 		}
 
+		public Builder cacheCapacity(final int cacheCapacity) {
+			this.cacheCapacity = cacheCapacity;
+			return this;
+		}
+
 		public Builder keySpace(final int keySpace) {
 			this.keySpace = keySpace;
+			return this;
+		}
+
+		public Builder cacheConsumer(final Consumer<Cache<?, ?>> cacheConsumer) {
+			this.cacheConsumer = cacheConsumer;
 			return this;
 		}
 
@@ -83,13 +99,15 @@ public record ConcurrencyTestProperties(
 			return this;
 		}
 
-		public Builder cacheCapacity(final int cacheCapacity) {
-			this.cacheCapacity = cacheCapacity;
-			return this;
-		}
-
 		public ConcurrencyTestProperties build() {
-			return new ConcurrencyTestProperties(threadCount, iterationsPerThread, cacheCapacity, keySpace, timeout, logger);
+			return new ConcurrencyTestProperties(
+					threadCount,
+					iterationsPerThread,
+					cacheCapacity,
+					keySpace,
+					cacheConsumer,
+					timeout,
+					logger);
 		}
 	}
 }

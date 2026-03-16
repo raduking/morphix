@@ -290,17 +290,16 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 			if (null != node.next) {
 				node.next.prev = node.prev;
 			}
+			node.prev = null;
 		}
+		node.next = null;
 		// add the node to the tail
 		if (null == tail) {
 			head = node;
 			tail = node;
-			node.prev = null;
-			node.next = null;
 		} else {
 			tail.next = node;
 			node.prev = tail;
-			node.next = null;
 			tail = node;
 		}
 		if (size() > capacity()) {
@@ -320,6 +319,7 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 		}
 		Node<K, V> node = head;
 		head = node.next;
+		node.next = null;
 
 		if (null == head) {
 			tail = null;

@@ -401,6 +401,7 @@ class StrictLRUCacheTest extends LRUCacheTest {
 		@Test
 		void shouldAddNewNodeToTail() {
 			Node<String, String> node = new Node<>("key1", "value1");
+			cache.storage().put(node.key(), node);
 			cache.setHead(node);
 			cache.setTail(node);
 
@@ -417,6 +418,8 @@ class StrictLRUCacheTest extends LRUCacheTest {
 			node1.setNext(node2);
 			node2.setPrev(node1);
 
+			cache.storage().put(node1.key(), node1);
+			cache.storage().put(node2.key(), node2);
 			cache.setHead(node1);
 			cache.setTail(node2);
 
@@ -436,6 +439,9 @@ class StrictLRUCacheTest extends LRUCacheTest {
 			node2.setNext(node3);
 			node3.setPrev(node2);
 
+			cache.storage().put(node1.key(), node1);
+			cache.storage().put(node2.key(), node2);
+			cache.storage().put(node3.key(), node3);
 			cache.setHead(node1);
 			cache.setTail(node3);
 
@@ -455,6 +461,9 @@ class StrictLRUCacheTest extends LRUCacheTest {
 			node2.setNext(node3);
 			node3.setPrev(node2);
 
+			cache.storage().put(node1.key(), node1);
+			cache.storage().put(node2.key(), node2);
+			cache.storage().put(node3.key(), node3);
 			cache.setHead(node1);
 			cache.setTail(node3);
 
@@ -474,6 +483,9 @@ class StrictLRUCacheTest extends LRUCacheTest {
 			node2.setNext(node3);
 			node3.setPrev(node2);
 
+			cache.storage().put(node1.key(), node1);
+			cache.storage().put(node2.key(), node2);
+			cache.storage().put(node3.key(), node3);
 			cache.setHead(node1);
 			cache.setTail(node3);
 

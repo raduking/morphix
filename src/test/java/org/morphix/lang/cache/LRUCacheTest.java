@@ -298,4 +298,38 @@ class LRUCacheTest {
 
 		return results;
 	}
+
+	@SuppressWarnings("resource")
+	static ConcurrencyTestResults stateStressTest(final LRUCache<Integer, Integer> cache, final ConcurrencyTestProperties properties)
+			throws InterruptedException, ExecutionException {
+		ConcurrencyTestResults results = new ConcurrencyTestResults();
+
+		ExecutorService executor = Executors.newFixedThreadPool(properties.threadCount());
+		List<Future<?>> futures = new ArrayList<>();
+		for (int t = 0; t < properties.threadCount(); ++t) {
+			futures.add(executor.submit(() -> {
+				ThreadLocalRandom rnd = ThreadLocalRandom.current();
+				for (int i = 0; i < properties.iterationsPerThread(); ++i) {
+					int key = rnd.nextInt(properties.keySpace());
+					if ((i & 3) == 0) {
+						// 25% writes
+						cache.computeIfAbsent(key, k -> k * 31);
+					} else {
+						// 75% reads
+						cache.get(key);
+					}
+					if ((i & 4095) == 0) {
+						properties.cacheConsumer().accept(cache);
+					}
+				}
+			}));
+		}
+		for (Future<?> future : futures) {
+			future.get();
+		}
+		executor.shutdown();
+		executor.awaitTermination(5, TimeUnit.SECONDS);
+
+		return results;
+	}
 }

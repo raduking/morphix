@@ -15,7 +15,9 @@ package org.morphix.lang.cache;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Function;
+import java.util.function.Supplier;
+
+import org.morphix.lang.function.Runnables;
 
 /**
  * A thread-safe concurrent strict LRU (Least Recently Used) cache implementation. This implementation guarantees strict
@@ -67,31 +69,7 @@ public class ConcurrentStrictLRUCache<K, V> extends StrictLRUCache<K, V> {
 	 */
 	@Override
 	public int size() {
-		modifyLock.lock();
-		try {
-			return size.get();
-		} finally {
-			modifyLock.unlock();
-		}
-	}
-
-	/**
-	 * @see StrictLRUCache#computeIfAbsent(Object, Function)
-	 */
-	@Override
-	public V computeIfAbsent(final K key, final Function<? super K, ? extends V> valueFunction) {
-		Node<K, V> node = storage().computeIfAbsent(key, k -> {
-			V v = valueFunction.apply(k);
-			if (null == v) {
-				return null;
-			}
-			return new Node<>(k, v);
-		});
-		if (null == node) {
-			return null;
-		}
-		toTail(node);
-		return node.value();
+		return locked(size::get);
 	}
 
 	/**
@@ -103,19 +81,23 @@ public class ConcurrentStrictLRUCache<K, V> extends StrictLRUCache<K, V> {
 	 */
 	@Override
 	void toTail(final Node<K, V> node) {
-		modifyLock.lock();
-		try {
-			if (null == node || tail() == node) {
+		locked(() -> {
+			if (null == node) {
 				return;
 			}
-			if (null == node.prev() && null == node.next()) {
+			// ensure node still belongs to map
+			if (storage().get(node.key()) != node) {
+				return;
+			}
+			if (tail() == node) {
+				return;
+			}
+			if (null == node.prev() && null == node.next() && head() != node) {
 				// this is a new node, so we need to increment the size
 				size.incrementAndGet();
 			}
 			super.toTail(node);
-		} finally {
-			modifyLock.unlock();
-		}
+		});
 	}
 
 	/**
@@ -135,12 +117,38 @@ public class ConcurrentStrictLRUCache<K, V> extends StrictLRUCache<K, V> {
 	 */
 	@Override
 	public void clear() {
-		modifyLock.lock();
-		try {
+		locked(() -> {
 			super.clear();
 			size.set(0);
+		});
+	}
+
+	/**
+	 * A helper method that executes the given action while holding the modify lock. This method is used to ensure that
+	 * modifications to the cache are thread-safe by acquiring the lock before executing the action and releasing it
+	 * afterward.
+	 *
+	 * @param <T> the type of the result returned by the action
+	 * @param action a supplier that provides the action to be executed while holding the lock
+	 * @return the result of the action executed while holding the lock
+	 */
+	<T> T locked(final Supplier<T> action) {
+		modifyLock.lock();
+		try {
+			return action.get();
 		} finally {
 			modifyLock.unlock();
 		}
+	}
+
+	/**
+	 * A helper method that executes the given action while holding the modify lock. This method is used to ensure that
+	 * modifications to the cache are thread-safe by acquiring the lock before executing the action and releasing it
+	 * afterward.
+	 *
+	 * @param action a runnable that provides the action to be executed while holding the lock
+	 */
+	void locked(final Runnable action) {
+		locked(Runnables.toSupplier(action));
 	}
 }
