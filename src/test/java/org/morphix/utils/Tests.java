@@ -63,6 +63,10 @@ public interface Tests {
 		fail("Condition not met within: " + timeout);
 	}
 
+	static void waitUntil(final BooleanSupplier condition, final Duration timeout) {
+		waitUntil(condition, timeout, Duration.ofMillis(50));
+	}
+
 	static void waitUntil(final BooleanSupplier condition) {
 		waitUntil(condition, Duration.ZERO, Duration.ofMillis(50));
 	}

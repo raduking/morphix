@@ -18,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.morphix.utils.Tests.waitUntil;
 
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -149,7 +150,7 @@ class LRUCacheTest {
 				cache.computeIfAbsent("key" + index, k -> "value" + index);
 			}
 
-			waitUntil(() -> cache.size() == CACHE_CAPACITY);
+			waitUntil(() -> cache.size() == CACHE_CAPACITY, Duration.ofSeconds(1));
 
 			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
 			assertThat(cache.get("key1"), is(nullValue()));
@@ -174,7 +175,7 @@ class LRUCacheTest {
 			// should evict lruIndex + 1, which is the least recently used entry after accessing lruIndex
 			cache.computeIfAbsent("key" + newIndex, k -> "value" + newIndex);
 
-			waitUntil(() -> cache.size() == CACHE_CAPACITY);
+			waitUntil(() -> cache.size() == CACHE_CAPACITY, Duration.ofSeconds(1));
 
 			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
 			assertThat(cache.get("key" + lruIndex), is(equalTo("value" + lruIndex)));

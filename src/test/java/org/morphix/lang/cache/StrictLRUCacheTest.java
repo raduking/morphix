@@ -396,7 +396,7 @@ class StrictLRUCacheTest extends LRUCacheTest {
 	}
 
 	@Nested
-	class AddToTailTests {
+	class ToTailTests {
 
 		@Test
 		void shouldAddNewNodeToTail() {

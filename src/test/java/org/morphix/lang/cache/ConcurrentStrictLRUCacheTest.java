@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.morphix.utils.ConcurrencyTestProperties;
 import org.morphix.utils.ConcurrencyTestResults;
 
@@ -64,6 +65,7 @@ class ConcurrentStrictLRUCacheTest extends StrictLRUCacheTest {
 	}
 
 	@Test
+	@Timeout(5)
 	void shouldHandleConcurrentAccess() throws InterruptedException {
 		ConcurrencyTestProperties properties = new ConcurrencyTestProperties.Builder()
 				.threadCount(100)
@@ -82,6 +84,7 @@ class ConcurrentStrictLRUCacheTest extends StrictLRUCacheTest {
 	}
 
 	@Test
+	@Timeout(5)
 	@SuppressWarnings("resource")
 	void shouldSurviveHighContention() throws Exception {
 		ConcurrentStrictLRUCache<Integer, Integer> cache = new ConcurrentStrictLRUCache<>(CAPACITY);
