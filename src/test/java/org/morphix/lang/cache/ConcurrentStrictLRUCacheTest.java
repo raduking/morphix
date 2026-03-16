@@ -20,14 +20,7 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Test;
@@ -43,11 +36,6 @@ import org.morphix.utils.ConcurrencyTestResults;
 class ConcurrentStrictLRUCacheTest extends StrictLRUCacheTest {
 
 	private static final Logger LOGGER = Logger.getLogger(ConcurrentStrictLRUCacheTest.class.getName());
-
-	private static final int THREADS = 32;
-	private static final int ITERATIONS = 200_000;
-	private static final int KEY_SPACE = 64;
-	private static final int CAPACITY = 16;
 
 	@Override
 	StrictLRUCache<String, String> newCache() {
@@ -85,37 +73,20 @@ class ConcurrentStrictLRUCacheTest extends StrictLRUCacheTest {
 
 	@Test
 	@Timeout(5)
-	@SuppressWarnings("resource")
 	void shouldSurviveHighContention() throws Exception {
-		ConcurrentStrictLRUCache<Integer, Integer> cache = new ConcurrentStrictLRUCache<>(CAPACITY);
+		int capacity = 16;
+		ConcurrentStrictLRUCache<Integer, Integer> cache = new ConcurrentStrictLRUCache<>(capacity);
+		ConcurrencyTestProperties properties = new ConcurrencyTestProperties.Builder()
+				.threadCount(32)
+				.iterationsPerThread(200_000)
+				.cacheCapacity(capacity)
+				.keySpace(64)
+				.timeout(Duration.ofSeconds(5))
+				.logger(LOGGER)
+				.build();
 
-		ExecutorService executor = Executors.newFixedThreadPool(THREADS);
-		List<Future<?>> futures = new ArrayList<>();
+		sizeStressTest(cache, properties);
 
-		for (int t = 0; t < THREADS; ++t) {
-			futures.add(executor.submit(() -> {
-				ThreadLocalRandom rnd = ThreadLocalRandom.current();
-				for (int i = 0; i < ITERATIONS; ++i) {
-					int key = rnd.nextInt(KEY_SPACE);
-					if ((i & 3) == 0) {
-						// 25% writes
-						cache.computeIfAbsent(key, k -> k * 31);
-					} else {
-						// 75% reads
-						cache.get(key);
-					}
-					if ((i & 1023) == 0) {
-						assertThat(cache.size(), lessThanOrEqualTo(CAPACITY));
-					}
-				}
-			}));
-		}
-		for (Future<?> f : futures) {
-			f.get();
-		}
-		executor.shutdown();
-		executor.awaitTermination(10, TimeUnit.SECONDS);
-
-		assertThat(cache.size(), lessThanOrEqualTo(CAPACITY));
+		assertThat(cache.size(), lessThanOrEqualTo(capacity));
 	}
 }

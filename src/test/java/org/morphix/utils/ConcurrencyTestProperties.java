@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 public record ConcurrencyTestProperties(
 		int threadCount,
 		int iterationsPerThread,
+		int cacheCapacity,
 		int keySpace,
 		Duration timeout,
 		Logger logger) {
@@ -33,6 +34,7 @@ public record ConcurrencyTestProperties(
 
 		public static final int THREAD_COUNT = 100;
 		public static final int ITERATIONS_PER_THREAD = 1000;
+		public static final int CACHE_CAPACITY = 3;
 		public static final int KEY_SPACE = 7;
 		public static final Duration TIMEOUT = Duration.ofSeconds(1);
 
@@ -51,6 +53,7 @@ public record ConcurrencyTestProperties(
 
 		private int threadCount = Default.THREAD_COUNT;
 		private int iterationsPerThread = Default.ITERATIONS_PER_THREAD;
+		private int cacheCapacity;
 		private int keySpace = Default.KEY_SPACE;
 		private Duration timeout = Default.TIMEOUT;
 		private Logger logger;
@@ -80,8 +83,13 @@ public record ConcurrencyTestProperties(
 			return this;
 		}
 
+		public Builder cacheCapacity(final int cacheCapacity) {
+			this.cacheCapacity = cacheCapacity;
+			return this;
+		}
+
 		public ConcurrencyTestProperties build() {
-			return new ConcurrencyTestProperties(threadCount, iterationsPerThread, keySpace, timeout, logger);
+			return new ConcurrencyTestProperties(threadCount, iterationsPerThread, cacheCapacity, keySpace, timeout, logger);
 		}
 	}
 }
