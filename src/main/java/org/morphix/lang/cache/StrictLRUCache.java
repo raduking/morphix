@@ -190,6 +190,9 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 	 * Constructor for the concurrent LRU cache. Initializes the cache with the specified maximum size and uses a default
 	 * hash map to store the cache nodes. This constructor is a convenience method for creating a strict LRU cache with a
 	 * standard hash map implementation, which is suitable for most use cases where thread safety is not a concern.
+	 * <p>
+	 * Using integers for size and capacity since the whole point of a LRU is to have a small cache, so we won't be hitting
+	 * the integer limit in practice.
 	 *
 	 * @param capacity the maximum size of the cache
 	 */
@@ -300,7 +303,7 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 			node.next = null;
 			tail = node;
 		}
-		if (cache.size() > capacity) {
+		if (size() > capacity()) {
 			removeHead();
 		}
 	}
@@ -323,7 +326,7 @@ public class StrictLRUCache<K, V> implements LRUCache<K, V> {
 		} else {
 			head.prev = null;
 		}
-		cache.remove(node.key, node);
+		cache.remove(node.key);
 	}
 
 	/**

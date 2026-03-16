@@ -13,7 +13,9 @@
 package org.morphix.lang.cache;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 
 /**
  * A thread-safe concurrent strict LRU (Least Recently Used) cache implementation. This implementation guarantees strict
@@ -42,12 +44,54 @@ public class ConcurrentStrictLRUCache<K, V> extends StrictLRUCache<K, V> {
 	private final ReentrantLock modifyLock = new ReentrantLock();
 
 	/**
+	 * An atomic integer to keep track of the current size of the cache. This is used to ensure thread-safe updates to the
+	 * cache size when adding or removing entries. Using integers for sizes since the whole point of a LRU is to have a
+	 * small cache, so we won't be hitting the integer limit in practice.
+	 */
+	private final AtomicInteger size = new AtomicInteger(0);
+
+	/**
 	 * Constructor for the concurrent LRU cache. Initializes the cache with the specified maximum size.
 	 *
 	 * @param capacity the maximum size of the cache
 	 */
 	public ConcurrentStrictLRUCache(final int capacity) {
 		super(capacity, ConcurrentHashMap::new);
+	}
+
+	/**
+	 * Returns the current size of the cache. This method is thread-safe and returns the number of key-value pairs currently
+	 * stored in the cache.
+	 *
+	 * @return the current size of the cache
+	 */
+	@Override
+	public int size() {
+		modifyLock.lock();
+		try {
+			return size.get();
+		} finally {
+			modifyLock.unlock();
+		}
+	}
+
+	/**
+	 * @see StrictLRUCache#computeIfAbsent(Object, Function)
+	 */
+	@Override
+	public V computeIfAbsent(final K key, final Function<? super K, ? extends V> valueFunction) {
+		Node<K, V> node = storage().computeIfAbsent(key, k -> {
+			V v = valueFunction.apply(k);
+			if (null == v) {
+				return null;
+			}
+			return new Node<>(k, v);
+		});
+		if (null == node) {
+			return null;
+		}
+		toTail(node);
+		return node.value();
 	}
 
 	/**
@@ -61,10 +105,29 @@ public class ConcurrentStrictLRUCache<K, V> extends StrictLRUCache<K, V> {
 	void toTail(final Node<K, V> node) {
 		modifyLock.lock();
 		try {
+			if (null == node || tail() == node) {
+				return;
+			}
+			if (null == node.prev() && null == node.next()) {
+				// this is a new node, so we need to increment the size
+				size.incrementAndGet();
+			}
 			super.toTail(node);
 		} finally {
 			modifyLock.unlock();
 		}
+	}
+
+	/**
+	 * @see StrictLRUCache#remove(Node)
+	 */
+	@Override
+	void removeHead() {
+		if (null == head()) {
+			return;
+		}
+		super.removeHead();
+		size.decrementAndGet();
 	}
 
 	/**
@@ -75,6 +138,7 @@ public class ConcurrentStrictLRUCache<K, V> extends StrictLRUCache<K, V> {
 		modifyLock.lock();
 		try {
 			super.clear();
+			size.set(0);
 		} finally {
 			modifyLock.unlock();
 		}
