@@ -20,6 +20,7 @@ import java.util.function.Function;
  * representations of objects.
  *
  * @param <T> the type of the value to convert
+ *
  * @author Radu Sebastian LAZIN
  */
 public interface ToStringFunction<T> extends Function<T, String> {
@@ -44,6 +45,7 @@ public interface ToStringFunction<T> extends Function<T, String> {
 	 * Creates a {@link ToStringFunction} that uses the default {@code toString()} method of the value.
 	 *
 	 * @param <T> the type of the value
+	 *
 	 * @return a {@link ToStringFunction} that converts values to strings using their default {@code toString()} method
 	 */
 	static <T> ToStringFunction<T> identity() {
@@ -54,6 +56,7 @@ public interface ToStringFunction<T> extends Function<T, String> {
 	 * Creates a {@link ToStringFunction} that converts the value to a string and then converts it to lower case.
 	 *
 	 * @param <T> the type of the value
+	 *
 	 * @return a {@link ToStringFunction} that converts values to lower case strings
 	 */
 	static <T> ToStringFunction<T> toLowerCase() {
@@ -64,6 +67,7 @@ public interface ToStringFunction<T> extends Function<T, String> {
 	 * Creates a {@link ToStringFunction} that converts the value to a string and then converts it to upper case.
 	 *
 	 * @param <T> the type of the value
+	 *
 	 * @return a {@link ToStringFunction} that converts values to upper case strings
 	 */
 	static <T> ToStringFunction<T> toUpperCase() {

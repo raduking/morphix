@@ -12,6 +12,11 @@
  */
 package org.morphix.lang;
 
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+
 import org.morphix.reflection.Constructors;
 
 /**
@@ -45,5 +50,23 @@ public final class JavaObjects {
 	@SuppressWarnings("unchecked")
 	public static <T> T cast(final Object o) {
 		return (T) o;
+	}
+
+	/**
+	 * Returns true if the given object is empty, false otherwise.
+	 *
+	 * @param o object to check
+	 * @return true if the given object is empty, false otherwise
+	 */
+	public static boolean isEmpty(final Object o) {
+		return switch (o) {
+			case null -> true;
+			case CharSequence charSequence -> charSequence.isEmpty();
+			case Collection<?> collection -> collection.isEmpty();
+			case Map<?, ?> map -> map.isEmpty();
+			case Optional<?> optional -> optional.isEmpty();
+			case Object object when object.getClass().isArray() -> Array.getLength(o) == 0;
+			default -> false;
+		};
 	}
 }
