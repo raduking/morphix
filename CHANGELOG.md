@@ -8,7 +8,14 @@
 - Added `LRUCache` interface which extends the `Cache` interface to allow for least recently used (LRU) cache implementations.
 - Added `StrictLRUCache` as a LRU cache implementation with O(1) operations, this implementation is not thread safe.
 - Added `ConcurrentStrictLRUCache` as a thread safe strict LRU cache.
-
+- Upgraded `pitest-maven` to `1.23.0`.
+- Upgraded `properties-maven-plugin` to `1.3.0`.
+- Upgraded parent to `4.0.5`.
+- Added `org.morphix.lang.leak` package which adds a mini resource leak detection framework.
+- Added `LeakDetectionLevel` enumeration to configure leak detection via the system property named `morphix.leak.detection.level`.
+- Added `ResourceLeakDetector` class with resource leak detection via `ResourceLeakTracker`.
+- Added `ResourceLeakTracker` class to track leaks for a resource.
+ 
 ---
 
 `1.0.25`
