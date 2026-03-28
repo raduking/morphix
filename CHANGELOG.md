@@ -11,10 +11,12 @@
 - Upgraded `pitest-maven` to `1.23.0`.
 - Upgraded `properties-maven-plugin` to `1.3.0`.
 - Upgraded parent to `4.0.5`.
-- Added `org.morphix.lang.leak` package which adds a mini resource leak detection framework.
+- Added `org.morphix.lang.leak` package which adds a resource leak detection framework.
 - Added `LeakDetectionLevel` enumeration to configure leak detection via the system property named `morphix.leak.detection.level`.
 - Added `ResourceLeakDetector` class with resource leak detection via `ResourceLeakTracker`.
 - Added `ResourceLeakTracker` class to track leaks for a resource.
+- Added `ResourceLeakReporter` interface that defines leak reporting.
+- Added `ResourceLeakLogger` class that implements `ResourceLeakReporter` using JUL (java.util.logging).
  
 ---
 

@@ -1,8 +1,21 @@
+/*
+ * Copyright 2026 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.morphix.lang.leak;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -82,7 +95,7 @@ class ResourceLeakDetectorTest {
 	@SuppressWarnings("resource")
 	void shouldReportLeakWhenNotClosed() throws Exception {
 		List<LogRecord> logs = new ArrayList<>();
-		Logger logger = Logger.getLogger(ResourceLeakReference.class.getName());
+		Logger logger = Logger.getLogger(ResourceLeakLogger.NAME);
 
 		LogsHandler handler = new LogsHandler(logs);
 		logger.addHandler(handler);
@@ -96,7 +109,7 @@ class ResourceLeakDetectorTest {
 		while (logs.isEmpty()) {
 			Threads.safeSleep(Duration.ofMillis(100));
 		}
-		String expectedMessage = tracker.getReference().message(GC_WITHOUT_CLOSE);
+		String expectedMessage = tracker.getReference().getReport(GC_WITHOUT_CLOSE);
 
 		try {
 			assertThat(expectedMessage, containsString(Object.class.getName()));
@@ -113,7 +126,7 @@ class ResourceLeakDetectorTest {
 	@SuppressWarnings("resource")
 	void shouldReportAllLeaksWhenNotClosed() throws Exception {
 		List<LogRecord> logs = new ArrayList<>();
-		Logger logger = Logger.getLogger(ResourceLeakReference.class.getName());
+		Logger logger = Logger.getLogger(ResourceLeakLogger.NAME);
 
 		LogsHandler handler = new LogsHandler(logs);
 		logger.addHandler(handler);
@@ -127,19 +140,21 @@ class ResourceLeakDetectorTest {
 		obj2 = null; // NOSONAR - allow GC
 
 		System.gc();
+
+		// wait until both leaks are reported
 		while (logs.isEmpty()) {
 			Threads.safeSleep(Duration.ofMillis(100));
 		}
-		String expectedMessage1 = tracker1.getReference().message(GC_WITHOUT_CLOSE);
-		String expectedMessage2 = tracker2.getReference().message(GC_WITHOUT_CLOSE);
-		String logMessages = logs.get(0).getMessage() + logs.get(1).getMessage();
+
+		String expectedMessage1 = tracker1.getReference().getReport(GC_WITHOUT_CLOSE);
+		String expectedMessage2 = tracker2.getReference().getReport(GC_WITHOUT_CLOSE);
+		List<String> logMessages = logs.stream().map(LogRecord::getMessage).toList();
 
 		try {
 			assertThat(expectedMessage1, containsString(A.class.getName()));
 			assertThat(expectedMessage2, containsString(B.class.getName()));
 
-			assertThat(logMessages, containsString(expectedMessage1));
-			assertThat(logMessages, containsString(expectedMessage2));
+			assertThat(logMessages, containsInAnyOrder(expectedMessage1, expectedMessage2));
 		} finally {
 			logger.removeHandler(handler);
 			// cleanup so other tests are not affected
@@ -156,7 +171,7 @@ class ResourceLeakDetectorTest {
 		System.setProperty(LeakDetectionLevel.PROPERTY, level);
 
 		List<LogRecord> logs = new ArrayList<>();
-		Logger logger = Logger.getLogger(ResourceLeakReference.class.getName());
+		Logger logger = Logger.getLogger(ResourceLeakLogger.NAME);
 
 		LogsHandler handler = new LogsHandler(logs);
 		logger.addHandler(handler);
@@ -167,10 +182,13 @@ class ResourceLeakDetectorTest {
 		obj = null; // NOSONAR - allow GC
 
 		System.gc();
+
+		// wait until the leak is reported
 		while (logs.isEmpty()) {
 			Threads.safeSleep(Duration.ofMillis(100));
 		}
-		String expectedMessage = tracker.getReference().message(GC_WITHOUT_CLOSE);
+
+		String expectedMessage = tracker.getReference().getReport(GC_WITHOUT_CLOSE);
 
 		try {
 			assertThat(expectedMessage, containsAtLeastTimes("  at ", 10));
@@ -187,7 +205,7 @@ class ResourceLeakDetectorTest {
 	@SuppressWarnings("resource")
 	void shouldReportLeaksOnShutdown() throws Exception {
 		List<LogRecord> logs = new ArrayList<>();
-		Logger logger = Logger.getLogger(ResourceLeakReference.class.getName());
+		Logger logger = Logger.getLogger(ResourceLeakLogger.NAME);
 
 		LogsHandler handler = new LogsHandler(logs);
 		logger.addHandler(handler);
@@ -211,7 +229,7 @@ class ResourceLeakDetectorTest {
 	@SuppressWarnings("resource")
 	void shouldReportLeaksOnShutdownWithShutdownThread() throws Exception {
 		List<LogRecord> logs = new ArrayList<>();
-		Logger logger = Logger.getLogger(ResourceLeakReference.class.getName());
+		Logger logger = Logger.getLogger(ResourceLeakLogger.NAME);
 
 		LogsHandler handler = new LogsHandler(logs);
 		logger.addHandler(handler);

@@ -17,7 +17,6 @@ import java.lang.StackWalker.StackFrame;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /**
@@ -26,13 +25,7 @@ import java.util.stream.Stream;
  *
  * @author Radu Sebastian LAZIN
  */
-final class ResourceLeakReference implements AutoCloseable {
-
-	/**
-	 * Logger for reporting resource leaks. The logger is configured to log at the WARNING level, and it includes the class
-	 * name of the referenced resource in the log messages.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(ResourceLeakReference.class.getName());
+public final class ResourceLeakReference implements AutoCloseable {
 
 	/**
 	 * StackWalker instance used to capture the allocation site of the resource. It is configured with the
@@ -57,16 +50,17 @@ final class ResourceLeakReference implements AutoCloseable {
 	private final Class<?> referencedClass;
 
 	/**
-	 * The stack frames captured at the allocation site of the resource. The number of frames captured depends on the leak
-	 * detection level. For {@link LeakDetectionLevel#ADVANCED}, it captures a limited number of frames, while for
-	 * {@link LeakDetectionLevel#PARANOID}, it captures the entire stack trace.
+	 * The stack frames captured at the allocation site of the resource.
 	 */
 	private final List<StackFrame> allocationSite;
 
 	/**
-	 * A flag to indicate whether a leak has already been reported for this reference. This is used to ensure that we only
-	 * report a leak once, even if the same resource is tracked multiple times or if the leak is detected multiple times
-	 * (e.g. due to multiple references to the same object).
+	 * The reporter used to report leaks for this reference.
+	 */
+	private final ResourceLeakReporter reporter;
+
+	/**
+	 * A flag to indicate whether a leak has already been reported for this reference.
 	 */
 	private final AtomicBoolean reported = new AtomicBoolean(false);
 
@@ -78,23 +72,49 @@ final class ResourceLeakReference implements AutoCloseable {
 
 	/**
 	 * Creates a new resource leak reference for the given resource class and leak detection level. It captures the
-	 * allocation site based on the specified leak detection level.
+	 * allocation site based on the specified leak detection level that determines how much information to capture about the
+	 * allocation site.
 	 *
-	 * @param level the leak detection level that determines how much information to capture about the allocation site
+	 * @param level the leak detection level
 	 * @param referencedClass the class of the resource being tracked for leaks
+	 * @param reporter the reporter used to report leaks for this reference
 	 */
-	ResourceLeakReference(final LeakDetectionLevel level, final Class<?> referencedClass) {
+	ResourceLeakReference(final LeakDetectionLevel level, final Class<?> referencedClass, final ResourceLeakReporter reporter) {
 		this.level = level;
 		this.referencedClass = referencedClass;
 		this.allocationSite = captureAllocationSite(level);
+		this.reporter = reporter;
 	}
 
 	/**
-	 * Captures the allocation site of the resource based on the specified leak detection level. For
-	 * {@link LeakDetectionLevel#ADVANCED}, it captures a limited number of stack frames, while for
-	 * {@link LeakDetectionLevel#PARANOID}, it captures the entire stack trace.
+	 * Creates a new resource leak reference for the given resource class and leak detection level. It captures the
+	 * allocation site based on the specified leak detection level that determines how much information to capture about the
+	 * allocation site.
 	 *
-	 * @param level the leak detection level that determines how much information to capture about the allocation site
+	 * @param level the leak detection level
+	 * @param referencedClass the class of the resource being tracked for leaks
+	 * @param reporter the reporter used to report leaks for this reference
+	 * @return a new {@link ResourceLeakReference} instance
+	 */
+	static ResourceLeakReference of(final LeakDetectionLevel level, final Class<?> referencedClass, final ResourceLeakReporter reporter) {
+		return new ResourceLeakReference(level, referencedClass, reporter);
+	}
+
+	/**
+	 * Captures the allocation site of the resource based on the specified leak detection level that determines how much
+	 * information to capture about the allocation site.
+	 * <ul>
+	 * <li>For {@link LeakDetectionLevel#ADVANCED}, it captures a limited number of stack frames (defined by
+	 * {@link #ADVANCED_REPORTED_STACK_FRAMES}) to provide context about where the resource was allocated without incurring
+	 * too much overhead.</li>
+	 * <li>For {@link LeakDetectionLevel#PARANOID}, it captures the entire stack trace to provide the most detailed
+	 * information about the allocation site, which can be useful for debugging purposes but may have a significant
+	 * performance impact.</li>
+	 * <li>For other levels, it does not capture any stack frames to minimize overhead and only report the class name of the
+	 * resource.</li>
+	 * </ul>
+	 *
+	 * @param level the leak detection level
 	 * @return a list of stack frames representing the allocation site of the resource
 	 */
 	private static List<StackFrame> captureAllocationSite(final LeakDetectionLevel level) {
@@ -141,34 +161,45 @@ final class ResourceLeakReference implements AutoCloseable {
 		if (closed || !reported.compareAndSet(false, true)) {
 			return;
 		}
-
-		LOGGER.warning(() -> message(reason));
+		reporter.reportLeak(this, reason);
 	}
 
 	/**
-	 * Constructs the log message for a detected leak, including the class name of the referenced resource, the provided
-	 * reason, and optionally the stack trace of the allocation site based on the leak detection level. For
-	 * {@link LeakDetectionLevel#ADVANCED} and {@link LeakDetectionLevel#PARANOID}, the stack trace is included in the log
-	 * message to provide more context about where the resource was allocated.
+	 * Retrieves the class of the resource that is being tracked for leaks.
+	 *
+	 * @return the class of the resource being tracked for leaks
+	 */
+	public Class<?> getReferencedClass() {
+		return referencedClass;
+	}
+
+	/**
+	 * Retrieves the stack frames captured at the allocation site of the resource. The amount of information captured about
+	 * the allocation site depends on the leak detection level.
+	 *
+	 * @return a list of stack frames representing the allocation site of the resource
+	 */
+	public List<StackFrame> getAllocationSite() {
+		return allocationSite;
+	}
+
+	/**
+	 * Returns the leak detection level for this reference, which determines how much information is captured about the
+	 * allocation site and how leaks are reported.
+	 *
+	 * @return the leak detection level for this reference
+	 */
+	public LeakDetectionLevel getLevel() {
+		return level;
+	}
+
+	/**
+	 * Constructs the report for a detected leak.
 	 *
 	 * @param reason the reason for reporting the leak, which will be included in the log message
-	 * @return the constructed log message for the detected leak
+	 * @return the constructed report for the detected leak
 	 */
-	protected String message(final String reason) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("LEAK DETECTED: ")
-				.append(referencedClass.getName())
-				.append(" was not closed (")
-				.append(reason)
-				.append(")");
-
-		if (level.ordinal() >= LeakDetectionLevel.ADVANCED.ordinal()) {
-			String eol = System.lineSeparator();
-			sb.append(eol);
-			for (StackFrame frame : allocationSite) {
-				sb.append("  at ").append(frame).append(eol);
-			}
-		}
-		return sb.toString();
+	String getReport(final String reason) {
+		return reporter.report(this, reason);
 	}
 }

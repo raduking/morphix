@@ -30,23 +30,22 @@ class ResourceLeakReferenceTest {
 	@Test
 	@SuppressWarnings("resource")
 	void shouldReportOnlyOnce() {
-		ResourceLeakReference ref = new ResourceLeakReference(LeakDetectionLevel.SIMPLE, Object.class);
+		ResourceLeakReporter reporter = ResourceLeakLogger.instance();
+		ResourceLeakReference reference = ResourceLeakReference.of(LeakDetectionLevel.SIMPLE, Object.class, reporter);
 
-		ref.reportLeak(TEST);
+		reference.reportLeak(TEST);
 
-		assertTrue(ref.isReported());
-		assertDoesNotThrow(() -> ref.reportLeak(TEST));
-		assertDoesNotThrow(() -> ref.reportLeak(TEST));
-		assertFalse(ref.isClosed());
-		// no exception = OK
-		// TODO: maybe capture logs and assert only once
+		assertTrue(reference.isReported());
+		assertDoesNotThrow(() -> reference.reportLeak(TEST));
+		assertDoesNotThrow(() -> reference.reportLeak(TEST));
+		assertFalse(reference.isClosed());
 	}
 
 	@Test
 	@SuppressWarnings("resource")
 	void shouldNotReportAfterClose() {
-		ResourceLeakReference ref =
-				new ResourceLeakReference(LeakDetectionLevel.SIMPLE, Object.class);
+		ResourceLeakReporter reporter = ResourceLeakLogger.instance();
+		ResourceLeakReference ref = ResourceLeakReference.of(LeakDetectionLevel.SIMPLE, Object.class, reporter);
 
 		ref.close();
 		assertTrue(ref.isClosed());

@@ -94,14 +94,26 @@ public final class ResourceLeakDetector {
 	 * @param object the object to track for leaks
 	 * @return a {@link ResourceLeakTracker} that can be used to close the tracked object and report leaks
 	 */
-	@SuppressWarnings("resource")
 	public static ResourceLeakTracker track(final Object object) {
+		return track(object, ResourceLeakLogger.instance());
+	}
+
+	/**
+	 * Tracks the given object for resource leaks. If the leak detection level is disabled, this method returns a no-op
+	 * tracker.
+	 *
+	 * @param object the object to track for leaks
+	 * @param reporter the reporter to use for reporting leaks for this object
+	 * @return a {@link ResourceLeakTracker} that can be used to close the tracked object and report leaks
+	 */
+	@SuppressWarnings("resource")
+	public static ResourceLeakTracker track(final Object object, final ResourceLeakReporter reporter) {
 		LeakDetectionLevel level = LeakDetectionLevel.current();
 		if (LeakDetectionLevel.DISABLED == level) {
 			return ResourceLeakTracker.DISABLED;
 		}
 
-		ResourceLeakReference reference = new ResourceLeakReference(level, object.getClass());
+		ResourceLeakReference reference = ResourceLeakReference.of(level, object.getClass(), reporter);
 		REFERENCES.add(reference);
 
 		Cleanable cleanable = CLEANER.register(object, () -> reference.reportLeak("GC without close()"));
