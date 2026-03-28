@@ -62,6 +62,7 @@ public enum Case {
 	 * Upper camel case style, where all words are capitalized (e.g. "UpperCamelCase").
 	 */
 	UPPER_CAMEL {
+
 		/**
 		 * @see Case#format(String[], Locale)
 		 */
@@ -78,78 +79,42 @@ public enum Case {
 	/**
 	 * Snake case style, where all words are in lowercase and separated by underscores (e.g. "snake_case").
 	 */
-	SNAKE {
-		/**
-		 * The separator used for joining words in snake case style, which is an underscore ("_").
-		 */
-		public static final String SEPARATOR = "_";
+	SNAKE("_") {
 
 		/**
 		 * @see Case#format(String[], Locale)
 		 */
 		@Override
 		public String format(final String[] words, final Locale locale) {
-			return join(words, SEPARATOR, locale, Letter.LOWER);
-		}
-
-		/**
-		 * @see Case#wordSeparator()
-		 */
-		@Override
-		public String wordSeparator() {
-			return SEPARATOR;
+			return join(words, wordSeparator(), locale, Letter.LOWER);
 		}
 	},
 
 	/**
 	 * Upper snake case style, where all words are in uppercase and separated by underscores (e.g. "UPPER_SNAKE_CASE").
 	 */
-	UPPER_SNAKE {
-		/**
-		 * The separator used for joining words in upper snake case style, which is an underscore ("_").
-		 */
-		public static final String SEPARATOR = "_";
+	UPPER_SNAKE("_") {
 
 		/**
 		 * @see Case#format(String[], Locale)
 		 */
 		@Override
 		public String format(final String[] words, final Locale locale) {
-			return join(words, SEPARATOR, locale, Letter.UPPER);
-		}
-
-		/**
-		 * @see Case#wordSeparator()
-		 */
-		@Override
-		public String wordSeparator() {
-			return SEPARATOR;
+			return join(words, wordSeparator(), locale, Letter.UPPER);
 		}
 	},
 
 	/**
 	 * Kebab case style, where all words are in lowercase and separated by hyphens (e.g. "kebab-case").
 	 */
-	KEBAB {
-		/**
-		 * The separator used for joining words in kebab case style, which is a hyphen ("-").
-		 */
-		public static final String SEPARATOR = "-";
+	KEBAB("-") {
 
 		/**
 		 * @see Case#format(String[], Locale)
 		 */
 		@Override
 		public String format(final String[] words, final Locale locale) {
-			return join(words, SEPARATOR, locale, Letter.LOWER);
-		}
-
-		/**
-		 * @see Case#wordSeparator()
-		 */
-		@Override
-		public String wordSeparator() {
-			return SEPARATOR;
+			return join(words, wordSeparator(), locale, Letter.LOWER);
 		}
 	};
 
@@ -168,6 +133,28 @@ public enum Case {
 		 * Uppercase letter case, where all letters are converted to uppercase.
 		 */
 		UPPER
+	}
+
+	/**
+	 * The separator used for joining words in this case style.
+	 */
+	private String wordSeparator;
+
+	/**
+	 * Constructor for the enum constants that have a specific word separator.
+	 *
+	 * @param wordSeparator the separator used for joining words in this case style
+	 */
+	Case(final String wordSeparator) {
+		this.wordSeparator = wordSeparator;
+	}
+
+	/**
+	 * Default constructor for enum constants that do not have a specific word separator. The word separator will be set to
+	 * an empty string.
+	 */
+	Case() {
+		this("");
 	}
 
 	/**
@@ -225,7 +212,7 @@ public enum Case {
 	 * @return the separator used for joining words in this case style
 	 */
 	public String wordSeparator() {
-		return "";
+		return wordSeparator;
 	}
 
 	/**
