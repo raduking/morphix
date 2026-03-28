@@ -77,7 +77,7 @@ public class ConcurrentStrictLRUCache<K, V> extends StrictLRUCache<K, V> {
 	 * cache. This method acquires the modify lock to ensure that only one thread can modify the access order list at a
 	 * time, preventing race conditions and ensuring thread safety when adding new entries to the cache.
 	 *
-	 * @see TestStrictLRUCache#addToTail(Node)
+	 * @see StrictLRUCache#addToTail(Node)
 	 */
 	@Override
 	void toTail(final Node<K, V> node) {

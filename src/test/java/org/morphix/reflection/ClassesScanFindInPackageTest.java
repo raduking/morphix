@@ -73,6 +73,7 @@ class ClassesScanFindInPackageTest {
 		var classesCache = Classes.Scan.findInPackage("org.morphix.lang.cache", Path.of(TARGET_CLASSES));
 		var classesFunction = Classes.Scan.findInPackage("org.morphix.lang.function", Path.of(TARGET_CLASSES));
 		var classesLeak = Classes.Scan.findInPackage("org.morphix.lang.leak", Path.of(TARGET_CLASSES));
+		var classesResource = Classes.Scan.findInPackage("org.morphix.lang.resource", Path.of(TARGET_CLASSES));
 		var classesThread = Classes.Scan.findInPackage("org.morphix.lang.thread", Path.of(TARGET_CLASSES));
 
 		var classesStrictlyInLang = classes.stream()
@@ -84,6 +85,7 @@ class ClassesScanFindInPackageTest {
 				+ classesCache.size()
 				+ classesFunction.size()
 				+ classesLeak.size()
+				+ classesResource.size()
 				+ classesThread.size()));
 	}
 }

@@ -358,4 +358,13 @@ public class Threads {
 	public static void execute(final Duration timeout, final Runnable runnable) {
 		execute(timeout, Runnables.toSupplier(runnable));
 	}
+
+	/**
+	 * Checks if the current thread is interrupted.
+	 *
+	 * @return true if the current thread is interrupted, false otherwise
+	 */
+	public static boolean isCurrentInterrupted() {
+		return Thread.currentThread().isInterrupted();
+	}
 }

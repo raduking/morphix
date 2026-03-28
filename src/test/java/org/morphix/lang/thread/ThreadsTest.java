@@ -13,6 +13,7 @@
 package org.morphix.lang.thread;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -367,5 +368,20 @@ class ThreadsTest {
 			assertTrue(resource2.isClosed());
 			assertInstanceOf(UnsupportedOperationException.class, e);
 		}
+	}
+
+	@Test
+	void shouldReturnFalseWhenThreadIsNotInterrupted() {
+		// clear any existing interrupt status
+		Thread.interrupted();
+
+		assertThat(Threads.isCurrentInterrupted(), is(equalTo(false)));
+	}
+
+	@Test
+	void shouldReturnTrueWhenThreadIsInterrupted() {
+		Thread.currentThread().interrupt();
+
+		assertThat(Threads.isCurrentInterrupted(), is(equalTo(true)));
 	}
 }

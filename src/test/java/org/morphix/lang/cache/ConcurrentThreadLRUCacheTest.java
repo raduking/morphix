@@ -31,7 +31,7 @@ import org.morphix.utils.ConcurrencyTestProperties;
 import org.morphix.utils.ConcurrencyTestResults;
 
 /**
- * Test class for {@link TestStrictLRUCache}.
+ * Test class for {@link ConcurrentThreadLRUCache}.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -84,5 +84,51 @@ class ConcurrentThreadLRUCacheTest extends LRUCacheTest {
 		waitUntil(() -> cache.size() <= CACHE_CAPACITY);
 
 		assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
+	}
+
+	@Test
+	@Timeout(5)
+	void shouldEvictRandomlyWhenTheSamplesIsSetToOne() {
+		// sample size 1
+		ConcurrentThreadLRUCache<String, String> sampledCache = new ConcurrentThreadLRUCache<>(CACHE_CAPACITY, 1);
+
+		sampledCache.computeIfAbsent("A", k -> "Value A");
+		sampledCache.computeIfAbsent("B", k -> "Value B");
+		sampledCache.computeIfAbsent("C", k -> "Value C");
+
+		// access "A" to make it recently used
+		sampledCache.get("A");
+
+		// add a new entry, which should evict a random entry due to sample size of 1
+		sampledCache.computeIfAbsent("D", k -> "Value D");
+
+		waitUntil(() -> sampledCache.size() <= CACHE_CAPACITY);
+
+		assertThat(sampledCache.size(), is(equalTo(CACHE_CAPACITY)));
+	}
+
+	@Test
+	@Timeout(5)
+	void shouldEvictLeastRecentlyUsedByCheckingSamplesIfSamplesEqualsCapacity() {
+		// sample size 1
+		ConcurrentThreadLRUCache<String, String> sampledCache = new ConcurrentThreadLRUCache<>(CACHE_CAPACITY, CACHE_CAPACITY);
+
+		sampledCache.computeIfAbsent("A", k -> "Value A");
+		sampledCache.computeIfAbsent("B", k -> "Value B");
+		sampledCache.computeIfAbsent("C", k -> "Value C");
+
+		// access "A" to make it recently used
+		sampledCache.get("A");
+
+		// add a new entry, which should evict "B" since it's the least recently used among the sampled entries
+		sampledCache.computeIfAbsent("D", k -> "Value D");
+
+		waitUntil(() -> sampledCache.size() <= CACHE_CAPACITY);
+
+		assertThat(sampledCache.size(), is(equalTo(CACHE_CAPACITY)));
+		assertThat(sampledCache.get("B"), is(equalTo(null)));
+		assertThat(sampledCache.get("A"), is(equalTo("Value A")));
+		assertThat(sampledCache.get("C"), is(equalTo("Value C")));
+		assertThat(sampledCache.get("D"), is(equalTo("Value D")));
 	}
 }
