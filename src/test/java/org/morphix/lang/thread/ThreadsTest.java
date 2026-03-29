@@ -46,6 +46,7 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
@@ -361,6 +362,110 @@ class ThreadsTest {
 			Thread.currentThread().interrupt();
 
 			assertThat(Threads.isCurrentInterrupted(), is(equalTo(true)));
+		}
+	}
+
+	@Nested
+	class WaitUntilTest {
+
+		@Test
+		@Timeout(5)
+		void shouldWaitUntilConditionIsTrue() {
+			AtomicBoolean condition = new AtomicBoolean(false);
+
+			Thread thread = Thread.ofPlatform().start(() -> {
+				Threads.waitUntil(condition::get);
+			});
+			Threads.waitUntil(thread::isAlive);
+			condition.set(true);
+			Threads.safeJoin(thread);
+			Threads.waitUntil(() -> !thread.isAlive());
+
+			assertFalse(thread.isAlive());
+		}
+
+		@Test
+		@Timeout(5)
+		void shouldWaitUntilConditionIsTrueWithTimeout() {
+			AtomicBoolean condition = new AtomicBoolean(false);
+
+			Thread thread = Thread.ofPlatform().start(() -> {
+				Threads.waitUntil(condition::get, Duration.ofSeconds(1));
+			});
+			Threads.waitUntil(thread::isAlive);
+			condition.set(true);
+			Threads.safeJoin(thread);
+			Threads.waitUntil(() -> !thread.isAlive());
+
+			assertFalse(thread.isAlive());
+		}
+
+		@Test
+		@Timeout(5)
+		void shouldWaitUntilConditionIsTrueWithTimeoutAndPollInterval() {
+			AtomicBoolean condition = new AtomicBoolean(false);
+
+			Thread thread = Thread.ofPlatform().start(() -> {
+				Threads.waitUntil(condition::get, Duration.ofSeconds(1), Duration.ofMillis(10));
+			});
+			Threads.waitUntil(thread::isAlive);
+			condition.set(true);
+			Threads.safeJoin(thread);
+			Threads.waitUntil(() -> !thread.isAlive());
+
+			assertFalse(thread.isAlive());
+		}
+
+		@Test
+		void shouldReturnImmediatelyIfConditionIsAlreadyTrue() {
+			AtomicBoolean condition = new AtomicBoolean(true);
+
+			Thread thread = Thread.ofPlatform().start(() -> {
+				Threads.waitUntil(condition::get);
+			});
+			Threads.safeJoin(thread);
+
+			assertFalse(thread.isAlive());
+		}
+
+		@Test
+		void shouldReturnImmediatelyIfTimeoutIsNegative() {
+			AtomicBoolean condition = new AtomicBoolean(false);
+
+			Thread thread = Thread.ofPlatform().start(() -> {
+				Threads.waitUntil(condition::get, Duration.ofSeconds(-1));
+			});
+			Threads.safeJoin(thread);
+
+			assertFalse(thread.isAlive());
+			assertFalse(condition.get());
+		}
+
+		@Test
+		void shouldWaitForTimeout() {
+			AtomicBoolean condition = new AtomicBoolean(false);
+
+			Thread thread = Thread.ofPlatform().start(() -> {
+				Threads.waitUntil(condition::get, Duration.ofMillis(1), Duration.ofMillis(1));
+			});
+			Threads.safeJoin(thread);
+
+			assertFalse(thread.isAlive());
+			assertFalse(condition.get());
+		}
+
+		@Test
+		void shouldNotWaitForTimeoutIfInterrupted() {
+			AtomicBoolean condition = new AtomicBoolean(false);
+
+			Thread thread = Thread.ofPlatform().start(() -> {
+				Threads.waitUntil(condition::get, Duration.ofSeconds(3), Duration.ofMillis(10));
+			});
+			thread.interrupt();
+
+			Threads.waitUntil(() -> !thread.isAlive());
+
+			assertFalse(condition.get());
 		}
 	}
 }

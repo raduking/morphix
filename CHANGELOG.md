@@ -21,6 +21,7 @@
 - Moved `ScopedResource` from `apiphany` here since it's general purpose.
 - Added `ScopedResource.close` since it now implements `AutoCloseable`.
 - Added `Threads.isCurrentInterrupted` to check if the current thread is interrupted.
+- Added `Threads.waitUntil` methods to be able to wait for a condition to be true.
  
 ---
 

@@ -16,14 +16,15 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.morphix.utils.Tests.waitUntil;
 import static org.morphix.utils.matcher.MorphixMatchers.containsAtLeastTimes;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -36,7 +37,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.morphix.lang.thread.Threads;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.Fields;
 import org.morphix.utils.Tests;
@@ -106,9 +106,9 @@ class ResourceLeakDetectorTest {
 		obj = null; // NOSONAR - allow GC
 
 		System.gc();
-		while (logs.isEmpty()) {
-			Threads.safeSleep(Duration.ofMillis(100));
-		}
+
+		waitUntil(() -> !logs.isEmpty());
+
 		String expectedMessage = tracker.getReference().getReport(GC_WITHOUT_CLOSE);
 
 		try {
@@ -142,9 +142,7 @@ class ResourceLeakDetectorTest {
 		System.gc();
 
 		// wait until both leaks are reported
-		while (logs.isEmpty()) {
-			Threads.safeSleep(Duration.ofMillis(100));
-		}
+		waitUntil(() -> logs.size() >= 2);
 
 		String expectedMessage1 = tracker1.getReference().getReport(GC_WITHOUT_CLOSE);
 		String expectedMessage2 = tracker2.getReference().getReport(GC_WITHOUT_CLOSE);
@@ -153,7 +151,7 @@ class ResourceLeakDetectorTest {
 		try {
 			assertThat(expectedMessage1, containsString(A.class.getName()));
 			assertThat(expectedMessage2, containsString(B.class.getName()));
-
+			assertThat(logMessages, hasSize(2));
 			assertThat(logMessages, containsInAnyOrder(expectedMessage1, expectedMessage2));
 		} finally {
 			logger.removeHandler(handler);
@@ -184,9 +182,7 @@ class ResourceLeakDetectorTest {
 		System.gc();
 
 		// wait until the leak is reported
-		while (logs.isEmpty()) {
-			Threads.safeSleep(Duration.ofMillis(100));
-		}
+		waitUntil(() -> !logs.isEmpty());
 
 		String expectedMessage = tracker.getReference().getReport(GC_WITHOUT_CLOSE);
 

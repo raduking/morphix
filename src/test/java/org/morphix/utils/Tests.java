@@ -51,26 +51,17 @@ public interface Tests {
 	}
 
 	static void waitUntil(final BooleanSupplier condition, final Duration timeout, final Duration pollInterval) {
-		if (condition.getAsBoolean() || timeout.isNegative()) {
-			return;
+		Threads.waitUntil(condition, timeout, pollInterval);
+		if (!condition.getAsBoolean()) {
+			fail("Condition not met within: " + timeout);
 		}
-		long startTime = System.currentTimeMillis();
-		long endTime = startTime + timeout.toMillis();
-
-		while (System.currentTimeMillis() < endTime || timeout.isZero()) {
-			if (condition.getAsBoolean() || Threads.isCurrentInterrupted()) {
-				return;
-			}
-			Threads.safeSleep(pollInterval);
-		}
-		fail("Condition not met within: " + timeout);
 	}
 
 	static void waitUntil(final BooleanSupplier condition, final Duration timeout) {
-		waitUntil(condition, timeout, Duration.ofMillis(50));
+		waitUntil(condition, timeout, Threads.Default.POLL_INTERVAL);
 	}
 
 	static void waitUntil(final BooleanSupplier condition) {
-		waitUntil(condition, Duration.ZERO, Duration.ofMillis(50));
+		waitUntil(condition, Duration.ZERO, Threads.Default.POLL_INTERVAL);
 	}
 }

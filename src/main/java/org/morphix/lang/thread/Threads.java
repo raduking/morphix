@@ -22,11 +22,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.morphix.lang.Unchecked;
 import org.morphix.lang.function.Runnables;
+import org.morphix.reflection.Constructors;
 
 /**
  * Utility methods for working with threads.
@@ -148,7 +150,26 @@ public class Threads {
 		public void apply(final List<? extends Runnable> runnables, final ExecutorService executor) {
 			this.execution.apply(runnables, executor);
 		}
+	}
 
+	/**
+	 * Default values for threads operations.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	public static class Default {
+
+		/**
+		 * Default poll interval.
+		 */
+		public static final Duration POLL_INTERVAL = Duration.ofMillis(50);
+
+		/**
+		 * Private constructor.
+		 */
+		private Default() {
+			throw Constructors.unsupportedOperationException();
+		}
 	}
 
 	/**
@@ -399,5 +420,50 @@ public class Threads {
 	 */
 	public static boolean isCurrentInterrupted() {
 		return Thread.currentThread().isInterrupted();
+	}
+
+	/**
+	 * Waits until the given condition is true or the timeout is reached. The condition is checked at intervals defined by
+	 * the poll interval. If the timeout is zero, it will wait indefinitely until the condition is true. If the timeout is
+	 * negative, it will return immediately.
+	 *
+	 * @param condition condition to check
+	 * @param timeout maximum time to wait for the condition to be true
+	 * @param pollInterval interval between condition checks
+	 */
+	public static void waitUntil(final BooleanSupplier condition, final Duration timeout, final Duration pollInterval) {
+		if (condition.getAsBoolean() || timeout.isNegative()) {
+			return;
+		}
+		long startTime = System.currentTimeMillis();
+		long endTime = startTime + timeout.toMillis();
+
+		while (System.currentTimeMillis() < endTime || timeout.isZero()) {
+			if (condition.getAsBoolean() || Threads.isCurrentInterrupted()) {
+				return;
+			}
+			Threads.safeSleep(pollInterval);
+		}
+	}
+
+	/**
+	 * Waits until the given condition is true or the timeout is reached. The condition is checked at intervals defined by
+	 * the poll interval. If the timeout is zero, it will wait indefinitely until the condition is true. If the timeout is
+	 * negative, it will return immediately.
+	 *
+	 * @param condition condition to check
+	 * @param timeout maximum time to wait for the condition to be true
+	 */
+	public static void waitUntil(final BooleanSupplier condition, final Duration timeout) {
+		waitUntil(condition, timeout, Default.POLL_INTERVAL);
+	}
+
+	/**
+	 * Waits until the given condition is true. The condition is checked at intervals defined by the poll interval.
+	 *
+	 * @param condition condition to check
+	 */
+	public static void waitUntil(final BooleanSupplier condition) {
+		waitUntil(condition, Duration.ZERO, Default.POLL_INTERVAL);
 	}
 }
