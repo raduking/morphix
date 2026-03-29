@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.27`
+
+---
+
 `1.0.26`
 
 - Updated `Case.capitalize` to use `Locale.ROOT`.
