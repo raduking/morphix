@@ -2,7 +2,11 @@
 
 `1.0.27`
 
-- Changed `Threads.waitUntil` methods to return true if the condition was met, false if timeout reached. 
+- Changed `Threads.waitUntil` methods to return true if the condition was met, false if timeout reached.
+- Moved `lang.accumulator` package from `apiphany` to `morphix`.
+- Moved `lang.collections` package from `apiphany` to `morphix`.
+- Moved `lang.retry` package from `apiphany` to `morphix`.
+- Moved `Temporals` class from `apiphany` to `morphix`.
 
 ---
 

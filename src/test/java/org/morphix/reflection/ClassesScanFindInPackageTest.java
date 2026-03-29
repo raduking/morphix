@@ -70,10 +70,13 @@ class ClassesScanFindInPackageTest {
 	void shouldFindClassesInSubpackages() {
 		var classes = Classes.Scan.findInPackage("org.morphix.lang", Path.of(TARGET_CLASSES));
 
+		var classesAccumulator = Classes.Scan.findInPackage("org.morphix.lang.accumulator", Path.of(TARGET_CLASSES));
 		var classesCache = Classes.Scan.findInPackage("org.morphix.lang.cache", Path.of(TARGET_CLASSES));
+		var classesCollections = Classes.Scan.findInPackage("org.morphix.lang.collections", Path.of(TARGET_CLASSES));
 		var classesFunction = Classes.Scan.findInPackage("org.morphix.lang.function", Path.of(TARGET_CLASSES));
 		var classesLeak = Classes.Scan.findInPackage("org.morphix.lang.leak", Path.of(TARGET_CLASSES));
 		var classesResource = Classes.Scan.findInPackage("org.morphix.lang.resource", Path.of(TARGET_CLASSES));
+		var classesRetry = Classes.Scan.findInPackage("org.morphix.lang.retry", Path.of(TARGET_CLASSES));
 		var classesThread = Classes.Scan.findInPackage("org.morphix.lang.thread", Path.of(TARGET_CLASSES));
 
 		var classesStrictlyInLang = classes.stream()
@@ -82,9 +85,12 @@ class ClassesScanFindInPackageTest {
 		int langClassesCount = classesStrictlyInLang.size();
 
 		assertThat(classes.size(), equalTo(langClassesCount
+				+ classesAccumulator.size()
 				+ classesCache.size()
+				+ classesCollections.size()
 				+ classesFunction.size()
 				+ classesLeak.size()
+				+ classesRetry.size()
 				+ classesResource.size()
 				+ classesThread.size()));
 	}
