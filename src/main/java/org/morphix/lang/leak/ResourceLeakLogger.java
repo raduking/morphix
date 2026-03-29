@@ -44,8 +44,9 @@ public class ResourceLeakLogger implements ResourceLeakReporter {
 
 	/**
 	 * Reports a detected resource leak by logging a warning message. The log message includes the class name of the
-	 * referenced resource and the provided reason for the leak. The log level is set to WARNING to indicate that this is a
-	 * potential issue that should be investigated.
+	 * referenced resource and the provided reason for the leak.
+	 * <p>
+	 * The log level is set to WARNING to indicate that this is a potential issue that should be investigated.
 	 *
 	 * @param reference the reference to the resource that is leaking
 	 * @param reason the reason for reporting the leak, which can provide additional context about the leak
@@ -65,9 +66,10 @@ public class ResourceLeakLogger implements ResourceLeakReporter {
 	}
 
 	/**
-	 * Holder class for the singleton instance of {@link ResourceLeakLogger}. This class is loaded on demand when the
-	 * {@link #instance()} method is called, ensuring that the instance is created in a thread-safe manner without the need
-	 * for synchronization.
+	 * Holder class for the singleton instance of {@link ResourceLeakLogger}.
+	 * <p>
+	 * This class is loaded on demand when the {@link #instance()} method is called, ensuring that the instance is created
+	 * in a thread-safe manner without the need for synchronization.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */

@@ -40,6 +40,16 @@ import java.util.function.Consumer;
  * }
  * </pre>
  *
+ * or:
+ *
+ * <pre>
+ * try (ScopedResource&lt;Client&gt; scoped = ...) {
+ *    Resource resource = scoped.unwrap();
+ *    // use resource
+ * }
+ * </pre>
+ *
+ * The resource will be automatically closed if it is managed by the scoped resource, otherwise it will remain open
  * <p>
  * This pattern ensures that resources created internally are properly closed, while externally provided resources are
  * never accidentally closed.

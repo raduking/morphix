@@ -57,9 +57,8 @@ public final class ResourceLeakDetector {
 	public static final String CLEANER_THREAD_NAME = "morphix-leak-detector-cleaner";
 
 	/**
-	 * The set that keeps track of all active references. This allows us to report leaks on JVM shutdown and also to avoid
-	 * reporting the same leak multiple times if the same object is tracked multiple times (e.g. in case of multiple
-	 * references to the same object).
+	 * The set that keeps track of all active references. This avoids reporting the same leak multiple times if the same
+	 * object is tracked multiple times (e.g. in case of multiple references to the same object).
 	 */
 	private static final Set<ResourceLeakReference> REFERENCES = ConcurrentHashMap.newKeySet();
 
@@ -92,7 +91,7 @@ public final class ResourceLeakDetector {
 	 * tracker.
 	 *
 	 * @param object the object to track for leaks
-	 * @return a {@link ResourceLeakTracker} that can be used to close the tracked object and report leaks
+	 * @return a leak tracker that can be used to close the tracked object and report leaks
 	 */
 	public static ResourceLeakTracker track(final Object object) {
 		return track(object, ResourceLeakLogger.instance());
@@ -104,7 +103,7 @@ public final class ResourceLeakDetector {
 	 *
 	 * @param object the object to track for leaks
 	 * @param reporter the reporter to use for reporting leaks for this object
-	 * @return a {@link ResourceLeakTracker} that can be used to close the tracked object and report leaks
+	 * @return a leak tracker that can be used to close the tracked object and report leaks
 	 */
 	@SuppressWarnings("resource")
 	public static ResourceLeakTracker track(final Object object, final ResourceLeakReporter reporter) {

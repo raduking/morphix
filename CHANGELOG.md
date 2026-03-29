@@ -17,8 +17,9 @@
 - Added `ResourceLeakTracker` class to track leaks for a resource.
 - Added `ResourceLeakReporter` interface that defines leak reporting.
 - Added `ResourceLeakLogger` class that implements `ResourceLeakReporter` using JUL (java.util.logging).
-- Moved `ScopedResource` from `apiphany` here since it's general purpose.
 - Moved `Lifecycle` from `apiphany` here since it's general purpose.
+- Moved `ScopedResource` from `apiphany` here since it's general purpose.
+- Added `ScopedResource.close` since it now implements `AutoCloseable`.
 - Added `Threads.isCurrentInterrupted` to check if the current thread is interrupted.
  
 ---

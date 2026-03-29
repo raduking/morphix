@@ -40,27 +40,30 @@ public enum LeakDetectionLevel {
 	SIMPLE,
 
 	/**
-	 * Enhanced leak detection that provides more detailed information about leaks. This level may have a performance impact
-	 * due to the additional tracking and reporting.
+	 * Enhanced leak detection that provides more detailed information about leaks.
+	 * <p>
+	 * This level may have a performance impact due to the additional tracking and reporting.
 	 */
 	ADVANCED,
 
 	/**
-	 * The most aggressive leak detection level. This level may report even minor leaks and provide extensive details. It is
-	 * intended for debugging and development purposes and may have a significant performance impact.
+	 * The most aggressive leak detection level.
+	 * <p>
+	 * This level may report even minor leaks and provide extensive details. It is intended for debugging and development
+	 * purposes and may have a significant performance impact.
 	 */
 	PARANOID;
 
 	/**
-	 * The system property key used to determine the current leak detection level. The value of this property should be one
-	 * of the following (case-insensitive): "DISABLED", "SIMPLE", "ADVANCED", or "PARANOID". If the property is not set or
-	 * is invalid, the default level will be {@code SIMPLE}.
+	 * The system property key used to determine the current leak detection level, it should be set to any of the enum
+	 * names. If the property is not set or is invalid, the default level will be {@link #SIMPLE}.
 	 */
 	public static final String PROPERTY = "morphix.leak.detection.level";
 
 	/**
-	 * Retrieves the current leak detection level based on the system property {@code morphix.leak.detection.level}. If the
-	 * property is not set, is empty, or contains an invalid value, this method defaults to returning {@code SIMPLE}.
+	 * Retrieves the current leak detection level based on the system property {@code morphix.leak.detection.level}
+	 * ({@link #PROPERTY}. If the property is not set, is empty, or contains an invalid value, this method defaults to
+	 * returning {@link #SIMPLE}.
 	 *
 	 * @return the current {@link LeakDetectionLevel} based on the system property
 	 */

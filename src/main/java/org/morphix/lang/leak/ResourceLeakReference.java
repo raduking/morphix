@@ -104,13 +104,13 @@ public final class ResourceLeakReference implements AutoCloseable {
 	 * Captures the allocation site of the resource based on the specified leak detection level that determines how much
 	 * information to capture about the allocation site.
 	 * <ul>
-	 * <li>For {@link LeakDetectionLevel#ADVANCED}, it captures a limited number of stack frames (defined by
+	 * <li>for {@link LeakDetectionLevel#ADVANCED}, it captures a limited number of stack frames (defined by
 	 * {@link #ADVANCED_REPORTED_STACK_FRAMES}) to provide context about where the resource was allocated without incurring
 	 * too much overhead.</li>
-	 * <li>For {@link LeakDetectionLevel#PARANOID}, it captures the entire stack trace to provide the most detailed
+	 * <li>for {@link LeakDetectionLevel#PARANOID}, it captures the entire stack trace to provide the most detailed
 	 * information about the allocation site, which can be useful for debugging purposes but may have a significant
 	 * performance impact.</li>
-	 * <li>For other levels, it does not capture any stack frames to minimize overhead and only report the class name of the
+	 * <li>for other levels, it does not capture any stack frames to minimize overhead and only report the class name of the
 	 * resource.</li>
 	 * </ul>
 	 *
