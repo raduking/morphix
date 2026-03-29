@@ -123,13 +123,38 @@ class ScopedResourceTest {
 
 		ScopedResource<TestResource> scopedResource = ScopedResource.managed(resource);
 
+		scopedResource.close();
+
+		assertTrue(resource.isClosed());
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void shouldCloseManagedResourceOnCloseIfManaged() throws Exception {
+		TestResource resource = new TestResource();
+
+		ScopedResource<TestResource> scopedResource = ScopedResource.managed(resource);
+
 		scopedResource.closeIfManaged();
 
 		assertTrue(resource.isClosed());
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	void shouldNotCloseUnmanagedResource() throws Exception {
+		try (TestResource resource = new TestResource()) {
+			ScopedResource<TestResource> scopedResource = ScopedResource.unmanaged(resource);
+
+			scopedResource.close();
+
+			assertFalse(resource.isClosed());
+		}
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void shouldNotCloseUnmanagedResourceOnCloseIfManaged() throws Exception {
 		try (TestResource resource = new TestResource()) {
 			ScopedResource<TestResource> scopedResource = ScopedResource.unmanaged(resource);
 
@@ -154,6 +179,7 @@ class ScopedResourceTest {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	void shouldNotCloseUnmanagedResourceWithExceptionHandler() {
 		try (TestResource resource = new TestResource()) {
 			ScopedResource<TestResource> scopedResource = ScopedResource.unmanaged(resource);

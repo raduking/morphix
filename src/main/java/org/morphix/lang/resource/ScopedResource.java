@@ -48,7 +48,7 @@ import java.util.function.Consumer;
  *
  * @author Radu Sebastian LAZIN
  */
-public class ScopedResource<T extends AutoCloseable> {
+public class ScopedResource<T extends AutoCloseable> implements AutoCloseable {
 
 	/**
 	 * The wrapped AutoCloseable resource.
@@ -133,6 +133,17 @@ public class ScopedResource<T extends AutoCloseable> {
 		} catch (Exception e) {
 			exceptionHandler.accept(e);
 		}
+	}
+
+	/**
+	 * Closes the resource if it is managed by this wrapper. This method is an alias for {@link #closeIfManaged()} to allow
+	 * using try-with-resources with managed resources.
+	 * <p>
+	 * For unmanaged resources, this method does nothing.
+	 */
+	@Override
+	public void close() throws Exception {
+		closeIfManaged();
 	}
 
 	/**
