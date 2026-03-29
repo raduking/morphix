@@ -14,14 +14,18 @@ package org.morphix.lang.leak;
 
 import java.lang.ref.Cleaner;
 import java.lang.ref.Cleaner.Cleanable;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.morphix.lang.JavaObjects;
 import org.morphix.reflection.Constructors;
 
 /**
- * Utility class for tracking resource leaks. It uses {@link Cleaner} to detect when an object is garbage collected
- * without being properly closed.
+ * Utility class for tracking resource leaks. This class holds all the tracked references and the {@link Cleaner}. It
+ * provides methods for tracking objects and reporting leaks when they are garbage collected or when the JVM shuts down.
+ * <p>
+ * This is to be used in conjunction with the {@link ResourceLeakTracker} to track resources that need to be closed.
  * <p>
  * <b>Usage:</b>
  *
@@ -94,7 +98,7 @@ public final class ResourceLeakDetector {
 	 * @return a leak tracker that can be used to close the tracked object and report leaks
 	 */
 	public static ResourceLeakTracker track(final Object object) {
-		return track(object, ResourceLeakLogger.instance());
+		return track(object, null);
 	}
 
 	/**
@@ -102,11 +106,25 @@ public final class ResourceLeakDetector {
 	 * tracker.
 	 *
 	 * @param object the object to track for leaks
+	 * @param hint the hint to include in the leak report, which can provide additional context about the leak
+	 * @return a leak tracker that can be used to close the tracked object and report leaks
+	 */
+	public static ResourceLeakTracker track(final Object object, final String hint) {
+		return track(object, hint, ResourceLeakLogger.instance());
+	}
+
+	/**
+	 * Tracks the given object for resource leaks. If the leak detection level is disabled, this method returns a no-op
+	 * tracker.
+	 *
+	 * @param object the object to track for leaks
+	 * @param hint the hint to include in the leak report, which can provide additional context about the leak
 	 * @param reporter the reporter to use for reporting leaks for this object
 	 * @return a leak tracker that can be used to close the tracked object and report leaks
 	 */
 	@SuppressWarnings("resource")
-	public static ResourceLeakTracker track(final Object object, final ResourceLeakReporter reporter) {
+	public static ResourceLeakTracker track(final Object object, final String hint, final ResourceLeakReporter reporter) {
+		Objects.requireNonNull(object, "tracked object cannot be null");
 		LeakDetectionLevel level = LeakDetectionLevel.current();
 		if (LeakDetectionLevel.DISABLED == level) {
 			return ResourceLeakTracker.DISABLED;
@@ -114,22 +132,31 @@ public final class ResourceLeakDetector {
 
 		ResourceLeakReference reference = ResourceLeakReference.of(level, object.getClass(), reporter);
 		REFERENCES.add(reference);
-
-		Cleanable cleanable = CLEANER.register(object, () -> reference.reportLeak("GC without close()"));
+		Cleanable cleanable = CLEANER.register(object, () -> reportLeak(reference, message(hint, "GC without close()")));
 
 		return new ResourceLeakTracker(reference, cleanable);
 	}
 
 	/**
-	 * Closes the given reference and removes it from the set of active references. This method is called by the
-	 * {@link ResourceLeakTracker} when it is closed.
+	 * Constructs the message to include in the leak report based on the provided hint and reason. If the hint is not empty,
+	 * it is included in the message for additional context about the leak.
 	 *
-	 * @param reference the reference to close
-	 * @param cleanable the cleanable to clean
+	 * @param hint the hint to include in the message, which can provide additional context about the leak
+	 * @param reason the reason for reporting the leak, which can provide additional context about the leak
+	 * @return a formatted message to include in the leak report
 	 */
-	static void close(final ResourceLeakReference reference, final Cleanable cleanable) {
+	public static String message(final String hint, final String reason) {
+		return (JavaObjects.isEmpty(hint) ? "" : hint + " ") + reason;
+	}
+
+	/**
+	 * Untracks the given reference. This is called when a tracked object is closed to remove it from the set of active
+	 * references and avoid reporting it as a leak.
+	 *
+	 * @param reference the reference to untrack
+	 */
+	static void untrack(final ResourceLeakReference reference) {
 		REFERENCES.remove(reference);
-		cleanable.clean();
 	}
 
 	/**
@@ -154,17 +181,20 @@ public final class ResourceLeakDetector {
 	}
 
 	/**
-	 * Reports a leak for the given reference with the specified message.
+	 * Reports a leak for the given reference with the specified message. After a leak is reported for the reference, it is
+	 * untracked to avoid reporting it again in the future.
 	 *
 	 * @param reference the reference for which to report the leak
 	 * @param message the message to include in the leak report
 	 */
 	static void reportLeak(final ResourceLeakReference reference, final String message) {
 		reference.reportLeak(message);
+		untrack(reference);
 	}
 
 	/**
-	 * Reports leaks for all the given references with the specified message.
+	 * Reports leaks for all the given references with the specified message. After a leak is reported for a reference, it
+	 * is untracked to avoid reporting it again in the future.
 	 *
 	 * @param references the set of references for which to report leaks
 	 * @param message the message to include in the leak reports

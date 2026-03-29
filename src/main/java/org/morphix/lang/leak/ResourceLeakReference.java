@@ -16,8 +16,8 @@ import java.lang.StackWalker.Option;
 import java.lang.StackWalker.StackFrame;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
 /**
  * A reference to a resource that may potentially leak. It captures the allocation site and provides a mechanism to
@@ -38,6 +38,16 @@ public final class ResourceLeakReference implements AutoCloseable {
 	 * {@link LeakDetectionLevel#ADVANCED}.
 	 */
 	private static final int ADVANCED_REPORTED_STACK_FRAMES = 10;
+
+	/**
+	 * A set of class names to ignore when capturing the allocation site. This is used to filter out internal classes
+	 * related to the leak detection mechanism itself, such as {@link ResourceLeakReference}, {@link ResourceLeakTracker},
+	 * and {@link ResourceLeakDetector}, to avoid cluttering the captured stack trace with irrelevant frames.
+	 */
+	private static final Set<String> IGNORED_CLASS_NAMES = Set.of(
+			ResourceLeakReference.class.getName(),
+			ResourceLeakTracker.class.getName(),
+			ResourceLeakDetector.class.getName());
 
 	/**
 	 * The leak detection level that determines how much information to capture about the allocation site.
@@ -119,8 +129,13 @@ public final class ResourceLeakReference implements AutoCloseable {
 	 */
 	private static List<StackFrame> captureAllocationSite(final LeakDetectionLevel level) {
 		return switch (level) {
-			case ADVANCED -> STACK_WALKER.walk(stackFrame -> stackFrame.limit(ADVANCED_REPORTED_STACK_FRAMES).toList());
-			case PARANOID -> STACK_WALKER.walk(Stream::toList);
+			case ADVANCED -> STACK_WALKER.walk(stream -> stream
+					.dropWhile(frame -> IGNORED_CLASS_NAMES.contains(frame.getClassName()))
+					.limit(ADVANCED_REPORTED_STACK_FRAMES)
+					.toList());
+			case PARANOID -> STACK_WALKER.walk(stream -> stream
+					.dropWhile(frame -> IGNORED_CLASS_NAMES.contains(frame.getClassName()))
+					.toList());
 			default -> Collections.emptyList();
 		};
 	}
@@ -161,7 +176,9 @@ public final class ResourceLeakReference implements AutoCloseable {
 		if (closed || !reported.compareAndSet(false, true)) {
 			return;
 		}
-		reporter.reportLeak(this, reason);
+		if (null != reporter) {
+			reporter.reportLeak(this, reason);
+		}
 	}
 
 	/**
