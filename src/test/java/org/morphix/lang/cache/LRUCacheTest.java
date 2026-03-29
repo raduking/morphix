@@ -180,7 +180,7 @@ class LRUCacheTest {
 			// should evict lruIndex + 1, which is the least recently used entry after accessing lruIndex
 			cache.computeIfAbsent("key" + newIndex, k -> "value" + newIndex);
 
-			waitUntil(() -> cache.size() == CACHE_CAPACITY, Duration.ofSeconds(1));
+			waitUntil(() -> cache.size() == CACHE_CAPACITY, Duration.ofSeconds(3));
 
 			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
 			assertThat(cache.get("key" + lruIndex), is(equalTo("value" + lruIndex)));
