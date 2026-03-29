@@ -22,11 +22,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.morphix.lang.Unchecked;
 import org.morphix.lang.function.Runnables;
+import org.morphix.reflection.Constructors;
 
 /**
  * Utility methods for working with threads.
@@ -148,7 +150,26 @@ public class Threads {
 		public void apply(final List<? extends Runnable> runnables, final ExecutorService executor) {
 			this.execution.apply(runnables, executor);
 		}
+	}
 
+	/**
+	 * Default values for threads operations.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	public static class Default {
+
+		/**
+		 * Default poll interval.
+		 */
+		public static final Duration POLL_INTERVAL = Duration.ofMillis(50);
+
+		/**
+		 * Private constructor.
+		 */
+		private Default() {
+			throw Constructors.unsupportedOperationException();
+		}
 	}
 
 	/**
@@ -324,6 +345,39 @@ public class Threads {
 	 * Note: the implementation intentionally uses no try with resources because closing the executor too early would block
 	 * to cancel the task, and we want to make sure the executor is closed in the end after the manual task cancellation to
 	 * keep the {@link TimeoutException} behavior.
+	 * <p>
+	 *
+	 * <b>Important Limitations:</b>
+	 * <ul>
+	 * <li>This method uses thread interruption for cancellation, which requires the executing task to be responsive to
+	 * interrupts. Tasks that do not check {@link Thread#isInterrupted()} or handle {@link InterruptedException} may
+	 * continue running indefinitely even after the timeout occurs.</li>
+	 * <li>CPU-bound tasks with infinite loops that do not check their interrupt status <b>cannot be stopped</b> by this
+	 * method. The thread will continue running and the executor will hang during shutdown, causing this method to block
+	 * indefinitely.</li>
+	 * <li>Tasks that perform blocking I/O, sleep, or wait operations will generally respond to interrupts and be cancelled
+	 * properly.</li>
+	 * <li>For tasks that must be forcibly terminated, consider running them in a separate process using {@link Process} and
+	 * {@link Process#destroyForcibly()} instead.</li>
+	 * </ul>
+	 *
+	 * <b>Cooperative Cancellation Example:</b>
+	 *
+	 * <pre>
+	 * // Good: Task checks interrupt status
+	 * Runnable responsive = () -> {
+	 * 	while (!Thread.currentThread().isInterrupted()) {
+	 * 		// perform work
+	 * 	}
+	 * };
+	 *
+	 * // Bad: Task ignores interrupts and will cause hanging
+	 * Runnable unresponsive = () -> {
+	 * 	while (true) {
+	 * 		// perform work - cannot be stopped!
+	 * 	}
+	 * };
+	 * </pre>
 	 *
 	 * @param <T> the type of results supplied by the provided supplier
 	 *
@@ -357,5 +411,59 @@ public class Threads {
 	 */
 	public static void execute(final Duration timeout, final Runnable runnable) {
 		execute(timeout, Runnables.toSupplier(runnable));
+	}
+
+	/**
+	 * Checks if the current thread is interrupted.
+	 *
+	 * @return true if the current thread is interrupted, false otherwise
+	 */
+	public static boolean isCurrentInterrupted() {
+		return Thread.currentThread().isInterrupted();
+	}
+
+	/**
+	 * Waits until the given condition is true or the timeout is reached. The condition is checked at intervals defined by
+	 * the poll interval. If the timeout is zero, it will wait indefinitely until the condition is true. If the timeout is
+	 * negative, it will return immediately.
+	 *
+	 * @param condition condition to check
+	 * @param timeout maximum time to wait for the condition to be true
+	 * @param pollInterval interval between condition checks
+	 */
+	public static void waitUntil(final BooleanSupplier condition, final Duration timeout, final Duration pollInterval) {
+		if (condition.getAsBoolean() || timeout.isNegative()) {
+			return;
+		}
+		long startTime = System.currentTimeMillis();
+		long endTime = startTime + timeout.toMillis();
+
+		while (System.currentTimeMillis() < endTime || timeout.isZero()) {
+			if (condition.getAsBoolean() || Threads.isCurrentInterrupted()) {
+				return;
+			}
+			Threads.safeSleep(pollInterval);
+		}
+	}
+
+	/**
+	 * Waits until the given condition is true or the timeout is reached. The condition is checked at intervals defined by
+	 * the poll interval. If the timeout is zero, it will wait indefinitely until the condition is true. If the timeout is
+	 * negative, it will return immediately.
+	 *
+	 * @param condition condition to check
+	 * @param timeout maximum time to wait for the condition to be true
+	 */
+	public static void waitUntil(final BooleanSupplier condition, final Duration timeout) {
+		waitUntil(condition, timeout, Default.POLL_INTERVAL);
+	}
+
+	/**
+	 * Waits until the given condition is true. The condition is checked at intervals defined by the poll interval.
+	 *
+	 * @param condition condition to check
+	 */
+	public static void waitUntil(final BooleanSupplier condition) {
+		waitUntil(condition, Duration.ZERO, Default.POLL_INTERVAL);
 	}
 }

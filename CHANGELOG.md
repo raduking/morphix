@@ -1,5 +1,30 @@
 ## Release Notes
 
+`1.0.26`
+
+- Updated `Case.capitalize` to use `Locale.ROOT`.
+- Added `Case.capitalize(String, Locale)` to be able to capitalize a word with the given `Locale`.
+- Added `Cache` interface to allow for cache implementations.
+- Added `LRUCache` interface which extends the `Cache` interface to allow for least recently used (LRU) cache implementations.
+- Added `StrictLRUCache` as a LRU cache implementation with O(1) operations, this implementation is not thread safe.
+- Added `ConcurrentStrictLRUCache` as a thread safe strict LRU cache.
+- Upgraded `pitest-maven` to `1.23.0`.
+- Upgraded `properties-maven-plugin` to `1.3.0`.
+- Upgraded parent to `4.0.5`.
+- Added `org.morphix.lang.leak` package which adds a resource leak detection framework.
+- Added `LeakDetectionLevel` enumeration to configure leak detection via the system property named `morphix.leak.detection.level`.
+- Added `ResourceLeakDetector` class with resource leak detection via `ResourceLeakTracker`.
+- Added `ResourceLeakTracker` class to track leaks for a resource.
+- Added `ResourceLeakReporter` interface that defines leak reporting.
+- Added `ResourceLeakLogger` class that implements `ResourceLeakReporter` using JUL (java.util.logging).
+- Moved `Lifecycle` from `apiphany` here since it's general purpose.
+- Moved `ScopedResource` from `apiphany` here since it's general purpose.
+- Added `ScopedResource.close` since it now implements `AutoCloseable`.
+- Added `Threads.isCurrentInterrupted` to check if the current thread is interrupted.
+- Added `Threads.waitUntil` methods to be able to wait for a condition to be true.
+ 
+---
+
 `1.0.25`
 
 - Added `ThrowingUnaryOperator` similar to `ThrowingFunction`.

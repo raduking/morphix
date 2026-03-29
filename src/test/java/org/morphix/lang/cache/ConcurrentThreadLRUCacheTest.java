@@ -1,0 +1,134 @@
+/*
+ * Copyright 2026 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+package org.morphix.lang.cache;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.morphix.utils.Tests.waitUntil;
+
+import java.time.Duration;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.morphix.lang.JavaObjects;
+import org.morphix.utils.ConcurrencyTestProperties;
+import org.morphix.utils.ConcurrencyTestResults;
+
+/**
+ * Test class for {@link ConcurrentThreadLRUCache}.
+ *
+ * @author Radu Sebastian LAZIN
+ */
+class ConcurrentThreadLRUCacheTest extends LRUCacheTest {
+
+	private static final Logger LOGGER = Logger.getLogger(ConcurrentThreadLRUCacheTest.class.getName());
+
+	static final int CACHE_CAPACITY = 3;
+
+	ConcurrentThreadLRUCache<String, String> cache;
+
+	@Override
+	ConcurrentThreadLRUCache<String, String> newCache() {
+		return new ConcurrentThreadLRUCache<>(CACHE_CAPACITY);
+	}
+
+	@Override
+	@BeforeEach
+	void setUp() {
+		super.setUp();
+		cache = JavaObjects.cast(cache());
+	}
+
+	@Test
+	void shouldHaveTheCorrectCacheInstance() {
+		assertThat(cache, is(instanceOf(ConcurrentThreadLRUCache.class)));
+	}
+
+	@Test
+	void shouldHaveConcurrentHashMapAsStorage() {
+		assertThat(cache.storage(), is(instanceOf(ConcurrentHashMap.class)));
+	}
+
+	@Test
+	@Timeout(5)
+	void shouldHandleConcurrentAccess() throws InterruptedException {
+		ConcurrencyTestProperties properties = new ConcurrencyTestProperties.Builder()
+				.threadCount(100)
+				.iterationsPerThread(1000)
+				.keySpace(7)
+				.timeout(Duration.ofSeconds(1))
+				.logger(LOGGER)
+				.build();
+
+		ConcurrencyTestResults result = stressTest(cache, properties);
+
+		assertTrue(result.finished().get(), "All threads should complete in reasonable time");
+		assertThat("There should be no failed threads", result.failedThreads().get(), is(0L));
+
+		waitUntil(() -> cache.size() <= CACHE_CAPACITY);
+
+		assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
+	}
+
+	@Test
+	@Timeout(5)
+	void shouldEvictRandomlyWhenTheSamplesIsSetToOne() {
+		// sample size 1
+		ConcurrentThreadLRUCache<String, String> sampledCache = new ConcurrentThreadLRUCache<>(CACHE_CAPACITY, 1);
+
+		sampledCache.computeIfAbsent("A", k -> "Value A");
+		sampledCache.computeIfAbsent("B", k -> "Value B");
+		sampledCache.computeIfAbsent("C", k -> "Value C");
+
+		// access "A" to make it recently used
+		sampledCache.get("A");
+
+		// add a new entry, which should evict a random entry due to sample size of 1
+		sampledCache.computeIfAbsent("D", k -> "Value D");
+
+		waitUntil(() -> sampledCache.size() <= CACHE_CAPACITY);
+
+		assertThat(sampledCache.size(), is(equalTo(CACHE_CAPACITY)));
+	}
+
+	@Test
+	@Timeout(5)
+	void shouldEvictLeastRecentlyUsedByCheckingSamplesIfSamplesEqualsCapacity() {
+		// sample size 1
+		ConcurrentThreadLRUCache<String, String> sampledCache = new ConcurrentThreadLRUCache<>(CACHE_CAPACITY, CACHE_CAPACITY);
+
+		sampledCache.computeIfAbsent("A", k -> "Value A");
+		sampledCache.computeIfAbsent("B", k -> "Value B");
+		sampledCache.computeIfAbsent("C", k -> "Value C");
+
+		// access "A" to make it recently used
+		sampledCache.get("A");
+
+		// add a new entry, which should evict "B" since it's the least recently used among the sampled entries
+		sampledCache.computeIfAbsent("D", k -> "Value D");
+
+		waitUntil(() -> sampledCache.size() <= CACHE_CAPACITY);
+
+		assertThat(sampledCache.size(), is(equalTo(CACHE_CAPACITY)));
+		assertThat(sampledCache.get("B"), is(equalTo(null)));
+		assertThat(sampledCache.get("A"), is(equalTo("Value A")));
+		assertThat(sampledCache.get("C"), is(equalTo("Value C")));
+		assertThat(sampledCache.get("D"), is(equalTo("Value D")));
+	}
+}
