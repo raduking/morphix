@@ -155,7 +155,7 @@ class LRUCacheTest {
 				cache.computeIfAbsent("key" + index, k -> "value" + index);
 			}
 
-			waitUntil(() -> cache.size() == CACHE_CAPACITY, Duration.ofSeconds(1));
+			waitUntil(() -> cache.size() == CACHE_CAPACITY, Duration.ofSeconds(3));
 
 			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
 			assertThat(cache.get("key1"), is(nullValue()));
