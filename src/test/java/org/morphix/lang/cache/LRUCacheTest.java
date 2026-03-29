@@ -36,6 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.morphix.lang.JavaObjects;
 import org.morphix.lang.thread.Threads;
 import org.morphix.utils.ConcurrencyTestProperties;
 import org.morphix.utils.ConcurrencyTestResults;
@@ -55,8 +56,8 @@ class LRUCacheTest {
 		return new TestStrictLRUCache<>(CACHE_CAPACITY);
 	}
 
-	LRUCache<String, String> cache() {
-		return cache;
+	<T extends LRUCache<String, String>> T cache() {
+		return JavaObjects.cast(cache);
 	}
 
 	@BeforeEach

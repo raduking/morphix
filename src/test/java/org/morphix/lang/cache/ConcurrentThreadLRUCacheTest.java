@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.morphix.lang.JavaObjects;
 import org.morphix.utils.ConcurrencyTestProperties;
 import org.morphix.utils.ConcurrencyTestResults;
 
@@ -52,7 +51,7 @@ class ConcurrentThreadLRUCacheTest extends LRUCacheTest {
 	@BeforeEach
 	void setUp() {
 		super.setUp();
-		cache = JavaObjects.cast(cache());
+		this.cache = cache();
 	}
 
 	@Test
