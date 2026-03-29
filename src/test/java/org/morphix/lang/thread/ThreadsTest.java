@@ -387,9 +387,11 @@ class ThreadsTest {
 			});
 			Threads.waitUntil(thread::isAlive);
 			condition.set(true);
-			Threads.waitUntil(() -> !thread.isAlive());
+
+			boolean result = Threads.waitUntil(() -> !thread.isAlive());
 
 			assertFalse(thread.isAlive());
+			assertTrue(result);
 		}
 
 		@Test
@@ -438,13 +440,10 @@ class ThreadsTest {
 		void shouldReturnImmediatelyIfTimeoutIsNegative() {
 			AtomicBoolean condition = new AtomicBoolean(false);
 
-			Thread thread = Thread.ofPlatform().start(() -> {
-				Threads.waitUntil(condition::get, Duration.ofSeconds(-1));
-			});
-			Threads.safeJoin(thread);
+			boolean result = Threads.waitUntil(condition::get, Duration.ofSeconds(-1));
 
-			assertFalse(thread.isAlive());
 			assertFalse(condition.get());
+			assertFalse(result);
 		}
 
 		@Test

@@ -430,20 +430,24 @@ public class Threads {
 	 * @param condition condition to check
 	 * @param timeout maximum time to wait for the condition to be true
 	 * @param pollInterval interval between condition checks
+	 * @return true if the condition was met within the timeout, false otherwise
 	 */
-	public static void waitUntil(final BooleanSupplier condition, final Duration timeout, final Duration pollInterval) {
-		if (condition.getAsBoolean() || timeout.isNegative()) {
-			return;
+	public static boolean waitUntil(final BooleanSupplier condition, final Duration timeout, final Duration pollInterval) {
+		boolean conditionMet = condition.getAsBoolean();
+		if (conditionMet || timeout.isNegative()) {
+			return conditionMet;
 		}
 		long startTime = System.currentTimeMillis();
 		long endTime = startTime + timeout.toMillis();
 
 		while (System.currentTimeMillis() < endTime || timeout.isZero()) {
-			if (condition.getAsBoolean() || Threads.isCurrentInterrupted()) {
-				return;
+			conditionMet = condition.getAsBoolean();
+			if (conditionMet || Threads.isCurrentInterrupted()) {
+				break;
 			}
 			Threads.safeSleep(pollInterval);
 		}
+		return conditionMet;
 	}
 
 	/**
@@ -453,17 +457,19 @@ public class Threads {
 	 *
 	 * @param condition condition to check
 	 * @param timeout maximum time to wait for the condition to be true
+	 * @return true if the condition was met within the timeout, false otherwise
 	 */
-	public static void waitUntil(final BooleanSupplier condition, final Duration timeout) {
-		waitUntil(condition, timeout, Default.POLL_INTERVAL);
+	public static boolean waitUntil(final BooleanSupplier condition, final Duration timeout) {
+		return waitUntil(condition, timeout, Default.POLL_INTERVAL);
 	}
 
 	/**
 	 * Waits until the given condition is true. The condition is checked at intervals defined by the poll interval.
 	 *
 	 * @param condition condition to check
+	 * @return true if the condition was met, false if the thread was interrupted while waiting
 	 */
-	public static void waitUntil(final BooleanSupplier condition) {
-		waitUntil(condition, Duration.ZERO, Default.POLL_INTERVAL);
+	public static boolean waitUntil(final BooleanSupplier condition) {
+		return waitUntil(condition, Duration.ZERO, Default.POLL_INTERVAL);
 	}
 }

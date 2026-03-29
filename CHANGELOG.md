@@ -2,6 +2,8 @@
 
 `1.0.27`
 
+- Changed `Threads.waitUntil` methods to return true if the condition was met, false if timeout reached. 
+
 ---
 
 `1.0.26`
