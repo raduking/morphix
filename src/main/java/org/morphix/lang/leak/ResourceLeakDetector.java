@@ -116,6 +116,8 @@ public final class ResourceLeakDetector {
 	/**
 	 * Tracks the given object for resource leaks. If the leak detection level is disabled, this method returns a no-op
 	 * tracker.
+	 * <p>
+	 * TODO: implement fluent API for configuring the tracker.
 	 *
 	 * @param object the object to track for leaks
 	 * @param hint the hint to include in the leak report, which can provide additional context about the leak

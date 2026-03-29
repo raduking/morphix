@@ -51,6 +51,8 @@ public enum LeakDetectionLevel {
 	 * <p>
 	 * This level may report even minor leaks and provide extensive details. It is intended for debugging and development
 	 * purposes and may have a significant performance impact.
+	 * <p>
+	 * TODO: implement resource access tracking for this level
 	 */
 	PARANOID;
 
