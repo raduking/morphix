@@ -324,6 +324,39 @@ public class Threads {
 	 * Note: the implementation intentionally uses no try with resources because closing the executor too early would block
 	 * to cancel the task, and we want to make sure the executor is closed in the end after the manual task cancellation to
 	 * keep the {@link TimeoutException} behavior.
+	 * <p>
+	 *
+	 * <b>Important Limitations:</b>
+	 * <ul>
+	 * <li>This method uses thread interruption for cancellation, which requires the executing task to be responsive to
+	 * interrupts. Tasks that do not check {@link Thread#isInterrupted()} or handle {@link InterruptedException} may
+	 * continue running indefinitely even after the timeout occurs.</li>
+	 * <li>CPU-bound tasks with infinite loops that do not check their interrupt status <b>cannot be stopped</b> by this
+	 * method. The thread will continue running and the executor will hang during shutdown, causing this method to block
+	 * indefinitely.</li>
+	 * <li>Tasks that perform blocking I/O, sleep, or wait operations will generally respond to interrupts and be cancelled
+	 * properly.</li>
+	 * <li>For tasks that must be forcibly terminated, consider running them in a separate process using {@link Process} and
+	 * {@link Process#destroyForcibly()} instead.</li>
+	 * </ul>
+	 *
+	 * <b>Cooperative Cancellation Example:</b>
+	 *
+	 * <pre>
+	 * // Good: Task checks interrupt status
+	 * Runnable responsive = () -> {
+	 * 	while (!Thread.currentThread().isInterrupted()) {
+	 * 		// perform work
+	 * 	}
+	 * };
+	 *
+	 * // Bad: Task ignores interrupts and will cause hanging
+	 * Runnable unresponsive = () -> {
+	 * 	while (true) {
+	 * 		// perform work - cannot be stopped!
+	 * 	}
+	 * };
+	 * </pre>
 	 *
 	 * @param <T> the type of results supplied by the provided supplier
 	 *
