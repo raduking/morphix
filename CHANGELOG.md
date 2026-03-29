@@ -7,6 +7,10 @@
 - Moved `lang.collections` package from `apiphany` to `morphix`.
 - Moved `lang.retry` package from `apiphany` to `morphix`.
 - Moved `Temporals` class from `apiphany` to `morphix`.
+- Added `ResourceLeakTracker.isClosed` to check if the resource leak tracker is closed.
+- Added support for leak message hints to `ResourceLeakDetector`.
+- Added resource leak tracking to `ScopedResource`.
+- Removed `org.morphix.*` classes from resource leak call site frames since they are useless.
 
 ---
 
