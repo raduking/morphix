@@ -378,7 +378,6 @@ class ThreadsTest {
 			});
 			Threads.waitUntil(thread::isAlive);
 			condition.set(true);
-			Threads.safeJoin(thread);
 			Threads.waitUntil(() -> !thread.isAlive());
 
 			assertFalse(thread.isAlive());
@@ -394,7 +393,6 @@ class ThreadsTest {
 			});
 			Threads.waitUntil(thread::isAlive);
 			condition.set(true);
-			Threads.safeJoin(thread);
 			Threads.waitUntil(() -> !thread.isAlive());
 
 			assertFalse(thread.isAlive());
@@ -410,7 +408,6 @@ class ThreadsTest {
 			});
 			Threads.waitUntil(thread::isAlive);
 			condition.set(true);
-			Threads.safeJoin(thread);
 			Threads.waitUntil(() -> !thread.isAlive());
 
 			assertFalse(thread.isAlive());
