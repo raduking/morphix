@@ -27,7 +27,7 @@ public final class ResourceLeakTracker implements AutoCloseable {
 	 * A disabled tracker that does nothing when closed. This can be used when leak detection is turned off to avoid
 	 * unnecessary overhead.
 	 */
-	public static final ResourceLeakTracker DISABLED = new ResourceLeakTracker(null, null);
+	public static final ResourceLeakTracker DISABLED = new ResourceLeakTracker(null, null, true);
 
 	/**
 	 * The reference to the {@link ResourceLeakReference} and the {@link Cleanable} so that we can properly close the
@@ -44,6 +44,25 @@ public final class ResourceLeakTracker implements AutoCloseable {
 	private final Cleanable cleanable;
 
 	/**
+	 * A flag to indicate whether the tracker has been properly closed.
+	 */
+	private volatile boolean closed;
+
+	/**
+	 * Creates a new ResourceLeakTracker with the given reference and cleanable. This constructor is package-private to
+	 * restrict access to the ResourceLeakDetector class, which is responsible for creating and managing trackers.
+	 *
+	 * @param reference the ResourceLeakReference to track
+	 * @param cleanable the Cleanable to register for cleanup actions
+	 * @param closed whether the tracker is already closed (used for the DISABLED instance)
+	 */
+	ResourceLeakTracker(final ResourceLeakReference reference, final Cleanable cleanable, final boolean closed) {
+		this.reference = reference;
+		this.cleanable = cleanable;
+		this.closed = closed;
+	}
+
+	/**
 	 * Creates a new ResourceLeakTracker with the given reference and cleanable. This constructor is package-private to
 	 * restrict access to the ResourceLeakDetector class, which is responsible for creating and managing trackers.
 	 *
@@ -51,8 +70,7 @@ public final class ResourceLeakTracker implements AutoCloseable {
 	 * @param cleanable the Cleanable to register for cleanup actions
 	 */
 	ResourceLeakTracker(final ResourceLeakReference reference, final Cleanable cleanable) {
-		this.reference = reference;
-		this.cleanable = cleanable;
+		this(reference, cleanable, false);
 	}
 
 	/**
@@ -63,10 +81,24 @@ public final class ResourceLeakTracker implements AutoCloseable {
 	 */
 	@Override
 	public void close() {
-		if (null != reference) {
-			reference.close();
-			ResourceLeakDetector.close(reference, cleanable);
+		if (closed) {
+			return;
 		}
+		this.closed = true;
+		if (null == reference) {
+			return;
+		}
+		reference.close();
+		cleanable.clean();
+	}
+
+	/**
+	 * Returns whether the tracker has been properly closed.
+	 *
+	 * @return true if the tracker is closed, false otherwise
+	 */
+	public boolean isClosed() {
+		return closed;
 	}
 
 	/**

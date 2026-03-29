@@ -15,9 +15,11 @@ package org.morphix.lang.leak;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.morphix.utils.ConcurrentSystem;
 
 /**
  * Test class for {@link LeakDetectionLevel}.
@@ -26,9 +28,16 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 class LeakDetectionLevelTest {
 
+	private String originalProperty;
+
+	@BeforeEach
+	void setup() {
+		originalProperty = ConcurrentSystem.getAndSetProperty(LeakDetectionLevel.PROPERTY, null);
+	}
+
 	@AfterEach
 	void cleanup() {
-		System.clearProperty(LeakDetectionLevel.PROPERTY);
+		ConcurrentSystem.getAndSetProperty(LeakDetectionLevel.PROPERTY, originalProperty);
 	}
 
 	@Test

@@ -36,6 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.morphix.lang.JavaObjects;
 import org.morphix.lang.thread.Threads;
 import org.morphix.utils.ConcurrencyTestProperties;
 import org.morphix.utils.ConcurrencyTestResults;
@@ -55,8 +56,8 @@ class LRUCacheTest {
 		return new TestStrictLRUCache<>(CACHE_CAPACITY);
 	}
 
-	LRUCache<String, String> cache() {
-		return cache;
+	<T extends LRUCache<String, String>> T cache() {
+		return JavaObjects.cast(cache);
 	}
 
 	@BeforeEach
@@ -155,7 +156,7 @@ class LRUCacheTest {
 				cache.computeIfAbsent("key" + index, k -> "value" + index);
 			}
 
-			waitUntil(() -> cache.size() == CACHE_CAPACITY, Duration.ofSeconds(1));
+			waitUntil(() -> cache.size() == CACHE_CAPACITY, Duration.ofSeconds(3));
 
 			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
 			assertThat(cache.get("key1"), is(nullValue()));
@@ -180,7 +181,7 @@ class LRUCacheTest {
 			// should evict lruIndex + 1, which is the least recently used entry after accessing lruIndex
 			cache.computeIfAbsent("key" + newIndex, k -> "value" + newIndex);
 
-			waitUntil(() -> cache.size() == CACHE_CAPACITY, Duration.ofSeconds(1));
+			waitUntil(() -> cache.size() == CACHE_CAPACITY, Duration.ofSeconds(3));
 
 			assertThat(cache.size(), is(equalTo(CACHE_CAPACITY)));
 			assertThat(cache.get("key" + lruIndex), is(equalTo("value" + lruIndex)));

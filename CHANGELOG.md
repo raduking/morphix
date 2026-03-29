@@ -1,5 +1,19 @@
 ## Release Notes
 
+`1.0.27`
+
+- Changed `Threads.waitUntil` methods to return true if the condition was met, false if timeout reached.
+- Moved `lang.accumulator` package from `apiphany` to `morphix`.
+- Moved `lang.collections` package from `apiphany` to `morphix`.
+- Moved `lang.retry` package from `apiphany` to `morphix`.
+- Moved `Temporals` class from `apiphany` to `morphix`.
+- Added `ResourceLeakTracker.isClosed` to check if the resource leak tracker is closed.
+- Added support for leak message hints to `ResourceLeakDetector`.
+- Added resource leak tracking to `ScopedResource`.
+- Removed `org.morphix.*` classes from resource leak call site frames since they are useless.
+
+---
+
 `1.0.26`
 
 - Updated `Case.capitalize` to use `Locale.ROOT`.

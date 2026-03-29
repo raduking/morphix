@@ -15,6 +15,9 @@ package org.morphix.lang.resource;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import org.morphix.lang.leak.ResourceLeakDetector;
+import org.morphix.lang.leak.ResourceLeakTracker;
+
 /**
  * An immutable wrapper for managing the life-cycle of {@link AutoCloseable} resources with scope control.
  * <p>
@@ -71,6 +74,11 @@ public class ScopedResource<T extends AutoCloseable> implements AutoCloseable {
 	private final boolean managed;
 
 	/**
+	 * Leak tracker for detecting resource leaks.
+	 */
+	private final ResourceLeakTracker leakTracker;
+
+	/**
 	 * Constructs a new ScopedResource instance. Use factory methods {@link #managed(AutoCloseable)}, or
 	 * {@link #unmanaged(AutoCloseable)} to construct managed or unmanaged instances respectively.
 	 *
@@ -78,9 +86,11 @@ public class ScopedResource<T extends AutoCloseable> implements AutoCloseable {
 	 * @param management whether the wrapper should manage the life-cycle of the resource
 	 * @throws NullPointerException if resource is null
 	 */
+	@SuppressWarnings("resource")
 	public ScopedResource(final T resource, final Lifecycle management) {
 		this.resource = Objects.requireNonNull(resource, "resource cannot be null");
 		this.managed = Objects.requireNonNull(management, "management cannot be null").isManaged();
+		this.leakTracker = managed ? ResourceLeakDetector.track(resource) : ResourceLeakTracker.DISABLED;
 	}
 
 	/**
@@ -127,8 +137,12 @@ public class ScopedResource<T extends AutoCloseable> implements AutoCloseable {
 	 * @throws Exception if an error occurs while closing the resource
 	 */
 	public void closeIfManaged() throws Exception {
-		if (managed) {
-			resource.close();
+		try {
+			if (managed) {
+				resource.close();
+			}
+		} finally {
+			leakTracker.close();
 		}
 	}
 

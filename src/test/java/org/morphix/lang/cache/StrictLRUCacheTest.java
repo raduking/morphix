@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.morphix.lang.JavaObjects;
 import org.morphix.lang.cache.StrictLRUCache.Node;
 
 /**
@@ -49,7 +48,7 @@ class StrictLRUCacheTest extends LRUCacheTest {
 	@BeforeEach
 	void setUp() {
 		super.setUp();
-		cache = JavaObjects.cast(cache());
+		this.cache = cache();
 	}
 
 	@Nested

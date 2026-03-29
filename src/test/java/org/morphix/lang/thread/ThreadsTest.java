@@ -54,6 +54,8 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.morphix.lang.function.Runnables;
 import org.morphix.lang.thread.Threads.ExecutionType;
+import org.morphix.reflection.Constructors;
+import org.morphix.utils.Tests;
 
 /**
  * Test class for {@link Threads}.
@@ -83,6 +85,13 @@ class ThreadsTest {
 		Set<Integer> set = new HashSet<>(queue);
 		assertThat(queue, hasSize(THREAD_COUNT * THREAD_COUNT));
 		assertThat(set, hasSize(THREAD_COUNT * THREAD_COUNT));
+	}
+
+	@Test
+	void shouldThrowExceptionWhenTryingToInstantiateDefaultClass() {
+		UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(Threads.Default.class);
+
+		assertThat(e.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 	}
 
 	@Nested
@@ -378,10 +387,11 @@ class ThreadsTest {
 			});
 			Threads.waitUntil(thread::isAlive);
 			condition.set(true);
-			Threads.safeJoin(thread);
-			Threads.waitUntil(() -> !thread.isAlive());
+
+			boolean result = Threads.waitUntil(() -> !thread.isAlive());
 
 			assertFalse(thread.isAlive());
+			assertTrue(result);
 		}
 
 		@Test
@@ -394,7 +404,6 @@ class ThreadsTest {
 			});
 			Threads.waitUntil(thread::isAlive);
 			condition.set(true);
-			Threads.safeJoin(thread);
 			Threads.waitUntil(() -> !thread.isAlive());
 
 			assertFalse(thread.isAlive());
@@ -410,7 +419,6 @@ class ThreadsTest {
 			});
 			Threads.waitUntil(thread::isAlive);
 			condition.set(true);
-			Threads.safeJoin(thread);
 			Threads.waitUntil(() -> !thread.isAlive());
 
 			assertFalse(thread.isAlive());
@@ -432,13 +440,10 @@ class ThreadsTest {
 		void shouldReturnImmediatelyIfTimeoutIsNegative() {
 			AtomicBoolean condition = new AtomicBoolean(false);
 
-			Thread thread = Thread.ofPlatform().start(() -> {
-				Threads.waitUntil(condition::get, Duration.ofSeconds(-1));
-			});
-			Threads.safeJoin(thread);
+			boolean result = Threads.waitUntil(condition::get, Duration.ofSeconds(-1));
 
-			assertFalse(thread.isAlive());
 			assertFalse(condition.get());
+			assertFalse(result);
 		}
 
 		@Test

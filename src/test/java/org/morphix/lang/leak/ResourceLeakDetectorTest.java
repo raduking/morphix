@@ -14,6 +14,7 @@ package org.morphix.lang.leak;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
@@ -33,12 +34,14 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.Fields;
+import org.morphix.utils.ConcurrentSystem;
 import org.morphix.utils.Tests;
 
 /**
@@ -48,12 +51,26 @@ import org.morphix.utils.Tests;
  */
 class ResourceLeakDetectorTest {
 
+	private static final String REASON = "reason";
 	private static final String GC_WITHOUT_CLOSE = "GC without close()";
 	private static final String TEST_MESSAGE = "Test message";
 
+	private static final int ADVANCED_REPORTED_FRAMES = 10;
+	private static final Set<String> IGNORED_FRAMES = Set.of(
+			ResourceLeakReference.class.getName() + ".",
+			ResourceLeakTracker.class.getName() + ".",
+			ResourceLeakDetector.class.getName() + ".");
+
+	private String originalProperty;
+
+	@BeforeEach
+	void setup() {
+		originalProperty = ConcurrentSystem.getAndSetProperty(LeakDetectionLevel.PROPERTY, null);
+	}
+
 	@AfterEach
 	void cleanup() {
-		System.clearProperty(LeakDetectionLevel.PROPERTY);
+		ConcurrentSystem.getAndSetProperty(LeakDetectionLevel.PROPERTY, originalProperty);
 	}
 
 	private static Set<ResourceLeakReference> references() {
@@ -187,9 +204,12 @@ class ResourceLeakDetectorTest {
 		String expectedMessage = tracker.getReference().getReport(GC_WITHOUT_CLOSE);
 
 		try {
-			assertThat(expectedMessage, containsAtLeastTimes("  at ", 10));
-			assertThat(expectedMessage, containsString(TestResource.class.getName()));
 			assertThat(logs.get(0).getMessage(), equalTo(expectedMessage));
+			assertThat(expectedMessage, containsAtLeastTimes("  at ", ADVANCED_REPORTED_FRAMES));
+			assertThat(expectedMessage, containsString(TestResource.class.getName()));
+			for (String ignoredFrame : IGNORED_FRAMES) {
+				assertThat(expectedMessage, not(containsString(ignoredFrame)));
+			}
 		} finally {
 			logger.removeHandler(handler);
 			// cleanup so other tests are not affected
@@ -265,6 +285,20 @@ class ResourceLeakDetectorTest {
 		UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(ResourceLeakDetector.class);
 
 		assertThat(e.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
+	}
+
+	@Test
+	void shouldBuildMessageWithNullHint() {
+		String message = ResourceLeakDetector.message(null, REASON);
+
+		assertThat(message, equalTo(REASON));
+	}
+
+	@Test
+	void shouldBuildMessageWithHint() {
+		String message = ResourceLeakDetector.message(TEST_MESSAGE, REASON);
+
+		assertThat(message, equalTo(TEST_MESSAGE + " " + REASON));
 	}
 
 	static class TestResource implements AutoCloseable {

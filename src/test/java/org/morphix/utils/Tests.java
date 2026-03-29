@@ -51,8 +51,8 @@ public interface Tests {
 	}
 
 	static void waitUntil(final BooleanSupplier condition, final Duration timeout, final Duration pollInterval) {
-		Threads.waitUntil(condition, timeout, pollInterval);
-		if (!condition.getAsBoolean()) {
+		boolean conditionMet = Threads.waitUntil(condition, timeout, pollInterval);
+		if (!conditionMet) {
 			fail("Condition not met within: " + timeout);
 		}
 	}

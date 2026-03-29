@@ -13,6 +13,7 @@
 package org.morphix.lang.leak;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +25,20 @@ import org.junit.jupiter.api.Test;
 class ResourceLeakTrackerTest {
 
 	@Test
-	void noneTrackerShouldDoNothing() {
+	void disabledTrackerShouldDoNothing() {
 		assertDoesNotThrow(ResourceLeakTracker.DISABLED::close);
+	}
+
+	@Test
+	void disabledTrackerShouldBeClosed() {
+		assertTrue(ResourceLeakTracker.DISABLED.isClosed());
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void shouldNotThrowWhenClosingWithoutReference() {
+		ResourceLeakTracker tracker = new ResourceLeakTracker(null, null, false);
+
+		assertDoesNotThrow(tracker::close);
 	}
 }
