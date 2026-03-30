@@ -4,6 +4,8 @@
 
 - Added `ScopedResource.closeIfManaged(AutoClosable)` to be able to provide a custom `close` function.
 - Added `ScopedResource.get` as an alias for `ScopedResource.unwrap`.
+- Added `ScopedResource.derive` to create child scoped resources with the same management/ownership as the parent.
+- Added `ExceptionThrowingFunction` similar to `ThrowingFunction` throwing `Exception` instead of `Throwable`.
 - Moved `Pair` from `apiphany` to `morphix`.
 - Moved `Holder` from `apiphany` to `morphix`.
 

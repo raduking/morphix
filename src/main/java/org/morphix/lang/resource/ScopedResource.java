@@ -15,8 +15,7 @@ package org.morphix.lang.resource;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import org.morphix.lang.Unchecked;
-import org.morphix.lang.function.ThrowingFunction;
+import org.morphix.lang.function.ExceptionThrowingFunction;
 import org.morphix.lang.leak.ResourceLeakDetector;
 import org.morphix.lang.leak.ResourceLeakTracker;
 
@@ -339,14 +338,10 @@ public class ScopedResource<T extends AutoCloseable> implements AutoCloseable {
 	 * @return a new ScopedResource instance wrapping the derived resource
 	 * @throws Exception if an error occurs while creating the new resource
 	 */
-	public <R extends AutoCloseable> ScopedResource<R> derive(final ThrowingFunction<? super T, ? extends R> factory)
-			throws Exception { // NOSONAR this method is designed to accommodate any throwing function
-		final R child;
-		try {
-			child = factory.apply(resource);
-			return isManaged() ? managed(child) : unmanaged(child);
-		} catch (Throwable t) {
-			return Unchecked.reThrow(t);
-		}
+	@SuppressWarnings("resource")
+	public <R extends AutoCloseable> ScopedResource<R> derive(
+			final ExceptionThrowingFunction<? super T, ? extends R> factory) throws Exception {
+		R child = factory.apply(resource);
+		return isManaged() ? managed(child) : unmanaged(child);
 	}
 }
