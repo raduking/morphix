@@ -1,5 +1,11 @@
 ## Release Notes
 
+`1.0.28`
+
+- Moved `Pair` from `apiphany` to `morphix`.
+
+---
+
 `1.0.27`
 
 - Changed `Threads.waitUntil` methods to return true if the condition was met, false if timeout reached.
