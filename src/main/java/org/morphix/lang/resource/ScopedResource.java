@@ -131,19 +131,43 @@ public class ScopedResource<T extends AutoCloseable> implements AutoCloseable {
 	}
 
 	/**
+	 * Runs the provided close task if the resource is managed by this wrapper. For unmanaged resources, this method does
+	 * nothing. This method allows for custom close logic to be executed for managed resources, while ensuring that
+	 * unmanaged resources are not affected. For handling exceptions, consider using {@link #closeIfManaged(Consumer)}.
+	 * <p>
+	 * The use of {@link AutoCloseable} here allows the close task to be used both as a lambda expression, method reference
+	 * or a closeable resource providing flexibility in how the close logic is defined and executed.
+	 * <p>
+	 * Usage example:
+	 *
+	 * <pre>
+	 * scopedResource.closeIfManaged(() -> {
+	 * 	// custom close logic for the resource
+	 * 	resource.close();
+	 * });
+	 * </pre>
+	 *
+	 * @param closeTask a task that performs the close operation on the resource
+	 * @throws Exception if an error occurs while executing the close task
+	 */
+	public void closeIfManaged(final AutoCloseable closeTask) throws Exception {
+		try {
+			if (managed) {
+				closeTask.close();
+			}
+		} finally {
+			leakTracker.close();
+		}
+	}
+
+	/**
 	 * Closes the resource if it is managed by this wrapper. For unmanaged resources, this method does nothing. For handling
 	 * exceptions, consider using {@link #closeIfManaged(Consumer)}.
 	 *
 	 * @throws Exception if an error occurs while closing the resource
 	 */
 	public void closeIfManaged() throws Exception {
-		try {
-			if (managed) {
-				resource.close();
-			}
-		} finally {
-			leakTracker.close();
-		}
+		closeIfManaged(resource);
 	}
 
 	/**
