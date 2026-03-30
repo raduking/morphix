@@ -148,7 +148,7 @@ public final class ResourceLeakDetector {
 	 * @return a formatted message to include in the leak report
 	 */
 	public static String message(final String hint, final String reason) {
-		return (JavaObjects.isEmpty(hint) ? "" : hint + " ") + reason;
+		return (JavaObjects.isEmpty(hint) ? "" : hint + " - ") + reason;
 	}
 
 	/**

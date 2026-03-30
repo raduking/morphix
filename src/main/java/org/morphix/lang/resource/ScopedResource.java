@@ -113,6 +113,15 @@ public class ScopedResource<T extends AutoCloseable> implements AutoCloseable {
 	}
 
 	/**
+	 * Returns the underlying resource. This is an alias for {@link #unwrap()}.
+	 *
+	 * @return the wrapped resource
+	 */
+	public T get() {
+		return unwrap();
+	}
+
+	/**
 	 * Checks if this wrapper manages the resource's life-cycle.
 	 *
 	 * @return true if the resource is managed by this wrapper
@@ -151,10 +160,11 @@ public class ScopedResource<T extends AutoCloseable> implements AutoCloseable {
 	 * @throws Exception if an error occurs while executing the close task
 	 */
 	public void closeIfManaged(final AutoCloseable closeTask) throws Exception {
+		if (isNotManaged()) {
+			return;
+		}
 		try {
-			if (managed) {
-				closeTask.close();
-			}
+			closeTask.close();
 		} finally {
 			leakTracker.close();
 		}

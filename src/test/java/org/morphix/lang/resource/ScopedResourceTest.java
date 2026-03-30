@@ -25,6 +25,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.morphix.lang.function.Consumers;
 import org.morphix.lang.leak.LeakDetectionLevel;
+import org.morphix.lang.leak.ResourceLeakDetector;
+import org.morphix.lang.leak.ResourceLeakTracker;
+import org.morphix.reflection.Fields;
 import org.morphix.utils.ConcurrentSystem;
 
 /**
@@ -38,7 +41,6 @@ class ScopedResourceTest {
 	@SuppressWarnings("resource")
 	void shouldCreateAManagedResourceWithConstructor() {
 		TestResource resource = new TestResource();
-
 		ScopedResource<TestResource> scopedResource = new ScopedResource<>(resource);
 
 		TestResource retrievedResource = scopedResource.unwrap();
@@ -52,7 +54,6 @@ class ScopedResourceTest {
 	@SuppressWarnings("resource")
 	void shouldCreateAnUnmanagedResourceWithConstructor() {
 		TestResource resource = new TestResource();
-
 		ScopedResource<TestResource> scopedResource = new ScopedResource<>(resource, Lifecycle.UNMANAGED);
 
 		TestResource retrievedResource = scopedResource.unwrap();
@@ -66,7 +67,6 @@ class ScopedResourceTest {
 	@SuppressWarnings("resource")
 	void shouldCreateAManagedResourceWithFactoryMethod() {
 		TestResource resource = new TestResource();
-
 		ScopedResource<TestResource> scopedResource = ScopedResource.managed(resource);
 
 		TestResource retrievedResource = scopedResource.unwrap();
@@ -80,7 +80,6 @@ class ScopedResourceTest {
 	@SuppressWarnings("resource")
 	void shouldCreateAManagedResourceWithOwnedFactoryMethod() {
 		TestResource resource = new TestResource();
-
 		ScopedResource<TestResource> scopedResource = ScopedResource.owned(resource);
 
 		TestResource retrievedResource = scopedResource.unwrap();
@@ -94,7 +93,6 @@ class ScopedResourceTest {
 	@SuppressWarnings("resource")
 	void shouldCreateAnUnmanagedResourceWithFactoryMethod() {
 		TestResource resource = new TestResource();
-
 		ScopedResource<TestResource> scopedResource = ScopedResource.unmanaged(resource);
 
 		TestResource retrievedResource = scopedResource.unwrap();
@@ -108,7 +106,6 @@ class ScopedResourceTest {
 	@SuppressWarnings("resource")
 	void shouldCreateAnUnmanagedResourceWithExternalFactoryMethod() {
 		TestResource resource = new TestResource();
-
 		ScopedResource<TestResource> scopedResource = ScopedResource.external(resource);
 
 		TestResource retrievedResource = scopedResource.unwrap();
@@ -120,9 +117,30 @@ class ScopedResourceTest {
 
 	@Test
 	@SuppressWarnings("resource")
+	void shouldReturnTheSameResourceOnUnwrap() {
+		TestResource resource = new TestResource();
+		ScopedResource<TestResource> scopedResource = new ScopedResource<>(resource);
+
+		TestResource retrievedResource = scopedResource.unwrap();
+
+		assertThat(resource, equalTo(retrievedResource));
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void shouldReturnTheSameResourceOnGet() {
+		TestResource resource = new TestResource();
+		ScopedResource<TestResource> scopedResource = new ScopedResource<>(resource);
+
+		TestResource retrievedResource = scopedResource.get();
+
+		assertThat(resource, equalTo(retrievedResource));
+	}
+
+	@Test
+	@SuppressWarnings("resource")
 	void shouldCloseManagedResource() throws Exception {
 		TestResource resource = new TestResource();
-
 		ScopedResource<TestResource> scopedResource = ScopedResource.managed(resource);
 
 		scopedResource.close();
@@ -134,7 +152,6 @@ class ScopedResourceTest {
 	@SuppressWarnings("resource")
 	void shouldCloseManagedResourceOnCloseIfManaged() throws Exception {
 		TestResource resource = new TestResource();
-
 		ScopedResource<TestResource> scopedResource = ScopedResource.managed(resource);
 
 		scopedResource.closeIfManaged();
@@ -147,7 +164,20 @@ class ScopedResourceTest {
 	void shouldCloseManagedResourceAndResourceLeakTrackerOnCloseWhenAdvancedTrackingIsEnabled() throws Exception {
 		ConcurrentSystem.withProperty(LeakDetectionLevel.PROPERTY, LeakDetectionLevel.ADVANCED.name(), () -> {
 			TestResource resource = new TestResource();
+			ScopedResource<TestResource> scopedResource = ScopedResource.managed(resource);
 
+			scopedResource.closeIfManaged();
+
+			assertTrue(resource.isClosed());
+			assertTrue(scopedResource.getLeakTracker().isClosed());
+		});
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void shouldCloseManagedResourceAndResourceLeakTrackerOnCloseWhenSimpleTrackingIsEnabled() throws Exception {
+		ConcurrentSystem.withProperty(LeakDetectionLevel.PROPERTY, LeakDetectionLevel.SIMPLE.name(), () -> {
+			TestResource resource = new TestResource();
 			ScopedResource<TestResource> scopedResource = ScopedResource.managed(resource);
 
 			scopedResource.closeIfManaged();
@@ -171,7 +201,23 @@ class ScopedResourceTest {
 
 	@Test
 	@SuppressWarnings("resource")
-	void shouldNotCloseUnmanagedResourceButCloseTrackerIfAdvancedTrackingIsEnabled() throws Exception {
+	void shouldNotCloseUnmanagedResourceButCloseTrackerWhenSimpleTrackingIsEnabled() throws Exception {
+		ConcurrentSystem.withProperty(LeakDetectionLevel.PROPERTY, LeakDetectionLevel.SIMPLE.name(), () -> {
+			try (TestResource resource = new TestResource()) {
+				ScopedResource<TestResource> scopedResource = ScopedResource.unmanaged(resource);
+
+				scopedResource.close();
+
+				assertFalse(resource.isClosed());
+				// this should be the DISABLED tracker, which is always closed
+				assertTrue(scopedResource.getLeakTracker().isClosed());
+			}
+		});
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void shouldNotCloseUnmanagedResourceButCloseTrackerWhenAdvancedTrackingIsEnabled() throws Exception {
 		ConcurrentSystem.withProperty(LeakDetectionLevel.PROPERTY, LeakDetectionLevel.ADVANCED.name(), () -> {
 			try (TestResource resource = new TestResource()) {
 				ScopedResource<TestResource> scopedResource = ScopedResource.unmanaged(resource);
@@ -179,7 +225,25 @@ class ScopedResourceTest {
 				scopedResource.close();
 
 				assertFalse(resource.isClosed());
+				// this should be the DISABLED tracker, which is always closed
 				assertTrue(scopedResource.getLeakTracker().isClosed());
+			}
+		});
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void shouldNotCloseUnmanagedResourceOrTrackerWhenSimpleTrackingIsEnabledAndTrackerSetWithReflection() throws Exception {
+		ConcurrentSystem.withProperty(LeakDetectionLevel.PROPERTY, LeakDetectionLevel.SIMPLE.name(), () -> {
+			try (TestResource resource = new TestResource()) {
+				ScopedResource<TestResource> scopedResource = ScopedResource.unmanaged(resource);
+				ResourceLeakTracker leakTracker = ResourceLeakDetector.track(resource, "Expected test unclosed leak tracker");
+				Fields.IgnoreAccess.set(scopedResource, "leakTracker", leakTracker);
+
+				scopedResource.close();
+
+				assertFalse(resource.isClosed());
+				assertFalse(scopedResource.getLeakTracker().isClosed());
 			}
 		});
 	}
@@ -188,7 +252,6 @@ class ScopedResourceTest {
 	@SuppressWarnings("resource")
 	void shouldCloseManagedResourceWithExceptionHandler() {
 		TestResource resource = new TestResource();
-
 		ScopedResource<TestResource> scopedResource = ScopedResource.managed(resource);
 
 		assertDoesNotThrow(() -> scopedResource.closeIfManaged(e -> {
@@ -298,7 +361,6 @@ class ScopedResourceTest {
 	@SuppressWarnings("resource")
 	void shouldSafelyCloseTheResourceWithSafeCloseAndHandleException() {
 		TestResourceWithExceptionOnClose resource = new TestResourceWithExceptionOnClose();
-
 		AtomicReference<Exception> caughtException = new AtomicReference<>();
 
 		assertDoesNotThrow(() -> ScopedResource.safeClose(resource, caughtException::set));

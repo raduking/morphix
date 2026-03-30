@@ -2,6 +2,8 @@
 
 `1.0.28`
 
+- Added `ScopedResource.closeIfManaged(AutoClosable)` to be able to provide a custom `close` function.
+- Added `ScopedResource.get` as an alias for `ScopedResource.unwrap`.
 - Moved `Pair` from `apiphany` to `morphix`.
 - Moved `Holder` from `apiphany` to `morphix`.
 
