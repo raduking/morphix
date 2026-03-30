@@ -3,6 +3,7 @@
 `1.0.28`
 
 - Moved `Pair` from `apiphany` to `morphix`.
+- Moved `Holder` from `apiphany` to `morphix`.
 
 ---
 
