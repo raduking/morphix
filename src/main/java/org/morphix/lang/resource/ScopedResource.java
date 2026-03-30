@@ -171,6 +171,16 @@ public class ScopedResource<T extends AutoCloseable> implements AutoCloseable {
 	}
 
 	/**
+	 * Returns the leak tracker associated with this scoped resource. This is primarily intended for internal use and
+	 * testing to verify that leak tracking is functioning correctly.
+	 *
+	 * @return the resource leak tracker
+	 */
+	protected ResourceLeakTracker getLeakTracker() {
+		return leakTracker;
+	}
+
+	/**
 	 * Creates a new ScopedResource instance.
 	 *
 	 * @param <T> the type of the resource

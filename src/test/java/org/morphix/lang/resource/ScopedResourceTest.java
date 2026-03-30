@@ -24,6 +24,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.lang.function.Consumers;
+import org.morphix.lang.leak.LeakDetectionLevel;
+import org.morphix.utils.ConcurrentSystem;
 
 /**
  * Test class for {@link ScopedResource}.
@@ -142,14 +144,17 @@ class ScopedResourceTest {
 
 	@Test
 	@SuppressWarnings("resource")
-	void shouldNotCloseUnmanagedResource() throws Exception {
-		try (TestResource resource = new TestResource()) {
-			ScopedResource<TestResource> scopedResource = ScopedResource.unmanaged(resource);
+	void shouldCloseManagedResourceAndResourceLeakTrackerOnCloseWhenAdvancedTrackingIsEnabled() throws Exception {
+		ConcurrentSystem.withProperty(LeakDetectionLevel.PROPERTY, LeakDetectionLevel.ADVANCED.name(), () -> {
+			TestResource resource = new TestResource();
 
-			scopedResource.close();
+			ScopedResource<TestResource> scopedResource = ScopedResource.managed(resource);
 
-			assertFalse(resource.isClosed());
-		}
+			scopedResource.closeIfManaged();
+
+			assertTrue(resource.isClosed());
+			assertTrue(scopedResource.getLeakTracker().isClosed());
+		});
 	}
 
 	@Test
@@ -162,6 +167,21 @@ class ScopedResourceTest {
 
 			assertFalse(resource.isClosed());
 		}
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void shouldNotCloseUnmanagedResourceButCloseTrackerIfAdvancedTrackingIsEnabled() throws Exception {
+		ConcurrentSystem.withProperty(LeakDetectionLevel.PROPERTY, LeakDetectionLevel.ADVANCED.name(), () -> {
+			try (TestResource resource = new TestResource()) {
+				ScopedResource<TestResource> scopedResource = ScopedResource.unmanaged(resource);
+
+				scopedResource.close();
+
+				assertFalse(resource.isClosed());
+				assertTrue(scopedResource.getLeakTracker().isClosed());
+			}
+		});
 	}
 
 	@Test
@@ -277,14 +297,14 @@ class ScopedResourceTest {
 	@Test
 	@SuppressWarnings("resource")
 	void shouldSafelyCloseTheResourceWithSafeCloseAndHandleException() {
-		TestResourceExceptionOnClose resource = new TestResourceExceptionOnClose();
+		TestResourceWithExceptionOnClose resource = new TestResourceWithExceptionOnClose();
 
 		AtomicReference<Exception> caughtException = new AtomicReference<>();
 
 		assertDoesNotThrow(() -> ScopedResource.safeClose(resource, caughtException::set));
 
 		assertTrue(resource.isClosed());
-		assertThat(caughtException.get().getMessage(), equalTo(TestResourceExceptionOnClose.CLOSE_FAILED));
+		assertThat(caughtException.get().getMessage(), equalTo(TestResourceWithExceptionOnClose.CLOSE_FAILED));
 	}
 
 	static class TestResource implements AutoCloseable {
@@ -301,7 +321,7 @@ class ScopedResourceTest {
 		}
 	}
 
-	static class TestResourceExceptionOnClose implements AutoCloseable {
+	static class TestResourceWithExceptionOnClose implements AutoCloseable {
 
 		private static final String CLOSE_FAILED = "Close failed!";
 

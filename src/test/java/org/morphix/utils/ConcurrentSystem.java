@@ -51,6 +51,25 @@ public class ConcurrentSystem {
 		}
 	}
 
+	public static void withProperty(final String key, final String value, final AutoCloseable action) throws Exception {
+		ReentrantLock keyLock = getLockForKey(key);
+		keyLock.lock();
+		try {
+			String oldValue = System.setProperty(key, value);
+			try {
+				action.close();
+			} finally {
+				if (null == oldValue) {
+					System.clearProperty(key);
+				} else {
+					System.setProperty(key, oldValue);
+				}
+			}
+		} finally {
+			keyLock.unlock();
+		}
+	}
+
 	public static ReentrantLock getLockForKey(final String key) {
 		return LOCKS.computeIfAbsent(key, k -> new ReentrantLock());
 	}
