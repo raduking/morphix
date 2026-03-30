@@ -15,6 +15,8 @@ package org.morphix.lang.resource;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import org.morphix.lang.Unchecked;
+import org.morphix.lang.function.ThrowingFunction;
 import org.morphix.lang.leak.ResourceLeakDetector;
 import org.morphix.lang.leak.ResourceLeakTracker;
 
@@ -318,6 +320,33 @@ public class ScopedResource<T extends AutoCloseable> implements AutoCloseable {
 			resource.close();
 		} catch (Exception e) {
 			exceptionHandler.accept(e);
+		}
+	}
+
+	/**
+	 * Derives a new ScopedResource from the current one using the provided factory function. The management of the new
+	 * resource is determined by the management of the current resource.
+	 * <ul>
+	 * <li>If the current resource is managed, the new resource will also be managed</li>
+	 * <li>If the current resource is unmanaged, the new resource will also be unmanaged</li>
+	 * </ul>
+	 * This allows for consistent management of related resources and ensures that derived resources are properly handled
+	 * based on the management of the original resource.
+	 *
+	 * @param <R> the type of the new resource being derived
+	 *
+	 * @param factory a function that takes the current resource and produces a new resource
+	 * @return a new ScopedResource instance wrapping the derived resource
+	 * @throws Exception if an error occurs while creating the new resource
+	 */
+	public <R extends AutoCloseable> ScopedResource<R> derive(final ThrowingFunction<? super T, ? extends R> factory)
+			throws Exception { // NOSONAR this method is designed to accommodate any throwing function
+		final R child;
+		try {
+			child = factory.apply(resource);
+			return isManaged() ? managed(child) : unmanaged(child);
+		} catch (Throwable t) {
+			return Unchecked.reThrow(t);
 		}
 	}
 }
