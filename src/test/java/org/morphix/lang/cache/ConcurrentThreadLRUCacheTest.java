@@ -38,8 +38,6 @@ class ConcurrentThreadLRUCacheTest extends LRUCacheTest {
 
 	private static final Logger LOGGER = Logger.getLogger(ConcurrentThreadLRUCacheTest.class.getName());
 
-	static final int CACHE_CAPACITY = 3;
-
 	ConcurrentThreadLRUCache<String, String> cache;
 
 	@Override
@@ -101,7 +99,7 @@ class ConcurrentThreadLRUCacheTest extends LRUCacheTest {
 		// add a new entry, which should evict a random entry due to sample size of 1
 		sampledCache.computeIfAbsent("D", k -> "Value D");
 
-		waitUntil(() -> sampledCache.size() <= CACHE_CAPACITY);
+		waitUntil(() -> sampledCache.size() == CACHE_CAPACITY);
 
 		assertThat(sampledCache.size(), is(equalTo(CACHE_CAPACITY)));
 	}
@@ -122,7 +120,7 @@ class ConcurrentThreadLRUCacheTest extends LRUCacheTest {
 		// add a new entry, which should evict "B" since it's the least recently used among the sampled entries
 		sampledCache.computeIfAbsent("D", k -> "Value D");
 
-		waitUntil(() -> sampledCache.size() <= CACHE_CAPACITY);
+		waitUntil(() -> sampledCache.size() == CACHE_CAPACITY);
 
 		assertThat(sampledCache.size(), is(equalTo(CACHE_CAPACITY)));
 		assertThat(sampledCache.get("B"), is(equalTo(null)));
