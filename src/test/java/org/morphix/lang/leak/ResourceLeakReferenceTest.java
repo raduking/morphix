@@ -14,6 +14,7 @@ package org.morphix.lang.leak;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -51,5 +52,15 @@ class ResourceLeakReferenceTest {
 		assertTrue(ref.isClosed());
 		assertDoesNotThrow(() -> ref.reportLeak(TEST));
 		assertFalse(ref.isReported());
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void shouldReturnNullReportIfReporterIsNull() {
+		ResourceLeakReference ref = ResourceLeakReference.of(LeakDetectionLevel.SIMPLE, Object.class, null);
+		String report = ref.getReport(TEST);
+
+		assertDoesNotThrow(() -> ref.reportLeak(TEST));
+		assertNull(report);
 	}
 }

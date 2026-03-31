@@ -216,9 +216,7 @@ public class ConcurrentThreadLRUCache<K, V> implements LRUCache<K, V> {
 	 * Evicts entries from the cache until the cache size is less than or equal to the maximum size.
 	 */
 	void evict() {
-		if (!writeLock.tryLock()) {
-			return;
-		}
+		writeLock.lock();
 		try {
 			while (cache.size() > capacity) {
 				evictLeastRecentlyUsed();

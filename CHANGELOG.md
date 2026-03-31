@@ -1,5 +1,18 @@
 ## Release Notes
 
+`1.0.28`
+
+- Added `ScopedResource.closeIfManaged(AutoClosable)` to be able to provide a custom `close` function.
+- Added `ScopedResource.get` as an alias for `ScopedResource.unwrap`.
+- Added `ScopedResource.derive` to create child scoped resources with the same management/ownership as the parent.
+- Added `ExceptionThrowingFunction` similar to `ThrowingFunction` throwing `Exception` instead of `Throwable`.
+- Moved `Pair` from `apiphany` to `morphix`.
+- Moved `Holder` from `apiphany` to `morphix`.
+- Added `OptionalLibrary` class to describe a library support (moved and renamed from `org.apiphany.lang.LibraryDescriptor`).
+- Added `Libraries` utility interface to create the proper instance for the available library in the classpath (from apiphany `LibraryInitializer`).
+
+---
+
 `1.0.27`
 
 - Changed `Threads.waitUntil` methods to return true if the condition was met, false if timeout reached.

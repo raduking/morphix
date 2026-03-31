@@ -298,7 +298,7 @@ class ResourceLeakDetectorTest {
 	void shouldBuildMessageWithHint() {
 		String message = ResourceLeakDetector.message(TEST_MESSAGE, REASON);
 
-		assertThat(message, equalTo(TEST_MESSAGE + " " + REASON));
+		assertThat(message, equalTo(TEST_MESSAGE + " - " + REASON));
 	}
 
 	static class TestResource implements AutoCloseable {

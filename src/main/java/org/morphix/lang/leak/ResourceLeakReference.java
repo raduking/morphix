@@ -217,6 +217,9 @@ public final class ResourceLeakReference implements AutoCloseable {
 	 * @return the constructed report for the detected leak
 	 */
 	String getReport(final String reason) {
+		if (null == reporter) {
+			return null;
+		}
 		return reporter.report(this, reason);
 	}
 }
