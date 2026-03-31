@@ -1,5 +1,11 @@
 ## Release Notes
 
+`1.0.29`
+
+- Fixed `ConcurrentThreadLRUCache` eviction method to acquire lock always.
+
+---
+
 `1.0.28`
 
 - Added `ScopedResource.closeIfManaged(AutoClosable)` to be able to provide a custom `close` function.
