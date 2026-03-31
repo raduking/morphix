@@ -179,6 +179,7 @@ public final class ResourceLeakDetector {
 	 * @return a new thread that will report leaks on JVM shutdown
 	 */
 	static Thread newLeakReporterThread() {
+		// use platform thread, shutdown hooks must not rely on virtual thread scheduler
 		return new Thread(() -> reportLeaks(REFERENCES, "JVM shutdown"));
 	}
 
@@ -202,7 +203,8 @@ public final class ResourceLeakDetector {
 	 * @param message the message to include in the leak reports
 	 */
 	static void reportLeaks(final Set<ResourceLeakReference> references, final String message) {
-		for (ResourceLeakReference reference : references) {
+		Set<ResourceLeakReference> refs = REFERENCES == references ? Set.copyOf(references) : references;
+		for (ResourceLeakReference reference : refs) {
 			reportLeak(reference, message);
 		}
 	}
