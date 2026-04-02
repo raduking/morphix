@@ -19,6 +19,8 @@ import java.util.function.Supplier;
  * wrap the execution of a supplier or a runnable with custom logic, such as logging, error handling, or performance
  * monitoring.
  *
+ * @param <T> the type of the result produced by the supplier
+ *
  * @author Radu Sebastian LAZIN
  */
 @FunctionalInterface

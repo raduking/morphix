@@ -1,5 +1,12 @@
 ## Release Notes
 
+`1.0.30`
+
+- Added `Enums.valueOf(Class, String, Supplier)` which returns the default value supplied if the string cannot be transformed to the enum.
+- Added `ExecutionWrapper` functional interface which adds AOP like decorating functionality but without annotations.
+
+---
+
 `1.0.29`
 
 - Fixed `ConcurrentThreadLRUCache` eviction method to acquire lock always.

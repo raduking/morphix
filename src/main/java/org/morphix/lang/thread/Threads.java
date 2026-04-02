@@ -71,7 +71,7 @@ public class Threads {
 		}),
 
 		/**
-		 * Will run each runnable in parallel using standard Java threads.
+		 * Will run each runnable in parallel using standard Java threads (platform threads).
 		 */
 		PARALLEL((runnables, executor) -> {
 			List<Thread> threads = runnables.stream()
