@@ -31,11 +31,19 @@ A library that exposes general Java utility and reflection methods and a package
 
 - Provides utility classes / objects / methods for easier development with Java reflection.
 
+#### Utility
+
+- It has no outside dependencies, built entirely on standard Java 21+
+- Provides utility classes / objects / methods for easier development with Java.
+- Fast retry framework for retrying any code block with custom retry policies, exception handling and more.
+- Provides a simple concurrent LRU cache implementation.
+- Resource management, ownership and leak detection utilities for easier management of resources and their lifecycle.
+- Thread management utilities for easier management of threads and their lifecycle.
+
 #### Conversions
 
 - Provides an API for converting a source java object to a destination Java object.
 - It's simple, fast and has no byte-code manipulation
-- It has no outside dependencies, built entirely on standard Java 21+
 - No annotation processing needed
 - Uses reflection (fields + getters/setters)
 - Iterates through destination object fields
@@ -48,8 +56,8 @@ Current release `1.0.30`
 
 ### Documentation
 
-- [Simple conversions](doc/simple.md)
 - [Enums](doc/enums.md)
+- [Simple conversions](doc/simple.md)
 - [Auto conversions](doc/auto-conversions.md)
 
 ### Examples
