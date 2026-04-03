@@ -132,6 +132,66 @@ class ThreadsTest {
 
 			verifyNoInteractions(timeUnit);
 		}
+
+		@Test
+		void shouldNotSafeSleepIfTheGivenDurationIsZero() {
+			Duration duration = mock(Duration.class);
+			doReturn(0L).when(duration).toMillis();
+
+			boolean result = Threads.safeSleep(duration);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldNotSafeSleepIfTheGivenDurationIsNegative() {
+			Duration duration = mock(Duration.class);
+			doReturn(-1L).when(duration).toMillis();
+
+			boolean result = Threads.safeSleep(duration);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldHandleInterruptedExceptionWhenSafeSleeping() {
+			AtomicBoolean success = new AtomicBoolean(false);
+			Thread thread = Thread.ofPlatform().start(() -> {
+				boolean result = Threads.safeSleep(Duration.ofHours(TIME));
+				success.set(result);
+			});
+
+			thread.interrupt();
+			Threads.safeJoin(thread);
+
+			assertTrue(thread.isInterrupted());
+			assertFalse(success.get());
+		}
+
+		@Test
+		void shouldHandleInterruptedExceptionWhenSafeSleepingWithTimeUnit() {
+			AtomicBoolean success = new AtomicBoolean(false);
+			Thread thread = Thread.ofPlatform().start(() -> {
+				boolean result = Threads.safeSleep(TIME, TimeUnit.HOURS);
+				success.set(result);
+			});
+
+			thread.interrupt();
+			Threads.safeJoin(thread);
+
+			assertTrue(thread.isInterrupted());
+			assertFalse(success.get());
+		}
+
+		@Test
+		void shouldSafeSleepForTheGivenDurationAndReturnTrue() {
+			Duration duration = Duration.ofMillis(10);
+
+			boolean result = Threads.safeSleep(duration);
+
+			assertTrue(result);
+			assertFalse(Thread.currentThread().isInterrupted());
+		}
 	}
 
 	@Nested

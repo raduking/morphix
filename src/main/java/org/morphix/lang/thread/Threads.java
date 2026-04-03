@@ -180,20 +180,27 @@ public class Threads {
 	}
 
 	/**
-	 * Puts the current thread to sleep for the given interval with the given time unit. See {@link TimeUnit} for more
-	 * details. If the interval is zero no sleep will be done.
+	 * Puts the current thread to sleep for the given interval with the given time unit. See {@link TimeUnit#sleep(long)}
+	 * for more details. If the interval is zero no sleep will be done.
+	 * <p>
+	 * Note: it is recommended to set interrupt status for the current thread in case {@link InterruptedException} is
+	 * caught, so the method will do it by default. You can check the interrupt status with {@link #isCurrentInterrupted()}
+	 * after calling this method to know if the sleep was interrupted or not.
 	 *
 	 * @param interval interval
 	 * @param timeUnit time unit
+	 * @return true if the sleep completed successfully, false if it was interrupted
 	 */
-	public static void safeSleep(final long interval, final TimeUnit timeUnit) {
-		if (0 == interval) {
-			return;
+	public static boolean safeSleep(final long interval, final TimeUnit timeUnit) {
+		if (interval <= 0) {
+			return true;
 		}
 		try {
 			timeUnit.sleep(interval);
+			return true;
 		} catch (InterruptedException e) {
 			handleInterruptedException();
+			return false;
 		}
 	}
 
@@ -202,8 +209,8 @@ public class Threads {
 	 *
 	 * @param duration sleep duration
 	 */
-	public static void safeSleep(final Duration duration) {
-		safeSleep(duration.toMillis(), TimeUnit.MILLISECONDS);
+	public static boolean safeSleep(final Duration duration) {
+		return safeSleep(duration.toMillis(), TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -233,8 +240,8 @@ public class Threads {
 			return latch.await(duration.toMillis(), TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			handleInterruptedException();
+			return false;
 		}
-		return false;
 	}
 
 	/**
@@ -388,7 +395,7 @@ public class Threads {
 	@SuppressWarnings("resource")
 	public static <T> T execute(final Duration timeout, final Supplier<T> valueSupplier) {
 		Future<T> task = null;
-		ExecutorService executor = Executors.newSingleThreadExecutor();
+		ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 		try {
 			task = executor.submit(valueSupplier::get);
 			return task.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
