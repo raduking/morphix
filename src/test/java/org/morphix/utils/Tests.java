@@ -22,6 +22,7 @@ import java.util.Properties;
 import java.util.function.BooleanSupplier;
 
 import org.morphix.lang.JavaObjects;
+import org.morphix.lang.retry.Wait;
 import org.morphix.lang.thread.Threads;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.ReflectionException;
@@ -58,10 +59,10 @@ public interface Tests {
 	}
 
 	static void waitUntil(final BooleanSupplier condition, final Duration timeout) {
-		waitUntil(condition, timeout, Threads.Default.POLL_INTERVAL);
+		waitUntil(condition, timeout, Wait.Default.POLL_INTERVAL);
 	}
 
 	static void waitUntil(final BooleanSupplier condition) {
-		waitUntil(condition, Duration.ZERO, Threads.Default.POLL_INTERVAL);
+		waitUntil(condition, Duration.ZERO, Wait.Default.POLL_INTERVAL);
 	}
 }

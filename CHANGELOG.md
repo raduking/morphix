@@ -4,6 +4,8 @@
 
 - Added `Enums.valueOf(Class, String, Supplier)` which returns the default value supplied if the string cannot be transformed to the enum.
 - Added `ExecutionWrapper` functional interface which adds AOP like decorating functionality but without annotations.
+- Added `Wait.until` convenience methods for waiting for a specific condition to become true.
+- Added `Threads.waitUntil` convenience methods for waiting for a specific condition to become true which all delegate to `Wait.until`.
 
 ---
 
