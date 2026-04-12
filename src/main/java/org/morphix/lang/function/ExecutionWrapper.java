@@ -91,6 +91,10 @@ public interface ExecutionWrapper<T> {
 	/**
 	 * Creates a wrapper that executes the given {@code before} runnable before the supplier and the given {@code after}
 	 * runnable after the supplier. This allows you to easily add pre- and post-execution behavior around a supplier.
+	 * <ul>
+	 * <li>if the before runnable throws an exception, the supplier and the after runnable will not be executed</li>
+	 * <li>if the supplier throws an exception, the after runnable will still be executed</li>
+	 * </ul>
 	 *
 	 * @param <T> the type of the supplier's result
 	 *
