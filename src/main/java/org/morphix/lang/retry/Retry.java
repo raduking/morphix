@@ -79,6 +79,15 @@ public class Retry {
 	}
 
 	/**
+	 * Returns a retry that does not retry.
+	 *
+	 * @return no retry
+	 */
+	public static Retry noRetry() {
+		return NO_RETRY;
+	}
+
+	/**
 	 * Retries the {@link Supplier#get()} until the predicate is satisfied or the timeout is reached.
 	 *
 	 * @param <T> result type

@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
@@ -75,6 +76,18 @@ class RetryTest {
 	@Test
 	void shouldNotRetryWithNoRetry() {
 		Retry retry = Retry.NO_RETRY;
+
+		retry.until(() -> {
+			inSupplier.foo();
+			return null;
+		}, Objects::nonNull);
+
+		verify(inSupplier).foo();
+	}
+
+	@Test
+	void shouldNotRetryWithNoRetryMethod() {
+		Retry retry = Retry.noRetry();
 
 		retry.until(() -> {
 			inSupplier.foo();
@@ -302,6 +315,26 @@ class RetryTest {
 		verify(inSupplier).name();
 		assertThat(durationAccumulator.getInformationList(), hasSize(1));
 		assertThat(result, equalTo(NAME));
+	}
+
+	@Test
+	void shouldNotRetryWithNoRetryMethodWhenAccumulatingInformation() {
+		Retry retry = Retry.noRetry();
+
+		DurationAccumulator durationAccumulator = DurationAccumulator.of();
+		String result = retry.until(() -> inSupplier.name(), Objects::nonNull, durationAccumulator);
+
+		verify(inSupplier).name();
+		assertThat(durationAccumulator.getInformationList(), hasSize(1));
+		assertThat(result, equalTo(NAME));
+	}
+
+	@Test
+	void shouldReturnTheSameReferenceWhenNoRetry() {
+		Retry retry1 = Retry.NO_RETRY;
+		Retry retry2 = Retry.noRetry();
+
+		assertSame(retry1, retry2);
 	}
 
 	@Test
