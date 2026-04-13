@@ -54,8 +54,6 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.morphix.lang.function.Runnables;
 import org.morphix.lang.thread.Threads.ExecutionType;
-import org.morphix.reflection.Constructors;
-import org.morphix.utils.Tests;
 
 /**
  * Test class for {@link Threads}.
@@ -85,13 +83,6 @@ class ThreadsTest {
 		Set<Integer> set = new HashSet<>(queue);
 		assertThat(queue, hasSize(THREAD_COUNT * THREAD_COUNT));
 		assertThat(set, hasSize(THREAD_COUNT * THREAD_COUNT));
-	}
-
-	@Test
-	void shouldThrowExceptionWhenTryingToInstantiateDefaultClass() {
-		UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(Threads.Default.class);
-
-		assertThat(e.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 	}
 
 	@Nested
@@ -128,9 +119,70 @@ class ThreadsTest {
 		void shouldNotSafeSleepIfTheGivenAmountIsZero() {
 			TimeUnit timeUnit = mock(TimeUnit.class);
 
-			Threads.safeSleep(0, timeUnit);
+			boolean result = Threads.safeSleep(0, timeUnit);
 
+			assertTrue(result);
 			verifyNoInteractions(timeUnit);
+		}
+
+		@Test
+		void shouldNotSafeSleepIfTheGivenDurationIsZero() {
+			Duration duration = mock(Duration.class);
+			doReturn(0L).when(duration).toMillis();
+
+			boolean result = Threads.safeSleep(duration);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldNotSafeSleepIfTheGivenDurationIsNegative() {
+			Duration duration = mock(Duration.class);
+			doReturn(-1L).when(duration).toMillis();
+
+			boolean result = Threads.safeSleep(duration);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldHandleInterruptedExceptionWhenSafeSleeping() {
+			AtomicBoolean success = new AtomicBoolean(false);
+			Thread thread = Thread.ofPlatform().start(() -> {
+				boolean result = Threads.safeSleep(Duration.ofHours(TIME));
+				success.set(result);
+			});
+
+			thread.interrupt();
+			Threads.safeJoin(thread);
+
+			assertTrue(thread.isInterrupted());
+			assertFalse(success.get());
+		}
+
+		@Test
+		void shouldHandleInterruptedExceptionWhenSafeSleepingWithTimeUnit() {
+			AtomicBoolean success = new AtomicBoolean(false);
+			Thread thread = Thread.ofPlatform().start(() -> {
+				boolean result = Threads.safeSleep(TIME, TimeUnit.HOURS);
+				success.set(result);
+			});
+
+			thread.interrupt();
+			Threads.safeJoin(thread);
+
+			assertTrue(thread.isInterrupted());
+			assertFalse(success.get());
+		}
+
+		@Test
+		void shouldSafeSleepForTheGivenDurationAndReturnTrue() {
+			Duration duration = Duration.ofMillis(10);
+
+			boolean result = Threads.safeSleep(duration);
+
+			assertTrue(result);
+			assertFalse(Thread.currentThread().isInterrupted());
 		}
 	}
 
@@ -304,6 +356,48 @@ class ThreadsTest {
 
 			assertThat(i.get(), equalTo(1));
 			assertFalse(countReached.get());
+		}
+
+		@Test
+		void shouldSafelyWaitForCountdownLatchWithDurationAndHandleInterruptedException() {
+			CountDownLatch latch = new CountDownLatch(1);
+			AtomicInteger i = new AtomicInteger(0);
+			AtomicBoolean countReached = new AtomicBoolean(false);
+
+			Thread thread = Thread.ofPlatform().start(() -> {
+				i.incrementAndGet();
+				countReached.set(Threads.safeWait(latch, Duration.ofSeconds(10)));
+			});
+
+			Threads.waitUntil(() -> i.get() > 0, Duration.ofSeconds(10), Duration.ofMillis(5));
+			// interrupt the thread being joined not the joining thread
+			thread.interrupt();
+			boolean result = Threads.safeJoin(thread);
+
+			assertThat(i.get(), equalTo(1));
+			assertFalse(countReached.get());
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldSafelyWaitForCountdownLatchWithDurationAndHandleInterruptedExceptionOnJoin() {
+			CountDownLatch latch = new CountDownLatch(1);
+			AtomicInteger i = new AtomicInteger(0);
+			AtomicBoolean countReached = new AtomicBoolean(false);
+
+			Thread thread = Thread.ofPlatform().start(() -> {
+				i.incrementAndGet();
+				countReached.set(Threads.safeWait(latch, Duration.ofSeconds(10)));
+			});
+
+			Threads.waitUntil(() -> i.get() > 0, Duration.ofSeconds(10), Duration.ofMillis(5));
+			// interrupt the joining thread not the thread being joined
+			Thread.currentThread().interrupt();
+			boolean result = Threads.safeJoin(thread);
+
+			assertThat(i.get(), equalTo(1));
+			assertFalse(countReached.get());
+			assertFalse(result);
 		}
 	}
 

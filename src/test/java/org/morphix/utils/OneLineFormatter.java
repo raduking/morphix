@@ -24,6 +24,19 @@ import org.morphix.lang.Messages;
  * <p>
  * The format includes the timestamp, log level, logger name, and the message. The message supports SLF4J-style
  * placeholders (e.g., "User {} logged in") which are replaced with the actual parameters from the log record.
+ * <p>
+ * This can be configured in a logging properties file (e.g., logging.properties) by setting the formatter for a handler
+ * to this class:
+ *
+ * <pre>
+ * java.util.logging.ConsoleHandler.formatter = org.morphix.utils.OneLineFormatter
+ * </pre>
+ *
+ * The file can be configured to be used by the JVM with the following system property:
+ *
+ * <pre>
+ * -Djava.util.logging.config.file=path/to/logging.properties
+ * </pre>
  *
  * @author Radu Sebastian LAZIN
  */
@@ -39,6 +52,9 @@ public class OneLineFormatter extends Formatter {
 	 */
 	private SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);
 
+	/**
+	 * @see Formatter#format(LogRecord)
+	 */
 	@Override
 	public String format(final LogRecord logRecord) {
 		StringBuilder sb = new StringBuilder();

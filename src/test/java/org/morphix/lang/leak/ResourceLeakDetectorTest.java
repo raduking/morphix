@@ -237,6 +237,7 @@ class ResourceLeakDetectorTest {
 			assertThat(logs.get(0).getMessage(), containsString("JVM shutdown"));
 		} finally {
 			logger.removeHandler(handler);
+			// cleanup so other tests are not affected
 			tracker.close();
 		}
 	}
@@ -262,6 +263,7 @@ class ResourceLeakDetectorTest {
 			assertThat(logs.get(0).getMessage(), containsString("JVM shutdown"));
 		} finally {
 			logger.removeHandler(handler);
+			// cleanup so other tests are not affected
 			tracker.close();
 		}
 	}

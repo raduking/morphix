@@ -131,6 +131,27 @@ class EnumsTest {
 	}
 
 	@Test
+	void shouldReturnValueOfForValidValuesOnValueOfWithDefaultValueSupplier() {
+		ExampleEnum expected = Enums.valueOf(ExampleEnum.class, ExampleEnum.A.name(), () -> ExampleEnum.C);
+
+		assertThat(expected, equalTo(ExampleEnum.A));
+	}
+
+	@Test
+	void shouldReturnDefaultValueForNullParameterOnValueOfWithDefaultValueSupplier() {
+		ExampleEnum expected = Enums.valueOf(ExampleEnum.class, null, () -> ExampleEnum.C);
+
+		assertThat(expected, equalTo(ExampleEnum.C));
+	}
+
+	@Test
+	void shouldReturnDefaultValueForInvalidValueOnValueOfWithDefaultValueSupplier() {
+		ExampleEnum expected = Enums.valueOf(ExampleEnum.class, INVALID_VALUE, () -> ExampleEnum.C);
+
+		assertThat(expected, equalTo(ExampleEnum.C));
+	}
+
+	@Test
 	void shouldThrowExceptionIfClassIsInstantiatedWithDefaultConstructor() {
 		Throwable targetException = null;
 		Constructor<Enums> defaultConstructor = Constructors.getDeclared(Enums.class);

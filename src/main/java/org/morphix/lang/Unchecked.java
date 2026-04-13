@@ -83,6 +83,8 @@ public interface Unchecked {
 	/**
 	 * Interface that creates a name-space for the other version of the {@link Unchecked#reThrow(Throwable)} function that
 	 * does not have a <code>throws</code> declaration.
+	 *
+	 * @author Radu Sebastian LAZIN
 	 */
 	interface Undeclared {
 

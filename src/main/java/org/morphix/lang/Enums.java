@@ -24,6 +24,12 @@ import org.morphix.reflection.Constructors;
 
 /**
  * Utility class for java enums.
+ * <p>
+ * This class provides methods to build name maps for enums, transform from string to enum values using name maps, and
+ * safely get enum names. It also provides a method to get enum values by name with null safety.
+ * <p>
+ * A name map is a map that maps a string representation of an enum value to the enum value itself. This can be useful
+ * for example when parsing enum values from user input or configuration files.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -58,7 +64,7 @@ public class Enums {
 	}
 
 	/**
-	 * Transforms from a string to an enum value given an enum map (can further be enhanced to work for just the enum class
+	 * Transforms from a string to an enum value given a name map (can further be enhanced to work for just the enum class
 	 * as parameter).
 	 *
 	 * @param <T> enum type
@@ -147,6 +153,28 @@ public class Enums {
 	}
 
 	/**
+	 * Returns the same value as {@link Enum#valueOf(Class, String)} except it returns a default value when the name is null
+	 * instead of {@link NullPointerException}.
+	 *
+	 * @param <T> enum type
+	 *
+	 * @param enumClass enum class
+	 * @param name enum name
+	 * @param defaultValueSupplier supplies a default value
+	 * @return enum value
+	 */
+	public static <T extends Enum<T>> T valueOf(final Class<T> enumClass, final String name, final Supplier<T> defaultValueSupplier) {
+		if (null == name) {
+			return defaultValueSupplier.get();
+		}
+		try {
+			return Enum.valueOf(enumClass, name);
+		} catch (IllegalArgumentException e) {
+			return defaultValueSupplier.get();
+		}
+	}
+
+	/**
 	 * Returns the result of calling {@link Enum#name()} by checking for null enum first. If the enum is {@code null}, the
 	 * result is {@code null}.
 	 *
@@ -165,5 +193,4 @@ public class Enums {
 	private Enums() {
 		throw Constructors.unsupportedOperationException();
 	}
-
 }

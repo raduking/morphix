@@ -1,5 +1,18 @@
 ## Release Notes
 
+`1.0.30`
+
+- Added `Enums.valueOf(Class, String, Supplier)` which returns the default value supplied if the string cannot be transformed to the enum.
+- Added `ExecutionWrapper` functional interface which adds AOP like decorating functionality but without annotations.
+- Added `Wait.until` convenience methods for waiting for a specific condition to become true.
+- Added `Threads.waitUntil` convenience methods for waiting for a specific condition to become true which all delegate to `Wait.until`.
+- Added `LoggingFunction` functional interface to be able to pass logging functions for logging purposes.
+- Added `LoggingAdapter` as a minimal logging abstraction that can be implemented for any existing logging framework.
+- Added `Retry.noRetry` method which returns `Retry.NO_RETRY`.
+- Added `ReschedulingTask` class that abstracts a task being rescheduled by a given delay and guarantees no overlap. 
+
+---
+
 `1.0.29`
 
 - Fixed `ConcurrentThreadLRUCache` eviction method to acquire lock always.

@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 
 import org.morphix.lang.Unchecked;
 import org.morphix.lang.function.Runnables;
-import org.morphix.reflection.Constructors;
+import org.morphix.lang.retry.Wait;
 
 /**
  * Utility methods for working with threads.
@@ -51,7 +51,16 @@ public class Threads {
 		 * @param runnables list of Runnable elements
 		 * @param executor executor service (can be null)
 		 */
-		void apply(List<? extends Runnable> runnables, ExecutorService executor);
+		void run(List<? extends Runnable> runnables, ExecutorService executor);
+
+		/**
+		 * Applies this function to the given list of runnables, with a null executor.
+		 *
+		 * @param runnables list of Runnable elements
+		 */
+		default void run(final List<? extends Runnable> runnables) {
+			run(runnables, null);
+		}
 	}
 
 	/**
@@ -71,7 +80,7 @@ public class Threads {
 		}),
 
 		/**
-		 * Will run each runnable in parallel using standard Java threads.
+		 * Will run each runnable in parallel using standard Java threads (platform threads).
 		 */
 		PARALLEL((runnables, executor) -> {
 			List<Thread> threads = runnables.stream()
@@ -92,10 +101,10 @@ public class Threads {
 
 		/**
 		 * Will run each runnable using {@link CompletableFuture#runAsync(Runnable, Executor)} and the executor supplied. If the
-		 * executor is {@code null} a single thread executor will be used by default.
+		 * executor is {@code null} then the tasks will be executed on virtual threads.
 		 * <p>
-		 * By default, when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be
-		 * used.
+		 * By default, when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} since no executor is supplied, the
+		 * default execution type will be used.
 		 * <p>
 		 * If you want the runnables to run on a specific executor use:
 		 *
@@ -105,9 +114,7 @@ public class Threads {
 		 */
 		EXECUTOR((runnables, executor) -> {
 			if (null == executor) {
-				try (ExecutorService actualExecutor = Executors.newSingleThreadExecutor()) {
-					Threads.execute(runnables, actualExecutor);
-				}
+				Threads.execute(runnables, Threads.defaultExecutionType());
 			} else {
 				List<CompletableFuture<Void>> futures = runnables.stream()
 						.map(runnable -> CompletableFuture.runAsync(runnable, executor))
@@ -147,28 +154,8 @@ public class Threads {
 		 * @param executor executor service (can be null)
 		 */
 		@Override
-		public void apply(final List<? extends Runnable> runnables, final ExecutorService executor) {
-			this.execution.apply(runnables, executor);
-		}
-	}
-
-	/**
-	 * Default values for threads operations.
-	 *
-	 * @author Radu Sebastian LAZIN
-	 */
-	public static class Default {
-
-		/**
-		 * Default poll interval.
-		 */
-		public static final Duration POLL_INTERVAL = Duration.ofMillis(50);
-
-		/**
-		 * Private constructor.
-		 */
-		private Default() {
-			throw Constructors.unsupportedOperationException();
+		public void run(final List<? extends Runnable> runnables, final ExecutorService executor) {
+			this.execution.run(runnables, executor);
 		}
 	}
 
@@ -180,20 +167,27 @@ public class Threads {
 	}
 
 	/**
-	 * Puts the current thread to sleep for the given interval with the given time unit. See {@link TimeUnit} for more
-	 * details. If the interval is zero no sleep will be done.
+	 * Puts the current thread to sleep for the given interval with the given time unit. See {@link TimeUnit#sleep(long)}
+	 * for more details. If the interval is zero no sleep will be done.
+	 * <p>
+	 * Note: it is recommended to set interrupt status for the current thread in case {@link InterruptedException} is
+	 * caught, so the method will do it by default. You can check the interrupt status with {@link #isCurrentInterrupted()}
+	 * after calling this method to know if the sleep was interrupted or not.
 	 *
 	 * @param interval interval
 	 * @param timeUnit time unit
+	 * @return true if the sleep completed successfully, false if it was interrupted
 	 */
-	public static void safeSleep(final long interval, final TimeUnit timeUnit) {
-		if (0 == interval) {
-			return;
+	public static boolean safeSleep(final long interval, final TimeUnit timeUnit) {
+		if (interval <= 0) {
+			return true;
 		}
 		try {
 			timeUnit.sleep(interval);
+			return true;
 		} catch (InterruptedException e) {
 			handleInterruptedException();
+			return false;
 		}
 	}
 
@@ -201,9 +195,10 @@ public class Threads {
 	 * Puts the current thread to sleep for the given duration.
 	 *
 	 * @param duration sleep duration
+	 * @return true if the sleep completed successfully, false if it was interrupted
 	 */
-	public static void safeSleep(final Duration duration) {
-		safeSleep(duration.toMillis(), TimeUnit.MILLISECONDS);
+	public static boolean safeSleep(final Duration duration) {
+		return safeSleep(duration.toMillis(), TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -233,20 +228,23 @@ public class Threads {
 			return latch.await(duration.toMillis(), TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			handleInterruptedException();
+			return false;
 		}
-		return false;
 	}
 
 	/**
 	 * Helper method that calls {@link Thread#join()} on the given thread, with {@link InterruptedException} handling.
 	 *
 	 * @param thread thread object
+	 * @return true if successful, false if the join was interrupted
 	 */
-	public static void safeJoin(final Thread thread) {
+	public static boolean safeJoin(final Thread thread) {
 		try {
 			thread.join();
+			return true;
 		} catch (InterruptedException e) {
 			handleInterruptedException();
+			return false;
 		}
 	}
 
@@ -263,7 +261,7 @@ public class Threads {
 	 * @param executionType execution type
 	 */
 	public static <T extends Runnable> void execute(final List<T> runnables, final ExecutionType executionType) {
-		executionType.apply(runnables, null);
+		executionType.run(runnables);
 	}
 
 	/**
@@ -275,7 +273,7 @@ public class Threads {
 	 * @param executor the executor
 	 */
 	public static <T extends Runnable> void execute(final List<T> runnables, final ExecutorService executor) {
-		ExecutionType.EXECUTOR.apply(runnables, executor);
+		ExecutionType.EXECUTOR.run(runnables, executor);
 	}
 
 	/**
@@ -388,7 +386,7 @@ public class Threads {
 	@SuppressWarnings("resource")
 	public static <T> T execute(final Duration timeout, final Supplier<T> valueSupplier) {
 		Future<T> task = null;
-		ExecutorService executor = Executors.newSingleThreadExecutor();
+		ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 		try {
 			task = executor.submit(valueSupplier::get);
 			return task.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
@@ -398,7 +396,13 @@ public class Threads {
 			}
 			return Unchecked.Undeclared.reThrow(e);
 		} finally {
-			executor.close();
+			executor.shutdownNow();
+			try {
+				// one second should be enough for the task to respond to the interrupt
+				executor.awaitTermination(1, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
 		}
 	}
 
@@ -426,6 +430,11 @@ public class Threads {
 	 * Waits until the given condition is true or the timeout is reached. The condition is checked at intervals defined by
 	 * the poll interval. If the timeout is zero, it will wait indefinitely until the condition is true. If the timeout is
 	 * negative, it will return immediately.
+	 * <p>
+	 * This method delegates to {@link Wait#until(BooleanSupplier, Duration, Duration)} for the actual waiting logic, so it
+	 * behaves the same as that method. The only difference is that it is exposed here for convenience when working with
+	 * threads, so there is no need to import the {@link Wait} class directly when a wait for a condition in a
+	 * thread-related context is needed.
 	 *
 	 * @param condition condition to check
 	 * @param timeout maximum time to wait for the condition to be true
@@ -433,43 +442,49 @@ public class Threads {
 	 * @return true if the condition was met within the timeout, false otherwise
 	 */
 	public static boolean waitUntil(final BooleanSupplier condition, final Duration timeout, final Duration pollInterval) {
-		boolean conditionMet = condition.getAsBoolean();
-		if (conditionMet || timeout.isNegative()) {
-			return conditionMet;
-		}
-		long startTime = System.currentTimeMillis();
-		long endTime = startTime + timeout.toMillis();
-
-		while (System.currentTimeMillis() < endTime || timeout.isZero()) {
-			conditionMet = condition.getAsBoolean();
-			if (conditionMet || Threads.isCurrentInterrupted()) {
-				break;
-			}
-			Threads.safeSleep(pollInterval);
-		}
-		return conditionMet;
+		return Wait.until(condition, timeout, pollInterval);
 	}
 
 	/**
 	 * Waits until the given condition is true or the timeout is reached. The condition is checked at intervals defined by
 	 * the poll interval. If the timeout is zero, it will wait indefinitely until the condition is true. If the timeout is
 	 * negative, it will return immediately.
+	 * <p>
+	 * This method delegates to {@link Wait#until(BooleanSupplier, Duration)} for the actual waiting logic, so it behaves
+	 * the same as that method. The only difference is that it is exposed here for convenience when working with threads, so
+	 * there is no need to import the {@link Wait} class directly when a wait for a condition in a thread-related context is
+	 * needed.
 	 *
 	 * @param condition condition to check
 	 * @param timeout maximum time to wait for the condition to be true
 	 * @return true if the condition was met within the timeout, false otherwise
 	 */
 	public static boolean waitUntil(final BooleanSupplier condition, final Duration timeout) {
-		return waitUntil(condition, timeout, Default.POLL_INTERVAL);
+		return Wait.until(condition, timeout);
 	}
 
 	/**
 	 * Waits until the given condition is true. The condition is checked at intervals defined by the poll interval.
+	 * <p>
+	 * This method delegates to {@link Wait#until(BooleanSupplier)} for the actual waiting logic and behaves the same as
+	 * that method. The only difference is that it is exposed here for convenience when working with threads, so there is no
+	 * need to import the {@link Wait} class directly when a wait for a condition in a thread-related context is needed.
 	 *
 	 * @param condition condition to check
 	 * @return true if the condition was met, false if the thread was interrupted while waiting
 	 */
 	public static boolean waitUntil(final BooleanSupplier condition) {
-		return waitUntil(condition, Duration.ZERO, Default.POLL_INTERVAL);
+		return Wait.until(condition);
+	}
+
+	/**
+	 * Returns the default execution type for the {@link #execute(List, ExecutionType)} method. By default it is set to
+	 * {@link ExecutionType#VIRTUAL} since virtual threads are more efficient for most use cases, but it can be changed in
+	 * the future if needed without breaking backward compatibility.
+	 *
+	 * @return default executor
+	 */
+	public static ExecutionType defaultExecutionType() {
+		return ExecutionType.VIRTUAL;
 	}
 }

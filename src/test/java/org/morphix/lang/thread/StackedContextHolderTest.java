@@ -16,26 +16,28 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.logging.LogManager;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.morphix.utils.Tests;
 import org.morphix.utils.lang.thread.TenantContextHolder;
 
 /**
@@ -45,19 +47,12 @@ import org.morphix.utils.lang.thread.TenantContextHolder;
  */
 class StackedContextHolderTest {
 
-	private static final String PROPERTY_JAVA_UTIL_LOGGING_CONFIG_FILE = "java.util.logging.config.file";
-
 	private static final String TENANT_ID = "bubu";
 	private static final String TEST_STRING = "testString";
 
 	@BeforeAll
-	static void beforeAll() throws SecurityException, IOException {
-		// Set the system property to point to your test logging config
-		System.setProperty(PROPERTY_JAVA_UTIL_LOGGING_CONFIG_FILE,
-				"src/test/resources/test-logging.properties");
-
-		// Force LogManager to reinitialize with the new property
-		LogManager.getLogManager().readConfiguration();
+	static void beforeAll() throws Exception {
+		Tests.configureLogging("src/test/resources/test-logging.properties");
 	}
 
 	@Test
@@ -230,21 +225,20 @@ class StackedContextHolderTest {
 	void shouldPropagateCurrentTenantOnScheduledTask() {
 		try (ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()) {
 			AtomicReference<String> tenantIdRef = new AtomicReference<>();
+			CountDownLatch latch = new CountDownLatch(1);
 
 			TenantContextHolder.onTenant(TENANT_ID, () -> {
 				executor.schedule(TenantContextHolder.onCurrentTenant(() -> {
 					String tenantId = TenantContextHolder.getTenantId();
 					tenantIdRef.set(tenantId);
-				}), 50, TimeUnit.MILLISECONDS);
+					latch.countDown();
+				}), 1, TimeUnit.MILLISECONDS);
 			});
 
-			// Wait for the scheduled task to complete
-			int retryCount = 0;
-			while (tenantIdRef.get() == null && retryCount < 5) {
-				Threads.safeSleep(20, TimeUnit.MILLISECONDS);
-				++retryCount;
-			}
+			// wait for the scheduled task to complete
+			boolean completed = Threads.safeWait(latch, Duration.ofSeconds(1));
 
+			assertTrue(completed);
 			assertThat(tenantIdRef.get(), equalTo(TENANT_ID));
 		}
 	}
@@ -253,19 +247,18 @@ class StackedContextHolderTest {
 	void shouldNotPropagateCurrentTenantOnScheduledTaskIfCurrentTenantIsNotSet() {
 		try (ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()) {
 			AtomicReference<String> tenantIdRef = new AtomicReference<>();
+			CountDownLatch latch = new CountDownLatch(1);
 
 			executor.schedule(TenantContextHolder.onCurrentTenant(() -> {
 				String tenantId = TenantContextHolder.getTenantId();
 				tenantIdRef.set(tenantId);
-			}), 50, TimeUnit.MILLISECONDS);
+				latch.countDown();
+			}), 1, TimeUnit.MILLISECONDS);
 
-			// Wait for the scheduled task to complete
-			int retryCount = 0;
-			while (tenantIdRef.get() == null && retryCount < 5) {
-				Threads.safeSleep(20, TimeUnit.MILLISECONDS);
-				++retryCount;
-			}
+			// wait for the scheduled task to complete
+			boolean completed = Threads.safeWait(latch, Duration.ofSeconds(1));
 
+			assertTrue(completed);
 			assertThat(tenantIdRef.get(), equalTo(null));
 		}
 	}
