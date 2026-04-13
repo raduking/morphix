@@ -16,13 +16,16 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -222,21 +225,20 @@ class StackedContextHolderTest {
 	void shouldPropagateCurrentTenantOnScheduledTask() {
 		try (ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()) {
 			AtomicReference<String> tenantIdRef = new AtomicReference<>();
+			CountDownLatch latch = new CountDownLatch(1);
 
 			TenantContextHolder.onTenant(TENANT_ID, () -> {
 				executor.schedule(TenantContextHolder.onCurrentTenant(() -> {
 					String tenantId = TenantContextHolder.getTenantId();
 					tenantIdRef.set(tenantId);
-				}), 50, TimeUnit.MILLISECONDS);
+					latch.countDown();
+				}), 1, TimeUnit.MILLISECONDS);
 			});
 
-			// Wait for the scheduled task to complete
-			int retryCount = 0;
-			while (tenantIdRef.get() == null && retryCount < 5) {
-				Threads.safeSleep(20, TimeUnit.MILLISECONDS);
-				++retryCount;
-			}
+			// wait for the scheduled task to complete
+			boolean completed = Threads.safeWait(latch, Duration.ofSeconds(1));
 
+			assertTrue(completed);
 			assertThat(tenantIdRef.get(), equalTo(TENANT_ID));
 		}
 	}
@@ -245,19 +247,18 @@ class StackedContextHolderTest {
 	void shouldNotPropagateCurrentTenantOnScheduledTaskIfCurrentTenantIsNotSet() {
 		try (ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()) {
 			AtomicReference<String> tenantIdRef = new AtomicReference<>();
+			CountDownLatch latch = new CountDownLatch(1);
 
 			executor.schedule(TenantContextHolder.onCurrentTenant(() -> {
 				String tenantId = TenantContextHolder.getTenantId();
 				tenantIdRef.set(tenantId);
-			}), 50, TimeUnit.MILLISECONDS);
+				latch.countDown();
+			}), 1, TimeUnit.MILLISECONDS);
 
-			// Wait for the scheduled task to complete
-			int retryCount = 0;
-			while (tenantIdRef.get() == null && retryCount < 5) {
-				Threads.safeSleep(20, TimeUnit.MILLISECONDS);
-				++retryCount;
-			}
+			// wait for the scheduled task to complete
+			boolean completed = Threads.safeWait(latch, Duration.ofSeconds(1));
 
+			assertTrue(completed);
 			assertThat(tenantIdRef.get(), equalTo(null));
 		}
 	}

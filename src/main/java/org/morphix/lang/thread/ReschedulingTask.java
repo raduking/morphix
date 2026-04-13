@@ -34,9 +34,14 @@ import org.morphix.reflection.Constructors;
  * provided {@link Runnable} and then reschedule itself using a delay supplied by a {@link Supplier}.
  * <p>
  * The task can be enabled or disabled, and it will manage its own scheduling and cancellation to ensure that only one
- * instance of the task is scheduled at any time.
+ * instance of the task is scheduled at any time. The scheduling is done after the current task executions finishes, so
+ * if the task takes longer than the delay, it will not cause overlapping executions.
  * <p>
  * Useful for token refreshers, cache refreshers, heartbeat mechanisms, etc.
+ * <ul>
+ * <li>TODO: add support for fixed delay scheduling so no next delay supplier is needed</li>
+ * <li>TODO: add tests for the exact logging messages</li>
+ * </ul>
  *
  * @author Radu Sebastian LAZIN
  */
@@ -150,6 +155,8 @@ public class ReschedulingTask implements AutoCloseable {
 
 	/**
 	 * Closes the task, ensuring that any scheduled executions are cancelled and resources are released.
+	 * <p>
+	 * Note: the task will only be closed if the scheduler is managed by this instance.
 	 *
 	 * @throws Exception if an error occurs during closing
 	 */
@@ -245,7 +252,7 @@ public class ReschedulingTask implements AutoCloseable {
 		if (!enabled.compareAndSet(false, true)) {
 			return false;
 		}
-		logger.debug("[{}] Enabling self-rescheduling task.", name);
+		logger.debug("[{}] Enabling rescheduling task.", name);
 		execute();
 		return true;
 	}
@@ -259,7 +266,7 @@ public class ReschedulingTask implements AutoCloseable {
 		if (!enabled.compareAndSet(true, false)) {
 			return false;
 		}
-		logger.debug("[{}] Disabling self-rescheduling task.", name);
+		logger.debug("[{}] Disabling rescheduling task.", name);
 		cancelScheduledTask();
 		return true;
 	}

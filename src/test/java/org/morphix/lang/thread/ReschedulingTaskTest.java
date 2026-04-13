@@ -424,6 +424,7 @@ class ReschedulingTaskTest {
 		void shouldHandleExceptionsAndContinueScheduling() throws InterruptedException {
 			AtomicInteger counter = new AtomicInteger();
 			CountDownLatch latch = new CountDownLatch(2);
+			RuntimeException simulatedException = new RuntimeException("Simulated failure");
 
 			ReschedulingTask task = ReschedulingTask.builder()
 					.name(TASK_NAME)
@@ -431,15 +432,14 @@ class ReschedulingTaskTest {
 					.task(() -> {
 						counter.incrementAndGet();
 						latch.countDown();
-						throw new RuntimeException("Simulated failure");
+						throw simulatedException;
 					})
-					.nextDelay(() -> Duration.ofMillis(1))
+					.nextDelay(() -> Duration.ofMillis(10))
 					.logger(LOGGER)
 					.build();
-
 			task.enable();
 
-			boolean completed = latch.await(2, TimeUnit.SECONDS);
+			boolean completed = latch.await(1, TimeUnit.SECONDS);
 			task.disable();
 
 			assertThat(completed, is(true));
@@ -633,7 +633,7 @@ class ReschedulingTaskTest {
 
 			ScopedResource<ScheduledExecutorService> resource = ScopedResource.unmanaged(scheduledExecutor);
 
-			Retry retry = Retry.of(WaitCounter.of(retryAttempts, Duration.ofMillis(10)));
+			Retry retry = Retry.of(WaitCounter.of(retryAttempts, Duration.ofMillis(1)));
 
 			ReschedulingTask task = ReschedulingTask.builder()
 					.name(TASK_NAME)
