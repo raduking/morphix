@@ -18,11 +18,13 @@ import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.verify;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.morphix.utils.Tests;
 
 /**
  * Test class for {@link LoggerAdapter}.
@@ -31,6 +33,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @ExtendWith(MockitoExtension.class)
 class LoggerAdapterTest {
+
+	@BeforeAll
+	static void setup() throws Exception {
+		Tests.configureLogging("src/test/resources/test-logging.properties");
+	}
 
 	@Nested
 	class NoneLoggerAdapterTests {
@@ -60,7 +67,7 @@ class LoggerAdapterTest {
 
 			mockAdapter.trace(message, args);
 
-			verify(mockAdapter).log(LoggerAdapter.Level.TRACE, message, args);
+			verify(mockAdapter).log(LoggerAdapter.LoggingLevel.TRACE, message, args);
 		}
 
 		@Test
@@ -69,7 +76,7 @@ class LoggerAdapterTest {
 
 			mockAdapter.debug(message);
 
-			verify(mockAdapter).log(LoggerAdapter.Level.DEBUG, message);
+			verify(mockAdapter).log(LoggerAdapter.LoggingLevel.DEBUG, message);
 		}
 
 		@Test
@@ -79,7 +86,7 @@ class LoggerAdapterTest {
 
 			mockAdapter.info(message, args);
 
-			verify(mockAdapter).log(LoggerAdapter.Level.INFO, message, args);
+			verify(mockAdapter).log(LoggerAdapter.LoggingLevel.INFO, message, args);
 		}
 
 		@Test
@@ -88,7 +95,7 @@ class LoggerAdapterTest {
 
 			mockAdapter.warn(message);
 
-			verify(mockAdapter).log(LoggerAdapter.Level.WARN, message);
+			verify(mockAdapter).log(LoggerAdapter.LoggingLevel.WARN, message);
 		}
 
 		@Test
@@ -98,7 +105,7 @@ class LoggerAdapterTest {
 
 			mockAdapter.error(message, args);
 
-			verify(mockAdapter).log(LoggerAdapter.Level.ERROR, message, args);
+			verify(mockAdapter).log(LoggerAdapter.LoggingLevel.ERROR, message, args);
 		}
 
 		@Test
@@ -115,11 +122,11 @@ class LoggerAdapterTest {
 			mockAdapter.warn(warnMsg);
 			mockAdapter.error(errorMsg);
 
-			verify(mockAdapter).log(LoggerAdapter.Level.TRACE, traceMsg);
-			verify(mockAdapter).log(LoggerAdapter.Level.DEBUG, debugMsg);
-			verify(mockAdapter).log(LoggerAdapter.Level.INFO, infoMsg);
-			verify(mockAdapter).log(LoggerAdapter.Level.WARN, warnMsg);
-			verify(mockAdapter).log(LoggerAdapter.Level.ERROR, errorMsg);
+			verify(mockAdapter).log(LoggerAdapter.LoggingLevel.TRACE, traceMsg);
+			verify(mockAdapter).log(LoggerAdapter.LoggingLevel.DEBUG, debugMsg);
+			verify(mockAdapter).log(LoggerAdapter.LoggingLevel.INFO, infoMsg);
+			verify(mockAdapter).log(LoggerAdapter.LoggingLevel.WARN, warnMsg);
+			verify(mockAdapter).log(LoggerAdapter.LoggingLevel.ERROR, errorMsg);
 		}
 	}
 
@@ -128,39 +135,39 @@ class LoggerAdapterTest {
 
 		@Test
 		void shouldHaveFiveLevels() {
-			int levelCount = LoggerAdapter.Level.values().length;
+			int levelCount = LoggerAdapter.LoggingLevel.values().length;
 
 			assertThat(levelCount, is(5));
 		}
 
 		@Test
 		void shouldHaveAllExpectedLevels() {
-			LoggerAdapter.Level[] levels = LoggerAdapter.Level.values();
+			LoggerAdapter.LoggingLevel[] levels = LoggerAdapter.LoggingLevel.values();
 
 			assertThat(levels, arrayContainingInAnyOrder(
-					LoggerAdapter.Level.TRACE,
-					LoggerAdapter.Level.DEBUG,
-					LoggerAdapter.Level.INFO,
-					LoggerAdapter.Level.WARN,
-					LoggerAdapter.Level.ERROR));
+					LoggerAdapter.LoggingLevel.TRACE,
+					LoggerAdapter.LoggingLevel.DEBUG,
+					LoggerAdapter.LoggingLevel.INFO,
+					LoggerAdapter.LoggingLevel.WARN,
+					LoggerAdapter.LoggingLevel.ERROR));
 		}
 
 		@Test
 		void shouldHaveCorrectOrdinalOrder() {
-			assertThat(LoggerAdapter.Level.TRACE.ordinal(), is(0));
-			assertThat(LoggerAdapter.Level.DEBUG.ordinal(), is(1));
-			assertThat(LoggerAdapter.Level.INFO.ordinal(), is(2));
-			assertThat(LoggerAdapter.Level.WARN.ordinal(), is(3));
-			assertThat(LoggerAdapter.Level.ERROR.ordinal(), is(4));
+			assertThat(LoggerAdapter.LoggingLevel.TRACE.ordinal(), is(0));
+			assertThat(LoggerAdapter.LoggingLevel.DEBUG.ordinal(), is(1));
+			assertThat(LoggerAdapter.LoggingLevel.INFO.ordinal(), is(2));
+			assertThat(LoggerAdapter.LoggingLevel.WARN.ordinal(), is(3));
+			assertThat(LoggerAdapter.LoggingLevel.ERROR.ordinal(), is(4));
 		}
 
 		@Test
 		void shouldHaveCorrectLevelNames() {
-			assertThat(LoggerAdapter.Level.TRACE.name(), is("TRACE"));
-			assertThat(LoggerAdapter.Level.DEBUG.name(), is("DEBUG"));
-			assertThat(LoggerAdapter.Level.INFO.name(), is("INFO"));
-			assertThat(LoggerAdapter.Level.WARN.name(), is("WARN"));
-			assertThat(LoggerAdapter.Level.ERROR.name(), is("ERROR"));
+			assertThat(LoggerAdapter.LoggingLevel.TRACE.name(), is("TRACE"));
+			assertThat(LoggerAdapter.LoggingLevel.DEBUG.name(), is("DEBUG"));
+			assertThat(LoggerAdapter.LoggingLevel.INFO.name(), is("INFO"));
+			assertThat(LoggerAdapter.LoggingLevel.WARN.name(), is("WARN"));
+			assertThat(LoggerAdapter.LoggingLevel.ERROR.name(), is("ERROR"));
 		}
 	}
 }

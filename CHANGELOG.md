@@ -9,6 +9,7 @@
 - Added `LoggingFunction` functional interface to be able to pass logging functions for logging purposes.
 - Added `LoggingAdapter` as a minimal logging abstraction that can be implemented for any existing logging framework.
 - Added `Retry.noRetry` method which returns `Retry.NO_RETRY`.
+- Added `ReschedulingTask` class that abstracts a task being rescheduled by a given delay and guarantees no overlap. 
 
 ---
 

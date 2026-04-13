@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,13 +28,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.logging.LogManager;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.morphix.utils.Tests;
 import org.morphix.utils.lang.thread.TenantContextHolder;
 
 /**
@@ -45,19 +44,12 @@ import org.morphix.utils.lang.thread.TenantContextHolder;
  */
 class StackedContextHolderTest {
 
-	private static final String PROPERTY_JAVA_UTIL_LOGGING_CONFIG_FILE = "java.util.logging.config.file";
-
 	private static final String TENANT_ID = "bubu";
 	private static final String TEST_STRING = "testString";
 
 	@BeforeAll
-	static void beforeAll() throws SecurityException, IOException {
-		// Set the system property to point to your test logging config
-		System.setProperty(PROPERTY_JAVA_UTIL_LOGGING_CONFIG_FILE,
-				"src/test/resources/test-logging.properties");
-
-		// Force LogManager to reinitialize with the new property
-		LogManager.getLogManager().readConfiguration();
+	static void beforeAll() throws Exception {
+		Tests.configureLogging("src/test/resources/test-logging.properties");
 	}
 
 	@Test

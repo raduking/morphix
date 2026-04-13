@@ -23,20 +23,27 @@ package org.morphix.lang.function;
 public interface LoggerAdapter {
 
 	/**
+	 * A logger adapter that ignores all log messages.
+	 */
+	static LoggerAdapter EMPTY = (level, message, args) -> {
+		// empty
+	};
+
+	/**
 	 * Logs a message with the specified level, format, and arguments.
 	 *
 	 * @param level the log level
 	 * @param message the log message format
 	 * @param args the arguments to include in the log message
 	 */
-	void log(Level level, String message, Object... args);
+	void log(LoggingLevel level, String message, Object... args);
 
 	/**
 	 * Enumeration of log levels.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
-	enum Level {
+	enum LoggingLevel {
 
 		/**
 		 * Trace level, for very detailed logging.
@@ -70,58 +77,56 @@ public interface LoggerAdapter {
 	 * @return an empty logger adapter
 	 */
 	static LoggerAdapter none() {
-		return (level, message, args) -> {
-			// no-op
-		};
+		return EMPTY;
 	}
 
 	/**
-	 * Logs a message at the {@link Level#TRACE} level.
+	 * Logs a message at the {@link LoggingLevel#TRACE} level.
 	 *
 	 * @param message the log message format
 	 * @param args the arguments to include in the log message
 	 */
 	default void trace(final String message, final Object... args) {
-		log(Level.TRACE, message, args);
+		log(LoggingLevel.TRACE, message, args);
 	}
 
 	/**
-	 * Logs a message at the {@link Level#DEBUG} level.
+	 * Logs a message at the {@link LoggingLevel#DEBUG} level.
 	 *
 	 * @param message the log message format
 	 * @param args the arguments to include in the log message
 	 */
 	default void debug(final String message, final Object... args) {
-		log(Level.DEBUG, message, args);
+		log(LoggingLevel.DEBUG, message, args);
 	}
 
 	/**
-	 * Logs a message at the {@link Level#INFO} level.
+	 * Logs a message at the {@link LoggingLevel#INFO} level.
 	 *
 	 * @param message the log message format
 	 * @param args the arguments to include in the log message
 	 */
 	default void info(final String message, final Object... args) {
-		log(Level.INFO, message, args);
+		log(LoggingLevel.INFO, message, args);
 	}
 
 	/**
-	 * Logs a message at the {@link Level#WARN} level.
+	 * Logs a message at the {@link LoggingLevel#WARN} level.
 	 *
 	 * @param message the log message format
 	 * @param args the arguments to include in the log message
 	 */
 	default void warn(final String message, final Object... args) {
-		log(Level.WARN, message, args);
+		log(LoggingLevel.WARN, message, args);
 	}
 
 	/**
-	 * Logs a message at the {@link Level#ERROR} level.
+	 * Logs a message at the {@link LoggingLevel#ERROR} level.
 	 *
 	 * @param message the log message format
 	 * @param args the arguments to include in the log message
 	 */
 	default void error(final String message, final Object... args) {
-		log(Level.ERROR, message, args);
+		log(LoggingLevel.ERROR, message, args);
 	}
 }

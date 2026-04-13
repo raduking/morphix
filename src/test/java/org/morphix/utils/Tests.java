@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.util.Properties;
 import java.util.function.BooleanSupplier;
+import java.util.logging.LogManager;
 
 import org.morphix.lang.JavaObjects;
 import org.morphix.lang.retry.Wait;
@@ -33,6 +34,8 @@ import org.morphix.reflection.ReflectionException;
  * @author Radu Sebastian LAZIN
  */
 public interface Tests {
+
+	public static final String PROPERTY_JAVA_UTIL_LOGGING_CONFIG_FILE = "java.util.logging.config.file";
 
 	static <T extends Throwable> T verifyDefaultConstructorThrows(final Class<?> cls) {
 		ReflectionException reflectionException =
@@ -64,5 +67,10 @@ public interface Tests {
 
 	static void waitUntil(final BooleanSupplier condition) {
 		waitUntil(condition, Duration.ZERO, Wait.Default.POLL_INTERVAL);
+	}
+
+	static void configureLogging(final String loggingPropertiesFilePath) throws Exception {
+		System.setProperty(PROPERTY_JAVA_UTIL_LOGGING_CONFIG_FILE, loggingPropertiesFilePath);
+		LogManager.getLogManager().readConfiguration();
 	}
 }

@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.logging.Level;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,7 @@ import org.morphix.lang.JavaObjects;
 import org.morphix.lang.thread.Threads;
 import org.morphix.utils.ConcurrencyTestProperties;
 import org.morphix.utils.ConcurrencyTestResults;
+import org.morphix.utils.Tests;
 
 /**
  * Test class for {@link LRUCache}.
@@ -58,6 +60,11 @@ class LRUCacheTest {
 
 	<T extends LRUCache<String, String>> T cache() {
 		return JavaObjects.cast(cache);
+	}
+
+	@BeforeAll
+	static void setup() throws Exception {
+		Tests.configureLogging("src/test/resources/test-logging.properties");
 	}
 
 	@BeforeEach
