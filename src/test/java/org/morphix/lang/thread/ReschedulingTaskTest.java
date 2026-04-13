@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -94,16 +95,19 @@ class ReschedulingTaskTest {
 		@Test
 		@SuppressWarnings("resource")
 		void shouldUseDefaultValuesWhenNotProvided() {
+			ScopedResource<ScheduledExecutorService> scheduler = scheduler();
+
 			ReschedulingTask task = ReschedulingTask.builder()
 					.name(TASK_NAME)
-					.scheduler(scheduler())
+					.scheduler(scheduler)
 					.task(Runnables.doNothing())
 					.nextDelay(() -> DELAY)
 					.build();
 
-			assertThat(task.getLogger(), is(LoggerAdapter.none()));
-			assertThat(task.getMinDelay(), is(ReschedulingTask.Default.MIN_DELAY));
 			assertThat(task.getTaskCancelRetry(), is(Retry.noRetry()));
+			assertThat(task.getMinDelay(), is(ReschedulingTask.Default.MIN_DELAY));
+			assertThat(task.getLogger(), is(LoggerAdapter.none()));
+			assertThat(task.isInterruptOnCancel(), is(ReschedulingTask.Default.INTERRUPT_ON_CANCEL));
 		}
 	}
 
@@ -211,6 +215,34 @@ class ReschedulingTaskTest {
 
 		@Test
 		@SuppressWarnings("resource")
+		void shouldHaveDeterministicInitialState() {
+			ScopedResource<ScheduledExecutorService> scheduler = scheduler();
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(scheduler)
+					.task(Runnables.doNothing())
+					.nextDelay(() -> DELAY)
+					.build();
+
+			assertThat(task.getTaskCancelRetry(), is(Retry.noRetry()));
+			assertThat(task.getMinDelay(), is(ReschedulingTask.Default.MIN_DELAY));
+			assertThat(task.getLogger(), is(LoggerAdapter.none()));
+			assertThat(task.isInterruptOnCancel(), is(ReschedulingTask.Default.INTERRUPT_ON_CANCEL));
+
+			assertThat(task.getName(), is(TASK_NAME));
+			assertThat(task.getScheduler(), is(scheduler));
+			assertThat(task.getRefreshTask(), sameInstance(Runnables.doNothing()));
+			assertThat(task.getLogger(), is(LoggerAdapter.none()));
+			assertThat(task.getNextDelay(), is(DELAY));
+
+			assertThat(task.isEnabled(), is(false));
+			assertThat(task.isDisabled(), is(true));
+			assertThat(task.isScheduled(), is(false));
+		}
+
+		@Test
+		@SuppressWarnings("resource")
 		void shouldBeDisabledByDefault() {
 			ReschedulingTask task = ReschedulingTask.builder()
 					.name(TASK_NAME)
@@ -284,6 +316,33 @@ class ReschedulingTaskTest {
 					.build();
 
 			assertThat(task.getTaskCancelRetry(), is(retry));
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldUseCustomInterruptOnCancel() {
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(scheduler())
+					.task(Runnables.doNothing())
+					.nextDelay(() -> DELAY)
+					.interruptOnCancel(true)
+					.build();
+
+			assertThat(task.isInterruptOnCancel(), is(true));
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldUseFixedDelay() {
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(scheduler())
+					.task(Runnables.doNothing())
+					.nextDelay(DELAY)
+					.build();
+
+			assertThat(task.getNextDelay(), is(DELAY));
 		}
 	}
 

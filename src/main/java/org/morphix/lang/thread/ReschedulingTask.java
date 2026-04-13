@@ -39,7 +39,6 @@ import org.morphix.reflection.Constructors;
  * <p>
  * Useful for token refreshers, cache refreshers, heartbeat mechanisms, etc.
  * <ul>
- * <li>TODO: add support for fixed delay scheduling so no next delay supplier is needed</li>
  * <li>TODO: add tests for the exact logging messages</li>
  * </ul>
  *
@@ -58,6 +57,11 @@ public class ReschedulingTask implements AutoCloseable {
 		 * Default minimum delay between executions - 500 milliseconds (safeguard against negative/zero delays).
 		 */
 		public static final Duration MIN_DELAY = Duration.ofMillis(500);
+
+		/**
+		 * Default behavior for task cancellation - do not interrupt running tasks.
+		 */
+		public static final boolean INTERRUPT_ON_CANCEL = false;
 
 		/**
 		 * Hide constructor.
@@ -94,16 +98,22 @@ public class ReschedulingTask implements AutoCloseable {
 	private final Supplier<Duration> nextDelaySupplier;
 
 	/**
+	 * Minimum allowed delay between executions. This is a safeguard against negative or zero delays that could cause rapid
+	 * rescheduling.
+	 */
+	private final Duration minDelay;
+
+	/**
 	 * Retry strategy for task cancellation. Used when trying to cancel the currently scheduled task before scheduling a new
 	 * one.
 	 */
 	private final Retry taskCancelRetry;
 
 	/**
-	 * Minimum allowed delay between executions. This is a safeguard against negative or zero delays that could cause rapid
-	 * rescheduling.
+	 * Whether to interrupt the task thread when canceling. This is used in the cancellation logic when trying to cancel the
+	 * currently scheduled task before scheduling a new one. Optional, defaults to false (do not interrupt).
 	 */
-	private final Duration minDelay;
+	private final boolean interruptOnCancel;
 
 	/**
 	 * Atomic flag to indicate whether the task is enabled or disabled. When disabled, the task will not execute or
@@ -127,12 +137,13 @@ public class ReschedulingTask implements AutoCloseable {
 		this.refreshTask = Objects.requireNonNull(builder.refreshTask, "refreshTask must not be null");
 		this.nextDelaySupplier = Objects.requireNonNull(builder.nextDelaySupplier, "nextDelaySupplier must not be null");
 
-		this.taskCancelRetry = Nullables.nonNullOrDefault(builder.taskCancelRetry, Retry::noRetry);
 		this.logger = Nullables.nonNullOrDefault(builder.logger, LoggerAdapter::none);
 		this.minDelay = Nullables.nonNullOrDefault(builder.minDelay, () -> Default.MIN_DELAY);
 		if (minDelay.isNegative() || minDelay.isZero()) {
 			throw new IllegalArgumentException("minDelay must be positive");
 		}
+		this.taskCancelRetry = Nullables.nonNullOrDefault(builder.taskCancelRetry, Retry::noRetry);
+		this.interruptOnCancel = builder.interruptOnCancel;
 	}
 
 	/**
@@ -156,7 +167,7 @@ public class ReschedulingTask implements AutoCloseable {
 	/**
 	 * Closes the task, ensuring that any scheduled executions are cancelled and resources are released.
 	 * <p>
-	 * Note: the task will only be closed if the scheduler is managed by this instance.
+	 * Note: the scheduled task (future) and the scheduler will only be closed if the scheduler is managed by this instance.
 	 *
 	 * @throws Exception if an error occurs during closing
 	 */
@@ -205,7 +216,7 @@ public class ReschedulingTask implements AutoCloseable {
 		if (isDone(task)) {
 			return true;
 		}
-		return taskCancelRetry.until(() -> task.cancel(false), Boolean::booleanValue);
+		return taskCancelRetry.until(() -> task.cancel(interruptOnCancel), Boolean::booleanValue);
 	}
 
 	/**
@@ -328,12 +339,39 @@ public class ReschedulingTask implements AutoCloseable {
 	}
 
 	/**
-	 * Returns the retry strategy used for task cancellation.
+	 * Returns the scheduler used for executing the task.
 	 *
-	 * @return the task cancellation retry strategy
+	 * @return the scheduler
 	 */
-	protected Retry getTaskCancelRetry() {
-		return taskCancelRetry;
+	protected ScopedResource<ScheduledExecutorService> getScheduler() {
+		return scheduler;
+	}
+
+	/**
+	 * Returns the refresh task that is executed and rescheduled.
+	 *
+	 * @return the refresh task
+	 */
+	protected Runnable getRefreshTask() {
+		return refreshTask;
+	}
+
+	/**
+	 * Returns the supplier that provides the delay until the next execution after each run.
+	 *
+	 * @return the next delay supplier
+	 */
+	protected Supplier<Duration> getNextDelaySupplier() {
+		return nextDelaySupplier;
+	}
+
+	/**
+	 * Returns the delay until the next execution after each run by invoking the {@link #nextDelaySupplier}.
+	 *
+	 * @return the next delay
+	 */
+	protected Duration getNextDelay() {
+		return getNextDelaySupplier().get();
 	}
 
 	/**
@@ -343,6 +381,24 @@ public class ReschedulingTask implements AutoCloseable {
 	 */
 	protected Duration getMinDelay() {
 		return minDelay;
+	}
+
+	/**
+	 * Returns the retry strategy used for task cancellation.
+	 *
+	 * @return the task cancellation retry strategy
+	 */
+	protected Retry getTaskCancelRetry() {
+		return taskCancelRetry;
+	}
+
+	/**
+	 * Returns whether to interrupt the task thread when canceling.
+	 *
+	 * @return true if the task should be interrupted on cancel, false otherwise
+	 */
+	protected boolean isInterruptOnCancel() {
+		return interruptOnCancel;
 	}
 
 	/**
@@ -374,16 +430,22 @@ public class ReschedulingTask implements AutoCloseable {
 		private Supplier<Duration> nextDelaySupplier;
 
 		/**
+		 * Minimum allowed delay between executions. This is a safeguard against negative or zero delays that could cause rapid
+		 * rescheduling. Optional, defaults to {@link Default#MIN_DELAY}.
+		 */
+		private Duration minDelay;
+
+		/**
 		 * Retry strategy for task cancellation. Used when trying to cancel the currently scheduled task before scheduling a new
 		 * one. Optional, defaults to no retry.
 		 */
 		private Retry taskCancelRetry;
 
 		/**
-		 * Minimum allowed delay between executions. This is a safeguard against negative or zero delays that could cause rapid
-		 * rescheduling. Optional, defaults to {@link Default#MIN_DELAY}.
+		 * Whether to interrupt the task thread when cancelling. This is used in the cancellation logic when trying to cancel
+		 * the currently scheduled task before scheduling a new one. Optional, defaults to false (do not interrupt).
 		 */
-		private Duration minDelay;
+		private boolean interruptOnCancel = Default.INTERRUPT_ON_CANCEL;
 
 		/**
 		 * Logger for logging task events and errors. Optional, defaults to no-op logger.
@@ -451,6 +513,16 @@ public class ReschedulingTask implements AutoCloseable {
 		}
 
 		/**
+		 * Sets a fixed delay for the next execution after each run.
+		 *
+		 * @param fixedDelay the fixed delay, must not be null
+		 * @return this builder for chaining
+		 */
+		public Builder nextDelay(final Duration fixedDelay) {
+			return nextDelay(() -> fixedDelay);
+		}
+
+		/**
 		 * Sets the retry strategy for task cancellation.
 		 *
 		 * @param taskCancellationRetry the retry strategy for task cancellation, optional, defaults to no retry
@@ -469,6 +541,17 @@ public class ReschedulingTask implements AutoCloseable {
 		 */
 		public Builder minDelay(final Duration minDelay) {
 			this.minDelay = minDelay;
+			return this;
+		}
+
+		/**
+		 * Sets whether to interrupt the task thread when canceling.
+		 *
+		 * @param interruptOnCancel whether to interrupt on cancel, optional, defaults to false (do not interrupt)
+		 * @return this builder for chaining
+		 */
+		public Builder interruptOnCancel(final boolean interruptOnCancel) {
+			this.interruptOnCancel = interruptOnCancel;
 			return this;
 		}
 
