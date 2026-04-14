@@ -49,9 +49,9 @@ public class Threads {
 		 * Applies this function to the given arguments.
 		 *
 		 * @param runnables list of Runnable elements
-		 * @param executor executor service (can be null)
+		 * @param executor executor (can be null)
 		 */
-		void run(List<? extends Runnable> runnables, ExecutorService executor);
+		void run(List<? extends Runnable> runnables, Executor executor);
 
 		/**
 		 * Applies this function to the given list of runnables, with a null executor.
@@ -154,7 +154,7 @@ public class Threads {
 		 * @param executor executor service (can be null)
 		 */
 		@Override
-		public void run(final List<? extends Runnable> runnables, final ExecutorService executor) {
+		public void run(final List<? extends Runnable> runnables, final Executor executor) {
 			this.execution.run(runnables, executor);
 		}
 	}
@@ -253,7 +253,7 @@ public class Threads {
 	 * By default, when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be
 	 * used.
 	 * <p>
-	 * If you want the runnables to run on a specific executor use: {@link #execute(List, ExecutorService)}
+	 * If you want the runnables to run on a specific executor use: {@link #execute(List, Executor)}
 	 *
 	 * @param <T> runnable type
 	 *
@@ -272,7 +272,7 @@ public class Threads {
 	 * @param runnables list of runnables
 	 * @param executor the executor
 	 */
-	public static <T extends Runnable> void execute(final List<T> runnables, final ExecutorService executor) {
+	public static <T extends Runnable> void execute(final List<T> runnables, final Executor executor) {
 		ExecutionType.EXECUTOR.run(runnables, executor);
 	}
 
@@ -332,7 +332,7 @@ public class Threads {
 	 * @param task task to execute for each element
 	 * @param executor task executor
 	 */
-	public static <T> void executeForEachIn(final List<T> list, final Consumer<T> task, final ExecutorService executor) {
+	public static <T> void executeForEachIn(final List<T> list, final Consumer<T> task, final Executor executor) {
 		execute(tasksForEachIn(list, task), executor);
 	}
 
