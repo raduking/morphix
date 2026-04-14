@@ -22,13 +22,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -682,7 +686,7 @@ class ReschedulingTaskTest {
 
 		@Test
 		@SuppressWarnings("resource")
-		void shouldRetryCancellationOnDisableWhenConfigured() {
+		void shouldRetryCancellationOnDisableWhenRetryIsConfigured() {
 			int retryAttempts = 3;
 
 			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
@@ -710,7 +714,7 @@ class ReschedulingTaskTest {
 
 		@Test
 		@SuppressWarnings("resource")
-		void shouldRetryCancellationOnCloseWhenConfigured() throws Exception {
+		void shouldRetryCancellationOnCloseWhenRetryIsConfigured() throws Exception {
 			int retryAttempts = 3;
 
 			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
@@ -735,6 +739,147 @@ class ReschedulingTaskTest {
 
 			verify(scheduledFuture, times(retryAttempts)).cancel(anyBoolean());
 			verify(scheduledExecutor, times(1)).shutdownNow();
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldNotRetryCancellationOnDisableWhenRetryIsNotConfigured() {
+			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
+			ScheduledFuture<?> scheduledFuture = mock(ScheduledFuture.class);
+			doReturn(scheduledFuture).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+			doReturn(false).when(scheduledFuture).cancel(anyBoolean());
+
+			ScopedResource<ScheduledExecutorService> resource = ScopedResource.managed(scheduledExecutor);
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(resource)
+					.task(Runnables.doNothing())
+					.nextDelay(() -> Duration.ofSeconds(5))
+					.build();
+
+			task.enable();
+			task.disable();
+
+			verify(scheduledFuture, times(1)).cancel(anyBoolean());
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldNotRetryCancellationOnCloseWhenRetryIsNotConfigured() throws Exception {
+			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
+			ScheduledFuture<?> scheduledFuture = mock(ScheduledFuture.class);
+			doReturn(scheduledFuture).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+			doReturn(false).when(scheduledFuture).cancel(anyBoolean());
+
+			ScopedResource<ScheduledExecutorService> resource = ScopedResource.managed(scheduledExecutor);
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(resource)
+					.task(Runnables.doNothing())
+					.nextDelay(() -> Duration.ofSeconds(5))
+					.build();
+
+			task.enable();
+			task.close();
+
+			verify(scheduledFuture, times(1)).cancel(anyBoolean());
+			verify(scheduledExecutor, times(1)).shutdownNow();
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldInterruptTaskOnCancelWhenInterruptOnCancelIsTrue() throws InterruptedException {
+			AtomicInteger counter = new AtomicInteger(0);
+			CountDownLatch latch = new CountDownLatch(1);
+			CountDownLatch taskDisableLatch = new CountDownLatch(1);
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(scheduler())
+					.task(() -> {
+						if (counter.incrementAndGet() == 1) {
+							// first execution, disable only on the next execution to ensure the task
+							// is scheduled and running when disable is called
+						} else {
+							taskDisableLatch.countDown();
+							while (!Thread.currentThread().isInterrupted()) {
+								Threads.safeSleep(Duration.ofMillis(10));
+							}
+							latch.countDown();
+							// preserve interrupt status
+							Thread.currentThread().interrupt();
+						}
+					})
+					.nextDelay(() -> Duration.ofMillis(10))
+					.interruptOnCancel(true)
+					.build();
+
+			Thread.ofVirtual().start(() -> {
+				Threads.safeWait(taskDisableLatch);
+				task.disable();
+			});
+
+			task.enable();
+
+			boolean interrupted = latch.await(5, TimeUnit.SECONDS);
+
+			assertThat(interrupted, is(true));
+			assertThat(Thread.currentThread().isInterrupted(), is(false));
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldRescheduleAndCloseFinishedTaskMultipleTimes() throws InterruptedException {
+			int executionCount = 3;
+			AtomicInteger counter = new AtomicInteger();
+			CountDownLatch latch = new CountDownLatch(executionCount);
+			CountDownLatch disableLatch = new CountDownLatch(1);
+
+			ScopedResource<ScheduledExecutorService> scheduler = scheduler();
+
+			ScheduledExecutorService scheduledExecutor = spy(scheduler.unwrap());
+			List<ScheduledFuture<?>> scheduledFutures = new ArrayList<>();
+
+			doAnswer(invocation -> {
+				ScheduledFuture<?> scheduledFuture = (ScheduledFuture<?>) invocation.callRealMethod();
+				scheduledFuture = spy(scheduledFuture);
+				scheduledFutures.add(scheduledFuture);
+				return scheduledFuture;
+			}).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+
+			ScopedResource<ScheduledExecutorService> resource = ScopedResource.unmanaged(scheduledExecutor);
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(resource)
+					.task(() -> {
+						int count = counter.incrementAndGet();
+						latch.countDown();
+						if (count == executionCount) {
+							Threads.safeWait(disableLatch);
+						}
+					})
+					.nextDelay(Duration.ofMillis(10))
+					.minDelay(Duration.ofMillis(10))
+					.logger(LOGGER)
+					.build();
+			task.enable();
+
+			Thread.ofVirtual().start(() -> {
+				Threads.safeWait(latch);
+				task.disable();
+				disableLatch.countDown();
+			});
+
+			boolean completed = disableLatch.await(2, TimeUnit.SECONDS);
+
+			for (ScheduledFuture<?> scheduledFuture : scheduledFutures) {
+				verify(scheduledFuture, times(1)).cancel(anyBoolean());
+			}
+			assertThat(completed, is(true));
+			assertThat(counter.get(), equalTo(executionCount));
 		}
 	}
 
