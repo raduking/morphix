@@ -34,6 +34,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -62,6 +63,11 @@ class ResourceLeakDetectorTest {
 			ResourceLeakDetector.class.getName() + ".");
 
 	private String originalProperty;
+
+	@BeforeAll
+	static void beforeAll() {
+		references().clear();
+	}
 
 	@BeforeEach
 	void setup() {
@@ -99,6 +105,7 @@ class ResourceLeakDetectorTest {
 		try (ResourceLeakTracker tracker = ResourceLeakDetector.track(new Object())) {
 			assertFalse(references().isEmpty());
 		}
+		assertTrue(references().isEmpty());
 	}
 
 	@Test
