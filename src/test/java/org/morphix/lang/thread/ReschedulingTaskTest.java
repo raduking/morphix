@@ -1010,7 +1010,7 @@ class ReschedulingTaskTest {
 		@Test
 		@SuppressWarnings("resource")
 		void shouldEnableAndDisableTaskAndLogExecution() throws InterruptedException {
-			int executionCount = 2;
+			int executionCount = 3;
 
 			CountDownLatch latch = new CountDownLatch(executionCount);
 
@@ -1031,7 +1031,7 @@ class ReschedulingTaskTest {
 			task.disable();
 
 			verify(logger).debug("[{}] Enabling rescheduling task.", TASK_NAME);
-			verify(logger, atLeast(executionCount)).debug("[{}] Scheduling next execution in {}ms.", TASK_NAME, DELAY.toMillis());
+			verify(logger, atLeast(executionCount - 1)).debug("[{}] Scheduling next execution in {}ms.", TASK_NAME, DELAY.toMillis());
 			verify(logger).debug("[{}] Disabling rescheduling task.", TASK_NAME);
 		}
 
