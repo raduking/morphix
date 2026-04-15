@@ -47,7 +47,7 @@ public class InstanceCreatorOracleJDK extends InstanceCreator { // NOSONAR
 	 */
 	@Override
 	public boolean isUsable() {
-		return newConstructorForSerializationMethod != null;
+		return null != newConstructorForSerializationMethod;
 	}
 
 	/**

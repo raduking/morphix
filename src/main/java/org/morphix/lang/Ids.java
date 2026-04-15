@@ -276,7 +276,7 @@ public class Ids {
 	 * @return true if the string is a BigInteger, false otherwise
 	 */
 	public static boolean isBigInteger(final String str) {
-		if (str == null) {
+		if (null == str) {
 			return false;
 		}
 		int length = str.length();

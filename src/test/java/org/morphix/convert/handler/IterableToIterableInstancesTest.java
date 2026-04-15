@@ -251,7 +251,7 @@ class IterableToIterableInstancesTest {
 		List<Integer> a;
 
 		public List<Integer> getA() {
-			return a == null ? emptyList() : a;
+			return null == a ? emptyList() : a;
 		}
 	}
 

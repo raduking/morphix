@@ -323,7 +323,7 @@ public class GenericType implements ParameterizedType {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 
-		if (ownerType != null) {
+		if (null != ownerType) {
 			sb.append(ownerType.getTypeName());
 			sb.append("$");
 			if (ownerType instanceof ParameterizedType ot) {

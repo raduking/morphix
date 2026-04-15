@@ -107,6 +107,6 @@ public interface PutFunction<K, V> {
 	 * @return put function
 	 */
 	static <K, V> PutFunction<K, V> ifNotNullKeyAndValue() {
-		return (map, key, value) -> (key != null && value != null) ? map.put(key, value) : null;
+		return (map, key, value) -> (null != key && null != value) ? map.put(key, value) : null;
 	}
 }

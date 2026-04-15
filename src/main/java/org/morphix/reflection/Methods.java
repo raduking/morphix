@@ -666,7 +666,7 @@ public interface Methods {
 		 */
 		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Set<Class<?>> excluded) {
 			try {
-				if (cls == null || excluded.contains(cls)) {
+				if (null == cls || excluded.contains(cls)) {
 					return new LinkedList<>();
 				}
 				excluded.add(cls);

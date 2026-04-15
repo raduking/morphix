@@ -537,7 +537,7 @@ public interface Fields {
 					} catch (ReflectionException e) {
 						value = null;
 					}
-					if (value == null) {
+					if (null == value) {
 						break;
 					}
 				}

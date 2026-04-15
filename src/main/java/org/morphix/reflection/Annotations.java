@@ -52,10 +52,10 @@ public class Annotations {
 	 *     {@code --add-opens} flags)
 	 */
 	public static <A extends Annotation> void overrideValue(final A annotation, final String attribute, final Object value) {
-		if (attribute == null || attribute.isBlank()) {
+		if (null == attribute || attribute.isBlank()) {
 			throw new IllegalArgumentException("Attribute name must be non-null and non-blank.");
 		}
-		if (annotation == null) {
+		if (null == annotation) {
 			throw new ReflectionException("Failed to override annotation: annotation instance is null (possibly not retained at runtime).");
 		}
 		try {

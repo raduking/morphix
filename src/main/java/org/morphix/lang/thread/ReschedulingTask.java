@@ -349,7 +349,7 @@ public class ReschedulingTask implements AutoCloseable {
 	 * @return true if the task is not scheduled, false if it is scheduled and not done
 	 */
 	public static boolean isDone(final ScheduledFuture<?> task) {
-		return task == null || task.isDone();
+		return null == task || task.isDone();
 	}
 
 	/**

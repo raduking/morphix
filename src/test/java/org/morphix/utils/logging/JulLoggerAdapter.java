@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.morphix.lang.JavaArrays;
 import org.morphix.lang.Messages;
 import org.morphix.lang.function.LoggerAdapter;
 
@@ -34,7 +35,7 @@ public final class JulLoggerAdapter implements LoggerAdapter {
 		if (!logger.isLoggable(julLevel)) {
 			return;
 		}
-		if (args == null || args.length == 0) {
+		if (JavaArrays.isEmpty(args)) {
 			logger.log(julLevel, message);
 			return;
 		}

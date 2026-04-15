@@ -89,7 +89,7 @@ public class NullablesOptional {
 
 	@Benchmark
 	public List<String> testTernary() {
-		return hotel.images() != null ? hotel.images().names() : null;
+		return null != hotel.images() ? hotel.images().names() : null;
 	}
 
 	@Benchmark

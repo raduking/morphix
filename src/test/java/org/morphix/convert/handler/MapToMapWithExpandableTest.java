@@ -61,7 +61,7 @@ class MapToMapWithExpandableTest {
 
 		@Override
 		public int hashCode() {
-			return s == null ? super.hashCode() : s.hashCode();
+			return null == s ? super.hashCode() : s.hashCode();
 		}
 	}
 
@@ -81,7 +81,7 @@ class MapToMapWithExpandableTest {
 
 		@Override
 		public int hashCode() {
-			return s == null ? super.hashCode() : s.hashCode();
+			return null == s ? super.hashCode() : s.hashCode();
 		}
 	}
 

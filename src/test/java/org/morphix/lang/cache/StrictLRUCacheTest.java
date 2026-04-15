@@ -510,7 +510,7 @@ class StrictLRUCacheTest extends LRUCacheTest {
 		Set<Node<String, String>> visited = new HashSet<>();
 		StringBuilder sb = new StringBuilder();
 		Node<String, String> current = head;
-		while (current != null) {
+		while (null != current) {
 			if (!visited.add(current)) {
 				throw new IllegalStateException("Cycle detected in the linked list");
 			}

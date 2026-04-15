@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
+import org.morphix.lang.JavaArrays;
 import org.morphix.lang.Messages;
 
 /**
@@ -78,7 +79,7 @@ public class OneLineFormatter extends Formatter {
 
 		// logger name, only the class name (strip the package name)
 		String loggerName = logRecord.getLoggerName();
-		if (loggerName != null) {
+		if (null != loggerName) {
 			int lastDot = loggerName.lastIndexOf('.');
 			if (lastDot > 0) {
 				loggerName = loggerName.substring(lastDot + 1);
@@ -90,7 +91,7 @@ public class OneLineFormatter extends Formatter {
 		// message (replace SLF4J style {} with actual values)
 		String message = logRecord.getMessage();
 		Object[] params = logRecord.getParameters();
-		if (params != null && params.length > 0) {
+		if (JavaArrays.isNotEmpty(params)) {
 			message = Messages.message(message, params);
 		}
 		sb.append(message);
@@ -100,7 +101,7 @@ public class OneLineFormatter extends Formatter {
 
 		// exception handling
 		Throwable thrown = logRecord.getThrown();
-		if (thrown != null) {
+		if (null != thrown) {
 			appendException(sb, thrown, INDENT);
 		}
 
@@ -140,7 +141,7 @@ public class OneLineFormatter extends Formatter {
 		sb.append(throwable.getClass().getName());
 
 		String msg = throwable.getMessage();
-		if (msg != null) {
+		if (null != msg) {
 			sb.append(": ").append(msg);
 		}
 		sb.append("\n");
@@ -156,7 +157,7 @@ public class OneLineFormatter extends Formatter {
 			appendException(sb, suppressed, indent, visited);
 		}
 		Throwable cause = throwable.getCause();
-		if (cause != null) {
+		if (null != cause) {
 			sb.append("Caused by: ");
 			appendException(sb, cause, indent, visited);
 		}

@@ -84,7 +84,7 @@ class ReschedulingTaskTest {
 
 	@AfterEach
 	void tearDown() {
-		if (executor != null) {
+		if (null != executor) {
 			executor.shutdownNow();
 		}
 	}
