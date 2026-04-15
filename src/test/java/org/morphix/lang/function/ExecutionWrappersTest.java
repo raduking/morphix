@@ -22,6 +22,8 @@ import static org.hamcrest.Matchers.hasSize;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.morphix.lang.function.LoggerAdapter.LoggingLevel;
 import org.morphix.lang.thread.Threads;
 import org.morphix.reflection.Constructors;
@@ -45,7 +47,7 @@ class ExecutionWrappersTest {
 	}
 
 	@Test
-	void shouldLogStartAndFinishWhenUsingLogWrapper() {
+	void shouldLogStartAndFinishWhenUsingLogWrapperWithDefaultLevel() {
 		TestLoggerAdapter logger = new TestLoggerAdapter();
 		ExecutionWrapper<String> wrapper = ExecutionWrappers.log(logger, TEST_TASK);
 
@@ -55,6 +57,20 @@ class ExecutionWrappersTest {
 		assertThat(logger.getMessages(LoggingLevel.DEBUG), hasSize(2));
 		assertThat(logger.getMessages(LoggingLevel.DEBUG).get(0), is("[" + TEST_TASK + "] Starting execution."));
 		assertThat(logger.getMessages(LoggingLevel.DEBUG).get(1), is("[" + TEST_TASK + "] Finished execution."));
+	}
+
+	@ParameterizedTest
+	@EnumSource(LoggingLevel.class)
+	void shouldLogStartAndFinishWhenUsingLogWrapper(final LoggingLevel level) {
+		TestLoggerAdapter logger = new TestLoggerAdapter();
+		ExecutionWrapper<String> wrapper = ExecutionWrappers.log(logger, level, TEST_TASK);
+
+		String result = wrapper.execute(() -> "done");
+
+		assertThat(result, is("done"));
+		assertThat(logger.getMessages(level), hasSize(2));
+		assertThat(logger.getMessages(level).get(0), is("[" + TEST_TASK + "] Starting execution."));
+		assertThat(logger.getMessages(level).get(1), is("[" + TEST_TASK + "] Finished execution."));
 	}
 
 	@Test

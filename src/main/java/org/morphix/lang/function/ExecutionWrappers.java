@@ -12,6 +12,7 @@
  */
 package org.morphix.lang.function;
 
+import org.morphix.lang.function.LoggerAdapter.LoggingLevel;
 import org.morphix.reflection.Constructors;
 
 /**
@@ -33,7 +34,7 @@ public final class ExecutionWrappers {
 
 	/**
 	 * Creates an {@link ExecutionWrapper} that logs the start and end of execution using the provided
-	 * {@link LoggerAdapter}.
+	 * {@link LoggerAdapter}. The logging level uses is {@link LoggingLevel#DEBUG} by default.
 	 *
 	 * @param logger the logger to use for logging execution events
 	 * @param name a name to identify the execution in the log messages
@@ -41,9 +42,23 @@ public final class ExecutionWrappers {
 	 * @return an {@link ExecutionWrapper} that logs execution events
 	 */
 	public static <T> ExecutionWrapper<T> log(final LoggerAdapter logger, final String name) {
+		return log(logger, LoggingLevel.DEBUG, name);
+	}
+
+	/**
+	 * Creates an {@link ExecutionWrapper} that logs the start and end of execution using the provided {@link LoggerAdapter}
+	 * and logging level.
+	 *
+	 * @param logger the logger to use for logging execution events
+	 * @param level the logging level to use for logging execution events
+	 * @param name a name to identify the execution in the log messages
+	 * @param <T> the type of the result produced by the supplier
+	 * @return an {@link ExecutionWrapper} that logs execution events
+	 */
+	public static <T> ExecutionWrapper<T> log(final LoggerAdapter logger, final LoggingLevel level, final String name) {
 		return ExecutionWrapper.around(
-				() -> logger.debug("[{}] Starting execution.", name),
-				() -> logger.debug("[{}] Finished execution.", name));
+				() -> logger.log(level, "[{}] Starting execution.", name),
+				() -> logger.log(level, "[{}] Finished execution.", name));
 	}
 
 	/**
