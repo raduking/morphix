@@ -1,5 +1,12 @@
 ## Release Notes
 
+`1.0.31`
+
+- Changed all `ExecutorService` parameters in `Threads` class to `Executor` for better flexibility.
+- Changed `Methods.IgnoreAccess.invoke` to delegate to `Methods.invoke` with `MemberAccessor`.
+
+---
+
 `1.0.30`
 
 - Added `Enums.valueOf(Class, String, Supplier)` which returns the default value supplied if the string cannot be transformed to the enum.
