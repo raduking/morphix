@@ -39,12 +39,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.morphix.lang.function.ExecutionWrapper;
 import org.morphix.lang.function.LoggerAdapter;
 import org.morphix.lang.function.Runnables;
 import org.morphix.lang.resource.ScopedResource;
@@ -112,6 +114,7 @@ class ReschedulingTaskTest {
 			assertThat(task.getMinDelay(), is(ReschedulingTask.Default.MIN_DELAY));
 			assertThat(task.getLogger(), is(LoggerAdapter.none()));
 			assertThat(task.isInterruptOnCancel(), is(ReschedulingTask.Default.INTERRUPT_ON_CANCEL));
+			assertThat(task.getExecutionWrapper(), is(ExecutionWrapper.EMPTY));
 		}
 	}
 
@@ -938,6 +941,65 @@ class ReschedulingTaskTest {
 			boolean isNotDone = ReschedulingTask.isNotDone(null);
 
 			assertThat(isNotDone, is(false));
+		}
+	}
+
+	@Nested
+	class ExecutionWrapperTests {
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldExecuteTaskAndHandleExceptions() throws InterruptedException {
+			int executionCount = 3;
+
+			AtomicInteger wrapperCounter = new AtomicInteger();
+			AtomicInteger executionCounter = new AtomicInteger();
+
+			CountDownLatch latch = new CountDownLatch(3);
+			CountDownLatch disableLatch = new CountDownLatch(1);
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(scheduler())
+					.task(() -> {
+						int executions = executionCounter.incrementAndGet();
+						LOGGER.info("Executing task, execution count: {}", executions);
+						latch.countDown();
+						if (executions == executionCount) {
+							Threads.safeWait(disableLatch);
+						}
+					})
+					.executionWrapper(wrapped -> () -> transaction("test-transaction", wrapped, wrapperCounter))
+					.nextDelay(() -> Duration.ofMillis(10))
+					.minDelay(Duration.ofMillis(10))
+					.logger(LOGGER)
+					.build();
+			task.enable();
+
+			Thread.ofVirtual().start(() -> {
+				Threads.safeWait(latch);
+				task.disable();
+				disableLatch.countDown();
+			});
+
+			boolean executed = latch.await(5, TimeUnit.SECONDS);
+
+			assertThat(executed, is(true));
+			assertThat(executionCounter.get(), is(wrapperCounter.get()));
+			assertThat(executionCounter.get(), is(executionCount));
+		}
+
+		private static <T> T transaction(final String name, final Supplier<T> supplier, final AtomicInteger counter) {
+			counter.incrementAndGet();
+			try {
+				LOGGER.info("Starting transaction '{}'", name);
+				T result = supplier.get();
+				LOGGER.info("Transaction '{}' completed successfully", name);
+				return result;
+			} catch (Exception e) {
+				LOGGER.error("Transaction '{}' failed", name, e);
+				throw e;
+			}
 		}
 	}
 }

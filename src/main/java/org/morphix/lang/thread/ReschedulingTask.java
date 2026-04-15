@@ -23,7 +23,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.morphix.lang.Comparables;
+import org.morphix.lang.JavaObjects;
 import org.morphix.lang.Nullables;
+import org.morphix.lang.function.ExecutionWrapper;
 import org.morphix.lang.function.LoggerAdapter;
 import org.morphix.lang.resource.ScopedResource;
 import org.morphix.lang.retry.Retry;
@@ -52,7 +54,12 @@ import org.morphix.reflection.Constructors;
 public class ReschedulingTask implements AutoCloseable {
 
 	/**
-	 * Name space class for default values.
+	 * Name space class for default values. Other defaults which are not constants:
+	 * <ul>
+	 * <li>The logger defaults to {@link LoggerAdapter#none()}</li>
+	 * <li>The execution wrapper defaults to {@link ExecutionWrapper#identity()}</li>
+	 * <li>The task cancellation retry strategy defaults to {@link Retry#noRetry()}</li>
+	 * </ul>
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
@@ -95,6 +102,13 @@ public class ReschedulingTask implements AutoCloseable {
 	 * The task to be executed and rescheduled.
 	 */
 	private final Runnable refreshTask;
+
+	/**
+	 * The execution wrapper for the refresh task. This allows for additional behavior to be added around the execution of
+	 * the refresh task, such as logging, error handling, metrics, etc. Optional, defaults to a simple wrapper that just
+	 * runs the task.
+	 */
+	private final ExecutionWrapper<?> executionWrapper;
 
 	/**
 	 * Supplier that provides the delay until the next execution after each run. The delay is recalculated after each
@@ -142,6 +156,7 @@ public class ReschedulingTask implements AutoCloseable {
 		this.refreshTask = Objects.requireNonNull(builder.refreshTask, "refreshTask must not be null");
 		this.nextDelaySupplier = Objects.requireNonNull(builder.nextDelaySupplier, "nextDelaySupplier must not be null");
 
+		this.executionWrapper = Nullables.nonNullOrDefault(builder.executionWrapper, ExecutionWrapper::identity);
 		this.logger = Nullables.nonNullOrDefault(builder.logger, LoggerAdapter::none);
 		this.minDelay = Nullables.nonNullOrDefault(builder.minDelay, () -> Default.MIN_DELAY);
 		if (minDelay.isNegative() || minDelay.isZero()) {
@@ -234,7 +249,11 @@ public class ReschedulingTask implements AutoCloseable {
 			return;
 		}
 		try {
-			refreshTask.run();
+			if (ExecutionWrapper.EMPTY != executionWrapper) {
+				executionWrapper.execute(refreshTask);
+			} else {
+				refreshTask.run();
+			}
 		} catch (Exception e) {
 			logger.error("[{}] Error during task execution.", name, e);
 		} finally {
@@ -362,6 +381,16 @@ public class ReschedulingTask implements AutoCloseable {
 	}
 
 	/**
+	 * Returns the execution wrapper for the refresh task. This allows for additional behavior to be added around the
+	 * execution of the refresh task, such as logging, error handling, metrics, etc.
+	 *
+	 * @return the execution wrapper
+	 */
+	protected <T> ExecutionWrapper<T> getExecutionWrapper() {
+		return JavaObjects.cast(executionWrapper);
+	}
+
+	/**
 	 * Returns the supplier that provides the delay until the next execution after each run.
 	 *
 	 * @return the next delay supplier
@@ -427,6 +456,13 @@ public class ReschedulingTask implements AutoCloseable {
 		 * The task to be executed and rescheduled. Must not be null.
 		 */
 		private Runnable refreshTask;
+
+		/**
+		 * The execution wrapper for the refresh task. This allows for additional behavior to be added around the execution of
+		 * the refresh task, such as logging, error handling, metrics, etc. Optional, defaults to a simple wrapper that just
+		 * runs the task.
+		 */
+		private ExecutionWrapper<?> executionWrapper;
 
 		/**
 		 * Supplier that provides the delay until the next execution after each run. The delay is recalculated after each
@@ -503,6 +539,19 @@ public class ReschedulingTask implements AutoCloseable {
 		 */
 		public Builder task(final Runnable refreshTask) {
 			this.refreshTask = Objects.requireNonNull(refreshTask, "refreshTask must not be null");
+			return this;
+		}
+
+		/**
+		 * Sets the execution wrapper for the refresh task. This allows for additional behavior to be added around the execution
+		 * of the refresh task, such as logging, error handling, metrics, etc. Optional, defaults to a simple wrapper that just
+		 * runs the task.
+		 *
+		 * @param executionWrapper the execution wrapper, optional, defaults to a simple wrapper that just runs the task
+		 * @return this builder for chaining
+		 */
+		public Builder executionWrapper(final ExecutionWrapper<?> executionWrapper) {
+			this.executionWrapper = executionWrapper;
 			return this;
 		}
 

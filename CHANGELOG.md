@@ -1,5 +1,11 @@
 ## Release Notes
 
+`1.0.32`
+
+- Added `ExecutionWrapper` to `ReschedulingTask`.
+
+---
+
 `1.0.31`
 
 - Changed all `ExecutorService` parameters in `Threads` class to `Executor` for better flexibility.

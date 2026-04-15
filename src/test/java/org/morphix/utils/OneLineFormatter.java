@@ -14,6 +14,8 @@ package org.morphix.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
@@ -41,6 +43,8 @@ import org.morphix.lang.Messages;
  * @author Radu Sebastian LAZIN
  */
 public class OneLineFormatter extends Formatter {
+
+	private static final String INDENT = "  ";
 
 	/**
 	 * Date pattern for the timestamp.
@@ -94,6 +98,67 @@ public class OneLineFormatter extends Formatter {
 		// important! newline at the end of the log record
 		sb.append("\n");
 
+		// exception handling
+		Throwable thrown = logRecord.getThrown();
+		if (thrown != null) {
+			appendException(sb, thrown, INDENT);
+		}
+
 		return sb.toString();
+	}
+
+	/**
+	 * Appends exception in classic SLF4J / Logback style.
+	 *
+	 * @param sb the StringBuilder to append to
+	 * @param throwable the exception to append
+	 * @param indent the current indentation level (used for nested exceptions)
+	 */
+	private static void appendException(final StringBuilder sb, final Throwable throwable, final String indent) {
+		if (null == throwable) {
+			return;
+		}
+		appendException(sb, throwable, indent, new HashSet<>());
+	}
+
+	/**
+	 * Appends exception in classic SLF4J / Logback style, with circular reference detection.
+	 *
+	 * @param sb the StringBuilder to append to
+	 * @param throwable the exception to append
+	 * @param indent the current indentation level (used for nested exceptions)
+	 * @param visited the set of already visited exceptions to detect circular references
+	 */
+	private static void appendException(final StringBuilder sb, final Throwable throwable, final String indent, final Set<Throwable> visited) {
+		if (null == throwable) {
+			return;
+		}
+		if (!visited.add(throwable)) {
+			sb.append("[CIRCULAR REFERENCE]\n");
+			return;
+		}
+		sb.append(throwable.getClass().getName());
+
+		String msg = throwable.getMessage();
+		if (msg != null) {
+			sb.append(": ").append(msg);
+		}
+		sb.append("\n");
+
+		for (StackTraceElement element : throwable.getStackTrace()) {
+			sb.append(indent)
+					.append("at ")
+					.append(element)
+					.append("\n");
+		}
+		for (Throwable suppressed : throwable.getSuppressed()) {
+			sb.append(indent).append("Suppressed: ");
+			appendException(sb, suppressed, indent, visited);
+		}
+		Throwable cause = throwable.getCause();
+		if (cause != null) {
+			sb.append("Caused by: ");
+			appendException(sb, cause, indent, visited);
+		}
 	}
 }

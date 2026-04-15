@@ -14,6 +14,8 @@ package org.morphix.lang.function;
 
 import java.util.function.Supplier;
 
+import org.morphix.lang.JavaObjects;
+
 /**
  * Functional interface representing a wrapper for executing code with additional behavior. This interface allows you to
  * wrap the execution of a supplier or a runnable with custom logic, such as logging, error handling, or performance
@@ -25,6 +27,12 @@ import java.util.function.Supplier;
  */
 @FunctionalInterface
 public interface ExecutionWrapper<T> {
+
+	/**
+	 * An empty wrapper that does not modify the behavior of the supplier. This wrapper simply returns the original supplier
+	 * without any additional behavior.
+	 */
+	ExecutionWrapper<?> EMPTY = supplier -> supplier;
 
 	/**
 	 * Wraps the execution of a supplier with additional behavior.
@@ -85,7 +93,7 @@ public interface ExecutionWrapper<T> {
 	 * @return an identity wrapper that does not modify the behavior of the supplier
 	 */
 	static <T> ExecutionWrapper<T> identity() {
-		return supplier -> supplier;
+		return JavaObjects.cast(EMPTY);
 	}
 
 	/**
