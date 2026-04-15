@@ -383,7 +383,7 @@ public class ExtendedField {
 	 */
 	public <T extends Annotation> boolean isAnnotationPresent(final Class<T> annotation) {
 		boolean isPresent = false;
-		if (getterMethod != null) {
+		if (null != getterMethod) {
 			isPresent = getterMethod.isAnnotationPresent(annotation);
 		}
 		if (null != field) {

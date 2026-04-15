@@ -10,13 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.utils;
+package org.morphix.utils.logging;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
+import org.morphix.lang.JavaArrays;
 import org.morphix.lang.Messages;
 
 /**
@@ -29,7 +32,7 @@ import org.morphix.lang.Messages;
  * to this class:
  *
  * <pre>
- * java.util.logging.ConsoleHandler.formatter = org.morphix.utils.OneLineFormatter
+ * java.util.logging.ConsoleHandler.formatter = org.morphix.utils.logging.OneLineFormatter
  * </pre>
  *
  * The file can be configured to be used by the JVM with the following system property:
@@ -41,6 +44,8 @@ import org.morphix.lang.Messages;
  * @author Radu Sebastian LAZIN
  */
 public class OneLineFormatter extends Formatter {
+
+	private static final String INDENT = "  ";
 
 	/**
 	 * Date pattern for the timestamp.
@@ -74,7 +79,7 @@ public class OneLineFormatter extends Formatter {
 
 		// logger name, only the class name (strip the package name)
 		String loggerName = logRecord.getLoggerName();
-		if (loggerName != null) {
+		if (null != loggerName) {
 			int lastDot = loggerName.lastIndexOf('.');
 			if (lastDot > 0) {
 				loggerName = loggerName.substring(lastDot + 1);
@@ -86,7 +91,7 @@ public class OneLineFormatter extends Formatter {
 		// message (replace SLF4J style {} with actual values)
 		String message = logRecord.getMessage();
 		Object[] params = logRecord.getParameters();
-		if (params != null && params.length > 0) {
+		if (JavaArrays.isNotEmpty(params)) {
 			message = Messages.message(message, params);
 		}
 		sb.append(message);
@@ -94,6 +99,67 @@ public class OneLineFormatter extends Formatter {
 		// important! newline at the end of the log record
 		sb.append("\n");
 
+		// exception handling
+		Throwable thrown = logRecord.getThrown();
+		if (null != thrown) {
+			appendException(sb, thrown, INDENT);
+		}
+
 		return sb.toString();
+	}
+
+	/**
+	 * Appends exception in classic SLF4J / Logback style.
+	 *
+	 * @param sb the StringBuilder to append to
+	 * @param throwable the exception to append
+	 * @param indent the current indentation level (used for nested exceptions)
+	 */
+	private static void appendException(final StringBuilder sb, final Throwable throwable, final String indent) {
+		if (null == throwable) {
+			return;
+		}
+		appendException(sb, throwable, indent, new HashSet<>());
+	}
+
+	/**
+	 * Appends exception in classic SLF4J / Logback style, with circular reference detection.
+	 *
+	 * @param sb the StringBuilder to append to
+	 * @param throwable the exception to append
+	 * @param indent the current indentation level (used for nested exceptions)
+	 * @param visited the set of already visited exceptions to detect circular references
+	 */
+	private static void appendException(final StringBuilder sb, final Throwable throwable, final String indent, final Set<Throwable> visited) {
+		if (null == throwable) {
+			return;
+		}
+		if (!visited.add(throwable)) {
+			sb.append("[CIRCULAR REFERENCE]\n");
+			return;
+		}
+		sb.append(throwable.getClass().getName());
+
+		String msg = throwable.getMessage();
+		if (null != msg) {
+			sb.append(": ").append(msg);
+		}
+		sb.append("\n");
+
+		for (StackTraceElement element : throwable.getStackTrace()) {
+			sb.append(indent)
+					.append("at ")
+					.append(element)
+					.append("\n");
+		}
+		for (Throwable suppressed : throwable.getSuppressed()) {
+			sb.append(indent).append("Suppressed: ");
+			appendException(sb, suppressed, indent, visited);
+		}
+		Throwable cause = throwable.getCause();
+		if (null != cause) {
+			sb.append("Caused by: ");
+			appendException(sb, cause, indent, visited);
+		}
 	}
 }

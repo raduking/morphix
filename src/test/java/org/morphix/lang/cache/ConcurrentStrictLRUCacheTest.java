@@ -127,26 +127,26 @@ class ConcurrentStrictLRUCacheTest extends StrictLRUCacheTest {
 			Node<K, V> tail = cc.tail();
 
 			// head/tail consistency
-			if (head == null || tail == null) {
+			if (null == head || null == tail) {
 				if (head != tail) {
-					throw new IllegalStateException("Head/tail mismatch: one null, one not");
+					throw new IllegalStateException("Found head/tail mismatch: one null, one not");
 				}
 				if (cc.size() != 0) {
 					throw new IllegalStateException("Size not zero but list empty");
 				}
 				return;
 			}
-			if (head.prev() != null) {
-				throw new IllegalStateException("Head.prev != null");
+			if (null != head.prev()) {
+				throw new IllegalStateException("Found: null != head.prev");
 			}
-			if (tail.next() != null) {
-				throw new IllegalStateException("Tail.next != null");
+			if (null != tail.next()) {
+				throw new IllegalStateException("Found: null != tail.next");
 			}
 
 			// cycle detection
 			Node<K, V> slow = cc.head();
 			Node<K, V> fast = cc.head().next();
-			while (fast != null && fast.next() != null) {
+			while (null != fast && null != fast.next()) {
 				slow = slow.next();
 				fast = fast.next();
 				if (slow == fast) {
@@ -162,7 +162,7 @@ class ConcurrentStrictLRUCacheTest extends StrictLRUCacheTest {
 			int count = 0;
 			Node<K, V> prev = null;
 			Node<K, V> node = head;
-			while (node != null) {
+			while (null != node) {
 				if (node.prev() != prev) {
 					throw new IllegalStateException("Broken prev pointer at key=" + node.key());
 				}

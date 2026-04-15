@@ -72,7 +72,7 @@ public class FinderPathStrategy implements FieldFinderStrategy {
 			} else {
 				resultObject = null;
 			}
-			if (resultField == null) {
+			if (null == resultField) {
 				break;
 			}
 		}

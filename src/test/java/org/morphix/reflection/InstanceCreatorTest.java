@@ -34,7 +34,7 @@ class InstanceCreatorTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		assumeTrue(InstanceCreator.getInstance() != null);
+		assumeTrue(null != InstanceCreator.getInstance());
 	}
 
 	@Test

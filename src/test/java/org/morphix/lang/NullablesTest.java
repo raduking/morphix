@@ -367,7 +367,7 @@ class NullablesTest {
 		String result = Nullables.whenNotNull(a)
 				.andNotNull(A::getB)
 				.andNotNull(B::getS)
-				.valueWhenOrDefault(s -> s == null, BIBI);
+				.valueWhenOrDefault(s -> null == s, BIBI);
 
 		assertThat(result, equalTo(BIBI));
 	}
@@ -693,7 +693,7 @@ class NullablesTest {
 	}
 
 	private static boolean isNotBlank(final String s) {
-		return s != null && !s.isBlank();
+		return null != s && !s.isBlank();
 	}
 
 }

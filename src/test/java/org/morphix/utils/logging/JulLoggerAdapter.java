@@ -1,9 +1,10 @@
-package org.morphix.utils;
+package org.morphix.utils.logging;
 
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.morphix.lang.JavaArrays;
 import org.morphix.lang.Messages;
 import org.morphix.lang.function.LoggerAdapter;
 
@@ -34,8 +35,26 @@ public final class JulLoggerAdapter implements LoggerAdapter {
 		if (!logger.isLoggable(julLevel)) {
 			return;
 		}
-		// TODO: log exceptions (if the last argument is a Throwable, log it as an exception)
-		logger.log(julLevel, format(message, args));
+		if (JavaArrays.isEmpty(args)) {
+			logger.log(julLevel, message);
+			return;
+		}
+		final Object lastArg = args[args.length - 1];
+		if (lastArg instanceof Throwable throwable) {
+			String formattedMessage;
+			if (args.length == 1) {
+				// only exception was passed as argument, use the message as is
+				formattedMessage = message;
+			} else {
+				Object[] messageArgs = new Object[args.length - 1];
+				System.arraycopy(args, 0, messageArgs, 0, args.length - 1);
+				formattedMessage = Messages.message(message, messageArgs);
+			}
+			logger.log(julLevel, formattedMessage, throwable);
+		} else {
+			String formattedMessage = Messages.message(message, args);
+			logger.log(julLevel, formattedMessage);
+		}
 	}
 
 	private static Level toJulLevel(final LoggerAdapter.LoggingLevel level) {
@@ -46,12 +65,5 @@ public final class JulLoggerAdapter implements LoggerAdapter {
 			case WARN -> Level.WARNING;
 			case ERROR -> Level.SEVERE;
 		};
-	}
-
-	private static String format(final String message, final Object... args) {
-		if (args == null || args.length == 0) {
-			return message;
-		}
-		return Messages.message(message, args);
 	}
 }

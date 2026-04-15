@@ -73,7 +73,7 @@ class MapToMapTest {
 
 		@Override
 		public int hashCode() {
-			return s == null ? super.hashCode() : s.hashCode();
+			return null == s ? super.hashCode() : s.hashCode();
 		}
 	}
 
@@ -93,7 +93,7 @@ class MapToMapTest {
 
 		@Override
 		public int hashCode() {
-			return s == null ? super.hashCode() : s.hashCode();
+			return null == s ? super.hashCode() : s.hashCode();
 		}
 	}
 
@@ -276,7 +276,7 @@ class MapToMapTest {
 		Map<String, String> a;
 
 		public Map<String, String> getA() {
-			return a == null ? emptyMap() : a;
+			return null == a ? emptyMap() : a;
 		}
 	}
 

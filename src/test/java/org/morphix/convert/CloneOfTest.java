@@ -56,7 +56,7 @@ class CloneOfTest {
 
 		public void setTemporaryD(final D temporaryD) {
 			this.temporaryD = temporaryD;
-			if (temporaryD.getParentD() == null) {
+			if (null == temporaryD.getParentD()) {
 				this.temporaryD.setParentD(this);
 			}
 		}

@@ -176,7 +176,7 @@ public interface MapConversions {
 	 */
 	static <S, H, D> MapConversionPipeline<String, Object, H, D> convert(final S source, final SimpleConverter<String, H> keyConverter,
 			final SimpleConverter<Object, D> valueConverter, final PutFunction<String, Object> putFunction) {
-		if (source == null) {
+		if (null == source) {
 			return convertMap(Map.of(), keyConverter, valueConverter);
 		}
 		List<ExtendedField> fields = ExtendedFields.findAllNonStatic(source);

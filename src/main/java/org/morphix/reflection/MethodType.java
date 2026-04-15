@@ -233,7 +233,7 @@ public enum MethodType {
 	 * @return a field name based on a prefix and a method name
 	 */
 	public static String getFieldName(final String prefix, final String methodName) {
-		if (prefix == null || methodName == null || !startsWithStrict(prefix, methodName)) {
+		if (null == prefix || null == methodName || !startsWithStrict(prefix, methodName)) {
 			return null;
 		}
 		int index = prefix.length();

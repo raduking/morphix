@@ -157,7 +157,7 @@ public class TenantContextHolder extends StackedContextHolder<String> {
 	 * @return true if the tenant ID is valid, false otherwise
 	 */
 	private static boolean isValidTenantId(final String tenantId) {
-		return tenantId != null && !tenantId.isBlank();
+		return null != tenantId && !tenantId.isBlank();
 	}
 
 	/**

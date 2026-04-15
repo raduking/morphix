@@ -33,7 +33,7 @@ public class ContainsAtLeastTimesMatcher extends TypeSafeMatcher<String> {
 
 	@Override
 	protected boolean matchesSafely(final String text) {
-		if (text == null || substring == null || substring.isEmpty()) {
+		if (null == text || null == substring || substring.isEmpty()) {
 			return false;
 		}
 
