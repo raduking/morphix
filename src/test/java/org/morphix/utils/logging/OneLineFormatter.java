@@ -32,7 +32,7 @@ import org.morphix.lang.Messages;
  * to this class:
  *
  * <pre>
- * java.util.logging.ConsoleHandler.formatter = org.morphix.utils.OneLineFormatter
+ * java.util.logging.ConsoleHandler.formatter = org.morphix.utils.logging.OneLineFormatter
  * </pre>
  *
  * The file can be configured to be used by the JVM with the following system property:
