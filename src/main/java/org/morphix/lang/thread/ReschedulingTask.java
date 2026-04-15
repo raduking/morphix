@@ -106,9 +106,9 @@ public class ReschedulingTask implements AutoCloseable {
 	/**
 	 * The execution wrapper for the refresh task. This allows for additional behavior to be added around the execution of
 	 * the refresh task, such as logging, error handling, metrics, etc. Optional, defaults to a simple wrapper that just
-	 * runs the task.
+	 * runs the task. We use {@link Void} since the refresh task is a {@link Runnable} that does not produce a result.
 	 */
-	private final ExecutionWrapper<?> executionWrapper;
+	private final ExecutionWrapper<Void> executionWrapper;
 
 	/**
 	 * Supplier that provides the delay until the next execution after each run. The delay is recalculated after each
@@ -460,9 +460,9 @@ public class ReschedulingTask implements AutoCloseable {
 		/**
 		 * The execution wrapper for the refresh task. This allows for additional behavior to be added around the execution of
 		 * the refresh task, such as logging, error handling, metrics, etc. Optional, defaults to a simple wrapper that just
-		 * runs the task.
+		 * runs the task. We use {@link Void} since the refresh task is a {@link Runnable} that does not produce a result.
 		 */
-		private ExecutionWrapper<?> executionWrapper;
+		private ExecutionWrapper<Void> executionWrapper;
 
 		/**
 		 * Supplier that provides the delay until the next execution after each run. The delay is recalculated after each
@@ -483,8 +483,8 @@ public class ReschedulingTask implements AutoCloseable {
 		private Retry taskCancelRetry;
 
 		/**
-		 * Whether to interrupt the task thread when cancelling. This is used in the cancellation logic when trying to cancel
-		 * the currently scheduled task before scheduling a new one. Optional, defaults to false (do not interrupt).
+		 * Whether to interrupt the task thread when canceling. This is used in the cancellation logic when trying to cancel the
+		 * currently scheduled task before scheduling a new one. Optional, defaults to false (do not interrupt).
 		 */
 		private boolean interruptOnCancel = Default.INTERRUPT_ON_CANCEL;
 
@@ -545,14 +545,24 @@ public class ReschedulingTask implements AutoCloseable {
 		/**
 		 * Sets the execution wrapper for the refresh task. This allows for additional behavior to be added around the execution
 		 * of the refresh task, such as logging, error handling, metrics, etc. Optional, defaults to a simple wrapper that just
-		 * runs the task.
+		 * runs the task. We use {@link Void} since the refresh task is a {@link Runnable} that does not produce a result.
 		 *
 		 * @param executionWrapper the execution wrapper, optional, defaults to a simple wrapper that just runs the task
 		 * @return this builder for chaining
 		 */
-		public Builder executionWrapper(final ExecutionWrapper<?> executionWrapper) {
+		public Builder executionWrapper(final ExecutionWrapper<Void> executionWrapper) {
 			this.executionWrapper = executionWrapper;
 			return this;
+		}
+
+		/**
+		 * Alias for {@link #executionWrapper(ExecutionWrapper)} for better readability when wrapping a runnable task.
+		 *
+		 * @param wrapper the execution wrapper, optional, defaults to a simple wrapper that just runs the task
+		 * @return this builder for chaining
+		 */
+		public Builder wrap(final ExecutionWrapper<Void> wrapper) {
+			return executionWrapper(wrapper);
 		}
 
 		/**

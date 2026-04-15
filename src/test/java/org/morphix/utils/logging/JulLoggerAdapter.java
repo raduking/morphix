@@ -1,4 +1,4 @@
-package org.morphix.utils;
+package org.morphix.utils.logging;
 
 import java.util.Objects;
 import java.util.logging.Level;
@@ -35,9 +35,9 @@ public final class JulLoggerAdapter implements LoggerAdapter {
 			return;
 		}
 		if (args == null || args.length == 0) {
-            logger.log(julLevel, message);
-            return;
-        }
+			logger.log(julLevel, message);
+			return;
+		}
 		final Object lastArg = args[args.length - 1];
 		if (lastArg instanceof Throwable throwable) {
 			String formattedMessage;

@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -54,8 +55,8 @@ import org.morphix.lang.retry.Retry;
 import org.morphix.lang.retry.WaitCounter;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.Methods;
-import org.morphix.utils.JulLoggerAdapter;
 import org.morphix.utils.Tests;
+import org.morphix.utils.logging.JulLoggerAdapter;
 
 /**
  * Test class for {@link ReschedulingTask}.
@@ -969,7 +970,7 @@ class ReschedulingTaskTest {
 							Threads.safeWait(disableLatch);
 						}
 					})
-					.executionWrapper(wrapped -> () -> transaction("test-transaction", wrapped, wrapperCounter))
+					.wrap(wrapped -> () -> transaction("test-transaction", wrapped, wrapperCounter))
 					.nextDelay(() -> Duration.ofMillis(10))
 					.minDelay(Duration.ofMillis(10))
 					.logger(LOGGER)
@@ -1001,5 +1002,38 @@ class ReschedulingTaskTest {
 				throw e;
 			}
 		}
+	}
+
+	@Nested
+	class LoggingTests {
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldEnableAndDisableTaskAndLogExecution() throws InterruptedException {
+			int executionCount = 2;
+
+			CountDownLatch latch = new CountDownLatch(executionCount);
+
+			LoggerAdapter logger = mock(LoggerAdapter.class);
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(scheduler())
+					.task(latch::countDown)
+					.nextDelay(() -> DELAY)
+					.minDelay(Duration.ofMillis(10))
+					.logger(logger)
+					.build();
+			task.enable();
+
+			latch.await(1, TimeUnit.SECONDS);
+
+			task.disable();
+
+			verify(logger).debug("[{}] Enabling rescheduling task.", TASK_NAME);
+			verify(logger, atLeast(executionCount)).debug("[{}] Scheduling next execution in {}ms.", TASK_NAME, DELAY.toMillis());
+			verify(logger).debug("[{}] Disabling rescheduling task.", TASK_NAME);
+		}
+
 	}
 }
