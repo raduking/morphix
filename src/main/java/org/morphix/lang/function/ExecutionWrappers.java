@@ -34,7 +34,7 @@ public final class ExecutionWrappers {
 
 	/**
 	 * Creates an {@link ExecutionWrapper} that logs the start and end of execution using the provided
-	 * {@link LoggerAdapter}. The logging level uses is {@link LoggingLevel#DEBUG} by default.
+	 * {@link LoggerAdapter}. The default logging level is {@link LoggingLevel#DEBUG}.
 	 *
 	 * @param logger the logger to use for logging execution events
 	 * @param name a name to identify the execution in the log messages

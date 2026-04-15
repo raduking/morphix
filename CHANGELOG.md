@@ -3,7 +3,7 @@
 `1.0.32`
 
 - Added `ExecutionWrapper` to `ReschedulingTask`.
-- Added `ExecutionWrappers` utility class which provide basic wrappers.
+- Added `ExecutionWrappers` utility class which provides basic wrappers.
 - Added `ExecutionWrappers.log` wrapper which logs a start and an end message for the executed task.
 - Added `ExecutionWrappers.time` which times and logs the execution time for the executed task.
 

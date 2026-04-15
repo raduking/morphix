@@ -31,14 +31,14 @@ public final class TestLoggerAdapter implements LoggerAdapter {
 	 * Map that stores log messages categorized by their logging level. Each logging level maps to a list of messages logged
 	 * at that level.
 	 */
-	private final Map<LoggingLevel, List<String>> debugMessages = new EnumMap<>(LoggingLevel.class);
+	private final Map<LoggingLevel, List<String>> messages = new EnumMap<>(LoggingLevel.class);
 
 	/**
 	 * @see LoggerAdapter#log(LoggingLevel, String, Object...)
 	 */
 	@Override
 	public void log(final LoggingLevel level, final String message, final Object... args) {
-		debugMessages.computeIfAbsent(level, k -> new ArrayList<>()).add(Messages.message(message, args));
+		messages.computeIfAbsent(level, k -> new ArrayList<>()).add(Messages.message(message, args));
 	}
 
 	/**
@@ -48,7 +48,7 @@ public final class TestLoggerAdapter implements LoggerAdapter {
 	 * @return the map of logged messages categorized by logging level
 	 */
 	public Map<LoggingLevel, List<String>> getMessages() {
-		return debugMessages;
+		return messages;
 	}
 
 	/**
@@ -59,6 +59,6 @@ public final class TestLoggerAdapter implements LoggerAdapter {
 	 * @return the list of messages logged at the specified logging level, or an empty list if none were logged
 	 */
 	public List<String> getMessages(final LoggingLevel level) {
-		return debugMessages.getOrDefault(level, List.of());
+		return messages.getOrDefault(level, List.of());
 	}
 }

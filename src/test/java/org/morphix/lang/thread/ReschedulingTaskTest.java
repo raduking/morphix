@@ -957,7 +957,7 @@ class ReschedulingTaskTest {
 			AtomicInteger wrapperCounter = new AtomicInteger();
 			AtomicInteger executionCounter = new AtomicInteger();
 
-			CountDownLatch latch = new CountDownLatch(3);
+			CountDownLatch latch = new CountDownLatch(executionCount);
 			CountDownLatch disableLatch = new CountDownLatch(1);
 
 			ReschedulingTask task = ReschedulingTask.builder()
@@ -1027,10 +1027,11 @@ class ReschedulingTaskTest {
 					.build();
 			task.enable();
 
-			latch.await(1, TimeUnit.SECONDS);
+			boolean executed = latch.await(1, TimeUnit.SECONDS);
 
 			task.disable();
 
+			assertThat(executed, is(true));
 			verify(logger).debug("[{}] Enabling rescheduling task.", TASK_NAME);
 			verify(logger, atLeast(executionCount - 1)).debug("[{}] Scheduling next execution in {}ms.", TASK_NAME, DELAY.toMillis());
 			verify(logger).debug("[{}] Disabling rescheduling task.", TASK_NAME);
