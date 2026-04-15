@@ -487,22 +487,7 @@ public interface Methods {
 		 */
 		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
 			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
-				return JavaObjects.cast(method.invoke(obj, args));
-			} catch (InvocationTargetException e) {
-				// e is just a wrapper on the real exception, escalate the real one
-				Throwable cause = Reflection.unwrapInvocationTargetException(e);
-				String className = method.getDeclaringClass().getCanonicalName();
-				if (null != obj) {
-					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
-				}
-				throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), cause.getMessage());
-			} catch (Exception e) {
-				// escalate any exception invoking the method
-				String className = method.getDeclaringClass().getCanonicalName();
-				if (null != obj) {
-					className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
-				}
-				throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), e.getMessage());
+				return Methods.invoke(method, obj, args);
 			}
 		}
 

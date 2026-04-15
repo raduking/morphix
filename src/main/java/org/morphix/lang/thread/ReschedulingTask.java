@@ -37,6 +37,11 @@ import org.morphix.reflection.Constructors;
  * instance of the task is scheduled at any time. The scheduling is done after the current task executions finishes, so
  * if the task takes longer than the delay, it will not cause overlapping executions.
  * <p>
+ * Enabling the task will start the task execution on the same thread that called {@link #enable()} and rescheduling
+ * will be done on a separate thread managed by the provided {@link ScheduledExecutorService}. Disabling it will stop
+ * any future executions and cancel any currently scheduled task. The task also provides a close method to clean up
+ * resources when it is no longer needed.
+ * <p>
  * Useful for token refreshers, cache refreshers, heartbeat mechanisms, etc.
  * <ul>
  * <li>TODO: add tests for the exact logging messages</li>
@@ -525,11 +530,11 @@ public class ReschedulingTask implements AutoCloseable {
 		/**
 		 * Sets the retry strategy for task cancellation.
 		 *
-		 * @param taskCancellationRetry the retry strategy for task cancellation, optional, defaults to no retry
+		 * @param taskCancelRetry the retry strategy for task cancellation, optional, defaults to no retry
 		 * @return this builder for chaining
 		 */
-		public Builder taskCancelRetry(final Retry taskCancellationRetry) {
-			this.taskCancelRetry = taskCancellationRetry;
+		public Builder taskCancelRetry(final Retry taskCancelRetry) {
+			this.taskCancelRetry = taskCancelRetry;
 			return this;
 		}
 

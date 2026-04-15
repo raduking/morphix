@@ -34,6 +34,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -63,6 +64,11 @@ class ResourceLeakDetectorTest {
 
 	private String originalProperty;
 
+	@BeforeAll
+	static void beforeAll() {
+		references().clear();
+	}
+
 	@BeforeEach
 	void setup() {
 		originalProperty = ConcurrentSystem.getAndSetProperty(LeakDetectionLevel.PROPERTY, null);
@@ -84,8 +90,12 @@ class ResourceLeakDetectorTest {
 
 		ResourceLeakTracker tracker = ResourceLeakDetector.track(new Object());
 
-		assertSame(ResourceLeakTracker.DISABLED, tracker);
-		assertTrue(references().isEmpty());
+		try {
+			assertSame(ResourceLeakTracker.DISABLED, tracker);
+			assertTrue(references().isEmpty());
+		} finally {
+			tracker.close();
+		}
 	}
 
 	@Test
@@ -95,6 +105,7 @@ class ResourceLeakDetectorTest {
 		try (ResourceLeakTracker tracker = ResourceLeakDetector.track(new Object())) {
 			assertFalse(references().isEmpty());
 		}
+		assertTrue(references().isEmpty());
 	}
 
 	@Test
@@ -124,11 +135,11 @@ class ResourceLeakDetectorTest {
 
 		System.gc();
 
-		waitUntil(() -> !logs.isEmpty());
-
-		String expectedMessage = tracker.getReference().getReport(GC_WITHOUT_CLOSE);
-
 		try {
+			waitUntil(() -> !logs.isEmpty());
+
+			String expectedMessage = tracker.getReference().getReport(GC_WITHOUT_CLOSE);
+
 			assertThat(expectedMessage, containsString(Object.class.getName()));
 			assertThat(logs.get(0).getMessage(), equalTo(expectedMessage));
 		} finally {
@@ -158,14 +169,14 @@ class ResourceLeakDetectorTest {
 
 		System.gc();
 
-		// wait until both leaks are reported
-		waitUntil(() -> logs.size() >= 2);
-
-		String expectedMessage1 = tracker1.getReference().getReport(GC_WITHOUT_CLOSE);
-		String expectedMessage2 = tracker2.getReference().getReport(GC_WITHOUT_CLOSE);
-		List<String> logMessages = logs.stream().map(LogRecord::getMessage).toList();
-
 		try {
+			// wait until both leaks are reported
+			waitUntil(() -> logs.size() >= 2);
+
+			String expectedMessage1 = tracker1.getReference().getReport(GC_WITHOUT_CLOSE);
+			String expectedMessage2 = tracker2.getReference().getReport(GC_WITHOUT_CLOSE);
+			List<String> logMessages = logs.stream().map(LogRecord::getMessage).toList();
+
 			assertThat(expectedMessage1, containsString(A.class.getName()));
 			assertThat(expectedMessage2, containsString(B.class.getName()));
 			assertThat(logMessages, hasSize(2));
@@ -198,12 +209,12 @@ class ResourceLeakDetectorTest {
 
 		System.gc();
 
-		// wait until the leak is reported
-		waitUntil(() -> !logs.isEmpty());
-
-		String expectedMessage = tracker.getReference().getReport(GC_WITHOUT_CLOSE);
-
 		try {
+			// wait until the leak is reported
+			waitUntil(() -> !logs.isEmpty());
+
+			String expectedMessage = tracker.getReference().getReport(GC_WITHOUT_CLOSE);
+
 			assertThat(logs.get(0).getMessage(), equalTo(expectedMessage));
 			assertThat(expectedMessage, containsAtLeastTimes("  at ", ADVANCED_REPORTED_FRAMES));
 			assertThat(expectedMessage, containsString(TestResource.class.getName()));
@@ -229,10 +240,11 @@ class ResourceLeakDetectorTest {
 		TestResource obj = new TestResource();
 		ResourceLeakTracker tracker = obj.leakTracker;
 
-		for (ResourceLeakReference ref : references()) {
-			ref.reportLeak("JVM shutdown");
-		}
 		try {
+			for (ResourceLeakReference ref : references()) {
+				ref.reportLeak("JVM shutdown");
+			}
+
 			assertThat(logs.get(0).getMessage(), containsString(TestResource.class.getName()));
 			assertThat(logs.get(0).getMessage(), containsString("JVM shutdown"));
 		} finally {
