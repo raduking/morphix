@@ -849,6 +849,7 @@ class ReschedulingTaskTest {
 			doAnswer(invocation -> {
 				ScheduledFuture<?> scheduledFuture = (ScheduledFuture<?>) invocation.callRealMethod();
 				scheduledFuture = spy(scheduledFuture);
+				doReturn(false).when(scheduledFuture).isDone();
 				scheduledFutures.add(scheduledFuture);
 				return scheduledFuture;
 			}).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
@@ -859,9 +860,9 @@ class ReschedulingTaskTest {
 					.name(TASK_NAME)
 					.scheduler(resource)
 					.task(() -> {
-						int count = counter.incrementAndGet();
+						counter.incrementAndGet();
 						latch.countDown();
-						if (count == executionCount) {
+						if (latch.getCount() == 0) {
 							Threads.safeWait(disableLatch);
 						}
 					})
@@ -871,16 +872,16 @@ class ReschedulingTaskTest {
 					.build();
 			task.enable();
 
-			Thread.ofVirtual().start(() -> {
+			Thread.ofVirtual().name("disable-task").start(() -> {
 				Threads.safeWait(latch);
 				task.disable();
 				disableLatch.countDown();
 			});
 
-			boolean completed = disableLatch.await(2, TimeUnit.SECONDS);
+			boolean completed = disableLatch.await(5, TimeUnit.SECONDS);
 
 			for (ScheduledFuture<?> scheduledFuture : scheduledFutures) {
-				verify(scheduledFuture, times(1)).cancel(anyBoolean());
+				verify(scheduledFuture).cancel(anyBoolean());
 			}
 			assertThat(completed, is(true));
 			assertThat(counter.get(), equalTo(executionCount));

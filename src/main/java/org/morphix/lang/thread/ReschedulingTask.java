@@ -235,6 +235,7 @@ public class ReschedulingTask implements AutoCloseable {
 		if (isDone(task)) {
 			return true;
 		}
+		logger.debug("[{}] Attempting to cancel scheduled task: hashCode:[{}], state:[{}].", name, task.hashCode(), task.state());
 		return taskCancelRetry.until(() -> task.cancel(interruptOnCancel), Boolean::booleanValue);
 	}
 
