@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.morphix.lang.Comparables;
-import org.morphix.lang.JavaObjects;
 import org.morphix.lang.Nullables;
 import org.morphix.lang.function.ExecutionWrapper;
 import org.morphix.lang.function.LoggerAdapter;
@@ -386,8 +385,8 @@ public class ReschedulingTask implements AutoCloseable {
 	 *
 	 * @return the execution wrapper
 	 */
-	protected <T> ExecutionWrapper<T> getExecutionWrapper() {
-		return JavaObjects.cast(executionWrapper);
+	protected ExecutionWrapper<Void> getExecutionWrapper() {
+		return executionWrapper;
 	}
 
 	/**

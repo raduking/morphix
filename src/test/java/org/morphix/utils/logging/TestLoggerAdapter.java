@@ -52,8 +52,8 @@ public final class TestLoggerAdapter implements LoggerAdapter {
 	}
 
 	/**
-	 * Returns the list of messages logged at the specified logging level. If no messages were logged at that level, an empty
-	 * list is returned.
+	 * Returns the list of messages logged at the specified logging level. If no messages were logged at that level, an
+	 * empty list is returned.
 	 *
 	 * @param level the logging level for which to retrieve messages
 	 * @return the list of messages logged at the specified logging level, or an empty list if none were logged
