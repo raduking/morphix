@@ -15,6 +15,7 @@ package org.morphix.lang;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.morphix.reflection.Constructors;
@@ -68,5 +69,28 @@ public final class JavaObjects {
 			case Object object when object.getClass().isArray() -> Array.getLength(o) == 0;
 			default -> false;
 		};
+	}
+
+	/**
+	 * Returns true if the given object is not empty, false otherwise.
+	 *
+	 * @param o object to check
+	 * @return true if the given object is not empty, false otherwise
+	 */
+	public static boolean isNotEmpty(final Object o) {
+		return !isEmpty(o);
+	}
+
+	/**
+	 * Returns true if the given objects are NOT equal, false otherwise. This method is the opposite of
+	 * {@link Objects#equals(Object, Object)} and is useful when you want to check if two objects are not equal without
+	 * having to negate the result of {@code Objects.equals()}.
+	 *
+	 * @param o1 first object to compare
+	 * @param o2 second object to compare
+	 * @return true if the given objects are NOT equal, false otherwise
+	 */
+	public static boolean notEquals(final Object o1, final Object o2) {
+		return !Objects.equals(o1, o2);
 	}
 }

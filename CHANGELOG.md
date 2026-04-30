@@ -1,5 +1,13 @@
 ## Release Notes
 
+`1.0.33`
+
+- Added `JavaObjects.isNotEmpty` which returns true if the given object is not empty (opposite of `JavaObjects.isEmpty`).
+- Added `JavaObjects.notEquals` which returns true if the given objects are not equal (opposite of `Objects.equals`).
+- Added `LeakDetectionLevel.modifyGlobal` method to change the global leak detection level. 
+
+---
+
 `1.0.32`
 
 - Added `ExecutionWrapper` to `ReschedulingTask`.
