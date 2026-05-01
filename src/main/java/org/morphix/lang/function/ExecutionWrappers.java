@@ -71,13 +71,27 @@ public final class ExecutionWrappers {
 	 * @return an {@link ExecutionWrapper} that measures and logs execution time
 	 */
 	public static <T> ExecutionWrapper<T> time(final LoggerAdapter logger, final String name) {
+		return time(logger, LoggingLevel.DEBUG, name);
+	}
+
+	/**
+	 * Creates an {@link ExecutionWrapper} that measures and logs the execution time of the wrapped supplier using the
+	 * provided {@link LoggerAdapter} and logging level.
+	 *
+	 * @param logger the logger to use for logging execution time
+	 * @param level the logging level to use for logging execution time
+	 * @param name a name to identify the execution in the log messages
+	 * @param <T> the type of the result produced by the supplier
+	 * @return an {@link ExecutionWrapper} that measures and logs execution time
+	 */
+	public static <T> ExecutionWrapper<T> time(final LoggerAdapter logger, final LoggingLevel level, final String name) {
 		return supplier -> () -> {
 			long start = System.nanoTime();
 			try {
 				return supplier.get();
 			} finally {
 				long duration = System.nanoTime() - start;
-				logger.debug("[{}] Execution took {}ms.", name, duration / 1_000_000);
+				logger.log(level, "[{}] Execution took {}ms.", name, duration / 1_000_000);
 			}
 		};
 	}

@@ -4,7 +4,8 @@
 
 - Added `JavaObjects.isNotEmpty` which returns true if the given object is not empty (opposite of `JavaObjects.isEmpty`).
 - Added `JavaObjects.notEquals` which returns true if the given objects are not equal (opposite of `Objects.equals`).
-- Added `LeakDetectionLevel.modifyGlobal` method to change the global leak detection level. 
+- Added `LeakDetectionLevel.modifyGlobal` method to change the global leak detection level.
+- Added `ExecutionWrappers.time` with configurable logging level. 
 
 ---
 
