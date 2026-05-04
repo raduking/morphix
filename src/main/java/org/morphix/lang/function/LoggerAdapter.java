@@ -12,6 +12,8 @@
  */
 package org.morphix.lang.function;
 
+import java.util.logging.Level;
+
 /**
  * Minimal logging abstraction.
  * <p>
@@ -68,7 +70,22 @@ public interface LoggerAdapter {
 		/**
 		 * Error level, for error messages.
 		 */
-		ERROR
+		ERROR;
+
+		/**
+		 * Converts this logging level to the corresponding JUL {@link Level}.
+		 *
+		 * @return the corresponding JUL Level for this logging level
+		 */
+		public Level toJulLevel() {
+			return switch (this) {
+				case TRACE -> Level.FINEST;
+				case DEBUG -> Level.FINE;
+				case INFO -> Level.INFO;
+				case WARN -> Level.WARNING;
+				case ERROR -> Level.SEVERE;
+			};
+		}
 	}
 
 	/**

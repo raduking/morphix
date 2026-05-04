@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.utils.logging;
+package org.morphix.lang.logging;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -56,6 +56,13 @@ public class OneLineFormatter extends Formatter {
 	 * The date format used to format the timestamp in log records.
 	 */
 	private SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);
+
+	/**
+	 * Constructs a new OneLineFormatter with the default date format.
+	 */
+	public OneLineFormatter() {
+		// empty
+	}
 
 	/**
 	 * @see Formatter#format(LogRecord)

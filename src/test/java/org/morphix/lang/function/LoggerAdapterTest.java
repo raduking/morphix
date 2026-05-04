@@ -18,6 +18,8 @@ import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.verify;
 
+import java.util.logging.Level;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -168,6 +170,15 @@ class LoggerAdapterTest {
 			assertThat(LoggerAdapter.LoggingLevel.INFO.name(), is("INFO"));
 			assertThat(LoggerAdapter.LoggingLevel.WARN.name(), is("WARN"));
 			assertThat(LoggerAdapter.LoggingLevel.ERROR.name(), is("ERROR"));
+		}
+
+		@Test
+		void shouldConvertToJulLevel() {
+			assertThat(LoggerAdapter.LoggingLevel.TRACE.toJulLevel(), is(Level.FINEST));
+			assertThat(LoggerAdapter.LoggingLevel.DEBUG.toJulLevel(), is(Level.FINE));
+			assertThat(LoggerAdapter.LoggingLevel.INFO.toJulLevel(), is(Level.INFO));
+			assertThat(LoggerAdapter.LoggingLevel.WARN.toJulLevel(), is(Level.WARNING));
+			assertThat(LoggerAdapter.LoggingLevel.ERROR.toJulLevel(), is(Level.SEVERE));
 		}
 	}
 }

@@ -50,13 +50,13 @@ import org.junit.jupiter.api.Timeout;
 import org.morphix.lang.function.ExecutionWrapper;
 import org.morphix.lang.function.LoggerAdapter;
 import org.morphix.lang.function.Runnables;
+import org.morphix.lang.logging.JulLoggerAdapter;
 import org.morphix.lang.resource.ScopedResource;
 import org.morphix.lang.retry.Retry;
 import org.morphix.lang.retry.WaitCounter;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.Methods;
 import org.morphix.utils.Tests;
-import org.morphix.utils.logging.JulLoggerAdapter;
 
 /**
  * Test class for {@link ReschedulingTask}.
