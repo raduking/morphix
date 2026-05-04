@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.utils.logging;
+package org.morphix.lang.logging;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,6 +21,7 @@ import java.util.logging.LogRecord;
 
 import org.morphix.lang.JavaArrays;
 import org.morphix.lang.Messages;
+import org.morphix.lang.Nullables;
 
 /**
  * Custom log formatter that formats log records in a single line with a specific format.
@@ -45,8 +46,6 @@ import org.morphix.lang.Messages;
  */
 public class OneLineFormatter extends Formatter {
 
-	private static final String INDENT = "  ";
-
 	/**
 	 * Date pattern for the timestamp.
 	 */
@@ -56,6 +55,13 @@ public class OneLineFormatter extends Formatter {
 	 * The date format used to format the timestamp in log records.
 	 */
 	private SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);
+
+	/**
+	 * Constructs a new OneLineFormatter with the default date format.
+	 */
+	public OneLineFormatter() {
+		// empty
+	}
 
 	/**
 	 * @see Formatter#format(LogRecord)
@@ -69,12 +75,19 @@ public class OneLineFormatter extends Formatter {
 		sb.append(" ");
 
 		// thread name
-		String threadName = Thread.currentThread().getName();
+		Thread currentThread = Thread.currentThread();
+		String threadName = Nullables.nonNullOrDefault(currentThread.getName(), "");
+		if (threadName.isEmpty()) {
+			threadName = String.valueOf(currentThread.threadId());
+			if (currentThread.isVirtual()) {
+				threadName = "virtual-" + threadName;
+			}
+		}
 		sb.append(String.format("[%s]", threadName));
 		sb.append(" ");
 
-		// level (padded to 7 characters for alignment)
-		sb.append(String.format("%-7s", logRecord.getLevel()));
+		// level
+		sb.append(String.format("%s", logRecord.getLevel()));
 		sb.append(" ");
 
 		// logger name, only the class name (strip the package name)
@@ -97,12 +110,12 @@ public class OneLineFormatter extends Formatter {
 		sb.append(message);
 
 		// important! newline at the end of the log record
-		sb.append("\n");
+		sb.append(Logging.LINE_SEPARATOR);
 
 		// exception handling
 		Throwable thrown = logRecord.getThrown();
 		if (null != thrown) {
-			appendException(sb, thrown, INDENT);
+			appendThrowable(sb, thrown, Logging.INDENT);
 		}
 
 		return sb.toString();
@@ -115,11 +128,11 @@ public class OneLineFormatter extends Formatter {
 	 * @param throwable the exception to append
 	 * @param indent the current indentation level (used for nested exceptions)
 	 */
-	private static void appendException(final StringBuilder sb, final Throwable throwable, final String indent) {
+	protected static void appendThrowable(final StringBuilder sb, final Throwable throwable, final String indent) {
 		if (null == throwable) {
 			return;
 		}
-		appendException(sb, throwable, indent, new HashSet<>());
+		appendThrowable(sb, throwable, indent, new HashSet<>());
 	}
 
 	/**
@@ -130,12 +143,16 @@ public class OneLineFormatter extends Formatter {
 	 * @param indent the current indentation level (used for nested exceptions)
 	 * @param visited the set of already visited exceptions to detect circular references
 	 */
-	private static void appendException(final StringBuilder sb, final Throwable throwable, final String indent, final Set<Throwable> visited) {
+	protected static void appendThrowable(final StringBuilder sb, final Throwable throwable, final String indent, final Set<Throwable> visited) {
 		if (null == throwable) {
 			return;
 		}
 		if (!visited.add(throwable)) {
-			sb.append("[CIRCULAR REFERENCE]\n");
+			sb.append(" [CIRCULAR REFERENCE")
+					.append(": ")
+					.append(throwable.getClass().getName())
+					.append("]")
+					.append(Logging.LINE_SEPARATOR);
 			return;
 		}
 		sb.append(throwable.getClass().getName());
@@ -144,22 +161,22 @@ public class OneLineFormatter extends Formatter {
 		if (null != msg) {
 			sb.append(": ").append(msg);
 		}
-		sb.append("\n");
+		sb.append(Logging.LINE_SEPARATOR);
 
 		for (StackTraceElement element : throwable.getStackTrace()) {
 			sb.append(indent)
 					.append("at ")
 					.append(element)
-					.append("\n");
+					.append(Logging.LINE_SEPARATOR);
 		}
 		for (Throwable suppressed : throwable.getSuppressed()) {
 			sb.append(indent).append("Suppressed: ");
-			appendException(sb, suppressed, indent, visited);
+			appendThrowable(sb, suppressed, indent, visited);
 		}
 		Throwable cause = throwable.getCause();
 		if (null != cause) {
 			sb.append("Caused by: ");
-			appendException(sb, cause, indent, visited);
+			appendThrowable(sb, cause, indent, visited);
 		}
 	}
 }

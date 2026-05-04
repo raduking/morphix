@@ -59,6 +59,15 @@ class LeakDetectionLevelTest {
 		assertEquals(LeakDetectionLevel.PARANOID, LeakDetectionLevel.current());
 	}
 
+	@Test
+	void shouldModifyLevelAtRuntime() {
+		LeakDetectionLevel.modifyGlobal(LeakDetectionLevel.DISABLED);
+		assertEquals(LeakDetectionLevel.DISABLED, LeakDetectionLevel.current());
+
+		LeakDetectionLevel.modifyGlobal(LeakDetectionLevel.ADVANCED);
+		assertEquals(LeakDetectionLevel.ADVANCED, LeakDetectionLevel.current());
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = { "   simple", "simple   ", "  simple  ", "banana", "  ", "" })
 	void shouldReturnSimpleWhenInvalid(final String value) {

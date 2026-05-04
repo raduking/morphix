@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.morphix.lang.logging.Logging;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.Fields;
 import org.morphix.utils.ConcurrentSystem;
@@ -216,7 +217,7 @@ class ResourceLeakDetectorTest {
 			String expectedMessage = tracker.getReference().getReport(GC_WITHOUT_CLOSE);
 
 			assertThat(logs.get(0).getMessage(), equalTo(expectedMessage));
-			assertThat(expectedMessage, containsAtLeastTimes("  at ", ADVANCED_REPORTED_FRAMES));
+			assertThat(expectedMessage, containsAtLeastTimes(Logging.INDENT + "at ", ADVANCED_REPORTED_FRAMES));
 			assertThat(expectedMessage, containsString(TestResource.class.getName()));
 			for (String ignoredFrame : IGNORED_FRAMES) {
 				assertThat(expectedMessage, not(containsString(ignoredFrame)));

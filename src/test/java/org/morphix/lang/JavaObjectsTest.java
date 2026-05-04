@@ -186,4 +186,154 @@ class JavaObjectsTest {
 			assertFalse(result);
 		}
 	}
+
+	@Nested
+	class IsNotEmptyTests {
+
+		@Test
+		void shouldReturnFalseOnNull() {
+			boolean result = JavaObjects.isNotEmpty(null);
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnNonNull() {
+			Object o = new Object();
+
+			boolean result = JavaObjects.isNotEmpty(o);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnEmptyString() {
+			Object o = "";
+
+			boolean result = JavaObjects.isNotEmpty(o);
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnNonEmptyString() {
+			Object o = BUBU;
+
+			boolean result = JavaObjects.isNotEmpty(o);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnEmptyCollection() {
+			Collection<?> o = mock(Collection.class);
+			doReturn(true).when(o).isEmpty();
+
+			boolean result = JavaObjects.isNotEmpty(o);
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnNonEmptyCollection() {
+			Collection<?> o = mock(Collection.class);
+			doReturn(false).when(o).isEmpty();
+
+			boolean result = JavaObjects.isNotEmpty(o);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnEmptyMap() {
+			Map<?, ?> o = mock(Map.class);
+			doReturn(true).when(o).isEmpty();
+
+			boolean result = JavaObjects.isNotEmpty(o);
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnNonEmptyMap() {
+			Map<?, ?> o = mock(Map.class);
+			doReturn(false).when(o).isEmpty();
+
+			boolean result = JavaObjects.isNotEmpty(o);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnEmptyOptional() {
+			Object o = Optional.empty();
+
+			boolean result = JavaObjects.isNotEmpty(o);
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnNonEmptyOptional() {
+			Object o = Optional.of(BUBU);
+
+			boolean result = JavaObjects.isNotEmpty(o);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnEmptyArray() {
+			Object o = new Object[] { };
+
+			boolean result = JavaObjects.isNotEmpty(o);
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnNonEmptyArray() {
+			Object o = new Object[] { BUBU };
+
+			boolean result = JavaObjects.isNotEmpty(o);
+
+			assertTrue(result);
+		}
+	}
+
+	@Nested
+	class NotEqualsTests {
+
+		@Test
+		void shouldReturnFalseOnEqualObjects() {
+			Object o1 = BUBU;
+			Object o2 = BUBU;
+
+			boolean result = JavaObjects.notEquals(o1, o2);
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnNonEqualObjects() {
+			Object o1 = BUBU;
+			Object o2 = CUCU;
+
+			boolean result = JavaObjects.notEquals(o1, o2);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnTrueWhenOneObjectIsNull() {
+			Object o1 = BUBU;
+			Object o2 = null;
+
+			boolean result = JavaObjects.notEquals(o1, o2);
+
+			assertTrue(result);
+			assertTrue(JavaObjects.notEquals(o2, o1));
+			assertFalse(JavaObjects.notEquals(null, null));
+		}
+	}
 }

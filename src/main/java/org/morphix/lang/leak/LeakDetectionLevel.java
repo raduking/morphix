@@ -84,4 +84,21 @@ public enum LeakDetectionLevel {
 			return SIMPLE;
 		}
 	}
+
+	/**
+	 * Sets the global leak detection level by updating the system property {@code morphix.leak.detection.level}
+	 * ({@link #PROPERTY}) to the name of the specified level. This allows for dynamically changing the leak detection level
+	 * at runtime, which can be useful for testing and debugging purposes.
+	 * <p>
+	 * Note that changing the global leak detection level will affect all subsequent leak tracking and reporting, but it
+	 * will not retroactively change the behavior of already tracked resources. Resources that were tracked before the level
+	 * change will continue to be tracked and reported according to the level that was in effect at the time they were
+	 * tracked. Therefore, it is recommended to set the desired leak detection level before tracking any resources to ensure
+	 * consistent behavior.
+	 *
+	 * @param level the {@link LeakDetectionLevel} to set as the global leak detection level
+	 */
+	public static void modifyGlobal(final LeakDetectionLevel level) {
+		System.setProperty(PROPERTY, level.name());
+	}
 }

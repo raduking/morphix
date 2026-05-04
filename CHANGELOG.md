@@ -1,5 +1,19 @@
 ## Release Notes
 
+`1.0.33`
+
+- Added `JavaObjects.isNotEmpty` which returns true if the given object is not empty (opposite of `JavaObjects.isEmpty`).
+- Added `JavaObjects.notEquals` which returns true if the given objects are not equal (opposite of `Objects.equals`).
+- Added `LeakDetectionLevel.modifyGlobal` method to change the global leak detection level.
+- Added `ExecutionWrappers.time` with configurable logging level. 
+- Added `LoggerAdapter.LoggingLevel.toJulLevel` to convert a `LoggingLevel` to JUL `Level`.
+- Moved `JulLoggerAdapter` class from tests to `*.lang.logging` package for easy logging without bothering with logging frameworks.
+- Moved `OneLineFormatter` class from tests to `*.lang.logging` package to configure JUL logging to be similar to SLF4J.
+- Added `Logging` utility class with constants and methods for common logging features.
+- Changed logging indent to use tab character (`\t`) instead of 2 spaces.
+
+---
+
 `1.0.32`
 
 - Added `ExecutionWrapper` to `ReschedulingTask`.

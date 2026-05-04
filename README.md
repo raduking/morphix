@@ -52,7 +52,7 @@ A library that exposes general Java utility and reflection methods and a package
 
 ### Releases
 
-Current release `1.0.32`
+Current release `1.0.33`
 
 ### Documentation
 
@@ -81,6 +81,6 @@ Maven: add this dependency to your `pom.xml`
 <dependency>
     <groupId>io.github.raduking</groupId>
     <artifactId>morphix-all</artifactId>
-    <version>1.0.32</version>
+    <version>1.0.33</version>
 </dependency>
 ```

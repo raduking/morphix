@@ -75,6 +75,7 @@ class ClassesScanFindInPackageTest {
 		var classesCollections = Classes.Scan.findInPackage("org.morphix.lang.collections", Path.of(TARGET_CLASSES));
 		var classesFunction = Classes.Scan.findInPackage("org.morphix.lang.function", Path.of(TARGET_CLASSES));
 		var classesLeak = Classes.Scan.findInPackage("org.morphix.lang.leak", Path.of(TARGET_CLASSES));
+		var classesLogging = Classes.Scan.findInPackage("org.morphix.lang.logging", Path.of(TARGET_CLASSES));
 		var classesResource = Classes.Scan.findInPackage("org.morphix.lang.resource", Path.of(TARGET_CLASSES));
 		var classesRetry = Classes.Scan.findInPackage("org.morphix.lang.retry", Path.of(TARGET_CLASSES));
 		var classesThread = Classes.Scan.findInPackage("org.morphix.lang.thread", Path.of(TARGET_CLASSES));
@@ -90,6 +91,7 @@ class ClassesScanFindInPackageTest {
 				+ classesCollections.size()
 				+ classesFunction.size()
 				+ classesLeak.size()
+				+ classesLogging.size()
 				+ classesRetry.size()
 				+ classesResource.size()
 				+ classesThread.size()));
