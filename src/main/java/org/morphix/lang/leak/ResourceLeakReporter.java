@@ -14,6 +14,8 @@ package org.morphix.lang.leak;
 
 import java.lang.StackWalker.StackFrame;
 
+import org.morphix.lang.logging.Logging;
+
 /**
  * Interface for reporting resource leaks. Implementations of this interface can be used to customize how leaks are
  * reported, for example by logging them, sending them to a monitoring system, or displaying them in a user interface.
@@ -56,10 +58,9 @@ public interface ResourceLeakReporter {
 				.append(")");
 
 		if (reference.getLevel().ordinal() >= LeakDetectionLevel.ADVANCED.ordinal()) {
-			String eol = System.lineSeparator();
-			sb.append(eol);
+			sb.append(Logging.LINE_SEPARATOR);
 			for (StackFrame frame : reference.getAllocationSite()) {
-				sb.append("  at ").append(frame).append(eol);
+				sb.append(Logging.INDENT).append("at ").append(frame).append(Logging.LINE_SEPARATOR);
 			}
 		}
 		return sb.toString();

@@ -46,16 +46,6 @@ import org.morphix.lang.Messages;
 public class OneLineFormatter extends Formatter {
 
 	/**
-	 * Indentation string used for formatting stack traces in exceptions.
-	 */
-	private static final String INDENT = "  ";
-
-	/**
-	 * Line separator string (e.g., "\n" on Unix/Linux, "\r\n" on Windows).
-	 */
-	private static final String LINE_SEPARATOR = System.lineSeparator();
-
-	/**
 	 * Date pattern for the timestamp.
 	 */
 	private static final String DATE_PATTERN = "HH:mm:ss.SSS";
@@ -88,8 +78,8 @@ public class OneLineFormatter extends Formatter {
 		sb.append(String.format("[%s]", threadName));
 		sb.append(" ");
 
-		// level (padded to 7 characters for alignment)
-		sb.append(String.format("%-7s", logRecord.getLevel()));
+		// level
+		sb.append(String.format("%s", logRecord.getLevel()));
 		sb.append(" ");
 
 		// logger name, only the class name (strip the package name)
@@ -112,12 +102,12 @@ public class OneLineFormatter extends Formatter {
 		sb.append(message);
 
 		// important! newline at the end of the log record
-		sb.append(LINE_SEPARATOR);
+		sb.append(Logging.LINE_SEPARATOR);
 
 		// exception handling
 		Throwable thrown = logRecord.getThrown();
 		if (null != thrown) {
-			appendThrowable(sb, thrown, INDENT);
+			appendThrowable(sb, thrown, Logging.INDENT);
 		}
 
 		return sb.toString();
@@ -154,7 +144,7 @@ public class OneLineFormatter extends Formatter {
 					.append(": ")
 					.append(throwable.getClass().getName())
 					.append("]")
-					.append(LINE_SEPARATOR);
+					.append(Logging.LINE_SEPARATOR);
 			return;
 		}
 		sb.append(throwable.getClass().getName());
@@ -163,13 +153,13 @@ public class OneLineFormatter extends Formatter {
 		if (null != msg) {
 			sb.append(": ").append(msg);
 		}
-		sb.append(LINE_SEPARATOR);
+		sb.append(Logging.LINE_SEPARATOR);
 
 		for (StackTraceElement element : throwable.getStackTrace()) {
 			sb.append(indent)
 					.append("at ")
 					.append(element)
-					.append(LINE_SEPARATOR);
+					.append(Logging.LINE_SEPARATOR);
 		}
 		for (Throwable suppressed : throwable.getSuppressed()) {
 			sb.append(indent).append("Suppressed: ");
