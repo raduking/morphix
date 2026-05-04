@@ -21,6 +21,7 @@ import java.util.logging.LogRecord;
 
 import org.morphix.lang.JavaArrays;
 import org.morphix.lang.Messages;
+import org.morphix.lang.Nullables;
 
 /**
  * Custom log formatter that formats log records in a single line with a specific format.
@@ -74,7 +75,14 @@ public class OneLineFormatter extends Formatter {
 		sb.append(" ");
 
 		// thread name
-		String threadName = Thread.currentThread().getName();
+		Thread currentThread = Thread.currentThread();
+		String threadName = Nullables.nonNullOrDefault(currentThread.getName(), "");
+		if (threadName.isEmpty()) {
+			threadName = String.valueOf(currentThread.threadId());
+			if (currentThread.isVirtual()) {
+				threadName = "virtual-" + threadName;
+			}
+		}
 		sb.append(String.format("[%s]", threadName));
 		sb.append(" ");
 

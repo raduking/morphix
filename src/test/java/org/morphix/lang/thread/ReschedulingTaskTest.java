@@ -984,7 +984,7 @@ class ReschedulingTaskTest {
 				disableLatch.countDown();
 			});
 
-			boolean executed = latch.await(5, TimeUnit.SECONDS);
+			boolean executed = disableLatch.await(5, TimeUnit.SECONDS);
 
 			assertThat(executed, is(true));
 			assertThat(executionCounter.get(), is(wrapperCounter.get()));
