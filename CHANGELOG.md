@@ -1,5 +1,14 @@
 ## Release Notes
 
+`1.0.34`
+
+- Changed leak detection to default to `LeakDetectionLevel.DISABLED` instead of `LeakDetectionLevel.SIMPLE` to remove the cleaner virtual thread when not needed.
+- Changed `ResourceLeakDetector` to not instantiate a `Cleaner` when one is not needed (leak detection is disabled).
+- Upgraded `pitest-maven` to `1.23.1`.
+- Upgraded parent to `4.0.6`.
+
+---
+
 `1.0.33`
 
 - Added `JavaObjects.isNotEmpty` which returns true if the given object is not empty (opposite of `JavaObjects.isEmpty`).

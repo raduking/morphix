@@ -25,6 +25,18 @@ import org.morphix.reflection.Constructors;
  * Utility class for tracking resource leaks. This class holds all the tracked references and the {@link Cleaner}. It
  * provides methods for tracking objects and reporting leaks when they are garbage collected or when the JVM shuts down.
  * <p>
+ * The leak detection needs to be explicitly enabled by setting the system property {@code morphix.leak.detection.level}
+ * to a value other than {@code DISABLED}. This allows users to opt-in to leak detection when needed, without incurring
+ * the overhead of tracking and reporting leaks when it is not necessary.
+ * <p>
+ * The leak detection mechanism is based on the {@link Cleaner} API, which allows us to register a cleanup action to be
+ * executed when an object becomes phantom reachable (i.e. when it is garbage collected). When an object is tracked for
+ * leaks, a reference is created and registered with the cleaner. If the tracked object is garbage collected without
+ * being closed, the cleaner will execute the cleanup action, which will report the leak using the provided reporter.
+ * <p>
+ * Additionally, a shutdown hook is added to report any leaks that were not reported by the cleaner, for example in
+ * cases where the cleaner thread is not able to run or when the tracked objects are not garbage collected.
+ * <p>
  * This is to be used in conjunction with the {@link ResourceLeakTracker} to track resources that need to be closed.
  * <p>
  * <b>Usage:</b>
@@ -61,24 +73,15 @@ public final class ResourceLeakDetector {
 	public static final String CLEANER_THREAD_NAME = "morphix-leak-detector-cleaner";
 
 	/**
-	 * The set that keeps track of all active references. This avoids reporting the same leak multiple times if the same
-	 * object is tracked multiple times (e.g. in case of multiple references to the same object).
+	 * Creates a new cleaner if leak detection is enabled, otherwise returns {@code null}. This method is called in the
+	 * static initializer to initialize the {@link CleanerHolder#CLEANER} field. By returning {@code null} when leak
+	 * detection is disabled, we can avoid the overhead of creating and running a cleaner thread when leak detection is not
+	 * needed.
+	 *
+	 * @return a new cleaner if leak detection is enabled, or {@code null} if leak detection is disabled
 	 */
-	private static final Set<ResourceLeakReference> REFERENCES = ConcurrentHashMap.newKeySet();
-
-	/**
-	 * We use a single cleaner for all tracked objects. This allows us to avoid creating a new cleaner for each tracked
-	 * object, which would be expensive. The cleaner will run in a separate thread and will report leaks when the tracked
-	 * objects are garbage collected.
-	 */
-	private static final Cleaner CLEANER = Cleaner.create(ResourceLeakDetector::newCleanerThread);
-
-	/**
-	 * Static initializer to add the shutdown hook. This ensures that the shutdown hook is added as soon as the class is
-	 * loaded, which allows us to report leaks on JVM shutdown even if no objects are tracked.
-	 */
-	static {
-		addShutdownHook();
+	protected static Cleaner createCleaner() {
+		return Cleaner.create(ResourceLeakDetector::newCleanerThread);
 	}
 
 	/**
@@ -86,7 +89,7 @@ public final class ResourceLeakDetector {
 	 * cleaner thread is not able to run (e.g. because the JVM is shutting down) or for cases where the tracked objects are
 	 * not garbage collected (e.g. because they are still referenced by other objects).
 	 */
-	private static void addShutdownHook() {
+	protected static void addShutdownHook() {
 		Runtime.getRuntime().addShutdownHook(newLeakReporterThread());
 	}
 
@@ -133,8 +136,9 @@ public final class ResourceLeakDetector {
 		}
 
 		ResourceLeakReference reference = ResourceLeakReference.of(level, object.getClass(), reporter);
-		REFERENCES.add(reference);
-		Cleanable cleanable = CLEANER.register(object, () -> reportLeak(reference, message(hint, "GC without close()")));
+		references().add(reference);
+		Cleanable cleanable = CleanerHolder.CLEANER.register(object,
+				() -> reportLeak(reference, message(hint, "GC without close()")));
 
 		return new ResourceLeakTracker(reference, cleanable);
 	}
@@ -158,7 +162,7 @@ public final class ResourceLeakDetector {
 	 * @param reference the reference to untrack
 	 */
 	static void untrack(final ResourceLeakReference reference) {
-		REFERENCES.remove(reference);
+		references().remove(reference);
 	}
 
 	/**
@@ -180,7 +184,7 @@ public final class ResourceLeakDetector {
 	 */
 	static Thread newLeakReporterThread() {
 		// use platform thread, shutdown hooks must not rely on virtual thread scheduler
-		return new Thread(() -> reportLeaks(REFERENCES, "JVM shutdown"));
+		return new Thread(() -> reportLeaks(references(), "JVM shutdown"));
 	}
 
 	/**
@@ -203,10 +207,20 @@ public final class ResourceLeakDetector {
 	 * @param message the message to include in the leak reports
 	 */
 	static void reportLeaks(final Set<ResourceLeakReference> references, final String message) {
-		Set<ResourceLeakReference> refs = REFERENCES == references ? Set.copyOf(references) : references;
+		Set<ResourceLeakReference> refs = references() == references ? Set.copyOf(references) : references;
 		for (ResourceLeakReference reference : refs) {
 			reportLeak(reference, message);
 		}
+	}
+
+	/**
+	 * Returns the set of active references being tracked for leaks. This method is used by the shutdown hook to report any
+	 * leaks that were not reported by the cleaner.
+	 *
+	 * @return the set of active references being tracked for leaks
+	 */
+	static Set<ResourceLeakReference> references() {
+		return ReferencesHolder.REFERENCES;
 	}
 
 	/**
@@ -214,5 +228,45 @@ public final class ResourceLeakDetector {
 	 */
 	private ResourceLeakDetector() {
 		throw Constructors.unsupportedOperationException();
+	}
+
+	/**
+	 * Holder class for the cleaner. This class is loaded lazily when the cleaner is accessed for the first time, which
+	 * allows us to avoid initializing the cleaner and adding the shutdown hook if leak detection is disabled.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class CleanerHolder {
+
+		/**
+		 * We use a single cleaner for all tracked objects. This allows us to avoid creating a new cleaner for each tracked
+		 * object, which would be expensive. The cleaner will run in a separate thread and will report leaks when the tracked
+		 * objects are garbage collected.
+		 */
+		private static final Cleaner CLEANER = createCleaner();
+
+		/**
+		 * Static initializer to add the shutdown hook. This ensures that the shutdown hook is added as soon as the class is
+		 * loaded, which allows us to report leaks on JVM shutdown even if no objects are tracked.
+		 */
+		static {
+			addShutdownHook();
+		}
+	}
+
+	/**
+	 * Holder class for the active references. This class is loaded lazily when the references are accessed for the first
+	 * time, which allows us to avoid initializing the set of references if leak detection is disabled.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	private static class ReferencesHolder {
+
+		/**
+		 * We use a concurrent set to hold the active references. This allows us to safely add and remove references from
+		 * multiple threads without needing to synchronize access to the set. The set will be used to report leaks on JVM
+		 * shutdown for any references that were not reported by the cleaner.
+		 */
+		private static final Set<ResourceLeakReference> REFERENCES = ConcurrentHashMap.newKeySet();
 	}
 }

@@ -41,8 +41,8 @@ class LeakDetectionLevelTest {
 	}
 
 	@Test
-	void shouldDefaultToSimple() {
-		assertEquals(LeakDetectionLevel.SIMPLE, LeakDetectionLevel.current());
+	void shouldDefaultToDisabled() {
+		assertEquals(LeakDetectionLevel.DISABLED, LeakDetectionLevel.current());
 	}
 
 	@Test
@@ -69,10 +69,10 @@ class LeakDetectionLevelTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { "   simple", "simple   ", "  simple  ", "banana", "  ", "" })
-	void shouldReturnSimpleWhenInvalid(final String value) {
+	@ValueSource(strings = { "banana", "  ", "", "   disabled", "disabled   ", "  disabled  " })
+	void shouldReturnDisabledWhenInvalid(final String value) {
 		System.setProperty(LeakDetectionLevel.PROPERTY, value);
 
-		assertEquals(LeakDetectionLevel.SIMPLE, LeakDetectionLevel.current());
+		assertEquals(LeakDetectionLevel.DISABLED, LeakDetectionLevel.current());
 	}
 }

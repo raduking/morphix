@@ -65,23 +65,23 @@ public enum LeakDetectionLevel {
 	/**
 	 * Retrieves the current leak detection level based on the system property {@code morphix.leak.detection.level}
 	 * ({@link #PROPERTY}. If the property is not set, is empty, or contains an invalid value, this method defaults to
-	 * returning {@link #SIMPLE}.
+	 * returning {@link #DISABLED}.
 	 *
 	 * @return the current {@link LeakDetectionLevel} based on the system property
 	 */
 	public static LeakDetectionLevel current() {
 		String level = System.getProperty(PROPERTY);
 		if (null == level) {
-			return SIMPLE;
+			return DISABLED;
 		}
 		level = level.trim();
 		if (level.isEmpty()) {
-			return SIMPLE;
+			return DISABLED;
 		}
 		try {
 			return valueOf(level.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			return SIMPLE;
+			return DISABLED;
 		}
 	}
 
