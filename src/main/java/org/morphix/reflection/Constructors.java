@@ -14,7 +14,12 @@ package org.morphix.reflection;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
+
+import org.morphix.lang.JavaArrays;
+import org.morphix.lang.JavaObjects;
+import org.morphix.lang.collections.Lists;
 
 /**
  * Utility class for Java constructors.
@@ -83,6 +88,46 @@ public interface Constructors {
 			throw new ReflectionException(e, "No constructor found for class: {} with parameters: {}",
 					cls.getCanonicalName(), null != paramTypes ? List.of(paramTypes) : "none");
 		}
+	}
+
+	/**
+	 * Finds a constructor for the given type that matches the specified parameter types. This method searches for a
+	 * constructor whose parameter types are assignable from the provided parameter types (allowing for subclass matching).
+	 * If no matching constructor is found, a {@link ReflectionException} is thrown with a detailed message.
+	 *
+	 * @param <T> instance type
+	 *
+	 * @param cls class for which to find the constructor
+	 * @param parameterTypes list of parameter types to match
+	 * @return the matching constructor
+	 * @throws ReflectionException if no matching constructor is found
+	 * @see Safe#findOneMatching(Class, List)
+	 */
+	static <T> Constructor<T> findOneMatching(final Class<T> cls, final List<Class<?>> parameterTypes) {
+		Constructor<T> constructor = Safe.findOneMatching(cls, parameterTypes);
+		if (null == constructor) {
+			throw new ReflectionException("No constructor found for class: {} with parameters: {}", cls.getCanonicalName(),
+					Lists.isNotEmpty(parameterTypes) ? parameterTypes : "none");
+		}
+		return constructor;
+	}
+
+	/**
+	 * Finds a constructor for the given type that matches the specified parameter types. This method searches for a
+	 * constructor whose parameter types are assignable from the provided parameter types (allowing for subclass matching).
+	 * This is a convenience method that accepts parameter types as varargs. If no matching constructor is found, a
+	 * {@link ReflectionException} is thrown with a detailed message.
+	 *
+	 * @param <T> instance type
+	 *
+	 * @param cls class for which to find the constructor
+	 * @param parameterTypes parameter types to match
+	 * @return the matching constructor
+	 * @throws ReflectionException if no matching constructor is found
+	 * @see #findOneMatching(Class, List)
+	 */
+	static <T> Constructor<T> findOneMatching(final Class<T> cls, final Class<?>... parameterTypes) {
+		return findOneMatching(cls, JavaArrays.isNotEmpty(parameterTypes) ? List.of(parameterTypes) : Collections.emptyList());
 	}
 
 	/**
@@ -189,6 +234,55 @@ public interface Constructors {
 			} catch (NoSuchMethodException e) {
 				return null;
 			}
+		}
+
+		/**
+		 * Finds a constructor for the given type that matches the specified parameter types. This method searches for a
+		 * constructor whose parameter types are assignable from the provided parameter types (allowing for subclass matching).
+		 *
+		 * @param <T> instance type
+		 *
+		 * @param cls class for which to find the constructor
+		 * @param parameterTypes list of parameter types to match
+		 * @return the matching constructor, or null if not found
+		 */
+		static <T> Constructor<T> findOneMatching(final Class<T> cls, final List<Class<?>> parameterTypes) {
+			Constructor<?>[] constructors = cls.getDeclaredConstructors();
+			for (Constructor<?> constructor : constructors) {
+				Class<?>[] constructorParamTypes = constructor.getParameterTypes();
+				if (constructorParamTypes.length != parameterTypes.size()) {
+					continue;
+				}
+				boolean matches = true;
+				for (int i = 0; i < constructorParamTypes.length; ++i) {
+					Class<?> expectedType = constructorParamTypes[i];
+					Class<?> actualType = parameterTypes.get(i);
+					if (!Classes.isAssignableFrom(expectedType, actualType)) {
+						matches = false;
+						break;
+					}
+				}
+				if (matches) {
+					return JavaObjects.cast(constructor);
+				}
+			}
+			return null;
+		}
+
+		/**
+		 * Finds a constructor for the given type that matches the specified parameter types. This method searches for a
+		 * constructor whose parameter types are assignable from the provided parameter types (allowing for subclass matching).
+		 * This is a convenience method that accepts parameter types as varargs.
+		 *
+		 * @param <T> instance type
+		 *
+		 * @param cls class for which to find the constructor
+		 * @param parameterTypes parameter types to match
+		 * @return the matching constructor, or null if not found
+		 * @see #findOneMatching(Class, List)
+		 */
+		static <T> Constructor<T> findOneMatching(final Class<T> cls, final Class<?>... parameterTypes) {
+			return findOneMatching(cls, JavaArrays.isNotEmpty(parameterTypes) ? List.of(parameterTypes) : Collections.emptyList());
 		}
 	}
 }

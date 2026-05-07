@@ -1,5 +1,12 @@
 ## Release Notes
 
+`1.0.35`
+
+- Added `Classes.isAssignableFrom` similar to the Java one but this one checks for primitive assignment too.
+- Added `Constructors.findOneMatching` method to find a matching constructor given a list of parameter types.
+
+---
+
 `1.0.34`
 
 - Changed leak detection to default to `LeakDetectionLevel.DISABLED` instead of `LeakDetectionLevel.SIMPLE` so that leak detection can be opted in.

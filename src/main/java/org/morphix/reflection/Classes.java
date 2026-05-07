@@ -97,6 +97,62 @@ public interface Classes {
 	}
 
 	/**
+	 * Returns true if the source class is assignable to the target class, considering primitive and boxed types as
+	 * compatible. Example: int.class is assignable to Integer.class and Integer.class is assignable to int.class, but
+	 * int.class is not assignable to Long.class and Long.class is not assignable to int.class.
+	 *
+	 * <pre>
+	 * isAssignableFrom(int.class, Integer.class) -> true
+	 * isAssignableFrom(Integer.class, int.class) -> true
+	 * isAssignableFrom(int.class, int.class) -> true
+	 * isAssignableFrom(Integer.class, Integer.class) -> true
+	 * </pre>
+	 *
+	 * Also considering the assignability of primitive types to their super types, for example int is assignable to Number
+	 * but not to Long:
+	 *
+	 * <pre>
+	 * isAssignableFrom(int.class, Number.class) -> true
+	 * isAssignableFrom(Number.class, int.class) -> false
+	 * </pre>
+	 *
+	 * And considering the assignability of boxed types to their super types, for example Integer is assignable to Number
+	 * but not to Long:
+	 *
+	 * <pre>
+	 * isAssignableFrom(Integer.class, Number.class) -> true
+	 * isAssignableFrom(Number.class, Integer.class) -> false
+	 * isAssignableFrom(Integer.class, Long.class) -> false
+	 * isAssignableFrom(Long.class, int.class) -> false
+	 * </pre>
+	 *
+	 * @param target the target class
+	 * @param source the source class
+	 * @return true if the source class is assignable to the target class, false otherwise
+	 */
+	static boolean isAssignableFrom(final Class<?> target, final Class<?> source) {
+		if (null == source || null == target) {
+			return false;
+		}
+		if (target.isAssignableFrom(source)) {
+			return true;
+		}
+		if (source.isPrimitive()) {
+			Class<?> boxed = Primitives.getBoxedClass(source);
+			if (target.isAssignableFrom(boxed)) {
+				return true;
+			}
+		}
+		if (target.isPrimitive()) {
+			Class<?> boxed = Primitives.getBoxedClass(target);
+			if (boxed.isAssignableFrom(source)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Interface which groups all methods that return null and don't throw exceptions on expected errors. This functions as
 	 * a name space so that the method names inside keep the same name pattern.
 	 *
