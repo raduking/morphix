@@ -161,4 +161,17 @@ class FieldsSafeGetTest {
 
 		assertThat(result, equalTo(null));
 	}
+
+	static class S {
+		@SuppressWarnings("unused")
+		private static final String STATIC_FIELD = TEST_STRING;
+	}
+
+	@Test
+	void shouldReturnStaticFieldValue() {
+		S s = new S();
+		String staticField = Fields.Safe.get(s, "STATIC_FIELD");
+
+		assertThat(staticField, equalTo(TEST_STRING));
+	}
 }

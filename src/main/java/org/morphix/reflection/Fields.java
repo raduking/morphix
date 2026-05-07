@@ -363,6 +363,9 @@ public interface Fields {
 		 * @return field value
 		 */
 		static <T> T get(final Object obj, final Field field) {
+			if (MemberAccessor.isAccessible(obj, field)) {
+				return Fields.get(obj, field);
+			}
 			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
 				return Fields.get(obj, field);
 			}
@@ -381,11 +384,14 @@ public interface Fields {
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
 			if (obj instanceof Class<?> cls) {
-				return getStatic(cls, fieldName);
+				return IgnoreAccess.getStatic(cls, fieldName);
 			}
 			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
 			if (null == field) {
 				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, obj.getClass());
+			}
+			if (Modifier.isStatic(field.getModifiers())) {
+				return IgnoreAccess.getStatic(obj.getClass(), field);
 			}
 			return IgnoreAccess.get(obj, field);
 		}
@@ -424,7 +430,7 @@ public interface Fields {
 		 */
 		static <T> void set(final Object obj, final String fieldName, final T value) {
 			if (obj instanceof Class<?> cls) {
-				setStatic(cls, fieldName, value);
+				IgnoreAccess.setStatic(cls, fieldName, value);
 				return;
 			}
 			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
@@ -447,8 +453,26 @@ public interface Fields {
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field || !Modifier.isStatic(field.getModifiers())) {
+			if (null == field) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
+			}
+			return IgnoreAccess.getStatic(cls, field);
+		}
+
+		/**
+		 * Returns the value of a static field ignoring access modifiers.
+		 *
+		 * @param <T> the type of the static field
+		 * @param <U> type to get the field from
+		 *
+		 * @param cls the class that has the static field
+		 * @param field the static field
+		 * @return the value of the static field with the given name
+		 * @throws ReflectionException if the field is not static
+		 */
+		static <T, U> T getStatic(final Class<U> cls, final Field field) {
+			if (!Modifier.isStatic(field.getModifiers())) {
+				throw new ReflectionException("Could not find static field with name: {} in class: {}", field.getName(), cls);
 			}
 			return IgnoreAccess.get(null, field);
 		}
@@ -567,9 +591,9 @@ public interface Fields {
 		 * @return field value
 		 */
 		static <T> T get(final Object obj, final Field field) {
-			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
-				return JavaObjects.cast(field.get(obj));
-			} catch (IllegalArgumentException | IllegalAccessException | ReflectionException e) {
+			try {
+				return Fields.IgnoreAccess.get(obj, field);
+			} catch (ReflectionException e) {
 				return null;
 			}
 		}
@@ -587,11 +611,14 @@ public interface Fields {
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
 			if (obj instanceof Class<?> cls) {
-				return getStatic(cls, fieldName);
+				return Safe.getStatic(cls, fieldName);
 			}
 			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
 			if (null == field) {
 				return null;
+			}
+			if (Modifier.isStatic(field.getModifiers())) {
+				return Safe.getStatic(field);
 			}
 			return Safe.get(obj, field);
 		}
@@ -609,7 +636,25 @@ public interface Fields {
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field || !Modifier.isStatic(field.getModifiers())) {
+			if (null == field) {
+				return null;
+			}
+			return Safe.getStatic(field);
+		}
+
+		/**
+		 * Returns the value of a static field ignoring access modifiers.
+		 *
+		 * @param <T> the type of the static field
+		 * @param <U> type to get the field from
+		 *
+		 * @param cls the class that has the static field
+		 * @param field the static field
+		 * @return the value of the static field with the given name
+		 * @throws ReflectionException if the field is not static
+		 */
+		static <T> T getStatic(final Field field) {
+			if (!Modifier.isStatic(field.getModifiers())) {
 				return null;
 			}
 			return Safe.get(null, field);
@@ -668,5 +713,4 @@ public interface Fields {
 			IgnoreAccess.set(obj, field, null);
 		}
 	}
-
 }

@@ -53,9 +53,9 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 		// by default, a reflected object is not accessible
 		Object actual = null != object && Modifier.isStatic(member.getModifiers()) ? null : object;
 
-		this.isAccessible = ReflectionException.wrapThrowing(() -> member.canAccess(actual), ACCESS_CHANGE_ERROR + member);
+		this.isAccessible = isAccessible(actual, member);
 		if (!isAccessible) {
-			ReflectionException.wrapThrowing(() -> member.setAccessible(true), ACCESS_CHANGE_ERROR + member); // NOSONAR
+			setAccessible(member, true);
 		}
 	}
 
@@ -65,7 +65,28 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	@Override
 	public void close() {
 		if (!isAccessible) {
-			ReflectionException.wrapThrowing(() -> member.setAccessible(false), ACCESS_CHANGE_ERROR + member);
+			setAccessible(member, false);
 		}
+	}
+
+	/**
+	 * Checks if the member is accessible for the given object.
+	 *
+	 * @param object object containing the member to access
+	 * @param member member to check
+	 * @return {@code true} if the member is accessible, {@code false} otherwise
+	 */
+	public static <T extends AccessibleObject & Member> boolean isAccessible(final Object object, final T member) {
+		return ReflectionException.wrapThrowing(() -> member.canAccess(object), ACCESS_CHANGE_ERROR + member);
+	}
+
+	/**
+	 * Sets the accessibility of the member.
+	 *
+	 * @param member member to set accessibility for
+	 * @param accessible {@code true} to make the member accessible, {@code false} to make it not accessible
+	 */
+	public static <T extends AccessibleObject & Member> void setAccessible(final T member, final boolean accessible) {
+		ReflectionException.wrapThrowing(() -> member.setAccessible(accessible), ACCESS_CHANGE_ERROR + member); // NOSONAR
 	}
 }
