@@ -31,7 +31,7 @@ class ArrayConversionsTest {
 		String[] result = ArrayConversions.convertArray(source, String::valueOf).toArray(String[]::new);
 
 		assertThat(result.length, equalTo(source.length));
-		for (int i = 0; i < source.length; i++) {
+		for (int i = 0; i < source.length; ++i) {
 			assertThat(result[i], equalTo(String.valueOf(source[i])));
 		}
 	}
@@ -43,7 +43,7 @@ class ArrayConversionsTest {
 		String[] result = ArrayConversions.convertArray(source, String::valueOf).toArray(() -> new String[source.length]);
 
 		assertThat(result.length, equalTo(source.length));
-		for (int i = 0; i < source.length; i++) {
+		for (int i = 0; i < source.length; ++i) {
 			assertThat(result[i], equalTo(String.valueOf(source[i])));
 		}
 	}
@@ -55,7 +55,7 @@ class ArrayConversionsTest {
 		String[] result = ArrayConversions.convertArray(source, String::valueOf).to(new String[0]);
 
 		assertThat(result.length, equalTo(source.length));
-		for (int i = 0; i < source.length; i++) {
+		for (int i = 0; i < source.length; ++i) {
 			assertThat(result[i], equalTo(String.valueOf(source[i])));
 		}
 	}

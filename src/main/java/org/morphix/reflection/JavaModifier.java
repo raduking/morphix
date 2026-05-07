@@ -144,5 +144,4 @@ public enum JavaModifier {
 	public boolean isAccessModifier() {
 		return accessModifier;
 	}
-
 }

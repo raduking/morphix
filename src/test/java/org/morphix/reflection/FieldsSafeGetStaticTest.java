@@ -14,16 +14,15 @@ package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#getStatic(Class, String)}.
+ * Test class for {@link Fields.Safe#getStatic(Class, String)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsGetStaticFieldsTest {
+class FieldsSafeGetStaticTest {
 
 	private static final String GOOD_NAME = "s";
 	private static final String WRONG_NAME = "wrongName";
@@ -31,32 +30,30 @@ class FieldsGetStaticFieldsTest {
 
 	@Test
 	void shouldReturnStaticFieldValue() {
-		String staticField = Fields.IgnoreAccess.getStatic(A.class, "STATIC_FIELD");
+		String staticField = Fields.Safe.getStatic(A.class, "STATIC_FIELD");
 
 		assertThat(staticField, equalTo(FIELD_VALUE));
 	}
 
 	@Test
 	void shouldReturnStaticFieldValueWithGet() {
-		String staticField = Fields.IgnoreAccess.get(A.class, "STATIC_FIELD");
+		String staticField = Fields.Safe.get(A.class, "STATIC_FIELD");
 
 		assertThat(staticField, equalTo(FIELD_VALUE));
 	}
 
 	@Test
-	void shouldThrowExceptionIfFieldNotFound() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, WRONG_NAME));
+	void shouldReturnNullIfFieldNotFound() {
+		Object result = Fields.Safe.getStatic(A.class, WRONG_NAME);
 
-		assertThat(e.getMessage(),
-				equalTo("Could not find static field with name: " + WRONG_NAME + " in class: " + A.class));
+		assertThat(result, equalTo(null));
 	}
 
 	@Test
-	void shouldThrowExceptionIfFieldIsNotStatic() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, GOOD_NAME));
+	void shouldReturnNullIfFieldIsNotStatic() {
+		Object result = Fields.Safe.getStatic(A.class, GOOD_NAME);
 
-		assertThat(e.getMessage(),
-				equalTo("Could not find static field with name: " + GOOD_NAME + " in class: " + A.class));
+		assertThat(result, equalTo(null));
 	}
 
 	private static class A {
@@ -73,7 +70,7 @@ class FieldsGetStaticFieldsTest {
 
 	@Test
 	void shouldReturnStaticFieldValueFromDerivedClass() {
-		String staticField = Fields.IgnoreAccess.getStatic(B.class, "STATIC_FIELD");
+		String staticField = Fields.Safe.getStatic(B.class, "STATIC_FIELD");
 
 		assertThat(staticField, equalTo(FIELD_VALUE));
 	}

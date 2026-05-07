@@ -144,5 +144,4 @@ public interface Reflection {
 	static boolean isClassPresent(final String className) {
 		return null != Classes.Safe.getOne(className);
 	}
-
 }

@@ -103,5 +103,4 @@ public class Primitives {
 	private Primitives() {
 		throw Constructors.unsupportedOperationException();
 	}
-
 }

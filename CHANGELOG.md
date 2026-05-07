@@ -1,5 +1,22 @@
 ## Release Notes
 
+`1.0.34`
+
+- Changed leak detection to default to `LeakDetectionLevel.DISABLED` instead of `LeakDetectionLevel.SIMPLE` so that leak detection can be opted in.
+- Changed `ResourceLeakDetector` to not instantiate a `Cleaner` when one is not needed (leak detection is disabled).
+- Added `Fields.IgnoreAccess.getStatic(Class, Field)` method to return the given static field value.
+- Added `Fields.Safe.get` that returns `null` instead of throwing exceptions when field is missing or not accessible.
+- Added `Fields.Safe.getStatic` that returns `null` instead of throwing exceptions when field is missing or not accessible.
+- Added `Fields.Safe.getByPath` to return a field by its path or `null` if not found.
+- Added `Fields.Safe.getByPaths` to return a field by the given paths or `null` if not found.
+- Added `MemberAccessor.isAccessible` to check if a member is accessible.
+- Added `MemberAccessor.setAccessible(boolean)` to set the access for the managed member.
+- Added `MemberAccessor.setAccessible(Object, boolean)` static method to set the access for a member.
+- Upgraded `pitest-maven` to `1.23.1`.
+- Upgraded parent to `4.0.6`.
+
+---
+
 `1.0.33`
 
 - Added `JavaObjects.isNotEmpty` which returns true if the given object is not empty (opposite of `JavaObjects.isEmpty`).

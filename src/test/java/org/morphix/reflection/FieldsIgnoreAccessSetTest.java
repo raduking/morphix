@@ -23,11 +23,15 @@ import org.junit.jupiter.api.Test;
 import org.morphix.reflection.testdata.A;
 
 /**
- * Test class for {@link Fields#set(Object, String, Object)} and {@link Fields#set(Object, Field, Object)}.
+ * Test class for
+ * <ul>
+ * <li>{@link Fields.IgnoreAccess#set(Object, String, Object)}</li>
+ * <li>{@link Fields.IgnoreAccess#set(Object, Field, Object)}</li>
+ * </ul>
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsSetIgnoreAccessTest {
+class FieldsIgnoreAccessSetTest {
 
 	private static final String MISSING_FIELD_NAME = "missingField";
 	private static final String FIELD_NAME = "field";

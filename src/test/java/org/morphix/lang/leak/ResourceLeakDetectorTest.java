@@ -42,7 +42,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.morphix.lang.logging.Logging;
 import org.morphix.reflection.Constructors;
-import org.morphix.reflection.Fields;
 import org.morphix.utils.ConcurrentSystem;
 import org.morphix.utils.Tests;
 
@@ -67,7 +66,7 @@ class ResourceLeakDetectorTest {
 
 	@BeforeAll
 	static void beforeAll() {
-		references().clear();
+		ResourceLeakDetector.references().clear();
 	}
 
 	@BeforeEach
@@ -80,10 +79,6 @@ class ResourceLeakDetectorTest {
 		ConcurrentSystem.getAndSetProperty(LeakDetectionLevel.PROPERTY, originalProperty);
 	}
 
-	private static Set<ResourceLeakReference> references() {
-		return Fields.IgnoreAccess.getStatic(ResourceLeakDetector.class, "REFERENCES");
-	}
-
 	@Test
 	@SuppressWarnings("resource")
 	void shouldNotTrackWhenDisabled() {
@@ -93,7 +88,7 @@ class ResourceLeakDetectorTest {
 
 		try {
 			assertSame(ResourceLeakTracker.DISABLED, tracker);
-			assertTrue(references().isEmpty());
+			assertTrue(ResourceLeakDetector.references().isEmpty());
 		} finally {
 			tracker.close();
 		}
@@ -104,9 +99,9 @@ class ResourceLeakDetectorTest {
 		System.setProperty(LeakDetectionLevel.PROPERTY, "SIMPLE");
 
 		try (ResourceLeakTracker tracker = ResourceLeakDetector.track(new Object())) {
-			assertFalse(references().isEmpty());
+			assertFalse(ResourceLeakDetector.references().isEmpty());
 		}
-		assertTrue(references().isEmpty());
+		assertTrue(ResourceLeakDetector.references().isEmpty());
 	}
 
 	@Test
@@ -116,13 +111,15 @@ class ResourceLeakDetectorTest {
 		try (ResourceLeakTracker tracker = ResourceLeakDetector.track(new Object())) {
 			// no assertion here, just ensuring that the reference is added
 		}
-		assertTrue(references().isEmpty());
+		assertTrue(ResourceLeakDetector.references().isEmpty());
 	}
 
 	@Test
 	@Timeout(5)
 	@SuppressWarnings("resource")
 	void shouldReportLeakWhenNotClosed() throws Exception {
+		System.setProperty(LeakDetectionLevel.PROPERTY, "SIMPLE");
+
 		List<LogRecord> logs = new ArrayList<>();
 		Logger logger = Logger.getLogger(ResourceLeakLogger.NAME);
 
@@ -154,6 +151,8 @@ class ResourceLeakDetectorTest {
 	@Timeout(5)
 	@SuppressWarnings("resource")
 	void shouldReportAllLeaksWhenNotClosed() throws Exception {
+		System.setProperty(LeakDetectionLevel.PROPERTY, "SIMPLE");
+
 		List<LogRecord> logs = new ArrayList<>();
 		Logger logger = Logger.getLogger(ResourceLeakLogger.NAME);
 
@@ -232,6 +231,8 @@ class ResourceLeakDetectorTest {
 	@Test
 	@SuppressWarnings("resource")
 	void shouldReportLeaksOnShutdown() throws Exception {
+		System.setProperty(LeakDetectionLevel.PROPERTY, "SIMPLE");
+
 		List<LogRecord> logs = new ArrayList<>();
 		Logger logger = Logger.getLogger(ResourceLeakLogger.NAME);
 
@@ -242,7 +243,7 @@ class ResourceLeakDetectorTest {
 		ResourceLeakTracker tracker = obj.leakTracker;
 
 		try {
-			for (ResourceLeakReference ref : references()) {
+			for (ResourceLeakReference ref : ResourceLeakDetector.references()) {
 				ref.reportLeak("JVM shutdown");
 			}
 
@@ -258,6 +259,8 @@ class ResourceLeakDetectorTest {
 	@Test
 	@SuppressWarnings("resource")
 	void shouldReportLeaksOnShutdownWithShutdownThread() throws Exception {
+		System.setProperty(LeakDetectionLevel.PROPERTY, "SIMPLE");
+
 		List<LogRecord> logs = new ArrayList<>();
 		Logger logger = Logger.getLogger(ResourceLeakLogger.NAME);
 

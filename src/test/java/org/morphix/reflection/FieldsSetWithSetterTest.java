@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsSetFieldValueWithSetterTest {
+class FieldsSetWithSetterTest {
 
 	public static class A {
 		Integer x;
@@ -76,5 +76,4 @@ class FieldsSetFieldValueWithSetterTest {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.set(a, "z", 3));
 		assertThat(e.getMessage(), equalTo("Object does not contain a field named: z"));
 	}
-
 }

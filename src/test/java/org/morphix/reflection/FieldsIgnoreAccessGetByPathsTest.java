@@ -19,11 +19,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#getByPath(Object, String)}.
+ * Test class for
+ * <ul>
+ * <li>{@link Fields.IgnoreAccess#getByPaths(Object, String)}</li>
+ * <li>{@link Fields.IgnoreAccess#getByPaths(Object, String[])}</li>
+ * <li>{@link Fields.IgnoreAccess#getByPath(Object, String)}</li>
+ * </ul>
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsGetIgnoreAccessByPathsTest {
+class FieldsIgnoreAccessGetByPathsTest {
 
 	private static final String TEST_STRING = "testString";
 
@@ -45,6 +50,30 @@ class FieldsGetIgnoreAccessByPathsTest {
 		String x = Fields.IgnoreAccess.getByPaths(b, "x.y,a.x");
 
 		assertThat(x, equalTo(TEST_STRING));
+	}
+
+	@Test
+	void shouldGetFieldByPath() {
+		A a = new A();
+		a.x = TEST_STRING;
+		B b = new B();
+		b.a = a;
+
+		String x = Fields.IgnoreAccess.getByPath(b, "a.x");
+
+		assertThat(x, equalTo(TEST_STRING));
+	}
+
+	@Test
+	void shouldReturnNullOnGetFieldByPathWhenFieldDoesNotExist() {
+		A a = new A();
+		a.x = TEST_STRING;
+		B b = new B();
+		b.a = a;
+
+		String x = Fields.IgnoreAccess.getByPath(b, "x.y");
+
+		assertThat(x, equalTo(null));
 	}
 
 	@Test

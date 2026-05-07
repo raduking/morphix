@@ -19,7 +19,12 @@ package org.morphix.reflection.testdata;
  */
 public class A {
 
-	public static final String FIELD_NAME = "field";
+	public static class FieldName {
+		public static final String FIELD = "field";
+		public static final String S = "s";
+		public static final String I = "i";
+		public static final String B = "b";
+	}
 
 	private String field;
 	private String s;

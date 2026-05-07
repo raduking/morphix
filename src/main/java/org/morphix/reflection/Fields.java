@@ -38,7 +38,7 @@ public interface Fields {
 	 *
 	 * @param cls class containing the field
 	 * @param fieldName the name of the field
-	 * @return the field with the given name
+	 * @return the field with the given name or null if the field is not present in the class
 	 */
 	static <T> Field getOneDeclared(final Class<T> cls, final String fieldName) {
 		if (null == cls || null == fieldName) {
@@ -58,7 +58,7 @@ public interface Fields {
 	 *
 	 * @param obj object containing the field
 	 * @param fieldName the name of the field
-	 * @return the field with the given name
+	 * @return the field with the given name or null if the field is not present in the class
 	 */
 	static Field getOneDeclared(final Object obj, final String fieldName) {
 		if (null == obj) {
@@ -361,8 +361,12 @@ public interface Fields {
 		 * @param field field to query
 		 * @param obj object containing the field (null for static fields)
 		 * @return field value
+		 * @throws ReflectionException if the field value cannot be returned
 		 */
 		static <T> T get(final Object obj, final Field field) {
+			if (MemberAccessor.isAccessible(obj, field)) {
+				return Fields.get(obj, field);
+			}
 			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
 				return Fields.get(obj, field);
 			}
@@ -381,11 +385,14 @@ public interface Fields {
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
 			if (obj instanceof Class<?> cls) {
-				return getStatic(cls, fieldName);
+				return IgnoreAccess.getStatic(cls, fieldName);
 			}
 			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
 			if (null == field) {
 				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, obj.getClass());
+			}
+			if (Modifier.isStatic(field.getModifiers())) {
+				return IgnoreAccess.get(null, field);
 			}
 			return IgnoreAccess.get(obj, field);
 		}
@@ -398,6 +405,7 @@ public interface Fields {
 		 * @param field field to query
 		 * @param obj object containing the field (null for static fields)
 		 * @param value value to set
+		 * @throws ReflectionException if the field value cannot be set
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
 			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
@@ -424,7 +432,7 @@ public interface Fields {
 		 */
 		static <T> void set(final Object obj, final String fieldName, final T value) {
 			if (obj instanceof Class<?> cls) {
-				setStatic(cls, fieldName, value);
+				IgnoreAccess.setStatic(cls, fieldName, value);
 				return;
 			}
 			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
@@ -440,7 +448,6 @@ public interface Fields {
 		 * @param <T> the type of the static field
 		 * @param <U> type to get the field from
 		 *
-		 *
 		 * @param cls the class that has the static field
 		 * @param fieldName the name of the static field
 		 * @return the value of the static field with the given name
@@ -448,8 +455,26 @@ public interface Fields {
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field || !Modifier.isStatic(field.getModifiers())) {
+			if (null == field) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
+			}
+			return IgnoreAccess.getStatic(cls, field);
+		}
+
+		/**
+		 * Returns the value of a static field ignoring access modifiers.
+		 *
+		 * @param <T> the type of the static field
+		 * @param <U> type to get the field from
+		 *
+		 * @param cls the class that has the static field
+		 * @param field the static field
+		 * @return the value of the static field with the given name
+		 * @throws ReflectionException if the field is not static
+		 */
+		static <T, U> T getStatic(final Class<U> cls, final Field field) {
+			if (!Modifier.isStatic(field.getModifiers())) {
+				throw new ReflectionException("Could not find static field with name: {} in class: {}", field.getName(), cls);
 			}
 			return IgnoreAccess.get(null, field);
 		}
@@ -474,6 +499,136 @@ public interface Fields {
 		}
 
 		/**
+		 * Returns the field value for the given object. Field is searched with the field path.
+		 *
+		 * @param <T> object type
+		 * @param <U> field value type
+		 *
+		 * @param obj object to search the field in
+		 * @param paths possible paths to the field
+		 * @return field value or null if the field is not found or the field value cannot be returned
+		 */
+		static <T, U> U getByPaths(final T obj, final String... paths) {
+			return Safe.getByPaths(obj, paths);
+		}
+
+		/**
+		 * Variation of {@link IgnoreAccess#getByPaths(Object, String...)} with paths given as a comma separated list of paths
+		 * in a single string.
+		 *
+		 * @param <T> object type
+		 * @param <U> field value type
+		 *
+		 * @param obj object to search the field in
+		 * @param paths comma separated possible paths to the field
+		 * @return field value or null if the field is not found or the field value cannot be returned
+		 */
+		static <T, U> U getByPaths(final T obj, final String paths) {
+			return Safe.getByPaths(obj, paths);
+		}
+
+		/**
+		 * Returns the field value given by its qualified path to the required field in the given object.
+		 *
+		 * @param <T> object type
+		 * @param <U> field value type
+		 *
+		 * @param obj object to get the field from
+		 * @param path qualified path to the field
+		 * @return field value or null if the field is not found or the field value cannot be returned
+		 */
+		static <T, U> U getByPath(final T obj, final String path) {
+			return Safe.getByPath(obj, path);
+		}
+	}
+
+	/**
+	 * Interface which groups all methods that ignore field access modifiers and also return null instead of throwing an
+	 * exception when the field is not found or the field value cannot be returned.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Safe {
+
+		/**
+		 * Returns the value of the given field from the given object ignoring field access modifiers or {@code null} if the
+		 * field value cannot be returned.
+		 *
+		 * @param <T> field value type
+		 *
+		 * @param field field to query
+		 * @param obj object containing the field (null for static fields)
+		 * @return field value or null if the field value cannot be returned
+		 */
+		static <T> T get(final Object obj, final Field field) {
+			try {
+				return Fields.IgnoreAccess.get(obj, field);
+			} catch (ReflectionException e) {
+				return null;
+			}
+		}
+
+		/**
+		 * Returns the value of the given field from the given object ignoring field access modifiers. If the object supplied is
+		 * a {@link Class} then the field will be considered static.
+		 *
+		 * @param <T> field value type
+		 *
+		 * @param obj object containing the field (null for static fields)
+		 * @param fieldName field name to query
+		 * @return field value
+		 * @throws ReflectionException if the field is not found
+		 */
+		static <T> T get(final Object obj, final String fieldName) {
+			if (obj instanceof Class<?> cls) {
+				return Safe.getStatic(cls, fieldName);
+			}
+			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
+			if (null == field) {
+				return null;
+			}
+			if (Modifier.isStatic(field.getModifiers())) {
+				return Safe.get(null, field);
+			}
+			return Safe.get(obj, field);
+		}
+
+		/**
+		 * Returns the value of a static field ignoring access modifiers.
+		 *
+		 * @param <T> the type of the static field
+		 * @param <U> type to get the field from
+		 *
+		 * @param cls the class that has the static field
+		 * @param fieldName the name of the static field
+		 * @return the value of the static field with the given name
+		 * @throws ReflectionException if the field is not found
+		 */
+		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
+			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
+			if (null == field) {
+				return null;
+			}
+			return Safe.getStatic(field);
+		}
+
+		/**
+		 * Returns the value of a static field ignoring access modifiers.
+		 *
+		 * @param <T> the type of the static field
+		 *
+		 * @param field the static field
+		 * @return the value of the static field with the given name
+		 * @throws ReflectionException if the field is not static
+		 */
+		static <T> T getStatic(final Field field) {
+			if (!Modifier.isStatic(field.getModifiers())) {
+				return null;
+			}
+			return Safe.get(null, field);
+		}
+
+		/**
 		 * Returns the field value for the given object. Field is searched with the field path.<br>
 		 * TODO: implement full functionality similar to JSON Path
 		 *
@@ -482,7 +637,7 @@ public interface Fields {
 		 *
 		 * @param obj object to search the field in
 		 * @param paths possible paths to the field
-		 * @return field value
+		 * @return field value or null if the field is not found or the field value cannot be returned
 		 */
 		static <T, U> U getByPaths(final T obj, final String... paths) {
 			U result = null;
@@ -500,15 +655,15 @@ public interface Fields {
 		}
 
 		/**
-		 * Variation of {@link IgnoreAccess#getByPaths(Object, String...)} with paths given as a comma separated list of paths
-		 * in a single string.
+		 * Variation of {@link Safe#getByPaths(Object, String...)} with paths given as a comma separated list of paths in a
+		 * single string.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
 		 *
 		 * @param obj object to search the field in
 		 * @param paths comma separated possible paths to the field
-		 * @return field value
+		 * @return field value or null if the field is not found or the field value cannot be returned
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
 			return getByPaths(obj, Objects.requireNonNull(paths, "paths").split(","));
@@ -522,7 +677,7 @@ public interface Fields {
 		 *
 		 * @param obj object to get the field from
 		 * @param path qualified path to the field
-		 * @return field value
+		 * @return field value or null if the field is not found or the field value cannot be returned
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
 			U result = null;
@@ -547,7 +702,6 @@ public interface Fields {
 			}
 			return result;
 		}
-
 	}
 
 	/**
@@ -602,5 +756,4 @@ public interface Fields {
 			IgnoreAccess.set(obj, field, null);
 		}
 	}
-
 }

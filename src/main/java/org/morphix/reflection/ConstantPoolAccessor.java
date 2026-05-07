@@ -114,5 +114,4 @@ public class ConstantPoolAccessor { // NOSONAR we want this as singleton
 			// empty
 		}
 	}
-
 }
