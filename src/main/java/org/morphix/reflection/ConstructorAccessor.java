@@ -31,5 +31,4 @@ public class ConstructorAccessor<T> extends MemberAccessor<Constructor<T>> {
 	public ConstructorAccessor(final Constructor<T> constructor) {
 		super(null, constructor);
 	}
-
 }

@@ -146,5 +146,4 @@ public abstract class GenericClass<T> {
 		String typeString = null == type ? "T" : type.toString();
 		return "GenericClass<" + typeString + ">";
 	}
-
 }

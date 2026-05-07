@@ -38,7 +38,7 @@ public interface Fields {
 	 *
 	 * @param cls class containing the field
 	 * @param fieldName the name of the field
-	 * @return the field with the given name
+	 * @return the field with the given name or null if the field is not present in the class
 	 */
 	static <T> Field getOneDeclared(final Class<T> cls, final String fieldName) {
 		if (null == cls || null == fieldName) {
@@ -58,7 +58,7 @@ public interface Fields {
 	 *
 	 * @param obj object containing the field
 	 * @param fieldName the name of the field
-	 * @return the field with the given name
+	 * @return the field with the given name or null if the field is not present in the class
 	 */
 	static Field getOneDeclared(final Object obj, final String fieldName) {
 		if (null == obj) {
@@ -361,6 +361,7 @@ public interface Fields {
 		 * @param field field to query
 		 * @param obj object containing the field (null for static fields)
 		 * @return field value
+		 * @throws ReflectionException if the field value cannot be returned
 		 */
 		static <T> T get(final Object obj, final Field field) {
 			if (MemberAccessor.isAccessible(obj, field)) {
@@ -391,7 +392,7 @@ public interface Fields {
 				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, obj.getClass());
 			}
 			if (Modifier.isStatic(field.getModifiers())) {
-				return IgnoreAccess.getStatic(obj.getClass(), field);
+				return IgnoreAccess.get(null, field);
 			}
 			return IgnoreAccess.get(obj, field);
 		}
@@ -404,6 +405,7 @@ public interface Fields {
 		 * @param field field to query
 		 * @param obj object containing the field (null for static fields)
 		 * @param value value to set
+		 * @throws ReflectionException if the field value cannot be set
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
 			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
@@ -497,29 +499,17 @@ public interface Fields {
 		}
 
 		/**
-		 * Returns the field value for the given object. Field is searched with the field path.<br>
-		 * TODO: implement full functionality similar to JSON Path
+		 * Returns the field value for the given object. Field is searched with the field path.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
 		 *
 		 * @param obj object to search the field in
 		 * @param paths possible paths to the field
-		 * @return field value
+		 * @return field value or null if the field is not found or the field value cannot be returned
 		 */
 		static <T, U> U getByPaths(final T obj, final String... paths) {
-			U result = null;
-			try {
-				for (String path : paths) {
-					result = getByPath(obj, path);
-					if (null != result) {
-						break;
-					}
-				}
-			} catch (Exception e) {
-				return null;
-			}
-			return result;
+			return Safe.getByPaths(obj, paths);
 		}
 
 		/**
@@ -531,10 +521,10 @@ public interface Fields {
 		 *
 		 * @param obj object to search the field in
 		 * @param paths comma separated possible paths to the field
-		 * @return field value
+		 * @return field value or null if the field is not found or the field value cannot be returned
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
-			return getByPaths(obj, Objects.requireNonNull(paths, "paths").split(","));
+			return Safe.getByPaths(obj, paths);
 		}
 
 		/**
@@ -545,30 +535,10 @@ public interface Fields {
 		 *
 		 * @param obj object to get the field from
 		 * @param path qualified path to the field
-		 * @return field value
+		 * @return field value or null if the field is not found or the field value cannot be returned
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
-			U result = null;
-			String[] fieldNames = path.split("\\.");
-			if (fieldNames.length == 1) {
-				result = Fields.get(obj, fieldNames[0]);
-			} else {
-				Object value = obj;
-				for (String fieldName : fieldNames) {
-					try {
-						value = Fields.get(value, fieldName);
-					} catch (ReflectionException e) {
-						value = null;
-					}
-					if (null == value) {
-						break;
-					}
-				}
-				if (null != value) {
-					result = JavaObjects.cast(value);
-				}
-			}
-			return result;
+			return Safe.getByPath(obj, path);
 		}
 	}
 
@@ -588,7 +558,7 @@ public interface Fields {
 		 *
 		 * @param field field to query
 		 * @param obj object containing the field (null for static fields)
-		 * @return field value
+		 * @return field value or null if the field value cannot be returned
 		 */
 		static <T> T get(final Object obj, final Field field) {
 			try {
@@ -618,7 +588,7 @@ public interface Fields {
 				return null;
 			}
 			if (Modifier.isStatic(field.getModifiers())) {
-				return Safe.getStatic(field);
+				return Safe.get(null, field);
 			}
 			return Safe.get(obj, field);
 		}
@@ -656,6 +626,81 @@ public interface Fields {
 				return null;
 			}
 			return Safe.get(null, field);
+		}
+
+		/**
+		 * Returns the field value for the given object. Field is searched with the field path.<br>
+		 * TODO: implement full functionality similar to JSON Path
+		 *
+		 * @param <T> object type
+		 * @param <U> field value type
+		 *
+		 * @param obj object to search the field in
+		 * @param paths possible paths to the field
+		 * @return field value or null if the field is not found or the field value cannot be returned
+		 */
+		static <T, U> U getByPaths(final T obj, final String... paths) {
+			U result = null;
+			try {
+				for (String path : paths) {
+					result = getByPath(obj, path);
+					if (null != result) {
+						break;
+					}
+				}
+			} catch (Exception e) {
+				return null;
+			}
+			return result;
+		}
+
+		/**
+		 * Variation of {@link Safe#getByPaths(Object, String...)} with paths given as a comma separated list of paths
+		 * in a single string.
+		 *
+		 * @param <T> object type
+		 * @param <U> field value type
+		 *
+		 * @param obj object to search the field in
+		 * @param paths comma separated possible paths to the field
+		 * @return field value or null if the field is not found or the field value cannot be returned
+		 */
+		static <T, U> U getByPaths(final T obj, final String paths) {
+			return getByPaths(obj, Objects.requireNonNull(paths, "paths").split(","));
+		}
+
+		/**
+		 * Returns the field value given by its qualified path to the required field in the given object.
+		 *
+		 * @param <T> object type
+		 * @param <U> field value type
+		 *
+		 * @param obj object to get the field from
+		 * @param path qualified path to the field
+		 * @return field value or null if the field is not found or the field value cannot be returned
+		 */
+		static <T, U> U getByPath(final T obj, final String path) {
+			U result = null;
+			String[] fieldNames = path.split("\\.");
+			if (fieldNames.length == 1) {
+				result = Fields.get(obj, fieldNames[0]);
+			} else {
+				Object value = obj;
+				for (String fieldName : fieldNames) {
+					try {
+						value = Fields.get(value, fieldName);
+					} catch (ReflectionException e) {
+						value = null;
+					}
+					if (null == value) {
+						break;
+					}
+				}
+				if (null != value) {
+					result = JavaObjects.cast(value);
+				}
+			}
+			return result;
 		}
 	}
 

@@ -170,5 +170,4 @@ public class Lambdas {
 		}
 		return List.of(implClass.getDeclaredMethods());
 	}
-
 }

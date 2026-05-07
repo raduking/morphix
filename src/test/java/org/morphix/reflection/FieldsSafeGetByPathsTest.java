@@ -19,16 +19,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for
- * <ul>
- * <li>{@link Fields.IgnoreAccess#getByPaths(Object, String)}</li>
- * <li>{@link Fields.IgnoreAccess#getByPaths(Object, String[])}</li>
- * <li>{@link Fields.IgnoreAccess#getByPath(Object, String)}</li>
- * </ul>
+ * Test class for {@link Fields.Safe#getByPath(Object, String)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsIgnoreAccessGetByPathsTest {
+class FieldsSafeGetByPathsTest {
 
 	private static final String TEST_STRING = "testString";
 
@@ -47,33 +42,9 @@ class FieldsIgnoreAccessGetByPathsTest {
 		B b = new B();
 		b.a = a;
 
-		String x = Fields.IgnoreAccess.getByPaths(b, "x.y,a.x");
+		String x = Fields.Safe.getByPaths(b, "x.y,a.x");
 
 		assertThat(x, equalTo(TEST_STRING));
-	}
-
-	@Test
-	void shouldGetFieldByPath() {
-		A a = new A();
-		a.x = TEST_STRING;
-		B b = new B();
-		b.a = a;
-
-		String x = Fields.IgnoreAccess.getByPath(b, "a.x");
-
-		assertThat(x, equalTo(TEST_STRING));
-	}
-
-	@Test
-	void shouldReturnNullOnGetFieldByPathWhenFieldDoesNotExist() {
-		A a = new A();
-		a.x = TEST_STRING;
-		B b = new B();
-		b.a = a;
-
-		String x = Fields.IgnoreAccess.getByPath(b, "x.y");
-
-		assertThat(x, equalTo(null));
 	}
 
 	@Test
@@ -83,7 +54,7 @@ class FieldsIgnoreAccessGetByPathsTest {
 		B b = new B();
 		b.a = a;
 
-		A result = Fields.IgnoreAccess.getByPaths(b, "a");
+		A result = Fields.Safe.getByPaths(b, "a");
 
 		assertThat(result, equalTo(a));
 	}
@@ -95,7 +66,7 @@ class FieldsIgnoreAccessGetByPathsTest {
 		B b = new B();
 		b.a = a;
 
-		A result = Fields.IgnoreAccess.getByPaths(b, "z");
+		A result = Fields.Safe.getByPaths(b, "z");
 
 		assertThat(result, nullValue());
 	}
@@ -107,11 +78,11 @@ class FieldsIgnoreAccessGetByPathsTest {
 		B b = new B();
 		b.a = a;
 
-		A result = Fields.IgnoreAccess.getByPaths(b, "");
+		A result = Fields.Safe.getByPaths(b, "");
 
 		assertThat(result, nullValue());
 
-		result = Fields.IgnoreAccess.getByPaths(b, new String[] { });
+		result = Fields.Safe.getByPaths(b, new String[] { });
 
 		assertThat(result, nullValue());
 	}

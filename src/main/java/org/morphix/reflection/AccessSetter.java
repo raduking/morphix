@@ -56,5 +56,4 @@ public interface AccessSetter<T extends AccessibleObject & Member> {
 			}
 		};
 	}
-
 }

@@ -55,7 +55,7 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 
 		this.isAccessible = isAccessible(actual, member);
 		if (!isAccessible) {
-			setAccessible(member, true);
+			setAccessible(true);
 		}
 	}
 
@@ -65,8 +65,17 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	@Override
 	public void close() {
 		if (!isAccessible) {
-			setAccessible(member, false);
+			setAccessible(false);
 		}
+	}
+
+	/**
+	 * Sets the accessibility of the member to the given value.
+	 *
+	 * @param accessible {@code true} to make the member accessible, {@code false} to make it not accessible
+	 */
+	public void setAccessible(final boolean accessible) {
+		setAccessible(member, accessible);
 	}
 
 	/**

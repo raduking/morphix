@@ -77,5 +77,4 @@ public interface Types {
 	static <T> Class<T> getArrayClass(final ParameterizedType parameterizedType) {
 		return getArrayClass(parameterizedType.getRawType());
 	}
-
 }
