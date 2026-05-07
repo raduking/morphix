@@ -72,6 +72,8 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	/**
 	 * Checks if the member is accessible for the given object.
 	 *
+	 * @param <T> the type of the member, which must be both an {@link AccessibleObject} and a {@link Member}
+	 *
 	 * @param object object containing the member to access
 	 * @param member member to check
 	 * @return {@code true} if the member is accessible, {@code false} otherwise
@@ -82,6 +84,8 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 
 	/**
 	 * Sets the accessibility of the member.
+	 *
+	 * @param <T> the type of the member, which must be both an {@link AccessibleObject} and a {@link Member}
 	 *
 	 * @param member member to set accessibility for
 	 * @param accessible {@code true} to make the member accessible, {@code false} to make it not accessible

@@ -646,9 +646,7 @@ public interface Fields {
 		 * Returns the value of a static field ignoring access modifiers.
 		 *
 		 * @param <T> the type of the static field
-		 * @param <U> type to get the field from
 		 *
-		 * @param cls the class that has the static field
 		 * @param field the static field
 		 * @return the value of the static field with the given name
 		 * @throws ReflectionException if the field is not static
