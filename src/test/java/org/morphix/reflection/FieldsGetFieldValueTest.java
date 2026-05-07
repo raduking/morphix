@@ -12,6 +12,7 @@
  */
 package org.morphix.reflection;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,6 +21,7 @@ import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.reflection.testdata.A;
+import org.morphix.reflection.testdata.B;
 
 /**
  * Test class for {@link Fields#get(Object, Field)}.
@@ -40,13 +42,33 @@ class FieldsGetFieldValueTest {
 	}
 
 	@Test
-	void shouldThrowExceptionIfFiledIsNotAccessible() throws Exception {
+	void shouldThrowExceptionIfFieldIsNotAccessible() throws Exception {
 		A a = new A();
 
-		Field field = A.class.getDeclaredField(A.FIELD_NAME);
+		Field field = A.class.getDeclaredField(A.FieldName.FIELD);
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.get(a, field));
 
-		assertThat(e.getMessage(), equalTo("Could not get field " + A.FIELD_NAME));
+		assertThat(e.getMessage(), equalTo("Could not get field " + A.FieldName.FIELD));
+		assertThat(e.getCause(), instanceOf(IllegalAccessException.class));
 	}
 
+	@Test
+	void shouldThrowExceptionIfFieldIsNotPresentInClassAndNotAccesible() throws Exception {
+		Field field = A.class.getDeclaredField(A.FieldName.FIELD);
+		B b = new B();
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.get(b, field));
+
+		assertThat(e.getMessage(), equalTo("Could not get field " + A.FieldName.FIELD));
+		assertThat(e.getCause(), instanceOf(IllegalAccessException.class));
+	}
+
+	@Test
+	void shouldThrowExceptionIfFieldIsNotPresentInClass() throws Exception {
+		Field field = A.class.getDeclaredField(A.FieldName.B);
+		B b = new B();
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.get(b, field));
+
+		assertThat(e.getMessage(), equalTo("Could not get field " + A.FieldName.B));
+		assertThat(e.getCause(), instanceOf(IllegalArgumentException.class));
+	}
 }

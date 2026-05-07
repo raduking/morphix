@@ -19,11 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#setStatic(Class, String, Object)}.
+ * Test class for {@link Fields.IgnoreAccess#setStatic(Class, String, Object)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsSetStaticFieldIgnoreAccessTest {
+class FieldsIgnoreAccessSetStaticTest {
 
 	private static final String MISSING_FIELD_NAME = "missingField";
 	private static final String STATIC_FIELD_NAME = "staticField";
@@ -81,5 +81,4 @@ class FieldsSetStaticFieldIgnoreAccessTest {
 		String result = B.getStaticField();
 		assertThat(result, equalTo(VALUE));
 	}
-
 }

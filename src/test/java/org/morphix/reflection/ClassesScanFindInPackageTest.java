@@ -63,7 +63,7 @@ class ClassesScanFindInPackageTest {
 	void shouldFindClassesInPackage() {
 		var classes = Classes.Scan.findInPackage("org.morphix.reflection.testdata", Path.of(TARGET_TEST_CLASSES));
 
-		assertThat(classes.size(), equalTo(3));
+		assertThat(classes.size(), equalTo(4));
 	}
 
 	@Test

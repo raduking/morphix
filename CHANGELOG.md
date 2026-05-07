@@ -2,8 +2,10 @@
 
 `1.0.34`
 
-- Changed leak detection to default to `LeakDetectionLevel.DISABLED` instead of `LeakDetectionLevel.SIMPLE` to remove the cleaner virtual thread when not needed.
+- Changed leak detection to default to `LeakDetectionLevel.DISABLED` instead of `LeakDetectionLevel.SIMPLE` so that leak detection can be opted in.
 - Changed `ResourceLeakDetector` to not instantiate a `Cleaner` when one is not needed (leak detection is disabled).
+- Added `Fields.Safe.get` that returns `null` instead of throwing exceptions when field is missing or not accessible.
+- Added `Fields.Safe.getStatic` that returns `null` instead of throwing exceptions when field is missing or not accessible.
 - Upgraded `pitest-maven` to `1.23.1`.
 - Upgraded parent to `4.0.6`.
 

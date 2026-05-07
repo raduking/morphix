@@ -440,7 +440,6 @@ public interface Fields {
 		 * @param <T> the type of the static field
 		 * @param <U> type to get the field from
 		 *
-		 *
 		 * @param cls the class that has the static field
 		 * @param fieldName the name of the static field
 		 * @return the value of the static field with the given name
@@ -547,7 +546,74 @@ public interface Fields {
 			}
 			return result;
 		}
+	}
 
+	/**
+	 * Interface which groups all methods that ignore field access modifiers and also return null instead of throwing an
+	 * exception when the field is not found or the field value cannot be returned.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Safe {
+
+		/**
+		 * Returns the value of the given field from the given object ignoring field access modifiers or {@code null} if the
+		 * field value cannot be returned.
+		 *
+		 * @param <T> field value type
+		 *
+		 * @param field field to query
+		 * @param obj object containing the field (null for static fields)
+		 * @return field value
+		 */
+		static <T> T get(final Object obj, final Field field) {
+			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
+				return JavaObjects.cast(field.get(obj));
+			} catch (IllegalArgumentException | IllegalAccessException | ReflectionException e) {
+				return null;
+			}
+		}
+
+		/**
+		 * Returns the value of the given field from the given object ignoring field access modifiers. If the object supplied is
+		 * a {@link Class} then the field will be considered static.
+		 *
+		 * @param <T> field value type
+		 *
+		 * @param obj object containing the field (null for static fields)
+		 * @param fieldName field name to query
+		 * @return field value
+		 * @throws ReflectionException if the field is not found
+		 */
+		static <T> T get(final Object obj, final String fieldName) {
+			if (obj instanceof Class<?> cls) {
+				return getStatic(cls, fieldName);
+			}
+			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
+			if (null == field) {
+				return null;
+			}
+			return Safe.get(obj, field);
+		}
+
+		/**
+		 * Returns the value of a static field ignoring access modifiers.
+		 *
+		 * @param <T> the type of the static field
+		 * @param <U> type to get the field from
+		 *
+		 * @param cls the class that has the static field
+		 * @param fieldName the name of the static field
+		 * @return the value of the static field with the given name
+		 * @throws ReflectionException if the field is not found
+		 */
+		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
+			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
+			if (null == field || !Modifier.isStatic(field.getModifiers())) {
+				return null;
+			}
+			return Safe.get(null, field);
+		}
 	}
 
 	/**

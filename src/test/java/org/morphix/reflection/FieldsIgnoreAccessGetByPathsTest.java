@@ -19,11 +19,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#getByPath(Object, String)}.
+ * Test class for {@link Fields.IgnoreAccess#getByPath(Object, String)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsGetIgnoreAccessByPathsTest {
+class FieldsIgnoreAccessGetByPathsTest {
 
 	private static final String TEST_STRING = "testString";
 

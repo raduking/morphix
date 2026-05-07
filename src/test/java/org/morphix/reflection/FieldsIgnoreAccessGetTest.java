@@ -22,11 +22,11 @@ import org.junit.jupiter.api.Test;
 import org.morphix.reflection.testdata.B;
 
 /**
- * Test class for {@link Fields#get(Object, Field)}.
+ * Test class for {@link Fields.IgnoreAccess#get(Object, Field)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsGetIgnoreAccessTest {
+class FieldsIgnoreAccessGetTest {
 
 	private static final String TEST_STRING = "testString";
 	private static final Long TEST_LONG = 17L;
@@ -116,4 +116,26 @@ class FieldsGetIgnoreAccessTest {
 		assertThat(s, equalTo(TEST_STRING));
 	}
 
+	public static class A {
+		public String s;
+		protected Long l;
+		@SuppressWarnings("unused")
+		private Integer i;
+	}
+
+	@Test
+	void shouldIgnoreAccessOnReturningTheValue() throws Exception {
+		A a = new A();
+		a.s = TEST_STRING;
+		a.l = TEST_LONG;
+		a.i = TEST_INTEGER;
+
+		String s = Fields.IgnoreAccess.get(a, A.class.getDeclaredField("s"));
+		Long l = Fields.IgnoreAccess.get(a, A.class.getDeclaredField("l"));
+		Integer i = Fields.IgnoreAccess.get(a, A.class.getDeclaredField("i"));
+
+		assertThat(s, equalTo(TEST_STRING));
+		assertThat(l, equalTo(TEST_LONG));
+		assertThat(i, equalTo(TEST_INTEGER));
+	}
 }

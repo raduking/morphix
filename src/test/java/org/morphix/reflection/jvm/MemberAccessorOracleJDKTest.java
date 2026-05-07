@@ -87,7 +87,7 @@ class MemberAccessorOracleJDKTest {
 		assumeTrue(MemberAccessorOracleJDK.isUsable());
 
 		A a = new A();
-		Field field = A.class.getDeclaredField(A.FIELD_NAME);
+		Field field = A.class.getDeclaredField(A.FieldName.FIELD);
 
 		assertFalse(field.canAccess(a));
 
