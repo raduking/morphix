@@ -56,11 +56,9 @@ public interface ResourceLeakReporter {
 				.append(" was not closed (")
 				.append(reason)
 				.append(")");
-
 		if (reference.getLevel().ordinal() >= LeakDetectionLevel.ADVANCED.ordinal()) {
-			sb.append(Logging.LINE_SEPARATOR);
 			for (StackFrame frame : reference.getAllocationSite()) {
-				sb.append(Logging.INDENT).append("at ").append(frame).append(Logging.LINE_SEPARATOR);
+				sb.append(Logging.LINE_SEPARATOR).append(Logging.INDENT).append("at ").append(frame);
 			}
 		}
 		return sb.toString();
