@@ -4,6 +4,8 @@
 
 - Added `Classes.isAssignableFrom` similar to the Java one but this one checks for primitive assignment too.
 - Added `Constructors.findOneMatching` method to find a matching constructor given a list of parameter types.
+- Added `Constructors.findAllMatching` method to find all matching constructors given a list of parameter types.
+- Added `Constructors.matches` to check if a constructor matches the provided parameters.
 
 ---
 

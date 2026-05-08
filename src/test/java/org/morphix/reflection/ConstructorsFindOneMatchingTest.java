@@ -12,24 +12,21 @@
  */
 package org.morphix.reflection;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.typeCompatibleWith;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.Matchers.hasSize;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.morphix.lang.Messages;
 
 /**
  * Test class for
  *
  * <ul>
- * <li>{@link Constructors#findOneMatching(Class, List)}</li>
- * <li>{@link Constructors#findOneMatching(Class, Class...)}</li>
+ * <li>{@link Constructors#findAllMatching(Class, List)}</li>
+ * <li>{@link Constructors#findAllMatching(Class, Class...)}</li>
  * </ul>
  *
  * @author Radu Sebastian LAZIN
@@ -46,6 +43,21 @@ class ConstructorsFindOneMatchingTest {
 		public B(final Number i, final String s) {
 			// empty constructor
 		}
+
+		@SuppressWarnings("unused")
+		public B(final Integer i, final String s) {
+			// empty constructor
+		}
+
+		@SuppressWarnings("unused")
+		public B(final int i, final String s) {
+			// empty constructor
+		}
+
+		@SuppressWarnings("unused")
+		public B(final Object i, final String s) {
+			// empty constructor
+		}
 	}
 
 	public static class C {
@@ -57,49 +69,27 @@ class ConstructorsFindOneMatchingTest {
 	}
 
 	@Nested
-	class FindOneMatchingWithList {
+	class FindAllMatchingWithList {
 
 		@Test
-		void shouldFindOneMatchingConstructor() {
-			Constructor<B> constructor = Constructors.findOneMatching(B.class, List.of(Integer.class, String.class));
+		void shouldFindAllMatchingConstructors() {
+			List<Constructor<B>> constructors = Constructors.findAllMatching(B.class, List.of(Integer.class, String.class));
 
-			assertThat(constructor.getParameterCount(), equalTo(2));
-			assertThat(constructor.getParameterTypes()[0], typeCompatibleWith(Number.class));
-			assertThat(constructor.getParameterTypes()[1], equalTo(String.class));
-		}
-
-		@Test
-		void shouldFindOneMatchingConstructorWithPrimitiveTypes() {
-			Constructor<B> constructor = Constructors.findOneMatching(B.class, List.of(int.class, String.class));
-
-			assertThat(constructor.getParameterCount(), equalTo(2));
-			assertThat(constructor.getParameterTypes()[0], typeCompatibleWith(Number.class));
-			assertThat(constructor.getParameterTypes()[1], equalTo(String.class));
+			assertThat(constructors, hasSize(4));
 		}
 
 		@Test
 		void shouldFindDefaultConstructor() {
-			Constructor<B> constructor = Constructors.findOneMatching(B.class, List.of());
+			List<Constructor<B>> constructors = Constructors.findAllMatching(B.class, List.of());
 
-			assertThat(constructor.getParameterCount(), equalTo(0));
+			assertThat(constructors, hasSize(1));
 		}
 
 		@Test
-		void shouldThrowExceptionWhenNoMatchingConstructor() {
-			List<Class<?>> paramTypes = List.of(String.class, String.class);
-			ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.findOneMatching(B.class, paramTypes));
+		void shouldNotFindAnyConstructors() {
+			List<Constructor<C>> constructors = Constructors.findAllMatching(C.class, List.of(Integer.class, String.class));
 
-			assertThat(e.getMessage(), equalTo(Messages.message("No constructor found for class: {} with parameters: {}",
-					B.class.getCanonicalName(), paramTypes)));
-		}
-
-		@Test
-		void shouldThrowExceptionWhenNoDefaultConstructorFound() {
-			List<Class<?>> paramTypes = List.of();
-			ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.findOneMatching(C.class, paramTypes));
-
-			assertThat(e.getMessage(), equalTo(Messages.message("No constructor found for class: {} with parameters: {}",
-					C.class.getCanonicalName(), "none")));
+			assertThat(constructors, hasSize(0));
 		}
 	}
 
@@ -107,45 +97,24 @@ class ConstructorsFindOneMatchingTest {
 	class FindOneMatchingWithVarargs {
 
 		@Test
-		void shouldFindOneMatchingConstructor() {
-			Constructor<B> constructor = Constructors.findOneMatching(B.class, Integer.class, String.class);
+		void shouldFindAllMatchingConstructors() {
+			List<Constructor<B>> constructors = Constructors.findAllMatching(B.class, Integer.class, String.class);
 
-			assertThat(constructor.getParameterCount(), equalTo(2));
-			assertThat(constructor.getParameterTypes()[0], typeCompatibleWith(Number.class));
-			assertThat(constructor.getParameterTypes()[1], equalTo(String.class));
-		}
-
-		@Test
-		void shouldFindOneMatchingConstructorWithPrimitiveTypes() {
-			Constructor<B> constructor = Constructors.findOneMatching(B.class, int.class, String.class);
-
-			assertThat(constructor.getParameterCount(), equalTo(2));
-			assertThat(constructor.getParameterTypes()[0], typeCompatibleWith(Number.class));
-			assertThat(constructor.getParameterTypes()[1], equalTo(String.class));
+			assertThat(constructors, hasSize(4));
 		}
 
 		@Test
 		void shouldFindDefaultConstructor() {
-			Constructor<B> constructor = Constructors.findOneMatching(B.class, List.of());
+			List<Constructor<B>> constructors = Constructors.findAllMatching(B.class);
 
-			assertThat(constructor.getParameterCount(), equalTo(0));
+			assertThat(constructors, hasSize(1));
 		}
 
 		@Test
-		void shouldThrowExceptionWhenNoMatchingConstructor() {
-			List<Class<?>> paramTypes = List.of(String.class, String.class);
-			ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.findOneMatching(B.class, String.class, String.class));
+		void shouldNotFindAnyConstructors() {
+			List<Constructor<C>> constructors = Constructors.findAllMatching(C.class, Integer.class, String.class);
 
-			assertThat(e.getMessage(), equalTo(Messages.message("No constructor found for class: {} with parameters: {}",
-					B.class.getCanonicalName(), paramTypes)));
-		}
-
-		@Test
-		void shouldThrowExceptionWhenNoDefaultConstructorFound() {
-			ReflectionException e = assertThrows(ReflectionException.class, () -> Constructors.findOneMatching(C.class));
-
-			assertThat(e.getMessage(), equalTo(Messages.message("No constructor found for class: {} with parameters: {}",
-					C.class.getCanonicalName(), "none")));
+			assertThat(constructors, hasSize(0));
 		}
 	}
 }

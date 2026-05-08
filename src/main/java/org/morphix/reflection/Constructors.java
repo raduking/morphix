@@ -14,6 +14,7 @@ package org.morphix.reflection;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -128,6 +129,67 @@ public interface Constructors {
 	 */
 	static <T> Constructor<T> findOneMatching(final Class<T> cls, final Class<?>... parameterTypes) {
 		return findOneMatching(cls, JavaArrays.isNotEmpty(parameterTypes) ? List.of(parameterTypes) : Collections.emptyList());
+	}
+
+	/**
+	 * Finds a constructor for the given type that matches the specified parameter types. This method searches for a
+	 * constructor whose parameter types are assignable from the provided parameter types (allowing for subclass matching).
+	 *
+	 * @param <T> instance type
+	 *
+	 * @param cls class for which to find the constructor
+	 * @param parameterTypes list of parameter types to match
+	 * @return the matching constructor, or null if not found
+	 */
+	static <T> List<Constructor<T>> findAllMatching(final Class<T> cls, final List<Class<?>> parameterTypes) {
+		Constructor<?>[] constructors = cls.getDeclaredConstructors();
+		List<Constructor<T>> matchingConstructors = new ArrayList<>(constructors.length);
+		for (Constructor<?> constructor : constructors) {
+			if (matches(constructor, parameterTypes)) {
+				matchingConstructors.add(JavaObjects.cast(constructor));
+			}
+		}
+		return matchingConstructors;
+	}
+
+	/**
+	 * Finds a constructor for the given type that matches the specified parameter types. This method searches for a
+	 * constructor whose parameter types are assignable from the provided parameter types (allowing for subclass matching).
+	 * This is a convenience method that accepts parameter types as varargs.
+	 *
+	 * @param <T> instance type
+	 *
+	 * @param cls class for which to find the constructor
+	 * @param parameterTypes parameter types to match
+	 * @return the matching constructor, or null if not found
+	 * @see #findAllMatching(Class, List)
+	 */
+	static <T> List<Constructor<T>> findAllMatching(final Class<T> cls, final Class<?>... parameterTypes) {
+		return findAllMatching(cls, JavaArrays.isNotEmpty(parameterTypes) ? List.of(parameterTypes) : Collections.emptyList());
+	}
+
+	/**
+	 * Checks if the given constructor matches the specified parameter types. This method checks if the constructor's
+	 * parameter types are assignable from the provided parameter types (allowing for subclass and primitive to class
+	 * matching).
+	 *
+	 * @param constructor to check for a match
+	 * @param parameterTypes list of parameter types to match against the constructor's parameter types
+	 * @return true if the constructor matches the specified parameter types, false otherwise
+	 */
+	static boolean matches(final Constructor<?> constructor, final List<Class<?>> parameterTypes) {
+		Class<?>[] constructorParamTypes = constructor.getParameterTypes();
+		if (constructorParamTypes.length != parameterTypes.size()) {
+			return false;
+		}
+		for (int i = 0; i < constructorParamTypes.length; ++i) {
+			Class<?> expectedType = constructorParamTypes[i];
+			Class<?> actualType = parameterTypes.get(i);
+			if (!Classes.isAssignableFrom(expectedType, actualType)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -249,20 +311,7 @@ public interface Constructors {
 		static <T> Constructor<T> findOneMatching(final Class<T> cls, final List<Class<?>> parameterTypes) {
 			Constructor<?>[] constructors = cls.getDeclaredConstructors();
 			for (Constructor<?> constructor : constructors) {
-				Class<?>[] constructorParamTypes = constructor.getParameterTypes();
-				if (constructorParamTypes.length != parameterTypes.size()) {
-					continue;
-				}
-				boolean matches = true;
-				for (int i = 0; i < constructorParamTypes.length; ++i) {
-					Class<?> expectedType = constructorParamTypes[i];
-					Class<?> actualType = parameterTypes.get(i);
-					if (!Classes.isAssignableFrom(expectedType, actualType)) {
-						matches = false;
-						break;
-					}
-				}
-				if (matches) {
+				if (matches(constructor, parameterTypes)) {
 					return JavaObjects.cast(constructor);
 				}
 			}
