@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.36`
+
+---
+
 `1.0.35`
 
 - Added `Classes.isAssignableFrom` similar to the Java one but this one checks for primitive assignment too.
