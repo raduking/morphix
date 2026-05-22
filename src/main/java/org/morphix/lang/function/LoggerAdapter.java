@@ -146,4 +146,28 @@ public interface LoggerAdapter {
 	default void error(final String message, final Object... args) {
 		log(LoggingLevel.ERROR, message, args);
 	}
+
+	/**
+	 * Checks if logging is enabled for the specified level. By default, this method returns true for all levels, but
+	 * implementations may override it to provide more efficient logging by avoiding unnecessary message formatting when
+	 * logging is disabled for a particular level.
+	 *
+	 * @param level the log level to check
+	 * @return true if logging is enabled for the specified level, false otherwise
+	 */
+	default boolean isEnabled(final LoggingLevel level) {
+		return true;
+	}
+
+	/**
+	 * Checks if logging is disabled for the specified level. By default, this method returns false for all levels, but
+	 * implementations may override it to provide more efficient logging by avoiding unnecessary message formatting when
+	 * logging is disabled for a particular level.
+	 *
+	 * @param level the log level to check
+	 * @return true if logging is disabled for the specified level, false otherwise
+	 */
+	default boolean isDisabled(final LoggingLevel level) {
+		return !isEnabled(level);
+	}
 }

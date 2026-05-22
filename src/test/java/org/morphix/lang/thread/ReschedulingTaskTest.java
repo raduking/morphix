@@ -22,24 +22,27 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.AfterEach;
@@ -54,6 +57,7 @@ import org.morphix.lang.logging.JulLoggerAdapter;
 import org.morphix.lang.resource.ScopedResource;
 import org.morphix.lang.retry.Retry;
 import org.morphix.lang.retry.WaitCounter;
+import org.morphix.lang.thread.ReschedulingTask.Default;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.Methods;
 import org.morphix.utils.Tests;
@@ -87,6 +91,11 @@ class ReschedulingTaskTest {
 		if (null != executor) {
 			executor.shutdownNow();
 		}
+	}
+
+	private static String getTaskName() {
+		String name = Methods.getCallerMethodName((clsName, methodName) -> methodName).orElse("unknown");
+		return TASK_NAME + "-" + name.replaceAll("[^A-Z]", "").toLowerCase();
 	}
 
 	@Nested
@@ -690,7 +699,7 @@ class ReschedulingTaskTest {
 
 		@Test
 		@SuppressWarnings("resource")
-		void shouldRetryCancellationOnDisableWhenRetryIsConfigured() {
+		void shouldRetryCancellationOnDisableWhenRetryIsConfigured() throws Exception {
 			int retryAttempts = 3;
 
 			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
@@ -713,7 +722,9 @@ class ReschedulingTaskTest {
 			task.enable();
 			task.disable();
 
-			verify(scheduledFuture, times(retryAttempts)).cancel(anyBoolean());
+			try (task) {
+				verify(scheduledFuture, times(retryAttempts)).cancel(anyBoolean());
+			}
 		}
 
 		@Test
@@ -743,11 +754,37 @@ class ReschedulingTaskTest {
 
 			verify(scheduledFuture, times(retryAttempts)).cancel(anyBoolean());
 			verify(scheduledExecutor, times(1)).shutdownNow();
+			verify(scheduledExecutor, times(1)).awaitTermination(Default.TERMINATION_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
 		}
 
 		@Test
 		@SuppressWarnings("resource")
-		void shouldNotRetryCancellationOnDisableWhenRetryIsNotConfigured() {
+		void shouldUseConfiguredAwaitTermination() throws Exception {
+			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
+			ScheduledFuture<?> scheduledFuture = mock(ScheduledFuture.class);
+			doReturn(scheduledFuture).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+			doReturn(false).when(scheduledFuture).cancel(anyBoolean());
+
+			ScopedResource<ScheduledExecutorService> resource = ScopedResource.managed(scheduledExecutor);
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(resource)
+					.task(Runnables.doNothing())
+					.nextDelay(() -> Duration.ofSeconds(5))
+					.terminationTimeout(DELAY)
+					.build();
+
+			task.enable();
+			task.close();
+
+			verify(scheduledExecutor, times(1)).shutdownNow();
+			verify(scheduledExecutor, times(1)).awaitTermination(DELAY.toMillis(), TimeUnit.MILLISECONDS);
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldNotRetryCancellationOnDisableWhenRetryIsNotConfigured() throws Exception {
 			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
 			ScheduledFuture<?> scheduledFuture = mock(ScheduledFuture.class);
 			doReturn(scheduledFuture).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
@@ -765,7 +802,9 @@ class ReschedulingTaskTest {
 			task.enable();
 			task.disable();
 
-			verify(scheduledFuture, times(1)).cancel(anyBoolean());
+			try (task) {
+				verify(scheduledFuture, times(1)).cancel(anyBoolean());
+			}
 		}
 
 		@Test
@@ -794,7 +833,7 @@ class ReschedulingTaskTest {
 
 		@Test
 		@SuppressWarnings("resource")
-		void shouldInterruptTaskOnCancelWhenInterruptOnCancelIsTrue() throws InterruptedException {
+		void shouldInterruptTaskOnCancelWhenInterruptOnCancelIsTrue() throws Exception {
 			AtomicInteger counter = new AtomicInteger(0);
 			CountDownLatch latch = new CountDownLatch(1);
 			CountDownLatch taskDisableLatch = new CountDownLatch(1);
@@ -828,6 +867,7 @@ class ReschedulingTaskTest {
 			task.enable();
 
 			boolean interrupted = latch.await(5, TimeUnit.SECONDS);
+			task.close();
 
 			assertThat(interrupted, is(true));
 			assertThat(Thread.currentThread().isInterrupted(), is(false));
@@ -835,7 +875,7 @@ class ReschedulingTaskTest {
 
 		@Test
 		@SuppressWarnings("resource")
-		void shouldRescheduleAndCloseFinishedTaskMultipleTimes() throws InterruptedException {
+		void shouldRescheduleMultipleTimesAndCloseAllFinishedTasks() throws Exception {
 			int executionCount = 3;
 			AtomicInteger counter = new AtomicInteger();
 			CountDownLatch latch = new CountDownLatch(executionCount);
@@ -844,23 +884,31 @@ class ReschedulingTaskTest {
 			ScopedResource<ScheduledExecutorService> scheduler = scheduler();
 
 			ScheduledExecutorService scheduledExecutor = spy(scheduler.unwrap());
-			List<ScheduledFuture<?>> scheduledFutures = new ArrayList<>();
+			List<ScheduledFuture<?>> scheduledFutures = new CopyOnWriteArrayList<>();
 
+			ReentrantLock scheduleLock = new ReentrantLock();
+			// spy() takes about 10x more time to execute the real method, so we need to ensure that the scheduling
+			// is synchronized to avoid the test taking too long due to the scheduling delays
 			doAnswer(invocation -> {
-				ScheduledFuture<?> scheduledFuture = (ScheduledFuture<?>) invocation.callRealMethod();
-				scheduledFuture = spy(scheduledFuture);
-				doReturn(false).when(scheduledFuture).isDone();
-				scheduledFutures.add(scheduledFuture);
-				return scheduledFuture;
-			}).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+				scheduleLock.lock();
+				try {
+					ScheduledFuture<?> scheduledFuture = (ScheduledFuture<?>) invocation.callRealMethod();
+					scheduledFuture = spy(scheduledFuture);
+					scheduledFutures.add(scheduledFuture);
+					return scheduledFuture;
+				} finally {
+					scheduleLock.unlock();
+				}
+			}).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.MILLISECONDS));
 
 			ScopedResource<ScheduledExecutorService> resource = ScopedResource.unmanaged(scheduledExecutor);
 
 			ReschedulingTask task = ReschedulingTask.builder()
-					.name(TASK_NAME)
+					.name(getTaskName())
 					.scheduler(resource)
 					.task(() -> {
 						counter.incrementAndGet();
+						LOGGER.info("Executing task, execution count: {}", counter.get());
 						latch.countDown();
 						if (latch.getCount() == 0) {
 							Threads.safeWait(disableLatch);
@@ -879,10 +927,22 @@ class ReschedulingTaskTest {
 			});
 
 			boolean completed = disableLatch.await(5, TimeUnit.SECONDS);
+			task.close();
+			executor.close();
 
-			for (ScheduledFuture<?> scheduledFuture : scheduledFutures) {
-				verify(scheduledFuture).cancel(anyBoolean());
-			}
+			// execution 1 (sync) schedules Future 1 (Execution 2).
+			// execution 2 runs, schedules Future 2 (Execution 3).
+			// execution 3 runs, disable() is called, skips further scheduling.
+			assertThat(scheduledFutures.size(), is(executionCount - 1));
+
+			// future 1 completed naturally and should NOT have been explicitly cancelled
+			ScheduledFuture<?> firstFuture = scheduledFutures.get(0);
+			verify(firstFuture, never()).cancel(anyBoolean());
+
+			// future 2 was active when disable() was invoked, so it MUST have been cancelled
+			ScheduledFuture<?> lastFuture = scheduledFutures.get(1);
+			verify(lastFuture).cancel(anyBoolean());
+
 			assertThat(completed, is(true));
 			assertThat(counter.get(), equalTo(executionCount));
 		}
@@ -951,7 +1011,7 @@ class ReschedulingTaskTest {
 
 		@Test
 		@SuppressWarnings("resource")
-		void shouldExecuteTaskAndHandleExceptions() throws InterruptedException {
+		void shouldExecuteTaskAndHandleExceptions() throws Exception {
 			int executionCount = 3;
 
 			AtomicInteger wrapperCounter = new AtomicInteger();
@@ -985,6 +1045,7 @@ class ReschedulingTaskTest {
 			});
 
 			boolean executed = disableLatch.await(5, TimeUnit.SECONDS);
+			task.close();
 
 			assertThat(executed, is(true));
 			assertThat(executionCounter.get(), is(wrapperCounter.get()));
@@ -1036,6 +1097,5 @@ class ReschedulingTaskTest {
 			verify(logger, atLeast(executionCount - 1)).debug("[{}] Scheduling next execution in {}ms.", TASK_NAME, DELAY.toMillis());
 			verify(logger).debug("[{}] Disabling rescheduling task.", TASK_NAME);
 		}
-
 	}
 }

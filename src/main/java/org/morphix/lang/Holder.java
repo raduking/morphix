@@ -49,24 +49,6 @@ public final class Holder<T> {
 	}
 
 	/**
-	 * Returns the hold value.
-	 *
-	 * @return the hold value
-	 */
-	public T getValue() {
-		return value;
-	}
-
-	/**
-	 * Sets the hold value.
-	 *
-	 * @param value value to hold
-	 */
-	public void setValue(final T value) {
-		this.value = value;
-	}
-
-	/**
 	 * Creates a new holder with no value.
 	 *
 	 * @param <U> value type
@@ -87,6 +69,42 @@ public final class Holder<T> {
 	 */
 	public static <U> Holder<U> of(final U value) {
 		return new Holder<>(value);
+	}
+
+	/**
+	 * Returns the hold value.
+	 *
+	 * @return the hold value
+	 */
+	public T getValue() {
+		return value;
+	}
+
+	/**
+	 * Sets the hold value.
+	 *
+	 * @param value value to hold
+	 */
+	public void setValue(final T value) {
+		this.value = value;
+	}
+
+	/**
+	 * Alias for {@link #getValue()}.
+	 *
+	 * @return the hold value
+	 */
+	public T get() {
+		return getValue();
+	}
+
+	/**
+	 * Alias for {@link #setValue(Object)}.
+	 *
+	 * @param value value to hold
+	 */
+	public void set(final T value) {
+		setValue(value);
 	}
 
 	/**
