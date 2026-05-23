@@ -7,6 +7,8 @@
 - Added `Holder.get` as an alias for `Holder.getValue`.
 - Added `LoggingAdapter.isEnabled(LoggingLevel)` to check if the logger can log for a specific level.
 - Added `LoggingAdapter.isDisabled(LoggingLevel)` which returns not `LoggingAdapter.isEnabled`. 
+- Added `OptionalLibrary.getFacadeClass` as an alias for `OptionalLibrary.getSpecificClass` this being the main method now.
+- Added `OptionalLibrary.getFacadeInstance` as an alias for `OptionalLibrary.getSpecificInstance` this being the main method now.
 
 ---
 
