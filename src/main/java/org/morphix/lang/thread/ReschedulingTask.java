@@ -294,14 +294,16 @@ public class ReschedulingTask implements AutoCloseable {
 		logger.debug("[{}] Scheduling next execution in {}ms.", name, delay.toMillis());
 		ScheduledExecutorService executor = scheduler.unwrap();
 		ScheduledFuture<?> newTask = executor.schedule(this::execute, delay.toMillis(), TimeUnit.MILLISECONDS);
-		logger.debug("[{}] Scheduled new task: {}.", name, debugInfo(newTask));
 		if (isEnabled()) {
+			logger.debug("[{}] Scheduled new task: {}.", name, debugInfo(newTask));
 			scheduledTask.set(newTask);
 			if (isDisabled()) {
-				ScheduledFuture<?> orphanedTask = scheduledTask.getAndSet(null);
-				if (orphanedTask != null) {
-					logger.debug("[{}] Task was disabled during scheduling. Cancelling orphaned task.", name);
-					cancel(orphanedTask);
+				logger.debug("[{}] Task was disabled during scheduling.", name);
+				if (scheduledTask.compareAndSet(newTask, null)) {
+					logger.debug("[{}] Cancelling orphaned task.", name);
+					cancel(newTask);
+				} else {
+					logger.debug("[{}] New task was already scheduled, cancelling not needed.", name);
 				}
 			}
 		} else {

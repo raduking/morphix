@@ -2,6 +2,12 @@
 
 `1.0.36`
 
+- Changed `ReschedulingTask` to not try to cancel finishing tasks anymore resulting in faster executions.
+- Added `Holder.set` as an alias for `Holder.setValue`.
+- Added `Holder.get` as an alias for `Holder.getValue`.
+- Added `LoggingAdapter.isEnabled(LoggingLevel)` to check if the logger can log for a specific level.
+- Added `LoggingAdapter.isDisabled(LoggingLevel)` which returns not `LoggingAdapter.isEnabled`. 
+
 ---
 
 `1.0.35`
