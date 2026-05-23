@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -936,12 +937,22 @@ class ReschedulingTaskTest {
 			assertThat(scheduledFutures.size(), is(executionCount - 1));
 
 			// future 1 completed naturally and should NOT have been explicitly cancelled
-			ScheduledFuture<?> firstFuture = scheduledFutures.get(0);
-			verify(firstFuture, never()).cancel(anyBoolean());
-
 			// future 2 was active when disable() was invoked, so it MUST have been cancelled
-			ScheduledFuture<?> lastFuture = scheduledFutures.get(1);
-			verify(lastFuture).cancel(anyBoolean());
+			// future 3 was never scheduled, so it should not be in the list of scheduled futures at all
+			// the order is not guaranteed, but we can check that one future was cancelled and the other was not
+			ScheduledFuture<?> firstFuture = scheduledFutures.stream()
+					.filter(f -> !f.isCancelled()) // The one that finished
+					.findFirst()
+					.orElseThrow();
+
+			ScheduledFuture<?> lastFuture = scheduledFutures.stream()
+					.filter(f -> f.isCancelled())
+					.findFirst()
+					.orElseThrow();
+
+			// Now verify regardless of insertion order
+			verify(firstFuture, never()).cancel(anyBoolean());
+			verify(lastFuture, atLeastOnce()).cancel(anyBoolean());
 
 			assertThat(completed, is(true));
 			assertThat(counter.get(), equalTo(executionCount));

@@ -148,7 +148,7 @@ public interface LoggerAdapter {
 	}
 
 	/**
-	 * Checks if logging is enabled for the specified level. By default, this method returns true for all levels, but
+	 * Checks if logging is enabled for the specified level. By default, this method returns false for all levels, but
 	 * implementations may override it to provide more efficient logging by avoiding unnecessary message formatting when
 	 * logging is disabled for a particular level.
 	 *
@@ -156,7 +156,7 @@ public interface LoggerAdapter {
 	 * @return true if logging is enabled for the specified level, false otherwise
 	 */
 	default boolean isEnabled(final LoggingLevel level) {
-		return true;
+		return false;
 	}
 
 	/**
