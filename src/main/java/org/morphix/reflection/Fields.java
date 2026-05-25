@@ -340,8 +340,7 @@ public interface Fields {
 		 */
 		static <T> T get(final Object obj, final Field field) {
 			if (null != obj && JavaModifier.STATIC.isPresentOn(field)) {
-				Class<?> cls = Classes.getFrom(obj);
-				return IgnoreAccess.getStatic(cls, field);
+				return IgnoreAccess.get(null, field);
 			}
 			if (MemberAccessor.isAccessible(obj, field)) {
 				return Fields.get(obj, field);
@@ -382,8 +381,7 @@ public interface Fields {
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
 			if (null != obj && JavaModifier.STATIC.isPresentOn(field)) {
-				Class<?> cls = Classes.getFrom(obj);
-				IgnoreAccess.setStatic(cls, field, value);
+				IgnoreAccess.set(null, field, value);
 				return;
 			}
 			if (MemberAccessor.isAccessible(obj, field)) {

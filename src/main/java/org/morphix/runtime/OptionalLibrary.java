@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Objects;
 
 import org.morphix.lang.function.InstanceFunction;
+import org.morphix.reflection.Classes;
 import org.morphix.reflection.Constructors;
-import org.morphix.reflection.Reflection;
 
 /**
  * Descriptor for a library indicating its presence and associated facade class. This class is used to check for the
@@ -166,7 +166,7 @@ public class OptionalLibrary<T> {
 	 */
 	public static <T> OptionalLibrary<T> of(final List<String> libraryClassNames, final Class<T> facadeClass,
 			final InstanceFunction<T> instanceFunction) {
-		boolean libraryPresent = libraryClassNames.stream().allMatch(Reflection::isClassPresent);
+		boolean libraryPresent = libraryClassNames.stream().allMatch(Classes::isPresent);
 		return libraryPresent
 				? present(facadeClass, instanceFunction)
 				: notPresent(facadeClass, instanceFunction);
