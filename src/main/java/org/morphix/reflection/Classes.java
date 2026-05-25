@@ -153,6 +153,31 @@ public interface Classes {
 	}
 
 	/**
+	 * Returns the class of the given object.
+	 * <ul>
+	 * <li>If the object is null, it returns null.</li>
+	 * <li>If the object is the Class class itself, it returns Class.class.</li>
+	 * <li>If the object is an instance of Class, it returns the object cast to Class.</li>
+	 * <li>Otherwise, it returns the result of calling getClass() on the object</li>
+	 * </ul>
+	 *
+	 * @param object the object to get the class from
+	 * @return the class of the given object
+	 */
+	static Class<?> getFrom(final Object object) {
+		if (null == object) {
+			return null;
+		}
+		if (object == Class.class) {
+			return Class.class;
+		}
+		if (object instanceof Class<?>) {
+			return (Class<?>) object;
+		}
+		return object.getClass();
+	}
+
+	/**
 	 * Interface which groups all methods that return null and don't throw exceptions on expected errors. This functions as
 	 * a name space so that the method names inside keep the same name pattern.
 	 *

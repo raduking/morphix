@@ -50,10 +50,7 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	 */
 	public MemberAccessor(final Object object, final T member) {
 		this.member = Objects.requireNonNull(member, "member");
-		// by default, a reflected object is not accessible
-		Object actual = null != object && Modifier.isStatic(member.getModifiers()) ? null : object;
-
-		this.isAccessible = isAccessible(actual, member);
+		this.isAccessible = isAccessible(object, member);
 		if (!isAccessible) {
 			setAccessible(true);
 		}
@@ -88,7 +85,8 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	 * @return {@code true} if the member is accessible, {@code false} otherwise
 	 */
 	public static <T extends AccessibleObject & Member> boolean isAccessible(final Object object, final T member) {
-		return ReflectionException.wrapThrowing(() -> member.canAccess(object), ACCESS_CHANGE_ERROR + member);
+		Object actual = null != object && Modifier.isStatic(member.getModifiers()) ? null : object;
+		return ReflectionException.wrapThrowing(() -> member.canAccess(actual), ACCESS_CHANGE_ERROR + member);
 	}
 
 	/**

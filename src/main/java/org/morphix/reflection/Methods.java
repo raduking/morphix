@@ -486,6 +486,12 @@ public interface Methods {
 		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
+			if (null != obj && JavaModifier.STATIC.isPresentOn(method)) {
+				return IgnoreAccess.invokeStatic(method, obj.getClass(), args);
+			}
+			if (MemberAccessor.isAccessible(obj, method)) {
+				return Methods.invoke(method, obj, args);
+			}
 			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
 				return Methods.invoke(method, obj, args);
 			}
@@ -503,7 +509,8 @@ public interface Methods {
 		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, A extends Annotation> void invokeWithAnnotation(final T obj, final Class<A> annotationClass) {
-			List<Method> methods = Methods.getAllDeclaredInHierarchy(obj.getClass(), MemberPredicates.withAnnotation(annotationClass));
+			Class<?> cls = Classes.getFrom(obj);
+			List<Method> methods = Methods.getAllDeclaredInHierarchy(cls, MemberPredicates.withAnnotation(annotationClass));
 			for (Method method : methods) {
 				IgnoreAccess.invoke(method, obj);
 			}
@@ -532,6 +539,25 @@ public interface Methods {
 				// escalate any exception invoking the method
 				throw new ReflectionException(e.getMessage(), e);
 			}
+		}
+
+		/**
+		 * Invokes the given static method on the given class with parameters, ignoring the access modifiers.
+		 *
+		 * @param <T> class type on which the method is invoked
+		 * @param <R> method return type
+		 *
+		 * @param method method to be invoked
+		 * @param cls class on which the method is invoked
+		 * @param args method arguments
+		 * @return result of the method invocation
+		 * @throws ReflectionException if any error occurs during method invocation
+		 */
+		static <T, R> R invokeStatic(final Method method, final Class<T> cls, final Object... args) {
+			if (JavaModifier.STATIC.isNotPresentOn(method)) {
+				throw new ReflectionException("Could not find static method with name: {} in class: {}", method.getName(), cls);
+			}
+			return IgnoreAccess.invoke(method, null, args);
 		}
 	}
 

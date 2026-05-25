@@ -2,6 +2,10 @@
 
 `1.0.36`
 
+- Added `JavaModifier.isPresentOn` method to check if a modifier is present on a member.
+- Added `JavaModifier.isNotPresentOn` method which is the inverse of `JavaModifier.isPresentOn`.
+- Changed `JavaModifier` to implement `Predicate`.
+- Added `Methods.IgnoreAccess.invokeStatic` to invoke static methods with static check.
 - Changed `ReschedulingTask` to not try to cancel finishing tasks anymore resulting in faster executions.
 - Added `Holder.set` as an alias for `Holder.setValue`.
 - Added `Holder.get` as an alias for `Holder.getValue`.

@@ -364,6 +364,9 @@ public interface Fields {
 		 * @throws ReflectionException if the field value cannot be returned
 		 */
 		static <T> T get(final Object obj, final Field field) {
+			if (null != obj && JavaModifier.STATIC.isPresentOn(field)) {
+				return IgnoreAccess.getStatic(obj.getClass(), field);
+			}
 			if (MemberAccessor.isAccessible(obj, field)) {
 				return Fields.get(obj, field);
 			}
@@ -384,10 +387,8 @@ public interface Fields {
 		 * @throws ReflectionException if the field is not found
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
-			if (obj instanceof Class<?> cls) {
-				return IgnoreAccess.getStatic(cls, fieldName);
-			}
-			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
+			Class<?> cls = Classes.getFrom(obj);
+			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 			if (null == field) {
 				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, obj.getClass());
 			}
@@ -473,7 +474,7 @@ public interface Fields {
 		 * @throws ReflectionException if the field is not static
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final Field field) {
-			if (!Modifier.isStatic(field.getModifiers())) {
+			if (JavaModifier.STATIC.isNotPresentOn(field)) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", field.getName(), cls);
 			}
 			return IgnoreAccess.get(null, field);
@@ -492,7 +493,7 @@ public interface Fields {
 		 */
 		static <T, U> void setStatic(final Class<T> cls, final String fieldName, final U value) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field || !Modifier.isStatic(field.getModifiers())) {
+			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
 			}
 			IgnoreAccess.set(null, field, value);
@@ -622,7 +623,7 @@ public interface Fields {
 		 * @throws ReflectionException if the field is not static
 		 */
 		static <T> T getStatic(final Field field) {
-			if (!Modifier.isStatic(field.getModifiers())) {
+			if (JavaModifier.STATIC.isNotPresentOn(field)) {
 				return null;
 			}
 			return Safe.get(null, field);

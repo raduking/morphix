@@ -138,4 +138,44 @@ class FieldsIgnoreAccessGetTest {
 		assertThat(l, equalTo(TEST_LONG));
 		assertThat(i, equalTo(TEST_INTEGER));
 	}
+
+	public static class D {
+		@SuppressWarnings("unused")
+		private static final String FIELD = "field";
+	}
+
+	@Test
+	void shouldIgnoreAccessOnStaticFields() throws Exception {
+		Field field = D.class.getDeclaredField("FIELD");
+
+		String value = Fields.IgnoreAccess.get(D.class, field);
+
+		assertThat(value, equalTo("field"));
+	}
+
+	@Test
+	void shouldIgnoreAccessOnStaticFieldsWithFieldName() {
+		String value = Fields.IgnoreAccess.get(D.class, "FIELD");
+
+		assertThat(value, equalTo("field"));
+	}
+
+	@Test
+	void shouldIgnoreAccessAndGetStaticFieldWithInstance() throws Exception {
+		D d = new D();
+		Field field = D.class.getDeclaredField("FIELD");
+
+		String value = Fields.IgnoreAccess.get(d, field);
+
+		assertThat(value, equalTo("field"));
+	}
+
+	@Test
+	void shouldReturnClassClassloaderField() {
+		Class<?> clazz = Class.class;
+
+		Object module = Fields.IgnoreAccess.get(clazz, "module");
+
+		assertThat(module, equalTo(clazz.getModule()));
+	}
 }

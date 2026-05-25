@@ -27,7 +27,7 @@ import org.morphix.reflection.testdata.A;
  *
  * @author Radu Sebastian LAZIN
  */
-class MethodsInvokeMethodTest {
+class MethodsInvokeTest {
 
 	private static final String TEST_STRING = "Test";
 
