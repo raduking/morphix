@@ -215,6 +215,8 @@ public class ReschedulingTask implements AutoCloseable {
 	/**
 	 * Closes the refresh scheduler by attempting to cancel any currently scheduled task. If cancellation fails, it forces a
 	 * shutdown of the scheduler and logs remaining tasks count.
+	 *
+	 * @param cancelled whether the scheduled task was successfully cancelled
 	 */
 	@SuppressWarnings("resource")
 	private void closeRefreshScheduler(final boolean cancelled) throws InterruptedException {
