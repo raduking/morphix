@@ -340,12 +340,7 @@ public interface Fields {
 		 * @throws ReflectionException if the field value cannot be returned
 		 */
 		static <T> T get(final Object obj, final Field field) {
-			if (MemberAccessor.isAccessible(obj, field)) {
-				return Fields.get(obj, field);
-			}
-			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
-				return Fields.get(obj, field);
-			}
+			return MemberAccessor.on(obj, field, () -> Fields.get(obj, field));
 		}
 
 		/**
@@ -359,19 +354,13 @@ public interface Fields {
 		 * @throws ReflectionException if the field value cannot be set
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
-			if (MemberAccessor.isAccessible(obj, field)) {
-				Fields.set(obj, field, value);
-				return;
-			}
-			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
-				Fields.set(obj, field, value);
-			} catch (ReflectionException e) {
+			MemberAccessor.on(obj, field, () -> Fields.set(obj, field, value), e -> {
 				if (e.getCause() instanceof IllegalArgumentException) {
 					throw e;
 				}
 				// only final fields will reach this code
 				Unsafe.set(obj, field, value);
-			}
+			});
 		}
 	}
 
