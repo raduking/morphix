@@ -77,6 +77,14 @@ class MethodsIgnoreAccessInvokeTest {
 	}
 
 	@Test
+	void shouldInvokeStaticMethodWithGet() throws Exception {
+		Method method = StaticA.class.getDeclaredMethod("foo", String.class);
+		Methods.IgnoreAccess.invoke(method, StaticA.class, TEST_STRING);
+
+		assertThat(StaticA.s, equalTo(TEST_STRING));
+	}
+
+	@Test
 	void shouldInvokeClassMethod() throws Exception {
 		Method method = Class.class.getDeclaredMethod("getName");
 		String name = Methods.IgnoreAccess.invoke(method, Class.class);

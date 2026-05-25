@@ -45,7 +45,7 @@ class MethodsIgnoreAccessInvokeStaticTest {
 	@Test
 	void shouldInvokeStaticMethod() throws Exception {
 		Method method = StaticA.class.getDeclaredMethod("foo", String.class);
-		Methods.IgnoreAccess.invoke(method, StaticA.class, TEST_STRING);
+		Methods.IgnoreAccess.invokeStatic(method, StaticA.class, TEST_STRING);
 
 		assertThat(StaticA.s, equalTo(TEST_STRING));
 	}
@@ -56,7 +56,7 @@ class MethodsIgnoreAccessInvokeStaticTest {
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeStatic(method, StaticA.class));
 		assertThat(e.getMessage(),
-				equalTo(Messages.message("Could not find static method with name: {} in class: {}", method.getName(), StaticA.class)));
+				equalTo(Messages.message("Method {} is not static on class: {}", method.getName(), StaticA.class)));
 	}
 
 	public static class StaticB {

@@ -555,7 +555,7 @@ public interface Methods {
 		 */
 		static <T, R> R invokeStatic(final Method method, final Class<T> cls, final Object... args) {
 			if (JavaModifier.STATIC.isNotPresentOn(method)) {
-				throw new ReflectionException("Could not find static method with name: {} in class: {}", method.getName(), cls);
+				throw new ReflectionException("Method {} is not static on class: {}", method.getName(), cls);
 			}
 			return IgnoreAccess.invoke(method, null, args);
 		}
@@ -604,8 +604,8 @@ public interface Methods {
 			if (null == obj) {
 				return null;
 			}
-			Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
-			return Safe.getOneDeclared(methodName, clazz, parameterTypes);
+			Class<?> cls = Classes.getFrom(obj);
+			return Safe.getOneDeclared(methodName, cls, parameterTypes);
 		}
 
 		/**

@@ -160,9 +160,9 @@ public interface LoggerAdapter {
 	}
 
 	/**
-	 * Checks if logging is disabled for the specified level. By default, this method returns false for all levels, but
-	 * implementations may override it to provide more efficient logging by avoiding unnecessary message formatting when
-	 * logging is disabled for a particular level.
+	 * Checks if logging is disabled for the specified level. By default, this method returns true for all levels (since
+	 * {@link #isEnabled(LoggingLevel)} defaults to false), but implementations may override it to provide more efficient
+	 * logging by avoiding unnecessary message formatting when logging is disabled for a particular level.
 	 *
 	 * @param level the log level to check
 	 * @return true if logging is disabled for the specified level, false otherwise

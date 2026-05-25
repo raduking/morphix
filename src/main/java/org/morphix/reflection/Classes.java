@@ -156,8 +156,7 @@ public interface Classes {
 	 * Returns the class of the given object.
 	 * <ul>
 	 * <li>If the object is null, it returns null.</li>
-	 * <li>If the object is the Class class itself, it returns Class.class.</li>
-	 * <li>If the object is an instance of Class, it returns the object cast to Class.</li>
+	 * <li>If the object is an instance of {@link Class}, it returns the object cast to {@link Class}.</li>
 	 * <li>Otherwise, it returns the result of calling getClass() on the object</li>
 	 * </ul>
 	 *
@@ -167,9 +166,6 @@ public interface Classes {
 	static Class<?> getFrom(final Object object) {
 		if (null == object) {
 			return null;
-		}
-		if (object == Class.class) {
-			return Class.class;
 		}
 		if (object instanceof Class<?>) {
 			return (Class<?>) object;

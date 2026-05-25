@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsSetWithSetterTest {
+class FieldsSetTest {
 
 	public static class A {
 		Integer x;

@@ -74,8 +74,8 @@ public interface Fields {
 	}
 
 	/**
-	 * Variation of {@link #getAllDeclared(Class)}. It will call the method with <code>obj.getClass()</code> if the object
-	 * is not instance of {@link Class}, otherwise it will search for fields in the given class.
+	 * Variation of {@link #getAllDeclared(Class)}. It will call the method with the class determined from the object
+	 * supplied as parameter.
 	 *
 	 * @param obj object on which the fields are needed
 	 * @return list of fields
@@ -84,8 +84,8 @@ public interface Fields {
 		if (null == obj) {
 			return List.of();
 		}
-		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
-		return getAllDeclared(clazz);
+		Class<?> cls = Classes.getFrom(obj);
+		return getAllDeclared(cls);
 	}
 
 	/**
@@ -115,8 +115,8 @@ public interface Fields {
 		if (null == obj || null == predicate) {
 			return List.of();
 		}
-		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
-		return getAllDeclared(clazz, predicate);
+		Class<?> cls = Classes.getFrom(obj);
+		return getAllDeclared(cls, predicate);
 	}
 
 	/**
@@ -186,8 +186,8 @@ public interface Fields {
 	}
 
 	/**
-	 * Variation of {@link #getAllDeclaredInHierarchy(Class)}. It will call the method with <code>obj.getClass()</code> if
-	 * the object is not instance of {@link Class}, otherwise it will search for fields in the given class.
+	 * Variation of {@link #getAllDeclaredInHierarchy(Class)}. It will call the method with the class determined from the
+	 * object supplied as parameter.
 	 *
 	 * @param obj object on which the fields are needed
 	 * @return list of fields
@@ -196,14 +196,13 @@ public interface Fields {
 		if (null == obj) {
 			return List.of();
 		}
-		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
-		return getAllDeclaredInHierarchy(clazz);
+		Class<?> cls = Classes.getFrom(obj);
+		return getAllDeclaredInHierarchy(cls);
 	}
 
 	/**
-	 * Variation of {@link #getAllDeclaredInHierarchy(Class, Predicate)}. It will call the method with
-	 * <code>obj.getClass()</code> if the object is not instance of {@link Class}, otherwise it will search for fields in
-	 * the given class.
+	 * Variation of {@link #getAllDeclaredInHierarchy(Class, Predicate)}. It will call the method with the class determined
+	 * from the object supplied as parameter.
 	 *
 	 * @param obj object on which the fields are needed
 	 * @param predicate predicate for fields
@@ -213,8 +212,8 @@ public interface Fields {
 		if (null == obj) {
 			return List.of();
 		}
-		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
-		return getAllDeclaredInHierarchy(clazz, predicate);
+		Class<?> cls = Classes.getFrom(obj);
+		return getAllDeclaredInHierarchy(cls, predicate);
 	}
 
 	/**
@@ -231,9 +230,8 @@ public interface Fields {
 	}
 
 	/**
-	 * Variation of {@link #getOneDeclaredInHierarchy(Class, String)}. It will call the method with
-	 * <code>obj.getClass()</code> if the object is not instance of {@link Class}, otherwise it will search for fields in
-	 * the given class.
+	 * Variation of {@link #getOneDeclaredInHierarchy(Class, String)}. It will call the method with the class determined
+	 * from the object supplied as parameter.
 	 *
 	 * @param obj object on which the fields are needed
 	 * @param fieldName the name of the field to be retrieved
@@ -287,18 +285,18 @@ public interface Fields {
 	 *
 	 * @param <T> the type of the returned field
 	 *
-	 * @param object the object from which the field should be retrieved
+	 * @param obj the object from which the field should be retrieved
 	 * @param fieldName the field name
 	 * @return the value of the field requested, retrieved by its getter method, and if not present, using direct access
 	 * @throws ReflectionException if the field is not found
 	 */
-	static <T> T get(final Object object, final String fieldName) {
-		Class<?> cls = object.getClass();
+	static <T> T get(final Object obj, final String fieldName) {
+		Class<?> cls = Classes.getFrom(obj);
 		Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 		if (null == field) {
 			throw new ReflectionException("Object does not contain a field named: {}", fieldName);
 		}
-		return Reflection.getFieldValue(object, field);
+		return Reflection.getFieldValue(obj, field);
 	}
 
 	/**
@@ -315,7 +313,7 @@ public interface Fields {
 	 * @throws ReflectionException if the field does not exist or the value type is not compatible with the field type
 	 */
 	static <T> void set(final Object obj, final String fieldName, final T value) {
-		Class<?> cls = obj.getClass();
+		Class<?> cls = Classes.getFrom(obj);
 		Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 		if (null == field) {
 			throw new ReflectionException("Object does not contain a field named: {}", fieldName);
@@ -342,7 +340,8 @@ public interface Fields {
 		 */
 		static <T> T get(final Object obj, final Field field) {
 			if (null != obj && JavaModifier.STATIC.isPresentOn(field)) {
-				return IgnoreAccess.getStatic(obj.getClass(), field);
+				Class<?> cls = Classes.getFrom(obj);
+				return IgnoreAccess.getStatic(cls, field);
 			}
 			if (MemberAccessor.isAccessible(obj, field)) {
 				return Fields.get(obj, field);
@@ -384,18 +383,24 @@ public interface Fields {
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
 			if (null != obj && JavaModifier.STATIC.isPresentOn(field)) {
-				IgnoreAccess.setStatic(obj.getClass(), field, value);
+				Class<?> cls = Classes.getFrom(obj);
+				IgnoreAccess.setStatic(cls, field, value);
+				return;
+			}
+			if (MemberAccessor.isAccessible(obj, field)) {
+				Fields.set(obj, field, value);
 				return;
 			}
 			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
 				Fields.set(obj, field, value);
+				return;
 			} catch (ReflectionException e) {
 				if (e.getCause() instanceof IllegalArgumentException) {
 					throw e;
 				}
-				// only final fields will reach this code
-				Unsafe.set(obj, field, value);
 			}
+			// only final fields will reach this code
+			Unsafe.set(obj, field, value);
 		}
 
 		/**
@@ -413,7 +418,7 @@ public interface Fields {
 			Class<?> cls = Classes.getFrom(obj);
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 			if (null == field) {
-				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, obj.getClass());
+				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, cls);
 			}
 			IgnoreAccess.set(obj, field, value);
 		}
@@ -585,8 +590,8 @@ public interface Fields {
 			if (null == obj) {
 				return null;
 			}
-			Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
-			return Safe.getOneDeclared(clazz, fieldName);
+			Class<?> cls = Classes.getFrom(obj);
+			return Safe.getOneDeclared(cls, fieldName);
 		}
 
 		/**
@@ -610,9 +615,8 @@ public interface Fields {
 		}
 
 		/**
-		 * Variation of {@link #getOneDeclaredInHierarchy(Class, String)}. It will call the method with
-		 * <code>obj.getClass()</code> if the object is not instance of {@link Class}, otherwise it will search for fields in
-		 * the given class.
+		 * Variation of {@link #getOneDeclaredInHierarchy(Class, String)}. It will call the method with the class determined
+		 * from the object supplied as parameter.
 		 *
 		 * @param obj object on which the fields are needed
 		 * @param fieldName the name of the field to be retrieved

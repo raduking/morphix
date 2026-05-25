@@ -9,8 +9,8 @@
 - Changed `ReschedulingTask` to not try to cancel finishing tasks anymore resulting in faster executions.
 - Added `Holder.set` as an alias for `Holder.setValue`.
 - Added `Holder.get` as an alias for `Holder.getValue`.
-- Added `LoggingAdapter.isEnabled(LoggingLevel)` to check if the logger can log for a specific level.
-- Added `LoggingAdapter.isDisabled(LoggingLevel)` which returns not `LoggingAdapter.isEnabled`. 
+- Added `LoggerAdapter.isEnabled(LoggingLevel)` to check if the logger can log for a specific level.
+- Added `LoggerAdapter.isDisabled(LoggingLevel)` which returns not `LoggerAdapter.isEnabled`. 
 - Added `OptionalLibrary.getFacadeClass` as an alias for `OptionalLibrary.getSpecificClass` this being the main method now.
 - Added `OptionalLibrary.getFacadeInstance` as an alias for `OptionalLibrary.getSpecificInstance` this being the main method now.
 - Added `Fields.Safe.getOneDeclared` and now `Fields.getOneDeclared` delegates to it.
