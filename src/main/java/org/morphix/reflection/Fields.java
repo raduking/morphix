@@ -352,8 +352,7 @@ public interface Fields {
 		}
 
 		/**
-		 * Returns the value of the given field from the given object ignoring field access modifiers. If the object supplied is
-		 * a {@link Class} then the field will be considered static.
+		 * Returns the value of the given field from the given object ignoring field access modifiers.
 		 *
 		 * @param <T> field value type
 		 *
@@ -404,8 +403,7 @@ public interface Fields {
 		}
 
 		/**
-		 * Sets the value of the given field from the given object to the value supplied ignoring field access modifiers. If the
-		 * object supplied is a {@link Class} then the field will be considered static.
+		 * Sets the value of the given field from the given object to the value supplied ignoring field access modifiers.
 		 *
 		 * @param <T> field value type
 		 *

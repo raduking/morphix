@@ -10,9 +10,9 @@
 - Added `Holder.set` as an alias for `Holder.setValue`.
 - Added `Holder.get` as an alias for `Holder.getValue`.
 - Added `LoggerAdapter.isEnabled(LoggingLevel)` to check if the logger can log for a specific level.
-- Added `LoggerAdapter.isDisabled(LoggingLevel)` which returns not `LoggerAdapter.isEnabled`. 
-- Added `OptionalLibrary.getFacadeClass` as an alias for `OptionalLibrary.getSpecificClass` this being the main method now.
-- Added `OptionalLibrary.getFacadeInstance` as an alias for `OptionalLibrary.getSpecificInstance` this being the main method now.
+- Added `LoggerAdapter.isDisabled(LoggingLevel)` which returns not `LoggerAdapter.isEnabled`.
+- Changed `OptionalLibrary.getSpecificClass` to be an alias for `OptionalLibrary.getFacadeClass` this being the main method now.
+- Changed `OptionalLibrary.getSpecificInstance` to be an alias for `OptionalLibrary.getFacadeInstance` this being the main method now.
 - Added `Fields.Safe.getOneDeclared` and now `Fields.getOneDeclared` delegates to it.
 - Added `Fields.Safe.getOneDeclaredInHierarchy` and now `Fields.getOneDeclaredInHierarchy` delegates to it.
 - Added missing `Fields.IgnoreAccess.setStatic` overloads to pair with `Fields.IgnoreAccess.getStatic` overloads.
