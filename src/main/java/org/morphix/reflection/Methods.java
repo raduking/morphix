@@ -434,7 +434,7 @@ public interface Methods {
 
 	/**
 	 * Returns the canonical class name for the given method and object. If the object is null, the declaring class of the
-	 * method is used. If the object is a Class, its cannon name is used. Otherwise, the cannonical name of the object's
+	 * method is used. If the object is a Class, its canonical name is used. Otherwise, the canonical name of the object's
 	 * class is used. This method is used to build error messages when invoking methods.
 	 *
 	 * @param method method for which the class name is needed

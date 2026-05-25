@@ -1003,7 +1003,7 @@ class ReschedulingTaskTest {
 			doAnswer(invocation -> {
 				LOGGER.info("cancel() called on mock future");
 				cancelAttempted.countDown();
-				return null;
+				return true;
 			}).when(mockFuture).cancel(anyBoolean());
 			doAnswer(invocation -> {
 				LOGGER.info("schedule() called on mock executor");

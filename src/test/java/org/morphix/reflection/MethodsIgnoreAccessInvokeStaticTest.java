@@ -16,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,14 @@ class MethodsIgnoreAccessInvokeStaticTest {
 	}
 
 	@Test
+	void shouldInvokeStaticMethodWithoutClass() throws Exception {
+		Method method = StaticA.class.getDeclaredMethod("foo", String.class);
+		Methods.IgnoreAccess.invokeStatic(method, null, TEST_STRING);
+
+		assertThat(StaticA.s, equalTo(TEST_STRING));
+	}
+
+	@Test
 	void shouldThrowReflectionExceptionWhenInvokingNonStaticMethod() throws Exception {
 		Method method = StaticA.class.getDeclaredMethod("goo", String.class);
 
@@ -70,12 +79,34 @@ class MethodsIgnoreAccessInvokeStaticTest {
 	void shouldThrowReflectionExceptionWhenInvokeFailsWithCause() throws Exception {
 		Method method = StaticB.class.getDeclaredMethod("foo", String.class);
 
-		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeStatic(method, StaticB.class));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeStatic(method, StaticB.class, TEST_STRING));
+		assertThat(e.getMessage(),
+				equalTo(Messages.message("Error invoking method {}.{}: {}.", StaticB.class.getCanonicalName(), method.getName(),
+						e.getCause().getMessage())));
 	}
 
 	@Test
 	void shouldThrowReflectionExceptionWhenInvokeStaticMethodFailsWithCause() throws Exception {
 		Method method = StaticB.class.getDeclaredMethod("foo", String.class);
-		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeStatic(method, null, TEST_STRING));
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeStatic(method, null, TEST_STRING));
+		Throwable cause = e.getCause();
+		assertThat(e.getMessage(),
+				equalTo(Messages.message("Error invoking method {}.{}: {}.", StaticB.class.getCanonicalName(), method.getName(),
+						cause.getMessage())));
+		assertThat(cause.getClass(), equalTo(InvocationTargetException.class));
+		assertThat(cause.getCause().getClass(), equalTo(NullPointerException.class));
+	}
+
+	@Test
+	void shouldThrowReflectionExceptionWhenInvokeFailsWithWrongArguments() throws Exception {
+		Method method = StaticB.class.getDeclaredMethod("foo", String.class);
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeStatic(method, StaticB.class));
+		Throwable cause = e.getCause();
+		assertThat(e.getMessage(),
+				equalTo(Messages.message("Error invoking method {}.{}: {}.", StaticB.class.getCanonicalName(), method.getName(),
+						cause.getMessage())));
+		assertThat(cause.getClass(), equalTo(IllegalArgumentException.class));
 	}
 }
