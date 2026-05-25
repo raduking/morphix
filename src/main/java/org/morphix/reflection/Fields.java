@@ -322,6 +322,60 @@ public interface Fields {
 	}
 
 	/**
+	 * Name space interface for internal methods that are not meant to be used outside of this class. These methods do not
+	 * do any validity checks and are only used to implement the methods in the {@link IgnoreAccess} interface.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Internal {
+
+		/**
+		 * Returns the value of the given field from the given object ignoring field access modifiers.
+		 *
+		 * @param <T> field value type
+		 *
+		 * @param field field to query
+		 * @param obj object containing the field (null for static fields)
+		 * @return field value
+		 * @throws ReflectionException if the field value cannot be returned
+		 */
+		static <T> T get(final Object obj, final Field field) {
+			if (MemberAccessor.isAccessible(obj, field)) {
+				return Fields.get(obj, field);
+			}
+			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
+				return Fields.get(obj, field);
+			}
+		}
+
+		/**
+		 * Sets the value of the given field from the given object to the value supplied ignoring field access modifiers.
+		 *
+		 * @param <T> field value type
+		 *
+		 * @param field field to query
+		 * @param obj object containing the field (null for static fields)
+		 * @param value value to set
+		 * @throws ReflectionException if the field value cannot be set
+		 */
+		static <T> void set(final Object obj, final Field field, final T value) {
+			if (MemberAccessor.isAccessible(obj, field)) {
+				Fields.set(obj, field, value);
+				return;
+			}
+			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
+				Fields.set(obj, field, value);
+			} catch (ReflectionException e) {
+				if (e.getCause() instanceof IllegalArgumentException) {
+					throw e;
+				}
+				// only final fields will reach this code
+				Unsafe.set(obj, field, value);
+			}
+		}
+	}
+
+	/**
 	 * Interface which groups all methods that ignore field access modifiers.
 	 *
 	 * @author Radu Sebastian LAZIN
@@ -339,15 +393,8 @@ public interface Fields {
 		 * @throws ReflectionException if the field value cannot be returned
 		 */
 		static <T> T get(final Object obj, final Field field) {
-			if (null != obj && JavaModifier.STATIC.isPresentOn(field)) {
-				return IgnoreAccess.get(null, field);
-			}
-			if (MemberAccessor.isAccessible(obj, field)) {
-				return Fields.get(obj, field);
-			}
-			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
-				return Fields.get(obj, field);
-			}
+			Object target = JavaModifier.STATIC.isPresentOn(field) ? null : obj;
+			return Internal.get(target, field);
 		}
 
 		/**
@@ -380,24 +427,8 @@ public interface Fields {
 		 * @throws ReflectionException if the field value cannot be set
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
-			if (null != obj && JavaModifier.STATIC.isPresentOn(field)) {
-				IgnoreAccess.set(null, field, value);
-				return;
-			}
-			if (MemberAccessor.isAccessible(obj, field)) {
-				Fields.set(obj, field, value);
-				return;
-			}
-			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
-				Fields.set(obj, field, value);
-				return;
-			} catch (ReflectionException e) {
-				if (e.getCause() instanceof IllegalArgumentException) {
-					throw e;
-				}
-			}
-			// only final fields will reach this code
-			Unsafe.set(obj, field, value);
+			Object target = JavaModifier.STATIC.isPresentOn(field) ? null : obj;
+			Internal.set(target, field, value);
 		}
 
 		/**
@@ -432,10 +463,10 @@ public interface Fields {
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field) {
+			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
 			}
-			return IgnoreAccess.getStatic(cls, field);
+			return Internal.get(null, field);
 		}
 
 		/**
@@ -456,7 +487,7 @@ public interface Fields {
 			if (JavaModifier.STATIC.isNotPresentOn(field)) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", field.getName(), cls);
 			}
-			return IgnoreAccess.get(null, field);
+			return Internal.get(null, field);
 		}
 
 		/**
@@ -472,10 +503,10 @@ public interface Fields {
 		 */
 		static <T, U> void setStatic(final Class<T> cls, final String fieldName, final U value) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field) {
+			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
 			}
-			IgnoreAccess.setStatic(cls, field, value);
+			Internal.set(cls, field, value);
 		}
 
 		/**
@@ -496,7 +527,7 @@ public interface Fields {
 			if (JavaModifier.STATIC.isNotPresentOn(field)) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", field.getName(), cls);
 			}
-			IgnoreAccess.set(null, field, value);
+			Internal.set(null, field, value);
 		}
 
 		/**
@@ -693,10 +724,7 @@ public interface Fields {
 		 * @throws ReflectionException if the field is not static
 		 */
 		static <T> T getStatic(final Field field) {
-			if (null == field) {
-				return null;
-			}
-			if (JavaModifier.STATIC.isNotPresentOn(field)) {
+			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
 				return null;
 			}
 			return Safe.get(null, field);
