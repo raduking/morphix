@@ -229,6 +229,36 @@ class ReschedulingTaskTest {
 
 			assertThat(ex.getMessage(), is("minDelay must be positive"));
 		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldThrowExceptionWhenTerminationTimeoutIsNegative() {
+			ReschedulingTask.Builder taskBuilder = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(scheduler())
+					.task(Runnables.doNothing())
+					.nextDelay(() -> DELAY)
+					.terminationTimeout(Duration.ofMillis(-1));
+
+			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, taskBuilder::build);
+
+			assertThat(ex.getMessage(), is("terminationTimeout must be positive"));
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldThrowExceptionWhenTerminationTimeoutIsZero() {
+			ReschedulingTask.Builder taskBuilder = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(scheduler())
+					.task(Runnables.doNothing())
+					.nextDelay(() -> DELAY)
+					.terminationTimeout(Duration.ZERO);
+
+			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, taskBuilder::build);
+
+			assertThat(ex.getMessage(), is("terminationTimeout must be positive"));
+		}
 	}
 
 	@Nested

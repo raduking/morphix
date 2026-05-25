@@ -178,6 +178,9 @@ public class ReschedulingTask implements AutoCloseable {
 		this.taskCancelRetry = Nullables.nonNullOrDefault(builder.taskCancelRetry, Retry::noRetry);
 		this.interruptOnCancel = builder.interruptOnCancel;
 		this.terminationTimeout = Nullables.nonNullOrDefault(builder.terminationTimeout, () -> Default.TERMINATION_TIMEOUT);
+		if (terminationTimeout.isNegative() || terminationTimeout.isZero()) {
+			throw new IllegalArgumentException("terminationTimeout must be positive");
+		}
 	}
 
 	/**

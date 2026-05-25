@@ -16,7 +16,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.LinkedList;
@@ -140,7 +139,6 @@ public interface Methods {
 			return new LinkedList<>();
 		}
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass());
-
 		Method[] declared = cls.getDeclaredMethods();
 		for (int i = declared.length - 1; i >= 0; --i) {
 			methods.addFirst(declared[i]);
@@ -164,7 +162,6 @@ public interface Methods {
 			return new LinkedList<>();
 		}
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), predicate);
-
 		Method[] declared = cls.getDeclaredMethods();
 		for (int i = declared.length - 1; i >= 0; --i) {
 			if (predicate.test(declared[i])) {
@@ -396,7 +393,7 @@ public interface Methods {
 	static <T> Method getFunctionalInterfaceMethod(final Class<T> cls) {
 		Method singleAbstractMethod = null;
 		for (Method method : cls.getMethods()) {
-			if (Modifier.isAbstract(method.getModifiers())) {
+			if (JavaModifier.ABSTRACT.isPresentOn(method)) {
 				if (null != singleAbstractMethod) {
 					throw new ReflectionException("{} is not a functional interface because it has more than one abstract method", cls);
 				}
@@ -426,19 +423,32 @@ public interface Methods {
 		} catch (InvocationTargetException e) {
 			// e is just a wrapper on the real exception, escalate the real one
 			Throwable cause = Reflection.unwrapInvocationTargetException(e);
-			String className = method.getDeclaringClass().getCanonicalName();
-			if (null != obj) {
-				className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
-			}
+			String className = getCanonicalClassName(method, obj);
 			throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), cause.getMessage());
 		} catch (Exception e) {
 			// escalate any exception invoking the method
-			String className = method.getDeclaringClass().getCanonicalName();
-			if (null != obj) {
-				className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
-			}
+			String className = getCanonicalClassName(method, obj);
 			throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), e.getMessage());
 		}
+	}
+
+	/**
+	 * Returns the canonical class name for the given method and object. If the object is null, the declaring class of the
+	 * method is used. If the object is a Class, its cannon name is used. Otherwise, the cannonical name of the object's
+	 * class is used. This method is used to build error messages when invoking methods.
+	 *
+	 * @param method method for which the class name is needed
+	 * @param obj object on which the method is invoked
+	 * @return canonical class name for the given method and object
+	 */
+	private static String getCanonicalClassName(final Method method, final Object obj) {
+		if (null == obj) {
+			return method.getDeclaringClass().getCanonicalName();
+		}
+		if (obj instanceof Class<?> cls) {
+			return cls.getCanonicalName();
+		}
+		return obj.getClass().getCanonicalName();
 	}
 
 	/**
@@ -487,7 +497,8 @@ public interface Methods {
 		 */
 		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
 			if (null != obj && JavaModifier.STATIC.isPresentOn(method)) {
-				return IgnoreAccess.invokeStatic(method, obj.getClass(), args);
+				Class<?> cls = Classes.getFrom(obj);
+				return IgnoreAccess.invokeStatic(method, cls, args);
 			}
 			if (MemberAccessor.isAccessible(obj, method)) {
 				return Methods.invoke(method, obj, args);
