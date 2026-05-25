@@ -162,16 +162,43 @@ class FieldsSafeGetTest {
 		assertThat(result, equalTo(null));
 	}
 
-	static class S {
+	public static class D {
 		@SuppressWarnings("unused")
-		private static final String STATIC_FIELD = TEST_STRING;
+		private static final String FIELD = "field";
 	}
 
 	@Test
-	void shouldReturnStaticFieldValue() {
-		S s = new S();
-		String staticField = Fields.Safe.get(s, "STATIC_FIELD");
+	void shouldGetStaticFields() throws Exception {
+		Field field = D.class.getDeclaredField("FIELD");
 
-		assertThat(staticField, equalTo(TEST_STRING));
+		String value = Fields.Safe.get(D.class, field);
+
+		assertThat(value, equalTo("field"));
+	}
+
+	@Test
+	void shouldGetStaticFieldsWithFieldName() {
+		String value = Fields.Safe.get(D.class, "FIELD");
+
+		assertThat(value, equalTo("field"));
+	}
+
+	@Test
+	void shouldGetStaticFieldWithInstance() throws Exception {
+		D d = new D();
+		Field field = D.class.getDeclaredField("FIELD");
+
+		String value = Fields.Safe.get(d, field);
+
+		assertThat(value, equalTo("field"));
+	}
+
+	@Test
+	void shouldReturnClassClassloaderField() {
+		Class<?> clazz = Class.class;
+
+		Object module = Fields.Safe.get(clazz, "module");
+
+		assertThat(module, equalTo(clazz.getModule()));
 	}
 }

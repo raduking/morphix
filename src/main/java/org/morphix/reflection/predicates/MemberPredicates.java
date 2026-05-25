@@ -15,7 +15,6 @@ package org.morphix.reflection.predicates;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
-import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.IntPredicate;
@@ -23,6 +22,7 @@ import java.util.function.Predicate;
 
 import org.morphix.lang.function.IntPredicates;
 import org.morphix.reflection.Constructors;
+import org.morphix.reflection.JavaModifier;
 
 /**
  * Predicates for members.
@@ -122,7 +122,7 @@ public class MemberPredicates {
 	 * @return a predicate that verifies if a member is static
 	 */
 	public static <T extends Member> Predicate<T> isStatic() {
-		return member -> Modifier.isStatic(member.getModifiers());
+		return JavaModifier.STATIC::isPresentOn;
 	}
 
 	/**
@@ -133,7 +133,7 @@ public class MemberPredicates {
 	 * @return a predicate that verifies if a member is not static
 	 */
 	public static <T extends Member> Predicate<T> isNotStatic() {
-		return member -> !Modifier.isStatic(member.getModifiers());
+		return JavaModifier.STATIC::isNotPresentOn;
 	}
 
 	/**
@@ -144,6 +144,6 @@ public class MemberPredicates {
 	 * @return a predicate that verifies if a member is abstract
 	 */
 	public static <T extends Member> Predicate<T> isAbstract() {
-		return member -> Modifier.isAbstract(member.getModifiers());
+		return JavaModifier.ABSTRACT::isPresentOn;
 	}
 }

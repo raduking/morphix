@@ -701,7 +701,6 @@ public interface Methods {
 			} catch (NullPointerException e) {
 				throw new ReflectionException("The excluded set is null. Please provide a non null modifiable set.", e);
 			}
-
 			List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), excluded);
 			for (Class<?> iface : cls.getInterfaces()) {
 				methods.addAll(getAllDeclaredInHierarchy(iface, excluded));
@@ -710,7 +709,6 @@ public interface Methods {
 			for (int i = declared.length - 1; i >= 0; --i) {
 				methods.addFirst(declared[i]);
 			}
-
 			return methods;
 		}
 	}

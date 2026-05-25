@@ -13,11 +13,13 @@
 package org.morphix.reflection.predicates;
 
 import static org.morphix.convert.handler.PrimitiveAssignment.isPrimitiveToClass;
+import static org.morphix.lang.function.Predicates.not;
+import static org.morphix.reflection.JavaModifier.PUBLIC;
+import static org.morphix.reflection.JavaModifier.STATIC;
 import static org.morphix.reflection.predicates.MemberPredicates.hasName;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.function.Predicate;
 
 import org.morphix.reflection.Constructors;
@@ -54,9 +56,7 @@ public final class MethodPredicates {
 	 */
 	public static <T> Predicate<Method> isConverterMethod(final Class<T> parameterClass) {
 		return method -> {
-			int modifiers = method.getModifiers();
-			// method must be public and static
-			if (!Modifier.isPublic(modifiers) || !Modifier.isStatic(modifiers)) {
+			if (not(PUBLIC.and(STATIC)).test(method)) {
 				return false;
 			}
 			Class<?>[] parameterTypes = method.getParameterTypes();

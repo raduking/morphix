@@ -16,6 +16,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.lang.reflect.Field;
+
 import org.junit.jupiter.api.Test;
 
 /**
@@ -68,6 +70,13 @@ class FieldsIgnoreAccessSetStaticTest {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.setStatic(B.class, NON_STATIC_FIELD_NAME, VALUE));
 		assertThat(e.getMessage(),
 				equalTo("Could not find static field with name: " + NON_STATIC_FIELD_NAME + " in class: " + B.class));
+	}
+
+	@Test
+	void shouldThrowExceptionIfFieldIsNull() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.setStatic(B.class, (Field) null, VALUE));
+		assertThat(e.getMessage(),
+				equalTo("Field cannot be null when trying to set static field value from class: " + B.class));
 	}
 
 	private static class C extends B {

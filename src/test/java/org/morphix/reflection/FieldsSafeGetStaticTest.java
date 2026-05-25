@@ -15,10 +15,18 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import java.lang.reflect.Field;
+
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields.Safe#getStatic(Class, String)}.
+ * Test class for:
+ *
+ * <ul>
+ * <li>{@link Fields.Safe#getStatic(Class, String)}.</li>
+ * <li>{@link Fields.Safe#getStatic(Field)}</li>
+ * <li>{@link Fields.Safe#get(Class, String)}. where it follows the static field path</li>
+ * </ul>
  *
  * @author Radu Sebastian LAZIN
  */
@@ -52,6 +60,34 @@ class FieldsSafeGetStaticTest {
 	@Test
 	void shouldReturnNullIfFieldIsNotStatic() {
 		Object result = Fields.Safe.getStatic(A.class, GOOD_NAME);
+
+		assertThat(result, equalTo(null));
+	}
+
+	@Test
+	void shouldReturnNullIfFieldIsNotStaticWithGet() {
+		Object result = Fields.Safe.get(A.class, GOOD_NAME);
+
+		assertThat(result, equalTo(null));
+	}
+
+	@Test
+	void shouldReturnNullIfFieldNameIsNull() {
+		Object result = Fields.Safe.getStatic(A.class, null);
+
+		assertThat(result, equalTo(null));
+	}
+
+	@Test
+	void shouldReturnNullIfClassIsNull() {
+		Object result = Fields.Safe.getStatic(null, GOOD_NAME);
+
+		assertThat(result, equalTo(null));
+	}
+
+	@Test
+	void shouldReturnNullIfFieldIsNull() {
+		Object result = Fields.Safe.getStatic(null);
 
 		assertThat(result, equalTo(null));
 	}

@@ -128,5 +128,4 @@ class MethodsIgnoreAccessInvokeTest {
 		Method method = StaticB.class.getDeclaredMethod("foo", String.class);
 		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invoke(method, null, TEST_STRING));
 	}
-
 }

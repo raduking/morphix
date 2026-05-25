@@ -14,7 +14,6 @@ package org.morphix.reflection;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Member;
-import java.lang.reflect.Modifier;
 import java.util.Objects;
 
 /**
@@ -85,7 +84,7 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	 * @return {@code true} if the member is accessible, {@code false} otherwise
 	 */
 	public static <T extends AccessibleObject & Member> boolean isAccessible(final Object object, final T member) {
-		Object actual = null != object && Modifier.isStatic(member.getModifiers()) ? null : object;
+		Object actual = null != object && JavaModifier.STATIC.isPresentOn(member) ? null : object;
 		return ReflectionException.wrapThrowing(() -> member.canAccess(actual), ACCESS_CHANGE_ERROR + member);
 	}
 

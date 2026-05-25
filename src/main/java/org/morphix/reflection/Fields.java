@@ -13,7 +13,6 @@
 package org.morphix.reflection;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,14 +40,7 @@ public interface Fields {
 	 * @return the field with the given name or null if the field is not present in the class
 	 */
 	static <T> Field getOneDeclared(final Class<T> cls, final String fieldName) {
-		if (null == cls || null == fieldName) {
-			return null;
-		}
-		try {
-			return cls.getDeclaredField(fieldName);
-		} catch (NoSuchFieldException e) {
-			return null;
-		}
+		return Safe.getOneDeclared(cls, fieldName);
 	}
 
 	/**
@@ -61,11 +53,7 @@ public interface Fields {
 	 * @return the field with the given name or null if the field is not present in the class
 	 */
 	static Field getOneDeclared(final Object obj, final String fieldName) {
-		if (null == obj) {
-			return null;
-		}
-		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
-		return getOneDeclared(clazz, fieldName);
+		return Safe.getOneDeclared(obj, fieldName);
 	}
 
 	/**
@@ -239,14 +227,7 @@ public interface Fields {
 	 * @return existing field, null otherwise
 	 */
 	static <T> Field getOneDeclaredInHierarchy(final Class<T> cls, final String fieldName) {
-		if (null == cls) {
-			return null;
-		}
-		Field field = getOneDeclared(cls, fieldName);
-		if (null != field) {
-			return field;
-		}
-		return getOneDeclaredInHierarchy(cls.getSuperclass(), fieldName);
+		return Safe.getOneDeclaredInHierarchy(cls, fieldName);
 	}
 
 	/**
@@ -259,11 +240,7 @@ public interface Fields {
 	 * @return existing field, null otherwise
 	 */
 	static Field getOneDeclaredInHierarchy(final Object obj, final String fieldName) {
-		if (null == obj) {
-			return null;
-		}
-		Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
-		return getOneDeclaredInHierarchy(clazz, fieldName);
+		return Safe.getOneDeclaredInHierarchy(obj, fieldName);
 	}
 
 	/**
@@ -390,10 +367,7 @@ public interface Fields {
 			Class<?> cls = Classes.getFrom(obj);
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 			if (null == field) {
-				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, obj.getClass());
-			}
-			if (Modifier.isStatic(field.getModifiers())) {
-				return IgnoreAccess.get(null, field);
+				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, cls);
 			}
 			return IgnoreAccess.get(obj, field);
 		}
@@ -409,6 +383,10 @@ public interface Fields {
 		 * @throws ReflectionException if the field value cannot be set
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
+			if (null != obj && JavaModifier.STATIC.isPresentOn(field)) {
+				IgnoreAccess.setStatic(obj.getClass(), field, value);
+				return;
+			}
 			try (MemberAccessor<Field> ignored = new MemberAccessor<>(obj, field)) {
 				Fields.set(obj, field, value);
 			} catch (ReflectionException e) {
@@ -432,11 +410,8 @@ public interface Fields {
 		 * @throws ReflectionException if the field is not found
 		 */
 		static <T> void set(final Object obj, final String fieldName, final T value) {
-			if (obj instanceof Class<?> cls) {
-				IgnoreAccess.setStatic(cls, fieldName, value);
-				return;
-			}
-			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
+			Class<?> cls = Classes.getFrom(obj);
+			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 			if (null == field) {
 				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, obj.getClass());
 			}
@@ -474,6 +449,9 @@ public interface Fields {
 		 * @throws ReflectionException if the field is not static
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final Field field) {
+			if (null == field) {
+				throw new ReflectionException("Field cannot be null when trying to get static field value from class: {}", cls);
+			}
 			if (JavaModifier.STATIC.isNotPresentOn(field)) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", field.getName(), cls);
 			}
@@ -493,8 +471,29 @@ public interface Fields {
 		 */
 		static <T, U> void setStatic(final Class<T> cls, final String fieldName, final U value) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
+			if (null == field) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
+			}
+			IgnoreAccess.setStatic(cls, field, value);
+		}
+
+		/**
+		 * Sets the value of the given static field from the given object to the value supplied ignoring field access modifiers.
+		 *
+		 * @param <T> type containing the static method
+		 * @param <U> field value type
+		 *
+		 * @param cls class containing the static field
+		 * @param field field to set
+		 * @param value value to set
+		 * @throws ReflectionException if the field is not found
+		 */
+		static <T, U> void setStatic(final Class<T> cls, final Field field, final U value) {
+			if (null == field) {
+				throw new ReflectionException("Field cannot be null when trying to set static field value from class: {}", cls);
+			}
+			if (JavaModifier.STATIC.isNotPresentOn(field)) {
+				throw new ReflectionException("Could not find static field with name: {} in class: {}", field.getName(), cls);
 			}
 			IgnoreAccess.set(null, field, value);
 		}
@@ -552,6 +551,82 @@ public interface Fields {
 	interface Safe {
 
 		/**
+		 * Returns the field with the given name from the given class. If the field is not present in the class it returns
+		 * {@code null}. This method does not search for fields in super classes, use
+		 * {@link #getOneDeclaredInHierarchy(Class, String)} for that.
+		 *
+		 * @param <T> type to get the field from
+		 *
+		 * @param cls class containing the field
+		 * @param fieldName the name of the field
+		 * @return the field with the given name or null if the field is not present in the class
+		 */
+		static <T> Field getOneDeclared(final Class<T> cls, final String fieldName) {
+			if (null == cls || null == fieldName) {
+				return null;
+			}
+			try {
+				return cls.getDeclaredField(fieldName);
+			} catch (NoSuchFieldException e) {
+				return null;
+			}
+		}
+
+		/**
+		 * Returns the field with the given name from the given object. If the field is not present in the class it returns
+		 * {@code null}. If the object supplied is a {@link Class} then the field from the given class will be returned. If the
+		 * object is not a {@link Class} then the field from the class of the given object will be returned.
+		 *
+		 * @param obj object containing the field
+		 * @param fieldName the name of the field
+		 * @return the field with the given name or null if the field is not present in the class
+		 */
+		static Field getOneDeclared(final Object obj, final String fieldName) {
+			if (null == obj) {
+				return null;
+			}
+			Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
+			return Safe.getOneDeclared(clazz, fieldName);
+		}
+
+		/**
+		 * Returns a field in the class and in all super classes of the class given as parameter.
+		 *
+		 * @param <T> type to get the fields from
+		 *
+		 * @param cls class on which the fields are returned
+		 * @param fieldName the name of the fields to get
+		 * @return existing field, null otherwise
+		 */
+		static <T> Field getOneDeclaredInHierarchy(final Class<T> cls, final String fieldName) {
+			if (null == cls) {
+				return null;
+			}
+			Field field = getOneDeclared(cls, fieldName);
+			if (null != field) {
+				return field;
+			}
+			return Safe.getOneDeclaredInHierarchy(cls.getSuperclass(), fieldName);
+		}
+
+		/**
+		 * Variation of {@link #getOneDeclaredInHierarchy(Class, String)}. It will call the method with
+		 * <code>obj.getClass()</code> if the object is not instance of {@link Class}, otherwise it will search for fields in
+		 * the given class.
+		 *
+		 * @param obj object on which the fields are needed
+		 * @param fieldName the name of the field to be retrieved
+		 * @return existing field, null otherwise
+		 */
+		static Field getOneDeclaredInHierarchy(final Object obj, final String fieldName) {
+			if (null == obj) {
+				return null;
+			}
+			Class<?> cls = Classes.getFrom(obj);
+			return Safe.getOneDeclaredInHierarchy(cls, fieldName);
+		}
+
+		/**
 		 * Returns the value of the given field from the given object ignoring field access modifiers or {@code null} if the
 		 * field value cannot be returned.
 		 *
@@ -581,15 +656,10 @@ public interface Fields {
 		 * @throws ReflectionException if the field is not found
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
-			if (obj instanceof Class<?> cls) {
-				return Safe.getStatic(cls, fieldName);
-			}
-			Field field = Fields.getOneDeclaredInHierarchy(obj.getClass(), fieldName);
+			Class<?> cls = Classes.getFrom(obj);
+			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 			if (null == field) {
 				return null;
-			}
-			if (Modifier.isStatic(field.getModifiers())) {
-				return Safe.get(null, field);
 			}
 			return Safe.get(obj, field);
 		}
@@ -623,6 +693,9 @@ public interface Fields {
 		 * @throws ReflectionException if the field is not static
 		 */
 		static <T> T getStatic(final Field field) {
+			if (null == field) {
+				return null;
+			}
 			if (JavaModifier.STATIC.isNotPresentOn(field)) {
 				return null;
 			}
@@ -720,7 +793,7 @@ public interface Fields {
 		 * @param value value to be set on the field
 		 */
 		static void set(final Object obj, final Field field, final Object value) {
-			boolean isStatic = Modifier.isStatic(field.getModifiers());
+			boolean isStatic = JavaModifier.STATIC.isPresentOn(field);
 			Object instance = obj;
 			if (isStatic) {
 				instance = TheUnsafe.staticFieldBase(field);

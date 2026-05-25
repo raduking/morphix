@@ -90,6 +90,13 @@ class FieldsIgnoreAccessGetTest {
 	}
 
 	@Test
+	void shouldThrowExceptionOnNullObject() {
+		Object o = null;
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.get(o, NON_EXISTENT_FIELD));
+		assertThat(e.getMessage(), equalTo("Could not find field '" + NON_EXISTENT_FIELD + "' on object of type " + null));
+	}
+
+	@Test
 	void shouldKeepAccessModifiersUnchangedAfterCall() throws Exception {
 		B b = new B();
 		b.setI(TEST_INTEGER);

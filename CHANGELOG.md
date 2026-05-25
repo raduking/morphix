@@ -13,6 +13,9 @@
 - Added `LoggingAdapter.isDisabled(LoggingLevel)` which returns not `LoggingAdapter.isEnabled`. 
 - Added `OptionalLibrary.getFacadeClass` as an alias for `OptionalLibrary.getSpecificClass` this being the main method now.
 - Added `OptionalLibrary.getFacadeInstance` as an alias for `OptionalLibrary.getSpecificInstance` this being the main method now.
+- Added `Fields.Safe.getOneDeclared` and now `Fields.getOneDeclared` delegates to it.
+- Added `Fields.Safe.getOneDeclaredInHierarchy` and now `Fields.getOneDeclaredInHierarchy` delegates to it.
+- Added missing `Fields.IgnoreAccess.setStatic` overloads to pair with `Fields.IgnoreAccess.getStatic` overloads.
 
 ---
 
