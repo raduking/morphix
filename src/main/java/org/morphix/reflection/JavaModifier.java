@@ -42,47 +42,57 @@ public enum JavaModifier implements Predicate<Member> {
 	/**
 	 * <code>public</code> access modifier
 	 */
-	PUBLIC(true, Modifier::isPublic),
+	PUBLIC(true, Modifier.PUBLIC),
 
 	/**
 	 * <code>protected</code> access modifier
 	 */
-	PROTECTED(true, Modifier::isProtected),
+	PROTECTED(true, Modifier.PROTECTED),
 
 	/**
 	 * <code>private</code> access modifier
 	 */
-	PRIVATE(true, Modifier::isPrivate),
+	PRIVATE(true, Modifier.PRIVATE),
 
 	/**
 	 * <code>final</code> modifier
 	 */
-	FINAL(Modifier::isFinal),
+	FINAL(Modifier.FINAL),
 
 	/**
 	 * <code>static</code> modifier
 	 */
-	STATIC(Modifier::isStatic),
+	STATIC(Modifier.STATIC),
 
 	/**
 	 * <code>abstract</code> modifier
 	 */
-	ABSTRACT(Modifier::isAbstract),
+	ABSTRACT(Modifier.ABSTRACT),
 
 	/**
 	 * <code>transient</code> modifier
 	 */
-	TRANSIENT(Modifier::isTransient),
+	TRANSIENT(Modifier.TRANSIENT),
 
 	/**
 	 * <code>synchronized</code> modifier
 	 */
-	SYNCHRONIZED(Modifier::isSynchronized),
+	SYNCHRONIZED(Modifier.SYNCHRONIZED),
 
 	/**
 	 * <code>volatile</code> modifier
 	 */
-	VOLATILE(Modifier::isVolatile);
+	VOLATILE(Modifier.VOLATILE),
+
+	/**
+	 * <code>native</code> modifier
+	 */
+	NATIVE(Modifier.NATIVE),
+
+	/**
+	 * <code>strictfp</code> modifier
+	 */
+	STRICTFP(Modifier.STRICT);
 
 	/**
 	 * The actual string value of the modifier.
@@ -95,9 +105,9 @@ public enum JavaModifier implements Predicate<Member> {
 	private final boolean accessModifier;
 
 	/**
-	 * Function that checks if a given modifier value contains this modifier.
+	 * Mask value to check if the modifier is present on a member.
 	 */
-	private final Function<Integer, Boolean> modifierCheckFunction;
+	private final int modifierMask;
 
 	/**
 	 * Name map that maps the java keyword to the corresponding modifier enum value.
@@ -122,18 +132,21 @@ public enum JavaModifier implements Predicate<Member> {
 	 * Constructor with the access modifier.
 	 *
 	 * @param accessModifier access modifier
+	 * @param modifierMask mask value to check if the modifier is present on a member
 	 */
-	JavaModifier(final boolean accessModifier, final Function<Integer, Boolean> modifierCheckFunction) {
+	JavaModifier(final boolean accessModifier, final int modifierMask) {
 		this.value = name().toLowerCase();
 		this.accessModifier = accessModifier;
-		this.modifierCheckFunction = modifierCheckFunction;
+		this.modifierMask = modifierMask;
 	}
 
 	/**
-	 * Default constructor.
+	 * Constructor with modifier mask only, the access modifier flag is set to false by default.
+	 *
+	 * @param modifierMask mask value to check if the modifier is present on a member
 	 */
-	JavaModifier(final Function<Integer, Boolean> modifierCheckFunction) {
-		this(false, modifierCheckFunction);
+	JavaModifier(final int modifierMask) {
+		this(false, modifierMask);
 	}
 
 	/**
@@ -167,7 +180,7 @@ public enum JavaModifier implements Predicate<Member> {
 	 */
 	@Override
 	public boolean test(final Member member) {
-		return modifierCheckFunction.apply(member.getModifiers());
+		return (member.getModifiers() & modifierMask) != 0;
 	}
 
 	/**

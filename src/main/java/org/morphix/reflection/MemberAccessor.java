@@ -120,7 +120,7 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	 * @return the result returned by the supplier
 	 */
 	public static <T extends AccessibleObject & Member, U> U on(final Object obj, final T member, final Supplier<U> supplier) {
-		return on(obj, member, supplier, e -> Unchecked.reThrow(e));
+		return on(obj, member, supplier, Unchecked.Undeclared::reThrow);
 	}
 
 	/**
@@ -135,11 +135,11 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	 * @param obj object containing the member to access
 	 * @param member member to access
 	 * @param supplier supplier to execute with the member accessible
-	 * @param exceptionHandler handler for any exception thrown during the execution of the supplier
+	 * @param onError handler for any exception thrown during the execution of the supplier
 	 * @return the result returned by the supplier or by the exception handler if an exception is thrown
 	 */
 	public static <T extends AccessibleObject & Member, U> U on(final Object obj, final T member, final Supplier<U> supplier,
-			final Function<ReflectionException, U> exceptionHandler) {
+			final Function<ReflectionException, U> onError) {
 		try {
 			if (isAccessible(obj, member)) {
 				return supplier.get();
@@ -151,7 +151,7 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 				setAccessible(member, false);
 			}
 		} catch (ReflectionException e) {
-			return exceptionHandler.apply(e);
+			return onError.apply(e);
 		}
 	}
 
@@ -166,12 +166,12 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	 * @param obj object containing the member to access
 	 * @param member member to access
 	 * @param runnable runnable to execute with the member accessible
-	 * @param exceptionHandler handler for any exception thrown during the execution of the runnable
+	 * @param onError handler for any exception thrown during the execution of the runnable
 	 */
 	public static <T extends AccessibleObject & Member> void on(final Object obj, final T member, final Runnable runnable,
-			final Consumer<ReflectionException> exceptionHandler) {
+			final Consumer<ReflectionException> onError) {
 		on(obj, member, Runnables.toSupplier(runnable), t -> {
-			exceptionHandler.accept(t);
+			onError.accept(t);
 			return null;
 		});
 	}

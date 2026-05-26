@@ -18,6 +18,7 @@
 - Added missing `Fields.IgnoreAccess.setStatic` overloads to pair with `Fields.IgnoreAccess.getStatic` overloads.
 - Added `Classes.isPresent` to check if a class is present in the class path.
 - Added `Classes.getOne(Class, String)` to return a class which has a name built from the given class and the given prefix.
+- Added `MemberAccessor.on` utility methods to wrap an execution with member access.
 
 ---
 
