@@ -193,13 +193,11 @@ public interface Classes {
 	 * @return the class of the given object
 	 */
 	static Class<?> getFrom(final Object object) {
-		if (null == object) {
-			return null;
-		}
-		if (object instanceof Class<?>) {
-			return (Class<?>) object;
-		}
-		return object.getClass();
+		return switch (object) {
+			case null -> null;
+			case Class<?> cls -> cls;
+			default -> object.getClass();
+		};
 	}
 
 	/**

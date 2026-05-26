@@ -19,6 +19,8 @@
 - Added `Classes.isPresent` to check if a class is present in the class path.
 - Added `Classes.getOne(Class, String)` to return a class which has a name built from the given class and the given prefix.
 - Added `MemberAccessor.on` utility methods to wrap an execution with member access.
+- Added `Fields.Unchecked` name space interface for no validation versions for `Fields.IgnoreAccess` methods.
+- Added `Methods.Unchecked` name space interface for no validation versions for `Methods.IgnoreAccess` methods.
 
 ---
 

@@ -322,49 +322,6 @@ public interface Fields {
 	}
 
 	/**
-	 * Name space interface for internal methods that are not meant to be used outside of this class. These methods do not
-	 * do any validity checks and are only used to implement the methods in the {@link IgnoreAccess} interface.
-	 *
-	 * @author Radu Sebastian LAZIN
-	 */
-	interface Internal {
-
-		/**
-		 * Returns the value of the given field from the given object ignoring field access modifiers.
-		 *
-		 * @param <T> field value type
-		 *
-		 * @param field field to query
-		 * @param obj object containing the field (null for static fields)
-		 * @return field value
-		 * @throws ReflectionException if the field value cannot be returned
-		 */
-		static <T> T get(final Object obj, final Field field) {
-			return MemberAccessor.on(obj, field, () -> Fields.get(obj, field));
-		}
-
-		/**
-		 * Sets the value of the given field from the given object to the value supplied ignoring field access modifiers.
-		 *
-		 * @param <T> field value type
-		 *
-		 * @param field field to query
-		 * @param obj object containing the field (null for static fields)
-		 * @param value value to set
-		 * @throws ReflectionException if the field value cannot be set
-		 */
-		static <T> void set(final Object obj, final Field field, final T value) {
-			MemberAccessor.on(obj, field, () -> Fields.set(obj, field, value), e -> {
-				if (e.getCause() instanceof IllegalArgumentException) {
-					throw e;
-				}
-				// only final fields will reach this code
-				Unsafe.set(obj, field, value);
-			});
-		}
-	}
-
-	/**
 	 * Interface which groups all methods that ignore field access modifiers.
 	 *
 	 * @author Radu Sebastian LAZIN
@@ -383,7 +340,7 @@ public interface Fields {
 		 */
 		static <T> T get(final Object obj, final Field field) {
 			Object target = JavaModifier.STATIC.isPresentOn(field) ? null : obj;
-			return Internal.get(target, field);
+			return Unchecked.get(target, field);
 		}
 
 		/**
@@ -417,7 +374,7 @@ public interface Fields {
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
 			Object target = JavaModifier.STATIC.isPresentOn(field) ? null : obj;
-			Internal.set(target, field, value);
+			Unchecked.set(target, field, value);
 		}
 
 		/**
@@ -455,7 +412,7 @@ public interface Fields {
 			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
 			}
-			return Internal.get(null, field);
+			return Unchecked.get(null, field);
 		}
 
 		/**
@@ -476,7 +433,7 @@ public interface Fields {
 			if (JavaModifier.STATIC.isNotPresentOn(field)) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", field.getName(), cls);
 			}
-			return Internal.get(null, field);
+			return Unchecked.get(null, field);
 		}
 
 		/**
@@ -495,7 +452,7 @@ public interface Fields {
 			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
 			}
-			Internal.set(cls, field, value);
+			Unchecked.set(cls, field, value);
 		}
 
 		/**
@@ -516,7 +473,7 @@ public interface Fields {
 			if (JavaModifier.STATIC.isNotPresentOn(field)) {
 				throw new ReflectionException("Could not find static field with name: {} in class: {}", field.getName(), cls);
 			}
-			Internal.set(null, field, value);
+			Unchecked.set(null, field, value);
 		}
 
 		/**
@@ -819,6 +776,55 @@ public interface Fields {
 					? TheUnsafe.staticFieldOffset(field)
 					: TheUnsafe.objectFieldOffset(field);
 			TheUnsafe.putObject(instance, offset, value);
+		}
+	}
+
+	/**
+	 * Name space interface for methods that ignore field access modifiers, do not do validations and emphasize speed. The
+	 * caller is responsible to provide valid input and to handle exceptions.
+	 * <p>
+	 * Prefer using the methods in {@link IgnoreAccess} instead of the ones in this interface. The methods in this interface
+	 * are only for extreme performance cases where the caller is sure that the field exists and the field value can be
+	 * returned or set and the caller does not want to handle exceptions.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Unchecked {
+
+		/**
+		 * Returns the value of the given field from the given object ignoring field access modifiers.
+		 *
+		 * @param <T> field value type
+		 *
+		 * @param field field to query
+		 * @param obj object containing the field (null for static fields)
+		 * @return field value
+		 * @throws ReflectionException if the field value cannot be returned
+		 * @see IgnoreAccess#get(Object, Field)
+		 */
+		static <T> T get(final Object obj, final Field field) {
+			return MemberAccessor.on(obj, field, () -> Fields.get(obj, field));
+		}
+
+		/**
+		 * Sets the value of the given field from the given object to the value supplied ignoring field access modifiers.
+		 *
+		 * @param <T> field value type
+		 *
+		 * @param field field to query
+		 * @param obj object containing the field (null for static fields)
+		 * @param value value to set
+		 * @throws ReflectionException if the field value cannot be set
+		 * @see IgnoreAccess#set(Object, Field, Object)
+		 */
+		static <T> void set(final Object obj, final Field field, final T value) {
+			MemberAccessor.on(obj, field, () -> Fields.set(obj, field, value), e -> {
+				if (e.getCause() instanceof IllegalArgumentException) {
+					throw e;
+				}
+				// only final fields will reach this code
+				Unsafe.set(obj, field, value);
+			});
 		}
 	}
 

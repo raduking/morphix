@@ -63,7 +63,7 @@ public final class AnyToAnyFromStaticMethod extends FieldHandler {
 		}
 		// find a method in the dClass that can convert the value from a source class value
 		for (Method method : staticConvertMethods) {
-			Object dValue = Methods.IgnoreAccess.invoke(method, dClass, sValue);
+			Object dValue = Methods.Unchecked.invokeStatic(method, sValue);
 			if (null != dValue) {
 				dfo.setFieldValue(dValue);
 				return CONVERTED;

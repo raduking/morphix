@@ -496,16 +496,8 @@ public interface Methods {
 		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
-			if (null != obj && JavaModifier.STATIC.isPresentOn(method)) {
-				Class<?> cls = Classes.getFrom(obj);
-				return IgnoreAccess.invokeStatic(method, cls, args);
-			}
-			if (MemberAccessor.isAccessible(obj, method)) {
-				return Methods.invoke(method, obj, args);
-			}
-			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
-				return Methods.invoke(method, obj, args);
-			}
+			Object target = JavaModifier.STATIC.isPresentOn(method) ? null : obj;
+			return Unchecked.invoke(method, target, args);
 		}
 
 		/**
@@ -568,7 +560,7 @@ public interface Methods {
 			if (JavaModifier.STATIC.isNotPresentOn(method)) {
 				throw new ReflectionException("Method {} is not static on class: {}", method.getName(), cls);
 			}
-			return IgnoreAccess.invoke(method, null, args);
+			return Unchecked.invokeStatic(method, args);
 		}
 	}
 
@@ -721,6 +713,48 @@ public interface Methods {
 				methods.addFirst(declared[i]);
 			}
 			return methods;
+		}
+	}
+
+	/**
+	 * Name space interface for methods that ignore access modifiers and do not do validations and emphasize speed. The
+	 * caller is responsible to provide valid input and to handle exceptions.
+	 * <p>
+	 * For example, when invoking a method on a class that is known to have that method, or when invoking a method in a loop
+	 * and the overhead of handling exceptions is too high.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Unchecked {
+
+		/**
+		 * Invokes the given method on the given object with parameters, ignoring the access modifiers.
+		 *
+		 * @param <T> object type on which the method is invoked
+		 * @param <R> method return type
+		 *
+		 * @param obj object on which the method is invoked
+		 * @param method method to be invoked
+		 * @param args method arguments
+		 * @return result of the method invocation
+		 * @throws ReflectionException if any error occurs during method invocation
+		 */
+		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
+			return MemberAccessor.on(obj, method, () -> Methods.invoke(method, obj, args));
+		}
+
+		/**
+		 * Invokes the given static method on the given class with parameters, ignoring the access modifiers.
+		 *
+		 * @param <R> method return type
+		 *
+		 * @param method method to be invoked
+		 * @param args method arguments
+		 * @return result of the method invocation
+		 * @throws ReflectionException if any error occurs during method invocation
+		 */
+		static <R> R invokeStatic(final Method method, final Object... args) {
+			return Unchecked.invoke(method, null, args);
 		}
 	}
 }
