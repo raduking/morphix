@@ -110,6 +110,8 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	 * Executes the given supplier with the member accessible. If the member is already accessible, it will execute the
 	 * supplier without changing the accessibility. Otherwise, it will change the accessibility to {@code true} before
 	 * executing the supplier and will restore the original accessibility after execution.
+	 * <p>
+	 * Any Exception thrown during the execution of the supplier will be re-thrown as an unchecked exception.
 	 *
 	 * @param <T> the type of the member, which must be both an {@link AccessibleObject} and a {@link Member}
 	 * @param <U> the type of the result returned by the supplier
@@ -126,8 +128,10 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	/**
 	 * Executes the given supplier with the member accessible. If the member is already accessible, it will execute the
 	 * supplier without changing the accessibility. Otherwise, it will change the accessibility to {@code true} before
-	 * executing the supplier and will restore the original accessibility after execution. If any exception is thrown during
-	 * the execution of the supplier, it will be handled by the given exception handler.
+	 * executing the supplier and will restore the original accessibility after execution.
+	 * <p>
+	 * If any {@link ReflectionException} exception is thrown during the execution of the supplier, it will be handled by
+	 * the given exception handler.
 	 *
 	 * @param <T> the type of the member, which must be both an {@link AccessibleObject} and a {@link Member}
 	 * @param <U> the type of the result returned by the supplier
@@ -158,8 +162,10 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	/**
 	 * Executes the given runnable with the member accessible. If the member is already accessible, it will execute the
 	 * runnable without changing the accessibility. Otherwise, it will change the accessibility to {@code true} before
-	 * executing the runnable and will restore the original accessibility after execution. If any exception is thrown during
-	 * the execution of the runnable, it will be handled by the given exception handler.
+	 * executing the runnable and will restore the original accessibility after execution.
+	 * <p>
+	 * If any {@link ReflectionException} exception is thrown during the execution of the runnable, it will be handled by
+	 * the given exception handler.
 	 *
 	 * @param <T> the type of the member, which must be both an {@link AccessibleObject} and a {@link Member}
 	 *
