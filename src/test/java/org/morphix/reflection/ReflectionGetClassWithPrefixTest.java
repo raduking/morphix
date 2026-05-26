@@ -43,6 +43,6 @@ class ReflectionGetClassWithPrefixTest {
 	void shouldThrowExceptionIfClassWithPrefixDoesNotExist() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Reflection.getClassWithPrefix(Int.class, "P"));
 		assertThat(e.getMessage(),
-				equalTo("Could not find class with prefix '" + ReflectionGetClassWithPrefixTest.class.getCanonicalName() + "$PInt'"));
+				equalTo("Could not load class with prefix: " + ReflectionGetClassWithPrefixTest.class.getCanonicalName() + "$PInt"));
 	}
 }

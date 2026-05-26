@@ -16,7 +16,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.LinkedList;
@@ -140,7 +139,6 @@ public interface Methods {
 			return new LinkedList<>();
 		}
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass());
-
 		Method[] declared = cls.getDeclaredMethods();
 		for (int i = declared.length - 1; i >= 0; --i) {
 			methods.addFirst(declared[i]);
@@ -164,7 +162,6 @@ public interface Methods {
 			return new LinkedList<>();
 		}
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), predicate);
-
 		Method[] declared = cls.getDeclaredMethods();
 		for (int i = declared.length - 1; i >= 0; --i) {
 			if (predicate.test(declared[i])) {
@@ -396,7 +393,7 @@ public interface Methods {
 	static <T> Method getFunctionalInterfaceMethod(final Class<T> cls) {
 		Method singleAbstractMethod = null;
 		for (Method method : cls.getMethods()) {
-			if (Modifier.isAbstract(method.getModifiers())) {
+			if (JavaModifier.ABSTRACT.isPresentOn(method)) {
 				if (null != singleAbstractMethod) {
 					throw new ReflectionException("{} is not a functional interface because it has more than one abstract method", cls);
 				}
@@ -426,19 +423,32 @@ public interface Methods {
 		} catch (InvocationTargetException e) {
 			// e is just a wrapper on the real exception, escalate the real one
 			Throwable cause = Reflection.unwrapInvocationTargetException(e);
-			String className = method.getDeclaringClass().getCanonicalName();
-			if (null != obj) {
-				className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
-			}
+			String className = getCanonicalClassName(method, obj);
 			throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), cause.getMessage());
 		} catch (Exception e) {
 			// escalate any exception invoking the method
-			String className = method.getDeclaringClass().getCanonicalName();
-			if (null != obj) {
-				className = obj instanceof Class<?> cls ? cls.getCanonicalName() : obj.getClass().getCanonicalName();
-			}
+			String className = getCanonicalClassName(method, obj);
 			throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), e.getMessage());
 		}
+	}
+
+	/**
+	 * Returns the canonical class name for the given method and object. If the object is null, the declaring class of the
+	 * method is used. If the object is a Class, its canonical name is used. Otherwise, the canonical name of the object's
+	 * class is used. This method is used to build error messages when invoking methods.
+	 *
+	 * @param method method for which the class name is needed
+	 * @param obj object on which the method is invoked
+	 * @return canonical class name for the given method and object
+	 */
+	private static String getCanonicalClassName(final Method method, final Object obj) {
+		if (null == obj) {
+			return method.getDeclaringClass().getCanonicalName();
+		}
+		if (obj instanceof Class<?> cls) {
+			return cls.getCanonicalName();
+		}
+		return obj.getClass().getCanonicalName();
 	}
 
 	/**
@@ -486,9 +496,8 @@ public interface Methods {
 		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
-			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
-				return Methods.invoke(method, obj, args);
-			}
+			Object target = JavaModifier.STATIC.isPresentOn(method) ? null : obj;
+			return Unchecked.invoke(method, target, args);
 		}
 
 		/**
@@ -503,7 +512,8 @@ public interface Methods {
 		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, A extends Annotation> void invokeWithAnnotation(final T obj, final Class<A> annotationClass) {
-			List<Method> methods = Methods.getAllDeclaredInHierarchy(obj.getClass(), MemberPredicates.withAnnotation(annotationClass));
+			Class<?> cls = Classes.getFrom(obj);
+			List<Method> methods = Methods.getAllDeclaredInHierarchy(cls, MemberPredicates.withAnnotation(annotationClass));
 			for (Method method : methods) {
 				IgnoreAccess.invoke(method, obj);
 			}
@@ -532,6 +542,25 @@ public interface Methods {
 				// escalate any exception invoking the method
 				throw new ReflectionException(e.getMessage(), e);
 			}
+		}
+
+		/**
+		 * Invokes the given static method on the given class with parameters, ignoring the access modifiers.
+		 *
+		 * @param <T> class type on which the method is invoked
+		 * @param <R> method return type
+		 *
+		 * @param method method to be invoked
+		 * @param cls class on which the method is invoked
+		 * @param args method arguments
+		 * @return result of the method invocation
+		 * @throws ReflectionException if any error occurs during method invocation
+		 */
+		static <T, R> R invokeStatic(final Method method, final Class<T> cls, final Object... args) {
+			if (JavaModifier.STATIC.isNotPresentOn(method)) {
+				throw new ReflectionException("Method {} is not static on class: {}", method.getName(), cls);
+			}
+			return Unchecked.invokeStatic(method, args);
 		}
 	}
 
@@ -578,8 +607,8 @@ public interface Methods {
 			if (null == obj) {
 				return null;
 			}
-			Class<?> clazz = obj instanceof Class<?> cls ? cls : obj.getClass();
-			return Safe.getOneDeclared(methodName, clazz, parameterTypes);
+			Class<?> cls = Classes.getFrom(obj);
+			return Safe.getOneDeclared(methodName, cls, parameterTypes);
 		}
 
 		/**
@@ -675,7 +704,6 @@ public interface Methods {
 			} catch (NullPointerException e) {
 				throw new ReflectionException("The excluded set is null. Please provide a non null modifiable set.", e);
 			}
-
 			List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), excluded);
 			for (Class<?> iface : cls.getInterfaces()) {
 				methods.addAll(getAllDeclaredInHierarchy(iface, excluded));
@@ -684,8 +712,49 @@ public interface Methods {
 			for (int i = declared.length - 1; i >= 0; --i) {
 				methods.addFirst(declared[i]);
 			}
-
 			return methods;
+		}
+	}
+
+	/**
+	 * Name space interface for methods that ignore access modifiers and do not do validations and emphasize speed. The
+	 * caller is responsible to provide valid input and to handle exceptions.
+	 * <p>
+	 * For example, when invoking a method on a class that is known to have that method, or when invoking a method in a loop
+	 * and the overhead of handling exceptions is too high.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Unchecked {
+
+		/**
+		 * Invokes the given method on the given object with parameters, ignoring the access modifiers.
+		 *
+		 * @param <T> object type on which the method is invoked
+		 * @param <R> method return type
+		 *
+		 * @param obj object on which the method is invoked
+		 * @param method method to be invoked
+		 * @param args method arguments
+		 * @return result of the method invocation
+		 * @throws ReflectionException if any error occurs during method invocation
+		 */
+		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
+			return MemberAccessor.on(obj, method, () -> Methods.invoke(method, obj, args));
+		}
+
+		/**
+		 * Invokes the given static method on the given class with parameters, ignoring the access modifiers.
+		 *
+		 * @param <R> method return type
+		 *
+		 * @param method method to be invoked
+		 * @param args method arguments
+		 * @return result of the method invocation
+		 * @throws ReflectionException if any error occurs during method invocation
+		 */
+		static <R> R invokeStatic(final Method method, final Object... args) {
+			return Unchecked.invoke(method, null, args);
 		}
 	}
 }

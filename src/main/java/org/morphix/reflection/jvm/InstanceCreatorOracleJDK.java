@@ -71,7 +71,7 @@ public class InstanceCreatorOracleJDK extends InstanceCreator { // NOSONAR
 	 */
 	<T> Constructor<T> newConstructorForSerialization(final Class<T> cls) {
 		try {
-			return Methods.IgnoreAccess.invoke(newConstructorForSerializationMethod, reflectionFactory, cls, objectConstructor);
+			return Methods.Unchecked.invoke(newConstructorForSerializationMethod, reflectionFactory, cls, objectConstructor);
 		} catch (Exception e) {
 			throw new ReflectionException("Could not create constructor for serialization.", e);
 		}

@@ -65,7 +65,7 @@ public final class CharSequenceToEnum extends FieldHandler {
 			if (VALUE_OF_METHOD_NAME.equals(method.getName())) {
 				valueOfMethod = method;
 			} else {
-				Object dValue = Methods.IgnoreAccess.invoke(method, dClass, sValue);
+				Object dValue = Methods.Unchecked.invokeStatic(method, sValue);
 				if (null != dValue) {
 					dfo.setFieldValue(dValue);
 					return CONVERTED;
@@ -73,7 +73,7 @@ public final class CharSequenceToEnum extends FieldHandler {
 			}
 		}
 		// invoke the 'valueOf' method last
-		Object dValue = Methods.IgnoreAccess.invoke(valueOfMethod, dClass, sValue);
+		Object dValue = Methods.Unchecked.invoke(valueOfMethod, dClass, sValue);
 		// dValue will never be null because 'valueOf' will fail for wrong values
 		dfo.setFieldValue(dValue);
 		return CONVERTED;

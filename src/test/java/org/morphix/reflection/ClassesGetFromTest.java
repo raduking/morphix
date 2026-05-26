@@ -12,38 +12,41 @@
  */
 package org.morphix.reflection;
 
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields#get(Object, String)}.
+ * Test class for:
+ *
+ * <ul>
+ * <li>{@link Classes#getFrom(Object)}</li>
+ * </ul>
  *
  * @author Radu Sebastian LAZIN
  */
-class FieldsGetFieldValueWithGetterTest {
+class ClassesGetFromTest {
 
 	@Test
-	void shouldRetrieveFieldValueByGetter() {
-		Integer result = Fields.get(new A(), "x");
+	void shouldReturnTheClass() {
+		Class<?> cls = Classes.getFrom(Class.class);
 
-		assertThat(result, equalTo(2));
+		assertThat(cls, equalTo(Class.class));
 	}
 
 	@Test
-	void shouldRetrieveFieldValueByField() {
-		Integer result = Fields.get(new A(), "y");
+	void shouldReturnNullFromNull() {
+		Class<?> cls = Classes.getFrom(null);
 
-		assertThat(result, equalTo(3));
+		assertThat(cls, nullValue());
 	}
 
-	public static class A {
-		Integer x = 2;
-		Integer y = 3;
+	@Test
+	void shouldReturnClassFormObject() {
+		Class<?> cls = Classes.getFrom(new Object());
 
-		public Integer getX() {
-			return x;
-		}
+		assertThat(cls, equalTo(Object.class));
 	}
 }

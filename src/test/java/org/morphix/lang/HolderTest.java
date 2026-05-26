@@ -34,6 +34,7 @@ class HolderTest {
 		Holder<String> holder = new Holder<>();
 
 		assertThat(holder.getValue(), nullValue());
+		assertThat(holder.get(), nullValue());
 	}
 
 	@Test
@@ -41,6 +42,7 @@ class HolderTest {
 		Holder<String> holder = new Holder<>(TEST_STRING);
 
 		assertThat(holder.getValue(), equalTo(TEST_STRING));
+		assertThat(holder.get(), equalTo(TEST_STRING));
 	}
 
 	@Test
@@ -48,11 +50,31 @@ class HolderTest {
 		Holder<String> holder = Holder.empty();
 
 		assertThat(holder.getValue(), nullValue());
+		assertThat(holder.get(), nullValue());
 	}
 
 	@Test
 	void shouldConstructAHolderWithAValueWithStaticMethod() {
 		Holder<String> holder = Holder.of(TEST_STRING);
+
+		assertThat(holder.getValue(), equalTo(TEST_STRING));
+		assertThat(holder.get(), equalTo(TEST_STRING));
+	}
+
+	@Test
+	void shouldSetValue() {
+		Holder<String> holder = new Holder<>();
+
+		holder.setValue(TEST_STRING);
+
+		assertThat(holder.getValue(), equalTo(TEST_STRING));
+	}
+
+	@Test
+	void shouldSetValueWithSetMethod() {
+		Holder<String> holder = new Holder<>();
+
+		holder.set(TEST_STRING);
 
 		assertThat(holder.getValue(), equalTo(TEST_STRING));
 	}

@@ -90,6 +90,13 @@ class FieldsIgnoreAccessGetTest {
 	}
 
 	@Test
+	void shouldThrowExceptionOnNullObject() {
+		Object o = null;
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.get(o, NON_EXISTENT_FIELD));
+		assertThat(e.getMessage(), equalTo("Could not find field '" + NON_EXISTENT_FIELD + "' on object of type " + null));
+	}
+
+	@Test
 	void shouldKeepAccessModifiersUnchangedAfterCall() throws Exception {
 		B b = new B();
 		b.setI(TEST_INTEGER);
@@ -137,5 +144,45 @@ class FieldsIgnoreAccessGetTest {
 		assertThat(s, equalTo(TEST_STRING));
 		assertThat(l, equalTo(TEST_LONG));
 		assertThat(i, equalTo(TEST_INTEGER));
+	}
+
+	public static class D {
+		@SuppressWarnings("unused")
+		private static final String FIELD = "field";
+	}
+
+	@Test
+	void shouldIgnoreAccessOnStaticFields() throws Exception {
+		Field field = D.class.getDeclaredField("FIELD");
+
+		String value = Fields.IgnoreAccess.get(D.class, field);
+
+		assertThat(value, equalTo("field"));
+	}
+
+	@Test
+	void shouldIgnoreAccessOnStaticFieldsWithFieldName() {
+		String value = Fields.IgnoreAccess.get(D.class, "FIELD");
+
+		assertThat(value, equalTo("field"));
+	}
+
+	@Test
+	void shouldIgnoreAccessAndGetStaticFieldWithInstance() throws Exception {
+		D d = new D();
+		Field field = D.class.getDeclaredField("FIELD");
+
+		String value = Fields.IgnoreAccess.get(d, field);
+
+		assertThat(value, equalTo("field"));
+	}
+
+	@Test
+	void shouldReturnClassClassloaderField() {
+		Class<?> clazz = Class.class;
+
+		Object module = Fields.IgnoreAccess.get(clazz, "module");
+
+		assertThat(module, equalTo(clazz.getModule()));
 	}
 }

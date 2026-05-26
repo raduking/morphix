@@ -11,16 +11,19 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+OLD_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+
 if [ "$#" -lt 1 ]; then
     echo "Usage: $0 <new-version>"
+    echo
+    echo "Current version: $OLD_VERSION"
     exit 1
 fi
 
 NEW_VERSION=$1
-OLD_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 
-echo "New version: $NEW_VERSION"
 echo "Old version: $OLD_VERSION"
+echo "New version: $NEW_VERSION"
 
 if [ "$NEW_VERSION" = "$OLD_VERSION" ]; then
     echo "Nothing to update."
@@ -32,6 +35,33 @@ echo "Updating project version to $NEW_VERSION in pom.xml files..."
 mvn versions:set -DnewVersion=$NEW_VERSION
 mvn versions:update-child-modules
 mvn versions:commit
+
+CHANGELOG_FILE="CHANGELOG.md"
+
+# Update CHANGELOG.md if exists
+if [ -f "$CHANGELOG_FILE" ]; then
+    echo "Updating $CHANGELOG_FILE..."
+
+    TEMP_FILE=$(mktemp)
+    {
+        # first line, usually "## Release Notes"
+        head -n 1 "$CHANGELOG_FILE"
+        
+        # new version
+        echo ""
+        echo "\`$NEW_VERSION\`"
+        echo ""
+        echo "---"
+
+        # the rest of the file skipping the first line (header)
+        tail -n +2 "$CHANGELOG_FILE"
+    } > "$TEMP_FILE"
+
+    mv "$TEMP_FILE" "$CHANGELOG_FILE"
+
+    echo "  Added new version entry for $NEW_VERSION to $CHANGELOG_FILE"
+    echo "  Note: Please edit $CHANGELOG_FILE to add the release notes for $NEW_VERSION"
+fi
 
 FILES=(
     "README.md"

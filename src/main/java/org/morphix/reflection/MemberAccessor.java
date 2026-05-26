@@ -14,8 +14,13 @@ package org.morphix.reflection;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Member;
-import java.lang.reflect.Modifier;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import org.morphix.lang.Unchecked;
+import org.morphix.lang.function.Runnables;
 
 /**
  * Helper class for accessing members that are not accessible. This is only a read access meaning that it cannot write
@@ -50,10 +55,7 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	 */
 	public MemberAccessor(final Object object, final T member) {
 		this.member = Objects.requireNonNull(member, "member");
-		// by default, a reflected object is not accessible
-		Object actual = null != object && Modifier.isStatic(member.getModifiers()) ? null : object;
-
-		this.isAccessible = isAccessible(actual, member);
+		this.isAccessible = isAccessible(object, member);
 		if (!isAccessible) {
 			setAccessible(true);
 		}
@@ -83,12 +85,13 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	 *
 	 * @param <T> the type of the member, which must be both an {@link AccessibleObject} and a {@link Member}
 	 *
-	 * @param object object containing the member to access
+	 * @param obj object containing the member to access
 	 * @param member member to check
 	 * @return {@code true} if the member is accessible, {@code false} otherwise
 	 */
-	public static <T extends AccessibleObject & Member> boolean isAccessible(final Object object, final T member) {
-		return ReflectionException.wrapThrowing(() -> member.canAccess(object), ACCESS_CHANGE_ERROR + member);
+	public static <T extends AccessibleObject & Member> boolean isAccessible(final Object obj, final T member) {
+		Object target = null != obj && JavaModifier.STATIC.isPresentOn(member) ? null : obj;
+		return ReflectionException.wrapThrowing(() -> member.canAccess(target), ACCESS_CHANGE_ERROR + member);
 	}
 
 	/**
@@ -101,5 +104,81 @@ public class MemberAccessor<T extends AccessibleObject & Member> implements Auto
 	 */
 	public static <T extends AccessibleObject & Member> void setAccessible(final T member, final boolean accessible) {
 		ReflectionException.wrapThrowing(() -> member.setAccessible(accessible), ACCESS_CHANGE_ERROR + member); // NOSONAR
+	}
+
+	/**
+	 * Executes the given supplier with the member accessible. If the member is already accessible, it will execute the
+	 * supplier without changing the accessibility. Otherwise, it will change the accessibility to {@code true} before
+	 * executing the supplier and will restore the original accessibility after execution.
+	 * <p>
+	 * Any Exception thrown during the execution of the supplier will be re-thrown as an unchecked exception.
+	 *
+	 * @param <T> the type of the member, which must be both an {@link AccessibleObject} and a {@link Member}
+	 * @param <U> the type of the result returned by the supplier
+	 *
+	 * @param obj object containing the member to access
+	 * @param member member to access
+	 * @param supplier supplier to execute with the member accessible
+	 * @return the result returned by the supplier
+	 */
+	public static <T extends AccessibleObject & Member, U> U on(final Object obj, final T member, final Supplier<U> supplier) {
+		return on(obj, member, supplier, Unchecked.Undeclared::reThrow);
+	}
+
+	/**
+	 * Executes the given supplier with the member accessible. If the member is already accessible, it will execute the
+	 * supplier without changing the accessibility. Otherwise, it will change the accessibility to {@code true} before
+	 * executing the supplier and will restore the original accessibility after execution.
+	 * <p>
+	 * If any {@link ReflectionException} exception is thrown during the execution of the supplier, it will be handled by
+	 * the given exception handler.
+	 *
+	 * @param <T> the type of the member, which must be both an {@link AccessibleObject} and a {@link Member}
+	 * @param <U> the type of the result returned by the supplier
+	 *
+	 * @param obj object containing the member to access
+	 * @param member member to access
+	 * @param supplier supplier to execute with the member accessible
+	 * @param onError handler for any exception thrown during the execution of the supplier
+	 * @return the result returned by the supplier or by the exception handler if an exception is thrown
+	 */
+	public static <T extends AccessibleObject & Member, U> U on(final Object obj, final T member, final Supplier<U> supplier,
+			final Function<ReflectionException, U> onError) {
+		try {
+			if (isAccessible(obj, member)) {
+				return supplier.get();
+			}
+			try {
+				setAccessible(member, true);
+				return supplier.get();
+			} finally {
+				setAccessible(member, false);
+			}
+		} catch (ReflectionException e) {
+			return onError.apply(e);
+		}
+	}
+
+	/**
+	 * Executes the given runnable with the member accessible. If the member is already accessible, it will execute the
+	 * runnable without changing the accessibility. Otherwise, it will change the accessibility to {@code true} before
+	 * executing the runnable and will restore the original accessibility after execution.
+	 * <p>
+	 * If any {@link ReflectionException} exception is thrown during the execution of the runnable, it will be handled by
+	 * the given exception handler.
+	 *
+	 * @param <T> the type of the member, which must be both an {@link AccessibleObject} and a {@link Member}
+	 *
+	 * @param obj object containing the member to access
+	 * @param member member to access
+	 * @param runnable runnable to execute with the member accessible
+	 * @param onError handler for any exception thrown during the execution of the runnable
+	 */
+	public static <T extends AccessibleObject & Member> void on(final Object obj, final T member, final Runnable runnable,
+			final Consumer<ReflectionException> onError) {
+		on(obj, member, Runnables.toSupplier(runnable), t -> {
+			onError.accept(t);
+			return null;
+		});
 	}
 }

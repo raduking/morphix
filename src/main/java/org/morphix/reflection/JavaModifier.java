@@ -12,9 +12,11 @@
  */
 package org.morphix.reflection;
 
+import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,55 +25,74 @@ import java.util.stream.Stream;
  * the 'default' package modifier which does not have a keyword associated.
  * <p>
  * The type is named {@link JavaModifier} to not be confused with {@link Modifier}.
+ * <p>
+ * Example usage:
+ *
+ * <pre>
+ * Arrays.stream(clazz.getDeclaredMethods())
+ * 		.filter(JavaModifier.PUBLIC)
+ * 		.filter(JavaModifier.STATIC)
+ * 		.toList();
+ * </pre>
  *
  * @author Radu Sebastian LAZIN
  */
-public enum JavaModifier {
+public enum JavaModifier implements Predicate<Member> {
 
 	/**
 	 * <code>public</code> access modifier
 	 */
-	PUBLIC(true),
+	PUBLIC(true, Modifier.PUBLIC),
 
 	/**
 	 * <code>protected</code> access modifier
 	 */
-	PROTECTED(true),
+	PROTECTED(true, Modifier.PROTECTED),
 
 	/**
 	 * <code>private</code> access modifier
 	 */
-	PRIVATE(true),
+	PRIVATE(true, Modifier.PRIVATE),
 
 	/**
 	 * <code>final</code> modifier
 	 */
-	FINAL,
+	FINAL(Modifier.FINAL),
 
 	/**
 	 * <code>static</code> modifier
 	 */
-	STATIC,
+	STATIC(Modifier.STATIC),
 
 	/**
 	 * <code>abstract</code> modifier
 	 */
-	ABSTRACT,
+	ABSTRACT(Modifier.ABSTRACT),
 
 	/**
 	 * <code>transient</code> modifier
 	 */
-	TRANSIENT,
+	TRANSIENT(Modifier.TRANSIENT),
 
 	/**
 	 * <code>synchronized</code> modifier
 	 */
-	SYNCHRONIZED,
+	SYNCHRONIZED(Modifier.SYNCHRONIZED),
 
 	/**
 	 * <code>volatile</code> modifier
 	 */
-	VOLATILE;
+	VOLATILE(Modifier.VOLATILE),
+
+	/**
+	 * <code>native</code> modifier
+	 */
+	NATIVE(Modifier.NATIVE),
+
+	/**
+	 * <code>strictfp</code> modifier
+	 */
+	STRICTFP(Modifier.STRICT);
 
 	/**
 	 * The actual string value of the modifier.
@@ -82,6 +103,11 @@ public enum JavaModifier {
 	 * Access modifier flag (some modifiers are not access modifiers).
 	 */
 	private final boolean accessModifier;
+
+	/**
+	 * Mask value to check if the modifier is present on a member.
+	 */
+	private final int modifierMask;
 
 	/**
 	 * Name map that maps the java keyword to the corresponding modifier enum value.
@@ -106,17 +132,21 @@ public enum JavaModifier {
 	 * Constructor with the access modifier.
 	 *
 	 * @param accessModifier access modifier
+	 * @param modifierMask mask value to check if the modifier is present on a member
 	 */
-	JavaModifier(final boolean accessModifier) {
+	JavaModifier(final boolean accessModifier, final int modifierMask) {
 		this.value = name().toLowerCase();
 		this.accessModifier = accessModifier;
+		this.modifierMask = modifierMask;
 	}
 
 	/**
-	 * Default constructor.
+	 * Constructor with modifier mask only, the access modifier flag is set to false by default.
+	 *
+	 * @param modifierMask mask value to check if the modifier is present on a member
 	 */
-	JavaModifier() {
-		this(false);
+	JavaModifier(final int modifierMask) {
+		this(false, modifierMask);
 	}
 
 	/**
@@ -143,5 +173,33 @@ public enum JavaModifier {
 	 */
 	public boolean isAccessModifier() {
 		return accessModifier;
+	}
+
+	/**
+	 * @see Predicate#test(Object)
+	 */
+	@Override
+	public boolean test(final Member member) {
+		return (member.getModifiers() & modifierMask) != 0;
+	}
+
+	/**
+	 * Checks if the given member has this modifier.
+	 *
+	 * @param member the member to check
+	 * @return true if the given member has this modifier, false otherwise
+	 */
+	public boolean isPresentOn(final Member member) {
+		return test(member);
+	}
+
+	/**
+	 * Checks if the given member does not have this modifier.
+	 *
+	 * @param member the member to check
+	 * @return true if the given member does not have this modifier, false otherwise
+	 */
+	public boolean isNotPresentOn(final Member member) {
+		return !isPresentOn(member);
 	}
 }

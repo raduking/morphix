@@ -181,4 +181,34 @@ class LoggerAdapterTest {
 			assertThat(LoggerAdapter.LoggingLevel.ERROR.toJulLevel(), is(Level.SEVERE));
 		}
 	}
+
+	@Nested
+	class IsEnabledTests {
+
+		@Test
+		void shouldReturnFalseForNoneAdapter() {
+			LoggerAdapter noneAdapter = LoggerAdapter.none();
+
+			assertThat(noneAdapter.isEnabled(LoggerAdapter.LoggingLevel.TRACE), is(false));
+			assertThat(noneAdapter.isEnabled(LoggerAdapter.LoggingLevel.DEBUG), is(false));
+			assertThat(noneAdapter.isEnabled(LoggerAdapter.LoggingLevel.INFO), is(false));
+			assertThat(noneAdapter.isEnabled(LoggerAdapter.LoggingLevel.WARN), is(false));
+			assertThat(noneAdapter.isEnabled(LoggerAdapter.LoggingLevel.ERROR), is(false));
+		}
+	}
+
+	@Nested
+	class IsDisabledTests {
+
+		@Test
+		void shouldReturnTrueForNoneAdapter() {
+			LoggerAdapter noneAdapter = LoggerAdapter.none();
+
+			assertThat(noneAdapter.isDisabled(LoggerAdapter.LoggingLevel.TRACE), is(true));
+			assertThat(noneAdapter.isDisabled(LoggerAdapter.LoggingLevel.DEBUG), is(true));
+			assertThat(noneAdapter.isDisabled(LoggerAdapter.LoggingLevel.INFO), is(true));
+			assertThat(noneAdapter.isDisabled(LoggerAdapter.LoggingLevel.WARN), is(true));
+			assertThat(noneAdapter.isDisabled(LoggerAdapter.LoggingLevel.ERROR), is(true));
+		}
+	}
 }

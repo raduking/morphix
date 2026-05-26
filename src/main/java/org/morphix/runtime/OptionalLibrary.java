@@ -16,157 +16,160 @@ import java.util.List;
 import java.util.Objects;
 
 import org.morphix.lang.function.InstanceFunction;
+import org.morphix.reflection.Classes;
 import org.morphix.reflection.Constructors;
-import org.morphix.reflection.Reflection;
 
 /**
- * Descriptor for a library indicating its presence and associated specific class.
+ * Descriptor for a library indicating its presence and associated facade class. This class is used to check for the
+ * presence of a library in the classpath and to provide access to a facade class that can be used to interact with the
+ * library if it is present. It also allows for an instance function to retrieve instances of the facade class,
+ * providing flexibility in how the facade class is instantiated (e.g., singleton, new instance per call, etc.).
  *
- * @param <T> the type of the specific class associated with the library
+ * @param <T> the type of the facade class associated with the library
  *
  * @author Radu Sebastian LAZIN
  */
 public class OptionalLibrary<T> {
 
 	/**
-	 * Indicates if the library is present and the specific class associated with it.
+	 * Indicates if the library is present and the facade class associated with it.
 	 */
 	private final boolean present;
 
 	/**
-	 * The specific class associated with the library.
+	 * The facade class associated with the library.
 	 */
-	private final Class<T> specificClass;
+	private final Class<T> facadeClass;
 
 	/**
-	 * An instance function to retrieve instances of the specific class, if needed.
+	 * An instance function to retrieve instances of the facade class, if needed.
 	 */
 	private final InstanceFunction<T> instanceFunction;
 
 	/**
-	 * Constructor with presence flag and specific class. When providing the instance function, it will be used to retrieve
-	 * instances of the specific class. If the instance function is not provided, a default one will be created using the
-	 * constructor of the specific class. This allows for flexibility in how instances of the specific class are created and
+	 * Constructor with presence flag and facade class. When providing the instance function, it will be used to retrieve
+	 * instances of the facade class. If the instance function is not provided, a default one will be created using the
+	 * constructor of the facade class. This allows for flexibility in how instances of the facade class are created and
 	 * also allows for singleton instances if the instance function is implemented to return the same instance.
 	 *
 	 * @param present indicates if the library is present
-	 * @param specificClass the specific class associated with the library
-	 * @param instanceFunction an optional instance function to retrieve instances of the specific class, if needed
+	 * @param facadeClass the facade class associated with the library
+	 * @param instanceFunction an optional instance function to retrieve instances of the facade class, if needed
 	 */
-	protected OptionalLibrary(final boolean present, final Class<T> specificClass, final InstanceFunction<T> instanceFunction) {
+	protected OptionalLibrary(final boolean present, final Class<T> facadeClass, final InstanceFunction<T> instanceFunction) {
 		this.present = present;
-		this.specificClass = Objects.requireNonNull(specificClass, "specificClass must not be null");
+		this.facadeClass = Objects.requireNonNull(facadeClass, "facadeClass must not be null");
 		this.instanceFunction = instanceFunction;
 	}
 
 	/**
-	 * Creates a default instance function that uses the constructor of the specific class to create new instances. This is
-	 * used when no custom instance function is provided, allowing for a simple way to create instances of the specific
-	 * class using its default constructor.
+	 * Creates a default instance function that uses the constructor of the facade class to create new instances. This is
+	 * used when no custom instance function is provided, allowing for a simple way to create instances of the facade class
+	 * using its default constructor.
 	 *
-	 * @param <T> the type of the specific class
+	 * @param <T> the type of the facade class
 	 *
-	 * @param specificClass specific class to create instances of
-	 * @return an instance function that creates new instances of the specific class using its constructor
+	 * @param facadeClass facade class to create instances of
+	 * @return an instance function that creates new instances of the facade class using its constructor
 	 */
-	private static <T> InstanceFunction<T> defaultInstanceFunction(final Class<T> specificClass) {
-		return () -> Constructors.IgnoreAccess.newInstance(specificClass);
+	private static <T> InstanceFunction<T> defaultInstanceFunction(final Class<T> facadeClass) {
+		return () -> Constructors.IgnoreAccess.newInstance(facadeClass);
 	}
 
 	/**
 	 * Factory method to create a {@link OptionalLibrary} instance indicating the library is present.
 	 *
-	 * @param <T> the type of the specific class
+	 * @param <T> the type of the facade class
 	 *
-	 * @param specificClass the specific class associated with the library
+	 * @param facadeClass the facade class associated with the library
 	 * @return a new LibraryDescriptor instance with presence set to true
 	 */
-	public static <T> OptionalLibrary<T> present(final Class<T> specificClass) {
-		return present(specificClass, defaultInstanceFunction(specificClass));
+	public static <T> OptionalLibrary<T> present(final Class<T> facadeClass) {
+		return present(facadeClass, defaultInstanceFunction(facadeClass));
 	}
 
 	/**
 	 * Factory method to create a {@link OptionalLibrary} instance indicating the library is present.
 	 *
-	 * @param <T> the type of the specific class
+	 * @param <T> the type of the facade class
 	 *
-	 * @param specificClass the specific class associated with the library
-	 * @param instanceFunction an instance function to retrieve instances of the specific class
+	 * @param facadeClass the facade class associated with the library
+	 * @param instanceFunction an instance function to retrieve instances of the facade class
 	 * @return a new LibraryDescriptor instance with presence set to true
 	 */
-	public static <T> OptionalLibrary<T> present(final Class<T> specificClass, final InstanceFunction<T> instanceFunction) {
-		return new OptionalLibrary<>(true, specificClass, instanceFunction);
+	public static <T> OptionalLibrary<T> present(final Class<T> facadeClass, final InstanceFunction<T> instanceFunction) {
+		return new OptionalLibrary<>(true, facadeClass, instanceFunction);
 	}
 
 	/**
 	 * Factory method to create a {@link OptionalLibrary} instance indicating the library is not present.
 	 *
-	 * @param <T> the type of the specific class
+	 * @param <T> the type of the facade class
 	 *
-	 * @param specificClass the specific class associated with the library
+	 * @param facadeClass the facade class associated with the library
 	 * @return a new LibraryDescriptor instance with presence set to false
 	 */
-	public static <T> OptionalLibrary<T> notPresent(final Class<T> specificClass) {
-		return notPresent(specificClass, defaultInstanceFunction(specificClass));
+	public static <T> OptionalLibrary<T> notPresent(final Class<T> facadeClass) {
+		return notPresent(facadeClass, defaultInstanceFunction(facadeClass));
 	}
 
 	/**
 	 * Factory method to create a {@link OptionalLibrary} instance indicating the library is not present.
 	 *
-	 * @param <T> the type of the specific class
+	 * @param <T> the type of the facade class
 	 *
-	 * @param specificClass the specific class associated with the library
-	 * @param instanceFunction an instance function to retrieve instances of the specific class
+	 * @param facadeClass the facade class associated with the library
+	 * @param instanceFunction an instance function to retrieve instances of the facade class
 	 * @return a new LibraryDescriptor instance with presence set to false
 	 */
-	public static <T> OptionalLibrary<T> notPresent(final Class<T> specificClass, final InstanceFunction<T> instanceFunction) {
-		return new OptionalLibrary<>(false, specificClass, instanceFunction);
+	public static <T> OptionalLibrary<T> notPresent(final Class<T> facadeClass, final InstanceFunction<T> instanceFunction) {
+		return new OptionalLibrary<>(false, facadeClass, instanceFunction);
 	}
 
 	/**
 	 * Factory method to create a {@link OptionalLibrary} instance.
 	 *
-	 * @param <T> the type of the specific class
+	 * @param <T> the type of the facade class
 	 *
 	 * @param libraryClassName the fully qualified class name to check for presence
-	 * @param specificClass the specific class associated with the library
+	 * @param facadeClass the facade class associated with the library
 	 * @return a new LibraryDescriptor instance
 	 */
-	public static <T> OptionalLibrary<T> of(final String libraryClassName, final Class<T> specificClass) {
-		return of(libraryClassName, specificClass, defaultInstanceFunction(specificClass));
+	public static <T> OptionalLibrary<T> of(final String libraryClassName, final Class<T> facadeClass) {
+		return of(libraryClassName, facadeClass, defaultInstanceFunction(facadeClass));
 	}
 
 	/**
 	 * Factory method to create a {@link OptionalLibrary} instance.
 	 *
-	 * @param <T> the type of the specific class
+	 * @param <T> the type of the facade class
 	 *
 	 * @param libraryClassName the fully qualified class name to check for presence
-	 * @param specificClass the specific class associated with the library
-	 * @param instanceFunction an instance function to retrieve instances of the specific class
+	 * @param facadeClass the facade class associated with the library
+	 * @param instanceFunction an instance function to retrieve instances of the facade class
 	 * @return a new LibraryDescriptor instance
 	 */
-	public static <T> OptionalLibrary<T> of(final String libraryClassName, final Class<T> specificClass,
+	public static <T> OptionalLibrary<T> of(final String libraryClassName, final Class<T> facadeClass,
 			final InstanceFunction<T> instanceFunction) {
-		return of(List.of(libraryClassName), specificClass, instanceFunction);
+		return of(List.of(libraryClassName), facadeClass, instanceFunction);
 	}
 
 	/**
 	 * Factory method to create a {@link OptionalLibrary} instance.
 	 *
-	 * @param <T> the type of the specific class
+	 * @param <T> the type of the facade class
 	 *
 	 * @param libraryClassNames a list of fully qualified class names to check for presence
-	 * @param specificClass the specific class associated with the library
-	 * @param instanceFunction an instance function to retrieve instances of the specific class
+	 * @param facadeClass the facade class associated with the library
+	 * @param instanceFunction an instance function to retrieve instances of the facade class
 	 * @return a new LibraryDescriptor instance
 	 */
-	public static <T> OptionalLibrary<T> of(final List<String> libraryClassNames, final Class<T> specificClass,
+	public static <T> OptionalLibrary<T> of(final List<String> libraryClassNames, final Class<T> facadeClass,
 			final InstanceFunction<T> instanceFunction) {
-		boolean libraryPresent = libraryClassNames.stream().allMatch(Reflection::isClassPresent);
+		boolean libraryPresent = libraryClassNames.stream().allMatch(Classes::isPresent);
 		return libraryPresent
-				? present(specificClass, instanceFunction)
-				: notPresent(specificClass, instanceFunction);
+				? present(facadeClass, instanceFunction)
+				: notPresent(facadeClass, instanceFunction);
 	}
 
 	/**
@@ -179,20 +182,42 @@ public class OptionalLibrary<T> {
 	}
 
 	/**
-	 * Retrieves the specific class associated with the library.
+	 * Retrieves the facade class associated with the library.
 	 *
-	 * @return the specific class
+	 * @return the facade class
 	 */
-	public Class<T> getSpecificClass() {
-		return specificClass;
+	public Class<T> getFacadeClass() {
+		return facadeClass;
 	}
 
 	/**
-	 * Retrieves an instance of the specific class using the instance function.
+	 * Retrieves the facade class associated with the library.
+	 * <p>
+	 * Alias for {@link #getFacadeClass()}.
 	 *
-	 * @return an instance of the specific class
+	 * @return the facade class
+	 */
+	public Class<T> getSpecificClass() {
+		return getFacadeClass();
+	}
+
+	/**
+	 * Retrieves an instance of the facade class using the instance function.
+	 *
+	 * @return an instance of the facade class
+	 */
+	public T getFacadeInstance() {
+		return instanceFunction.get();
+	}
+
+	/**
+	 * Retrieves an instance of the facade class using the instance function.
+	 * <p>
+	 * Alias for {@link #getFacadeInstance()}.
+	 *
+	 * @return an instance of the facade class
 	 */
 	public T getSpecificInstance() {
-		return instanceFunction.get();
+		return getFacadeInstance();
 	}
 }

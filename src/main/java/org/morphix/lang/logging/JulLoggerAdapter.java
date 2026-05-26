@@ -116,6 +116,14 @@ public final class JulLoggerAdapter implements LoggerAdapter {
 	}
 
 	/**
+	 * @see LoggerAdapter#isEnabled(LoggingLevel)
+	 */
+	@Override
+	public boolean isEnabled(final LoggingLevel level) {
+		return logger.isLoggable(level.toJulLevel());
+	}
+
+	/**
 	 * Returns the underlying JUL logger instance that this adapter delegates to for logging messages. This method is
 	 * protected to allow subclasses to access the logger if needed, while still encapsulating the logger within the
 	 * adapter.

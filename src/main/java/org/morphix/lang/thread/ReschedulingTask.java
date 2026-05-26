@@ -15,6 +15,7 @@ package org.morphix.lang.thread;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.morphix.lang.Comparables;
+import org.morphix.lang.Messages;
 import org.morphix.lang.Nullables;
 import org.morphix.lang.function.ExecutionWrapper;
 import org.morphix.lang.function.LoggerAdapter;
@@ -73,6 +75,12 @@ public class ReschedulingTask implements AutoCloseable {
 		 * Default behavior for task cancellation - do not interrupt running tasks.
 		 */
 		public static final boolean INTERRUPT_ON_CANCEL = false;
+
+		/**
+		 * Default timeout for awaiting termination of the scheduler when closing. This is used in the close method when
+		 * shutting down the scheduler if cancellation of the scheduled task fails. Optional, defaults to 1 second.
+		 */
+		public static final Duration TERMINATION_TIMEOUT = Duration.ofSeconds(1);
 
 		/**
 		 * Hide constructor.
@@ -134,6 +142,12 @@ public class ReschedulingTask implements AutoCloseable {
 	private final boolean interruptOnCancel;
 
 	/**
+	 * Timeout for awaiting termination of the scheduler when closing. This is used in the close method when shutting down
+	 * the scheduler if cancellation of the scheduled task fails. Optional, defaults to {@link Default#TERMINATION_TIMEOUT}.
+	 */
+	private final Duration terminationTimeout;
+
+	/**
 	 * Atomic flag to indicate whether the task is enabled or disabled. When disabled, the task will not execute or
 	 * reschedule itself.
 	 */
@@ -163,6 +177,10 @@ public class ReschedulingTask implements AutoCloseable {
 		}
 		this.taskCancelRetry = Nullables.nonNullOrDefault(builder.taskCancelRetry, Retry::noRetry);
 		this.interruptOnCancel = builder.interruptOnCancel;
+		this.terminationTimeout = Nullables.nonNullOrDefault(builder.terminationTimeout, () -> Default.TERMINATION_TIMEOUT);
+		if (terminationTimeout.isNegative() || terminationTimeout.isZero()) {
+			throw new IllegalArgumentException("terminationTimeout must be positive");
+		}
 	}
 
 	/**
@@ -193,22 +211,25 @@ public class ReschedulingTask implements AutoCloseable {
 	@Override
 	public void close() throws Exception {
 		enabled.set(false);
-		scheduler.closeIfManaged(this::closeRefreshScheduler);
+		boolean cancelled = cancelScheduledTask();
+		scheduler.closeIfManaged(() -> closeRefreshScheduler(cancelled));
 	}
 
 	/**
 	 * Closes the refresh scheduler by attempting to cancel any currently scheduled task. If cancellation fails, it forces a
 	 * shutdown of the scheduler and logs remaining tasks count.
+	 *
+	 * @param cancelled whether the scheduled task was successfully cancelled
 	 */
 	@SuppressWarnings("resource")
-	private void closeRefreshScheduler() {
+	private void closeRefreshScheduler(final boolean cancelled) throws InterruptedException {
 		ScheduledExecutorService executor = scheduler.unwrap();
-		boolean cancelled = cancelScheduledTask();
 		if (cancelled) {
 			executor.close();
 		} else {
 			List<Runnable> remaining = executor.shutdownNow();
 			logger.warn("[{}] Scheduler closed with {} remaining tasks.", name, remaining.size());
+			executor.awaitTermination(terminationTimeout.toMillis(), TimeUnit.MILLISECONDS);
 		}
 	}
 
@@ -220,8 +241,11 @@ public class ReschedulingTask implements AutoCloseable {
 	 * @return true if the task was successfully cancelled or there was no task to cancel, false if cancellation failed
 	 */
 	private boolean cancelScheduledTask() {
-		ScheduledFuture<?> task = scheduledTask.getAndSet(null);
-		return cancel(task);
+		ScheduledFuture<?> taskToCancel = scheduledTask.getAndSet(null);
+		if (null != taskToCancel) {
+			return cancel(taskToCancel);
+		}
+		return true;
 	}
 
 	/**
@@ -232,10 +256,11 @@ public class ReschedulingTask implements AutoCloseable {
 	 * @return true if the task was successfully cancelled or was already done, false if cancellation failed
 	 */
 	private boolean cancel(final ScheduledFuture<?> task) {
+		logger.debug("[{}] Called cancel scheduled task: {}.", name, debugInfo(task));
 		if (isDone(task)) {
 			return true;
 		}
-		logger.debug("[{}] Attempting to cancel scheduled task: hashCode:[{}], state:[{}].", name, task.hashCode(), task.state());
+		logger.debug("[{}] Attempting to cancel scheduled task: {}.", name, debugInfo(task));
 		return taskCancelRetry.until(() -> task.cancel(interruptOnCancel), Boolean::booleanValue);
 	}
 
@@ -272,10 +297,24 @@ public class ReschedulingTask implements AutoCloseable {
 		}
 		Duration delay = Comparables.max(nextDelaySupplier.get(), minDelay);
 		logger.debug("[{}] Scheduling next execution in {}ms.", name, delay.toMillis());
-
-		ScheduledFuture<?> newTask = scheduler.unwrap().schedule(this::execute, delay.toMillis(), TimeUnit.MILLISECONDS);
-		ScheduledFuture<?> oldTask = scheduledTask.getAndSet(newTask);
-		cancel(oldTask);
+		ScheduledExecutorService executor = scheduler.unwrap();
+		ScheduledFuture<?> newTask = executor.schedule(this::execute, delay.toMillis(), TimeUnit.MILLISECONDS);
+		if (isEnabled()) {
+			logger.debug("[{}] Scheduled new task: {}.", name, debugInfo(newTask));
+			scheduledTask.set(newTask);
+			if (isDisabled()) {
+				logger.debug("[{}] Task was disabled during scheduling.", name);
+				if (scheduledTask.compareAndSet(newTask, null)) {
+					logger.debug("[{}] Cancelling orphaned task.", name);
+					cancel(newTask);
+				} else {
+					logger.debug("[{}] New task was already scheduled, cancelling not needed.", name);
+				}
+			}
+		} else {
+			logger.debug("[{}] Task was disabled during scheduling. Cancelling immediate orphan.", name);
+			cancel(newTask);
+		}
 	}
 
 	/**
@@ -304,6 +343,20 @@ public class ReschedulingTask implements AutoCloseable {
 		logger.debug("[{}] Disabling rescheduling task.", name);
 		cancelScheduledTask();
 		return true;
+	}
+
+	/**
+	 * Utility method to log task information (hash code and state) for debugging purposes.
+	 *
+	 * @param task the task to log information about
+	 * @return a string with the task's hash code and state
+	 */
+	protected String debugInfo(final ScheduledFuture<?> task) {
+		if (logger.isDisabled(LoggerAdapter.LoggingLevel.DEBUG)) {
+			return "N/A";
+		}
+		return Messages.message("hashCode:[{}], state:[{}]",
+				Nullables.apply(task, Object::hashCode), Nullables.apply(task, Future::state));
 	}
 
 	/**
@@ -489,6 +542,12 @@ public class ReschedulingTask implements AutoCloseable {
 		private boolean interruptOnCancel = Default.INTERRUPT_ON_CANCEL;
 
 		/**
+		 * Timeout for awaiting termination of the scheduler when closing. This is used in the close method when shutting down
+		 * the scheduler if cancellation of the scheduled task fails. Optional, defaults to {@link Default#TERMINATION_TIMEOUT}.
+		 */
+		private Duration terminationTimeout;
+
+		/**
 		 * Logger for logging task events and errors. Optional, defaults to no-op logger.
 		 */
 		private LoggerAdapter logger;
@@ -616,6 +675,18 @@ public class ReschedulingTask implements AutoCloseable {
 		 */
 		public Builder interruptOnCancel(final boolean interruptOnCancel) {
 			this.interruptOnCancel = interruptOnCancel;
+			return this;
+		}
+
+		/**
+		 * Sets the timeout for awaiting termination of the scheduler when closing. This is used in the close method when
+		 * shutting down the scheduler if cancellation of the scheduled task fails.
+		 *
+		 * @param terminationTimeout the termination await timeout, optional, defaults to {@link Default#TERMINATION_TIMEOUT}
+		 * @return this builder for chaining
+		 */
+		public Builder terminationTimeout(final Duration terminationTimeout) {
+			this.terminationTimeout = terminationTimeout;
 			return this;
 		}
 

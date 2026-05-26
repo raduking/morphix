@@ -217,10 +217,10 @@ public class ExtendedField {
 			return value;
 		}
 		if (null != getterMethod) {
-			value = Methods.IgnoreAccess.invoke(getterMethod, object);
+			value = Methods.Unchecked.invoke(getterMethod, object);
 		}
 		if (null == value && null != field) {
-			value = Fields.IgnoreAccess.get(object, field);
+			value = Fields.Unchecked.get(object, field);
 		}
 		if (null == value && null == field && null == getterMethod && hasObject()) {
 			value = object;

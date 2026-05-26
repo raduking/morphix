@@ -55,7 +55,7 @@ class OptionalLibraryTest {
 	void shouldFailWhenSpecificClassIsNull() {
 		NullPointerException exception = assertThrows(NullPointerException.class, () -> OptionalLibrary.present(null));
 
-		assertThat(exception.getMessage(), is("specificClass must not be null"));
+		assertThat(exception.getMessage(), is("facadeClass must not be null"));
 	}
 
 	@Test

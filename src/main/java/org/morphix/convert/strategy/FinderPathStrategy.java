@@ -13,9 +13,9 @@
 package org.morphix.convert.strategy;
 
 import static org.morphix.reflection.ExtendedField.of;
+import static org.morphix.reflection.JavaModifier.STATIC;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.List;
 
 import org.morphix.reflection.ExtendedField;
@@ -64,7 +64,7 @@ public class FinderPathStrategy implements FieldFinderStrategy {
 				resultObject = Fields.IgnoreAccess.get(resultObject, resultField);
 			}
 			resultField = Fields.getOneDeclaredInHierarchy(currentClass, fieldName);
-			if (null != resultField && Modifier.isStatic(resultField.getModifiers())) {
+			if (null != resultField && STATIC.isPresentOn(resultField)) {
 				resultField = null;
 			}
 			if (null != resultField) {

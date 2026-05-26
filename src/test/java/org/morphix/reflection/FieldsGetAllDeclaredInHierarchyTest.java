@@ -104,6 +104,16 @@ class FieldsGetAllDeclaredInHierarchyTest {
 	}
 
 	@Test
+	void shouldReturnAllFieldsInHierarchyFromClassObject() {
+		Object o = Class.class;
+		List<Field> fields = Fields.getAllDeclaredInHierarchy(o);
+
+		int size = Class.class.getDeclaredFields().length;
+
+		assertThat(fields, hasSize(size));
+	}
+
+	@Test
 	void shouldReturnEmptyListForClassesWithNoFields() {
 		List<Field> fields = Fields.getAllDeclaredInHierarchy(C.class);
 

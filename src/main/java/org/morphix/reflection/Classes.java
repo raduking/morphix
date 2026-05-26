@@ -66,6 +66,25 @@ public interface Classes {
 	}
 
 	/**
+	 * Returns the class with the given prefix.
+	 *
+	 * @param <T> the type of the class with a prefix
+	 *
+	 * @param cls the class to build the name from
+	 * @param prefix the prefix which is added to the class
+	 * @return returns the class which has the name composed of the prefix + {@link Class#getSimpleName()}.
+	 * @throws ReflectionException when the class is not found
+	 */
+	static <T> Class<T> getOne(final Class<?> cls, final String prefix) {
+		String classWithPrefixName = cls.getName().replace(cls.getSimpleName(), prefix + cls.getSimpleName());
+		try {
+			return JavaObjects.cast(Class.forName(classWithPrefixName));
+		} catch (ClassNotFoundException e) {
+			throw new ReflectionException(e, "Could not load class with prefix: {}", classWithPrefixName);
+		}
+	}
+
+	/**
 	 * Returns the subclass of the expected parent.
 	 *
 	 * @param expectedParent expected parent
@@ -150,6 +169,35 @@ public interface Classes {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns true if the class given by its name is present in the classpath, false otherwise.
+	 *
+	 * @param className the {@linkplain ClassLoader##binary-name binary name}
+	 * @return true if the class is present in the classpath, false otherwise
+	 */
+	static boolean isPresent(final String className) {
+		return null != Classes.Safe.getOne(className);
+	}
+
+	/**
+	 * Returns the class of the given object.
+	 * <ul>
+	 * <li>If the object is null, it returns null.</li>
+	 * <li>If the object is an instance of {@link Class}, it returns the object cast to {@link Class}.</li>
+	 * <li>Otherwise, it returns the result of calling getClass() on the object</li>
+	 * </ul>
+	 *
+	 * @param object the object to get the class from
+	 * @return the class of the given object
+	 */
+	static Class<?> getFrom(final Object object) {
+		return switch (object) {
+			case null -> null;
+			case Class<?> cls -> cls;
+			default -> object.getClass();
+		};
 	}
 
 	/**

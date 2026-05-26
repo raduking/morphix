@@ -1,5 +1,29 @@
 ## Release Notes
 
+`1.0.36`
+
+- Added `JavaModifier.isPresentOn` method to check if a modifier is present on a member.
+- Added `JavaModifier.isNotPresentOn` method which is the inverse of `JavaModifier.isPresentOn`.
+- Changed `JavaModifier` to implement `Predicate`.
+- Added `Methods.IgnoreAccess.invokeStatic` to invoke static methods with static check.
+- Changed `ReschedulingTask` to not try to cancel finishing tasks anymore resulting in faster executions.
+- Added `Holder.set` as an alias for `Holder.setValue`.
+- Added `Holder.get` as an alias for `Holder.getValue`.
+- Added `LoggerAdapter.isEnabled(LoggingLevel)` to check if the logger can log for a specific level.
+- Added `LoggerAdapter.isDisabled(LoggingLevel)` which returns not `LoggerAdapter.isEnabled`.
+- Changed `OptionalLibrary.getSpecificClass` to be an alias for `OptionalLibrary.getFacadeClass` this being the main method now.
+- Changed `OptionalLibrary.getSpecificInstance` to be an alias for `OptionalLibrary.getFacadeInstance` this being the main method now.
+- Added `Fields.Safe.getOneDeclared` and now `Fields.getOneDeclared` delegates to it.
+- Added `Fields.Safe.getOneDeclaredInHierarchy` and now `Fields.getOneDeclaredInHierarchy` delegates to it.
+- Added missing `Fields.IgnoreAccess.setStatic` overloads to pair with `Fields.IgnoreAccess.getStatic` overloads.
+- Added `Classes.isPresent` to check if a class is present in the class path.
+- Added `Classes.getOne(Class, String)` to return a class which has a name built from the given class and the given prefix.
+- Added `MemberAccessor.on` utility methods to wrap an execution with member access.
+- Added `Fields.Unchecked` name space interface for no validation versions for `Fields.IgnoreAccess` methods.
+- Added `Methods.Unchecked` name space interface for no validation versions for `Methods.IgnoreAccess` methods.
+
+---
+
 `1.0.35`
 
 - Added `Classes.isAssignableFrom` similar to the Java one but this one checks for primitive assignment too.

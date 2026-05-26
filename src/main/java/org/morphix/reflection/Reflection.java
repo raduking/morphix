@@ -16,8 +16,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.morphix.lang.JavaObjects;
-
 /**
  * Utility reflection methods.
  *
@@ -52,18 +50,13 @@ public interface Reflection {
 	 *
 	 * @param <T> the type of the class with a prefix
 	 *
-	 * @param clazz the base class
+	 * @param cls the base class
 	 * @param prefix the prefix which is added to the class
 	 * @return returns the class which has the name composed of the prefix + {@link Class#getSimpleName()}.
 	 * @throws ReflectionException when the class is not found
 	 */
-	static <T> Class<T> getClassWithPrefix(final Class<?> clazz, final String prefix) {
-		String classWithPrefixName = clazz.getName().replace(clazz.getSimpleName(), prefix + clazz.getSimpleName());
-		try {
-			return JavaObjects.cast(Class.forName(classWithPrefixName));
-		} catch (ClassNotFoundException e) {
-			throw new ReflectionException(e, "Could not find class with prefix '{}'", classWithPrefixName);
-		}
+	static <T> Class<T> getClassWithPrefix(final Class<?> cls, final String prefix) {
+		return Classes.getOne(cls, prefix);
 	}
 
 	/**
@@ -79,7 +72,8 @@ public interface Reflection {
 	static <T> T getFieldValue(final Object obj, final Field field) {
 		// try a getter method first
 		String getterMethodName = MethodType.GETTER.getMethodName(field);
-		Method getterMethod = Methods.getOneDeclaredInHierarchy(getterMethodName, obj.getClass());
+		Class<?> cls = Classes.getFrom(obj);
+		Method getterMethod = Methods.getOneDeclaredInHierarchy(getterMethodName, cls);
 		if (null != getterMethod) {
 			return Methods.IgnoreAccess.invoke(getterMethod, obj);
 		}
@@ -98,7 +92,8 @@ public interface Reflection {
 	static void setFieldValue(final Object obj, final Field field, final Object value) {
 		// try a setter method first
 		String setterMethodName = MethodType.SETTER.getMethodName(field);
-		Method setterMethod = Methods.getOneDeclaredInHierarchy(setterMethodName, obj.getClass(), field.getType());
+		Class<?> cls = Classes.getFrom(obj);
+		Method setterMethod = Methods.getOneDeclaredInHierarchy(setterMethodName, cls, field.getType());
 		if (null != setterMethod) {
 			Methods.IgnoreAccess.invoke(setterMethod, obj, value);
 		} else {
@@ -123,7 +118,8 @@ public interface Reflection {
 	static <T, F, U> void setFieldValue(final T obj, final String fieldName, final Class<F> fieldType, final U value) {
 		// try a setter method first
 		String setterMethodName = MethodType.SETTER.getMethodName(fieldName);
-		Method setterMethod = Methods.getOneDeclaredInHierarchy(setterMethodName, obj.getClass(), fieldType);
+		Class<?> cls = Classes.getFrom(obj);
+		Method setterMethod = Methods.getOneDeclaredInHierarchy(setterMethodName, cls, fieldType);
 		if (null != setterMethod) {
 			Methods.IgnoreAccess.invoke(setterMethod, obj, value);
 		} else {
@@ -142,6 +138,6 @@ public interface Reflection {
 	 * @return true if the class is present in the classpath, false otherwise
 	 */
 	static boolean isClassPresent(final String className) {
-		return null != Classes.Safe.getOne(className);
+		return Classes.isPresent(className);
 	}
 }

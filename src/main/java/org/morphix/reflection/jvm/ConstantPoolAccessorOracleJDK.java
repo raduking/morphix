@@ -142,7 +142,7 @@ public class ConstantPoolAccessorOracleJDK extends ConstantPoolAccessor { // NOS
 	@Override
 	protected Object getConstantPool(final Class<?> cls) {
 		try {
-			return Methods.IgnoreAccess.invoke(getConstantPoolMethod, cls);
+			return Methods.Unchecked.invoke(getConstantPoolMethod, cls);
 		} catch (Exception e) {
 			return super.getConstantPool(cls);
 		}
@@ -157,7 +157,7 @@ public class ConstantPoolAccessorOracleJDK extends ConstantPoolAccessor { // NOS
 	@Override
 	protected int getSize(final Object constantPool) {
 		try {
-			return Methods.IgnoreAccess.invoke(getSizeMethod, constantPool);
+			return Methods.Unchecked.invoke(getSizeMethod, constantPool);
 		} catch (Exception e) {
 			return super.getSize(constantPool);
 		}
@@ -173,7 +173,7 @@ public class ConstantPoolAccessorOracleJDK extends ConstantPoolAccessor { // NOS
 	@Override
 	protected Member getMemberAt(final Object constantPool, final int index) {
 		try {
-			return Methods.IgnoreAccess.invoke(getMethodAtMethod, constantPool, index);
+			return Methods.Unchecked.invoke(getMethodAtMethod, constantPool, index);
 		} catch (Exception e) {
 			return super.getMemberAt(constantPool, index);
 		}
