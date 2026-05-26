@@ -1,5 +1,12 @@
 ## Release Notes
 
+`1.0.37`
+
+- Changed `JavaArrays.isEmpty` method parameter from `Object[]` to `T[]` generic type argument.
+- Changed `JavaArrays.isNotEmpty` method parameter from `Object[]` to `T[]` generic type argument.
+
+---
+
 `1.0.36`
 
 - Added `JavaModifier.isPresentOn` method to check if a modifier is present on a member.
