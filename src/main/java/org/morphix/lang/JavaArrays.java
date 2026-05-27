@@ -92,20 +92,24 @@ public interface JavaArrays {
 	/**
 	 * Checks if the given array is null or has no elements.
 	 *
+	 * @param <T> the component type of the array
+	 *
 	 * @param array the array to check
 	 * @return true if the array is null or empty, false otherwise
 	 */
-	static boolean isEmpty(final Object[] array) {
+	static <T> boolean isEmpty(final T[] array) {
 		return null == array || 0 == array.length;
 	}
 
 	/**
 	 * Checks if the given array is not null and has at least one element.
 	 *
+	 * @param <T> the component type of the array
+	 *
 	 * @param array the array to check
 	 * @return true if the array is not null and not empty, false otherwise
 	 */
-	static boolean isNotEmpty(final Object[] array) {
+	static <T> boolean isNotEmpty(final T[] array) {
 		return !isEmpty(array);
 	}
 }

@@ -78,9 +78,15 @@ public class ReschedulingTask implements AutoCloseable {
 
 		/**
 		 * Default timeout for awaiting termination of the scheduler when closing. This is used in the close method when
-		 * shutting down the scheduler if cancellation of the scheduled task fails. Optional, defaults to 1 second.
+		 * shutting down the scheduler if cancellation of the scheduled task fails. Optional, defaults to 0 seconds. The
+		 * scheduler will be shutdown immediately and the provider will not wait for the termination of the scheduler. This is
+		 * because the rescheduling task is expected to be closed when the application is shutting down, and waiting for the
+		 * termination of the scheduler could delay the shutdown process.
+		 * <p>
+		 * If a different behavior is desired, the {@link ReschedulingTask.Builder#terminationTimeout(Duration)} property can be
+		 * set to a different value.
 		 */
-		public static final Duration TERMINATION_TIMEOUT = Duration.ofSeconds(1);
+		public static final Duration TERMINATION_TIMEOUT = Duration.ZERO;
 
 		/**
 		 * Hide constructor.
@@ -178,8 +184,8 @@ public class ReschedulingTask implements AutoCloseable {
 		this.taskCancelRetry = Nullables.nonNullOrDefault(builder.taskCancelRetry, Retry::noRetry);
 		this.interruptOnCancel = builder.interruptOnCancel;
 		this.terminationTimeout = Nullables.nonNullOrDefault(builder.terminationTimeout, () -> Default.TERMINATION_TIMEOUT);
-		if (terminationTimeout.isNegative() || terminationTimeout.isZero()) {
-			throw new IllegalArgumentException("terminationTimeout must be positive");
+		if (terminationTimeout.isNegative()) {
+			throw new IllegalArgumentException("terminationTimeout must be greater than or equal to zero");
 		}
 	}
 
@@ -229,7 +235,10 @@ public class ReschedulingTask implements AutoCloseable {
 		} else {
 			List<Runnable> remaining = executor.shutdownNow();
 			logger.warn("[{}] Scheduler closed with {} remaining tasks.", name, remaining.size());
-			executor.awaitTermination(terminationTimeout.toMillis(), TimeUnit.MILLISECONDS);
+			long timeoutMillis = terminationTimeout.toMillis();
+			if (timeoutMillis > 0) {
+				executor.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
+			}
 		}
 	}
 
@@ -486,6 +495,16 @@ public class ReschedulingTask implements AutoCloseable {
 	 */
 	protected boolean isInterruptOnCancel() {
 		return interruptOnCancel;
+	}
+
+	/**
+	 * Returns the timeout for awaiting termination of the scheduler when closing. This is used in the close method when
+	 * shutting down the scheduler if cancellation of the scheduled task fails.
+	 *
+	 * @return the termination await timeout
+	 */
+	protected Duration getTerminationTimeout() {
+		return terminationTimeout;
 	}
 
 	/**

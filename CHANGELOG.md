@@ -1,5 +1,13 @@
 ## Release Notes
 
+`1.0.37`
+
+- Changed `JavaArrays.isEmpty` method parameter from `Object[]` to `T[]` generic type argument.
+- Changed `JavaArrays.isNotEmpty` method parameter from `Object[]` to `T[]` generic type argument.
+- Changed `ReschedulingTask.Default.TERMINATION_TIMEOUT` to `Duration.ZERO` so that application shutdown is not affected.
+
+---
+
 `1.0.36`
 
 - Added `JavaModifier.isPresentOn` method to check if a modifier is present on a member.
