@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -61,7 +62,6 @@ import org.morphix.lang.logging.JulLoggerAdapter;
 import org.morphix.lang.resource.ScopedResource;
 import org.morphix.lang.retry.Retry;
 import org.morphix.lang.retry.WaitCounter;
-import org.morphix.lang.thread.ReschedulingTask.Default;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.Methods;
 import org.morphix.utils.Tests;
@@ -129,6 +129,7 @@ class ReschedulingTaskTest {
 			assertThat(task.getLogger(), is(LoggerAdapter.none()));
 			assertThat(task.isInterruptOnCancel(), is(ReschedulingTask.Default.INTERRUPT_ON_CANCEL));
 			assertThat(task.getExecutionWrapper(), is(ExecutionWrapper.EMPTY));
+			assertThat(task.getTerminationTimeout(), is(ReschedulingTask.Default.TERMINATION_TIMEOUT));
 		}
 	}
 
@@ -242,12 +243,12 @@ class ReschedulingTaskTest {
 
 			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, taskBuilder::build);
 
-			assertThat(ex.getMessage(), is("terminationTimeout must be positive"));
+			assertThat(ex.getMessage(), is("terminationTimeout must be greater than or equal to zero"));
 		}
 
 		@Test
 		@SuppressWarnings("resource")
-		void shouldThrowExceptionWhenTerminationTimeoutIsZero() {
+		void shouldNotThrowExceptionWhenTerminationTimeoutIsZero() {
 			ReschedulingTask.Builder taskBuilder = ReschedulingTask.builder()
 					.name(TASK_NAME)
 					.scheduler(scheduler())
@@ -255,9 +256,7 @@ class ReschedulingTaskTest {
 					.nextDelay(() -> DELAY)
 					.terminationTimeout(Duration.ZERO);
 
-			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, taskBuilder::build);
-
-			assertThat(ex.getMessage(), is("terminationTimeout must be positive"));
+			assertDoesNotThrow(taskBuilder::build);
 		}
 	}
 
@@ -788,7 +787,7 @@ class ReschedulingTaskTest {
 
 			verify(scheduledFuture, times(retryAttempts)).cancel(anyBoolean());
 			verify(scheduledExecutor, times(1)).shutdownNow();
-			verify(scheduledExecutor, times(1)).awaitTermination(Default.TERMINATION_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+			verify(scheduledExecutor, never()).awaitTermination(anyLong(), any(TimeUnit.class));
 		}
 
 		@Test
@@ -814,6 +813,31 @@ class ReschedulingTaskTest {
 
 			verify(scheduledExecutor, times(1)).shutdownNow();
 			verify(scheduledExecutor, times(1)).awaitTermination(DELAY.toMillis(), TimeUnit.MILLISECONDS);
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldNotCallAwaitTerminationWhenTimeoutIsZero() throws Exception {
+			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
+			ScheduledFuture<?> scheduledFuture = mock(ScheduledFuture.class);
+			doReturn(scheduledFuture).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+			doReturn(false).when(scheduledFuture).cancel(anyBoolean());
+
+			ScopedResource<ScheduledExecutorService> resource = ScopedResource.managed(scheduledExecutor);
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(resource)
+					.task(Runnables.doNothing())
+					.nextDelay(() -> Duration.ofSeconds(5))
+					.terminationTimeout(Duration.ZERO)
+					.build();
+
+			task.enable();
+			task.close();
+
+			verify(scheduledExecutor, times(1)).shutdownNow();
+			verify(scheduledExecutor, never()).awaitTermination(anyLong(), any(TimeUnit.class));
 		}
 
 		@Test

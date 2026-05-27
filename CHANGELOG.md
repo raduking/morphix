@@ -4,6 +4,7 @@
 
 - Changed `JavaArrays.isEmpty` method parameter from `Object[]` to `T[]` generic type argument.
 - Changed `JavaArrays.isNotEmpty` method parameter from `Object[]` to `T[]` generic type argument.
+- Changed `ReschedulingTask.Default.TERMINATION_TIMEOUT` to `Duration.ZERO` so that application shutdown is not affected.
 
 ---
 
