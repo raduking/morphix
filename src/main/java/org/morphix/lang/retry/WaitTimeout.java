@@ -82,6 +82,11 @@ public class WaitTimeout implements Wait {
 	private Instant start;
 
 	/**
+	 * End time.
+	 */
+	private Instant end;
+
+	/**
 	 * Private constructor.
 	 *
 	 * @param timeout timeout
@@ -94,7 +99,7 @@ public class WaitTimeout implements Wait {
 		this.timeoutTimeUnit = timeoutTimeUnit;
 		this.interval = interval;
 		this.intervalTimeUnit = intervalTimeUnit;
-		this.start = Instant.now();
+		start();
 	}
 
 	/**
@@ -152,6 +157,7 @@ public class WaitTimeout implements Wait {
 	 */
 	protected void start(final Instant start) {
 		this.start = start;
+		this.end = start.plus(timeout, timeoutTimeUnit.toChronoUnit());
 	}
 
 	/**
@@ -193,7 +199,7 @@ public class WaitTimeout implements Wait {
 	 * @return true if the wait is over
 	 */
 	public boolean isOver(final Instant start) {
-		return Instant.now().isAfter(start.plus(timeout, timeoutTimeUnit.toChronoUnit()));
+		return Instant.now().isAfter(end);
 	}
 
 	/**
