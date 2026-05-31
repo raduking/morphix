@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.38`
+
+---
+
 `1.0.37`
 
 - Changed `JavaArrays.isEmpty` method parameter from `Object[]` to `T[]` generic type argument.
