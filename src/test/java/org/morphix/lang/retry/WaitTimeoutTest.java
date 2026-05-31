@@ -27,6 +27,7 @@ import java.util.function.BiConsumer;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.morphix.lang.retry.delay.FixedDelayStrategy;
 import org.morphix.lang.thread.Threads;
 import org.morphix.reflection.Constructors;
 import org.morphix.utils.Tests;
@@ -267,7 +268,7 @@ class WaitTimeoutTest {
 	void shouldNotWaitOnNowIfTimeoutReached() {
 		AtomicBoolean sleepCalls = new AtomicBoolean(false);
 		BiConsumer<Long, TimeUnit> sleepAction = (interval, timeUnit) -> sleepCalls.set(true);
-		WaitTimeout waitTimeout = new WaitTimeout(-10, TimeUnit.SECONDS, -10, TimeUnit.SECONDS) {
+		WaitTimeout waitTimeout = new WaitTimeout(-10, TimeUnit.SECONDS, FixedDelayStrategy.of(1, TimeUnit.NANOSECONDS)) {
 			@Override
 			public BiConsumer<Long, TimeUnit> sleepAction() {
 				return sleepAction;

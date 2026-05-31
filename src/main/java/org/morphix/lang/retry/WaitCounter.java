@@ -187,10 +187,10 @@ public class WaitCounter implements Wait {
 			return false;
 		}
 		WaitCounter thatWait = (WaitCounter) that;
-		return Objects.equals(interval, thatWait.interval)
-				&& Objects.equals(intervalTimeUnit, thatWait.intervalTimeUnit)
-				&& Objects.equals(maxCount, thatWait.maxCount)
-				&& Objects.equals(count, thatWait.count);
+		return interval == thatWait.interval
+				&& intervalTimeUnit == thatWait.intervalTimeUnit
+				&& maxCount == thatWait.maxCount
+				&& count == thatWait.count;
 	}
 
 	/**
