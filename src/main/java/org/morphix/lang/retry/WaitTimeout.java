@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.morphix.lang.retry.delay.FixedDelayStrategy;
 import org.morphix.reflection.Constructors;
@@ -75,17 +76,12 @@ public class WaitTimeout implements Wait {
 	/**
 	 * Counts the number of attempts.
 	 */
-	private int attempt;
+	private final AtomicInteger attempt = new AtomicInteger(0);
 
 	/**
 	 * Start time.
 	 */
 	private Instant start;
-
-	/**
-	 * End time.
-	 */
-	private Instant end;
 
 	/**
 	 * Private constructor.
@@ -142,7 +138,7 @@ public class WaitTimeout implements Wait {
 	 */
 	@Override
 	public long interval() {
-		return delayStrategy.delay(attempt);
+		return delayStrategy.delay(attempt.get());
 	}
 
 	/**
@@ -167,9 +163,8 @@ public class WaitTimeout implements Wait {
 	 * @param start time to set
 	 */
 	protected void start(final Instant start) {
-		this.attempt = 1;
+		this.attempt.set(1);
 		this.start = start;
-		this.end = start.plus(timeout, timeoutTimeUnit.toChronoUnit());
 	}
 
 	/**
@@ -178,9 +173,11 @@ public class WaitTimeout implements Wait {
 	@Override
 	public void now() {
 		// don't wait if the timeout is over
-		if (keepWaiting()) {
-			Wait.super.now();
+		if (!keepWaiting()) {
+			return;
 		}
+		Wait.super.now();
+		attempt.updateAndGet(value -> value == Integer.MAX_VALUE ? value : value + 1);
 	}
 
 	/**
@@ -211,7 +208,7 @@ public class WaitTimeout implements Wait {
 	 * @return true if the wait is over
 	 */
 	public boolean isOver(final Instant start) {
-		return Instant.now().isAfter(end);
+		return Instant.now().isAfter(start.plus(timeout, timeoutTimeUnit.toChronoUnit()));
 	}
 
 	/**
@@ -250,9 +247,8 @@ public class WaitTimeout implements Wait {
 		return timeout == thatWait.timeout
 				&& timeoutTimeUnit == thatWait.timeoutTimeUnit
 				&& Objects.equals(delayStrategy, thatWait.delayStrategy)
-				&& attempt == thatWait.attempt
-				&& Objects.equals(start, thatWait.start)
-				&& Objects.equals(end, thatWait.end);
+				&& attempt.get() == thatWait.attempt.get()
+				&& Objects.equals(start, thatWait.start);
 	}
 
 	/**
@@ -260,6 +256,6 @@ public class WaitTimeout implements Wait {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(timeout, timeoutTimeUnit, delayStrategy, attempt, start, end);
+		return Objects.hash(timeout, timeoutTimeUnit, delayStrategy, attempt.get(), start);
 	}
 }

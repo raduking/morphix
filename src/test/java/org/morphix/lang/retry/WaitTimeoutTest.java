@@ -21,8 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
 import org.hamcrest.Matchers;
@@ -30,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.morphix.lang.retry.delay.FixedDelayStrategy;
 import org.morphix.lang.thread.Threads;
 import org.morphix.reflection.Constructors;
+import org.morphix.reflection.Fields;
 import org.morphix.utils.Tests;
 
 /**
@@ -279,6 +283,54 @@ class WaitTimeoutTest {
 		waitTimeout.now();
 
 		assertThat(sleepCalls.get(), equalTo(false));
+	}
+
+	@Test
+	void shouldIncreaseAttemptAfterEachWait() {
+		List<Long> recordedIntervals = new ArrayList<>();
+		BiConsumer<Long, TimeUnit> sleepAction = (interval, timeUnit) -> recordedIntervals.add(interval);
+		WaitTimeout waitTimeout = new WaitTimeout(1, TimeUnit.DAYS, attempt -> attempt) {
+			@Override
+			public BiConsumer<Long, TimeUnit> sleepAction() {
+				return sleepAction;
+			}
+		};
+		waitTimeout.start();
+
+		waitTimeout.now();
+		waitTimeout.now();
+
+		assertThat(recordedIntervals, equalTo(List.of(1L, 2L)));
+	}
+
+	@Test
+	void shouldNotIncreaseAttemptWhenTimeoutIsReached() {
+		WaitTimeout waitTimeout = WaitTimeout.of(-1, TimeUnit.MILLISECONDS, attempt -> attempt);
+		waitTimeout.start();
+
+		waitTimeout.now();
+
+		assertThat(waitTimeout.interval(), equalTo(1L));
+	}
+
+	@Test
+	void shouldNotOverflowAttemptWhenAtIntegerMaxValue() {
+		WaitTimeout waitTimeout = new WaitTimeout(1, TimeUnit.DAYS, attempt -> attempt) {
+			@Override
+			public BiConsumer<Long, TimeUnit> sleepAction() {
+				return (interval, timeUnit) -> {
+					// no sleep
+				};
+			}
+		};
+		waitTimeout.start();
+
+		AtomicInteger attempt = Fields.IgnoreAccess.get(waitTimeout, "attempt");
+		attempt.set(Integer.MAX_VALUE);
+
+		waitTimeout.now();
+
+		assertThat(waitTimeout.interval(), equalTo((long) Integer.MAX_VALUE));
 	}
 
 	@Test
