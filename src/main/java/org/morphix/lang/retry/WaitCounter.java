@@ -176,7 +176,7 @@ public class WaitCounter implements Wait {
 	}
 
 	/**
-	 * Equals method that also verifies that objects are of the same class.
+	 * @see Object#equals(Object)
 	 */
 	@Override
 	public boolean equals(final Object that) {
@@ -194,7 +194,7 @@ public class WaitCounter implements Wait {
 	}
 
 	/**
-	 * Hash code implementation.
+	 * @see Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {

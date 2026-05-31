@@ -75,7 +75,7 @@ public class WaitTimeout implements Wait {
 	/**
 	 * Counts the number of attempts.
 	 */
-	private long attempt;
+	private int attempt;
 
 	/**
 	 * Start time.
@@ -236,10 +236,7 @@ public class WaitTimeout implements Wait {
 	}
 
 	/**
-	 * Equals method that also verifies that objects are of the same class.
-	 *
-	 * @param that object to test equality with
-	 * @return true if objects are equal, false otherwise
+	 * @see Object#equals(Object)
 	 */
 	@Override
 	public boolean equals(final Object that) {
@@ -259,9 +256,7 @@ public class WaitTimeout implements Wait {
 	}
 
 	/**
-	 * Hash code implementation.
-	 *
-	 * @return hash code
+	 * @see Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
