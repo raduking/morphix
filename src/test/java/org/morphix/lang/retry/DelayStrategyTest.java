@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,25 @@ class DelayStrategyTest {
 		TimeUnit result = strategy.timeUnit();
 
 		assertThat(result, equalTo(DelayStrategy.Default.TIME_UNIT));
+	}
+
+	@Test
+	void shouldReturnChronoUnitBasedOnStrategyTimeUnit() {
+		DelayStrategy strategy = new DelayStrategy() {
+			@Override
+			public long delay(final int attempt) {
+				return 10;
+			}
+
+			@Override
+			public TimeUnit timeUnit() {
+				return TimeUnit.SECONDS;
+			}
+		};
+
+		ChronoUnit result = strategy.chronoUnit();
+
+		assertThat(result, equalTo(ChronoUnit.SECONDS));
 	}
 
 	@Test

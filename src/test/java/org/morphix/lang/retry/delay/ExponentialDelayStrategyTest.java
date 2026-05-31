@@ -15,10 +15,11 @@ package org.morphix.lang.retry.delay;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -35,6 +36,34 @@ class ExponentialDelayStrategyTest {
 	private static final long MAX_DELAY = 1000;
 	private static final TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
 	private static final double MULTIPLIER = 2d;
+
+	@Test
+	void shouldBuildUsingFactoryMethodWithTimeUnit() {
+		ExponentialDelayStrategy strategy = ExponentialDelayStrategy.of(MIN_DELAY, MAX_DELAY, TIME_UNIT, MULTIPLIER);
+
+		assertThat(strategy.timeUnit(), equalTo(TIME_UNIT));
+		assertThat(strategy.delay(1), equalTo(MIN_DELAY));
+	}
+
+	@Test
+	void shouldBuildUsingFactoryMethodWithDurations() {
+		ExponentialDelayStrategy strategy = ExponentialDelayStrategy.of(Duration.ofMillis(MIN_DELAY), Duration.ofMillis(MAX_DELAY), MULTIPLIER);
+
+		assertThat(strategy.timeUnit(), equalTo(TimeUnit.MILLISECONDS));
+		assertThat(strategy.delay(1), equalTo(MIN_DELAY));
+	}
+
+	@Test
+	void shouldThrowExceptionWhenMinimumDurationIsNull() {
+		assertThrows(NullPointerException.class,
+				() -> ExponentialDelayStrategy.of(null, Duration.ofMillis(MAX_DELAY), MULTIPLIER));
+	}
+
+	@Test
+	void shouldThrowExceptionWhenMaximumDurationIsNull() {
+		assertThrows(NullPointerException.class,
+				() -> ExponentialDelayStrategy.of(Duration.ofMillis(MIN_DELAY), null, MULTIPLIER));
+	}
 
 	@Test
 	void shouldReturnConfiguredTimeUnit() {
@@ -117,14 +146,18 @@ class ExponentialDelayStrategyTest {
 	void shouldReturnFalseOnEqualsIfOtherIsNull() {
 		ExponentialDelayStrategy strategy = new ExponentialDelayStrategy(MIN_DELAY, MAX_DELAY, TIME_UNIT, MULTIPLIER);
 
-		assertNotEquals(null, strategy);
+		boolean result = strategy.equals(null);
+
+		assertFalse(result);
 	}
 
 	@Test
 	void shouldReturnFalseOnEqualsIfOtherIsADifferentClass() {
 		ExponentialDelayStrategy strategy = new ExponentialDelayStrategy(MIN_DELAY, MAX_DELAY, TIME_UNIT, MULTIPLIER);
 
-		assertNotEquals(strategy, new Object());
+		boolean result = strategy.equals(new Object());
+
+		assertFalse(result);
 	}
 
 	@Test
@@ -132,7 +165,9 @@ class ExponentialDelayStrategyTest {
 		ExponentialDelayStrategy strategy1 = new ExponentialDelayStrategy(MIN_DELAY, MAX_DELAY, TIME_UNIT, MULTIPLIER);
 		ExponentialDelayStrategy strategy2 = new ExponentialDelayStrategy(MIN_DELAY + 1, MAX_DELAY, TIME_UNIT, MULTIPLIER);
 
-		assertNotEquals(strategy1, strategy2);
+		boolean result = strategy1.equals(strategy2);
+
+		assertFalse(result);
 	}
 
 	@Test
@@ -140,7 +175,9 @@ class ExponentialDelayStrategyTest {
 		ExponentialDelayStrategy strategy1 = new ExponentialDelayStrategy(MIN_DELAY, MAX_DELAY, TIME_UNIT, MULTIPLIER);
 		ExponentialDelayStrategy strategy2 = new ExponentialDelayStrategy(MIN_DELAY, MAX_DELAY + 1, TIME_UNIT, MULTIPLIER);
 
-		assertNotEquals(strategy1, strategy2);
+		boolean result = strategy1.equals(strategy2);
+
+		assertFalse(result);
 	}
 
 	@Test
@@ -148,7 +185,9 @@ class ExponentialDelayStrategyTest {
 		ExponentialDelayStrategy strategy1 = new ExponentialDelayStrategy(MIN_DELAY, MAX_DELAY, TIME_UNIT, MULTIPLIER);
 		ExponentialDelayStrategy strategy2 = new ExponentialDelayStrategy(MIN_DELAY, MAX_DELAY, TimeUnit.SECONDS, MULTIPLIER);
 
-		assertNotEquals(strategy1, strategy2);
+		boolean result = strategy1.equals(strategy2);
+
+		assertFalse(result);
 	}
 
 	@Test
@@ -156,7 +195,9 @@ class ExponentialDelayStrategyTest {
 		ExponentialDelayStrategy strategy1 = new ExponentialDelayStrategy(MIN_DELAY, MAX_DELAY, TIME_UNIT, MULTIPLIER);
 		ExponentialDelayStrategy strategy2 = new ExponentialDelayStrategy(MIN_DELAY, MAX_DELAY, TIME_UNIT, MULTIPLIER + 1d);
 
-		assertNotEquals(strategy1, strategy2);
+		boolean result = strategy1.equals(strategy2);
+
+		assertFalse(result);
 	}
 
 	@Test

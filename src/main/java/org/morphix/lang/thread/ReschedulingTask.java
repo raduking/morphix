@@ -37,7 +37,7 @@ import org.morphix.reflection.Constructors;
  * provided {@link Runnable} and then reschedule itself using a delay supplied by a {@link Supplier}.
  * <p>
  * The task can be enabled or disabled, and it will manage its own scheduling and cancellation to ensure that only one
- * instance of the task is scheduled at any time. The scheduling is done after the current task executions finishes, so
+ * instance of the task is scheduled at any time. The scheduling is done after the current task execution finishes, so
  * if the task takes longer than the delay, it will not cause overlapping executions.
  * <p>
  * Enabling the task will start the task execution on the same thread that called {@link #enable()} and rescheduling
@@ -77,9 +77,10 @@ public class ReschedulingTask implements AutoCloseable {
 		public static final boolean INTERRUPT_ON_CANCEL = false;
 
 		/**
-		 * Default timeout for awaiting termination of the scheduler when closing. This is used in the close method when
-		 * shutting down the scheduler if cancellation of the scheduled task fails. Optional, defaults to 0 seconds. The
-		 * scheduler will be shutdown immediately and the provider will not wait for the termination of the scheduler. This is
+		 * Default timeout for awaiting termination of the scheduler when closing. Optional, defaults to 0 seconds.
+		 * <p>
+		 * This is used in the close method when shutting down the scheduler if cancellation of the scheduled task fails. The
+		 * scheduler will be shutdown immediately and the caller will not wait for the termination of the scheduler. This is
 		 * because the rescheduling task is expected to be closed when the application is shutting down, and waiting for the
 		 * termination of the scheduler could delay the shutdown process.
 		 * <p>
@@ -117,9 +118,11 @@ public class ReschedulingTask implements AutoCloseable {
 	private final Runnable refreshTask;
 
 	/**
-	 * The execution wrapper for the refresh task. This allows for additional behavior to be added around the execution of
-	 * the refresh task, such as logging, error handling, metrics, etc. Optional, defaults to a simple wrapper that just
-	 * runs the task. We use {@link Void} since the refresh task is a {@link Runnable} that does not produce a result.
+	 * The execution wrapper for the refresh task.
+	 * <p>
+	 * This allows for additional behavior to be added around the execution of the refresh task, such as logging, error
+	 * handling, metrics, etc. and defaults to a simple wrapper that just runs the task. We use {@link Void} since the
+	 * refresh task is a {@link Runnable} that does not produce a result.
 	 */
 	private final ExecutionWrapper<Void> executionWrapper;
 
@@ -657,7 +660,7 @@ public class ReschedulingTask implements AutoCloseable {
 		/**
 		 * Sets a fixed delay for the next execution after each run.
 		 *
-		 * @param fixedDelay the fixed delay, must not be null
+		 * @param fixedDelay the fixed delay, optional; if null, {@link #minDelay(Duration)} is applied
 		 * @return this builder for chaining
 		 */
 		public Builder nextDelay(final Duration fixedDelay) {

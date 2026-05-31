@@ -12,6 +12,7 @@
  */
 package org.morphix.lang.retry.delay;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -72,6 +73,32 @@ public final class ExponentialDelayStrategy implements DelayStrategy {
 			throw new IllegalArgumentException("Multiplier must be greater than 1");
 		}
 		this.multiplier = multiplier;
+	}
+
+	/**
+	 * Factory method for an exponential delay strategy.
+	 *
+	 * @param minDelay initial delay
+	 * @param maxDelay maximum delay
+	 * @param timeUnit time unit for delay values
+	 * @param multiplier exponential multiplier (must be greater than 1)
+	 * @return a new exponential delay strategy
+	 * @throws IllegalArgumentException if {@code maxDelay < minDelay} or if {@code multiplier <= 1}
+	 */
+	public static ExponentialDelayStrategy of(final long minDelay, final long maxDelay, final TimeUnit timeUnit, final double multiplier) {
+		return new ExponentialDelayStrategy(minDelay, maxDelay, timeUnit, multiplier);
+	}
+
+	/**
+	 * Factory method for an exponential delay strategy.
+	 *
+	 * @param minDelay initial delay
+	 * @param maxDelay maximum delay
+	 * @param multiplier exponential multiplier (must be greater than 1)
+	 * @return a new exponential delay strategy
+	 */
+	public static ExponentialDelayStrategy of(final Duration minDelay, final Duration maxDelay, final double multiplier) {
+		return of(minDelay.toMillis(), maxDelay.toMillis(), Default.TIME_UNIT, multiplier);
 	}
 
 	/**

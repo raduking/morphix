@@ -12,6 +12,7 @@
  */
 package org.morphix.lang.retry;
 
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 import org.morphix.reflection.Constructors;
@@ -61,6 +62,15 @@ public interface DelayStrategy {
 	 */
 	default TimeUnit timeUnit() {
 		return Default.TIME_UNIT;
+	}
+
+	/**
+	 * Returns the corresponding {@link ChronoUnit} for the time unit of this strategy.
+	 *
+	 * @return chrono unit corresponding to the time unit of this strategy
+	 */
+	default ChronoUnit chronoUnit() {
+		return timeUnit().toChronoUnit();
 	}
 
 	/**

@@ -15,7 +15,7 @@ package org.morphix.lang.retry.delay;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -86,14 +86,18 @@ class FixedDelayStrategyTest {
 	void shouldReturnFalseOnEqualsIfOtherIsNull() {
 		FixedDelayStrategy strategy = new FixedDelayStrategy(DELAY, TIME_UNIT);
 
-		assertNotEquals(null, strategy);
+		boolean result = strategy.equals(null);
+
+		assertFalse(result);
 	}
 
 	@Test
 	void shouldReturnFalseOnEqualsIfOtherIsADifferentClass() {
 		FixedDelayStrategy strategy = new FixedDelayStrategy(DELAY, TIME_UNIT);
 
-		assertNotEquals(strategy, new Object());
+		boolean result = strategy.equals(new Object());
+
+		assertFalse(result);
 	}
 
 	@Test
@@ -101,7 +105,9 @@ class FixedDelayStrategyTest {
 		FixedDelayStrategy strategy1 = new FixedDelayStrategy(DELAY, TIME_UNIT);
 		FixedDelayStrategy strategy2 = new FixedDelayStrategy(DELAY + 1, TIME_UNIT);
 
-		assertNotEquals(strategy1, strategy2);
+		boolean result = strategy1.equals(strategy2);
+
+		assertFalse(result);
 	}
 
 	@Test
@@ -109,7 +115,9 @@ class FixedDelayStrategyTest {
 		FixedDelayStrategy strategy1 = new FixedDelayStrategy(DELAY, TIME_UNIT);
 		FixedDelayStrategy strategy2 = new FixedDelayStrategy(DELAY, TimeUnit.SECONDS);
 
-		assertNotEquals(strategy1, strategy2);
+		boolean result = strategy1.equals(strategy2);
+
+		assertFalse(result);
 	}
 
 	@Test
