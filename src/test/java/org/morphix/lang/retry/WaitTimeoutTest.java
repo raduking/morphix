@@ -334,6 +334,23 @@ class WaitTimeoutTest {
 	}
 
 	@Test
+	void shouldReturnFalseOnEqualsIfAttemptIsDifferent() {
+		WaitTimeout waitTimeout1 = WaitTimeout.of(TIMEOUT, INTERVAL);
+		WaitTimeout waitTimeout2 = WaitTimeout.of(TIMEOUT, INTERVAL);
+
+		waitTimeout1.start(START);
+		waitTimeout2.start(START);
+		AtomicInteger attempt = Fields.IgnoreAccess.get(waitTimeout1, "attempt");
+		attempt.set(Integer.MAX_VALUE);
+
+		waitTimeout1.now();
+
+		boolean result = waitTimeout1.equals(waitTimeout2);
+
+		assertFalse(result);
+	}
+
+	@Test
 	void shouldThrowExceptionWhenTryingToInstantiateWaitTimeoutDefaultConstructor() {
 		UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(WaitTimeout.Default.class);
 
