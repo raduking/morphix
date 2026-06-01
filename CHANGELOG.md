@@ -7,6 +7,7 @@
 - Added `delay.FixedDelayStrategy` implementation for constant retry delays.
 - Added `delay.ExponentialDelayStrategy` implementation for exponential retry delays with max cap.
 - Changed `WaitTimeout` to use `DelayStrategy` instead of fixed interval fields.
+- Added `Temporsals.toLong` to convert a `Duration` to the specified `TimeUnit`.
 
 ---
 

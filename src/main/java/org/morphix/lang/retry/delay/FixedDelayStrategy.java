@@ -42,7 +42,7 @@ public class FixedDelayStrategy implements DelayStrategy {
 	 * @param delay fixed delay value
 	 * @param timeUnit time unit for the delay
 	 */
-	public FixedDelayStrategy(final long delay, final TimeUnit timeUnit) {
+	protected FixedDelayStrategy(final long delay, final TimeUnit timeUnit) {
 		this.delay = delay;
 		this.timeUnit = timeUnit;
 	}

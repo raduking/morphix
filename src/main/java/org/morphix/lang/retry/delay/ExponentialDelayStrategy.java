@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import org.morphix.lang.Temporals;
 import org.morphix.lang.retry.DelayStrategy;
 
 /**
@@ -62,7 +63,7 @@ public final class ExponentialDelayStrategy implements DelayStrategy {
 	 * @param multiplier exponential multiplier (must be greater than 1)
 	 * @throws IllegalArgumentException if {@code maxDelay < minDelay} or if {@code multiplier <= 1}
 	 */
-	public ExponentialDelayStrategy(final long minDelay, final long maxDelay, final TimeUnit timeUnit, final double multiplier) {
+	protected ExponentialDelayStrategy(final long minDelay, final long maxDelay, final TimeUnit timeUnit, final double multiplier) {
 		this.minDelay = minDelay;
 		this.maxDelay = maxDelay;
 		this.timeUnit = Objects.requireNonNull(timeUnit, "Time unit cannot be null");
@@ -94,11 +95,25 @@ public final class ExponentialDelayStrategy implements DelayStrategy {
 	 *
 	 * @param minDelay initial delay
 	 * @param maxDelay maximum delay
+	 * @param timeUnit time unit for delay values
+	 * @param multiplier exponential multiplier (must be greater than 1)
+	 * @return a new exponential delay strategy
+	 */
+	public static ExponentialDelayStrategy of(final Duration minDelay, final Duration maxDelay, final TimeUnit timeUnit, final double multiplier) {
+		return of(Temporals.toLong(minDelay, timeUnit), Temporals.toLong(maxDelay, timeUnit), timeUnit, multiplier);
+	}
+
+	/**
+	 * Factory method for an exponential delay strategy. The time unit for delay values is set to the default value defined
+	 * in {@link DelayStrategy.Default#TIME_UNIT}.
+	 *
+	 * @param minDelay initial delay
+	 * @param maxDelay maximum delay
 	 * @param multiplier exponential multiplier (must be greater than 1)
 	 * @return a new exponential delay strategy
 	 */
 	public static ExponentialDelayStrategy of(final Duration minDelay, final Duration maxDelay, final double multiplier) {
-		return of(minDelay.toMillis(), maxDelay.toMillis(), Default.TIME_UNIT, multiplier);
+		return of(minDelay, maxDelay, Default.TIME_UNIT, multiplier);
 	}
 
 	/**

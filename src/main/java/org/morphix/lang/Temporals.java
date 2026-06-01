@@ -14,6 +14,7 @@ package org.morphix.lang;
 
 import java.time.Duration;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utility methods for handling date/time/duration.
@@ -105,5 +106,17 @@ public interface Temporals {
 			case 'd' -> Duration.ofDays(value);
 			default -> throw new IllegalArgumentException("Unsupported unit: " + unit + " in: " + input);
 		};
+	}
+
+	/**
+	 * Converts a {@link Duration} to the specified {@link TimeUnit} as a long value.
+	 *
+	 * @param duration the duration to convert
+	 * @param timeUnit the target time unit
+	 * @return the converted duration in the target time unit as a long value
+	 * @throws NullPointerException if {@code duration} or {@code timeUnit} is null
+	 */
+	static long toLong(final Duration duration, final TimeUnit timeUnit) {
+		return timeUnit.convert(duration.toMillis(), TimeUnit.MILLISECONDS);
 	}
 }
