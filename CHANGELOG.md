@@ -1,5 +1,16 @@
 ## Release Notes
 
+`1.0.38`
+
+- Added `DelayStrategy` interface for retry delay calculation with default conversion helpers.
+- Added `DelayStrategy.Default` namespace with default delay time unit constant.
+- Added `delay.FixedDelayStrategy` implementation for constant retry delays.
+- Added `delay.ExponentialDelayStrategy` implementation for exponential retry delays with max cap.
+- Changed `WaitTimeout` to use `DelayStrategy` instead of fixed interval fields.
+- Added `Temporals.toLong` to convert a `Duration` to the specified `TimeUnit`.
+
+---
+
 `1.0.37`
 
 - Changed `JavaArrays.isEmpty` method parameter from `Object[]` to `T[]` generic type argument.

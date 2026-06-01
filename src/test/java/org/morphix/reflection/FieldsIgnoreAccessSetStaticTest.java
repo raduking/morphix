@@ -59,14 +59,14 @@ class FieldsIgnoreAccessSetStaticTest {
 	}
 
 	@Test
-	void shouldThrowExceptionForFieldThatDoesNotExist() {
+	void shouldThrowExceptionForFieldThatDoesNotExistByName() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.setStatic(B.class, MISSING_FIELD_NAME, VALUE));
 		assertThat(e.getMessage(),
 				equalTo("Could not find static field with name: " + MISSING_FIELD_NAME + " in class: " + B.class));
 	}
 
 	@Test
-	void shouldThrowExceptionForFieldIsNotStatic() {
+	void shouldThrowExceptionIfFieldIsNotStaticByName() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.setStatic(B.class, NON_STATIC_FIELD_NAME, VALUE));
 		assertThat(e.getMessage(),
 				equalTo("Could not find static field with name: " + NON_STATIC_FIELD_NAME + " in class: " + B.class));
@@ -79,12 +79,31 @@ class FieldsIgnoreAccessSetStaticTest {
 				equalTo("Field cannot be null when trying to set static field value from class: " + B.class));
 	}
 
+	@Test
+	void shouldSetStaticFieldIgnoringAccessFromDerivedClass() {
+		Field field = Fields.getOneDeclared(B.class, STATIC_FIELD_NAME);
+		Fields.IgnoreAccess.setStatic(C.class, field, VALUE);
+
+		String result = B.getStaticField();
+
+		assertThat(result, equalTo(VALUE));
+	}
+
+	@Test
+	void shouldThrowExceptionForFieldIsNotStatic() {
+		Field field = Fields.getOneDeclared(B.class, NON_STATIC_FIELD_NAME);
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.setStatic(B.class, field, VALUE));
+		assertThat(e.getMessage(),
+				equalTo("Could not find static field with name: " + NON_STATIC_FIELD_NAME + " in class: " + B.class));
+	}
+
 	private static class C extends B {
 		// empty
 	}
 
 	@Test
-	void shouldSetStaticFieldIgnoringAccessFromDerivedClass() {
+	void shouldSetStaticFieldByNameIgnoringAccessFromDerivedClass() {
 		Fields.IgnoreAccess.setStatic(C.class, STATIC_FIELD_NAME, VALUE);
 
 		String result = B.getStaticField();

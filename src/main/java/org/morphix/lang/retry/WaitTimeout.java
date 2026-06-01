@@ -16,7 +16,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.morphix.lang.retry.delay.FixedDelayStrategy;
 import org.morphix.reflection.Constructors;
 
 /**
@@ -67,14 +69,14 @@ public class WaitTimeout implements Wait {
 	private final TimeUnit timeoutTimeUnit;
 
 	/**
-	 * Interval between waits.
+	 * Strategy that determines the sleep interval between checks.
 	 */
-	private final long interval;
+	private final DelayStrategy delayStrategy;
 
 	/**
-	 * Interval time unit.
+	 * Counts the number of attempts.
 	 */
-	private final TimeUnit intervalTimeUnit;
+	private final AtomicInteger attempt = new AtomicInteger(0);
 
 	/**
 	 * Start time.
@@ -86,15 +88,13 @@ public class WaitTimeout implements Wait {
 	 *
 	 * @param timeout timeout
 	 * @param timeoutTimeUnit timeout time unit
-	 * @param interval interval
-	 * @param intervalTimeUnit interval time unit
+	 * @param delayStrategy strategy that determines the sleep interval between checks
 	 */
-	protected WaitTimeout(final long timeout, final TimeUnit timeoutTimeUnit, final long interval, final TimeUnit intervalTimeUnit) {
+	protected WaitTimeout(final long timeout, final TimeUnit timeoutTimeUnit, final DelayStrategy delayStrategy) {
 		this.timeout = timeout;
 		this.timeoutTimeUnit = timeoutTimeUnit;
-		this.interval = interval;
-		this.intervalTimeUnit = intervalTimeUnit;
-		this.start = Instant.now();
+		this.delayStrategy = delayStrategy;
+		start();
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class WaitTimeout implements Wait {
 	 * @return the wait object
 	 */
 	public static WaitTimeout of(final long timeout, final TimeUnit timeoutTimeUnit, final long interval, final TimeUnit intervalTimeUnit) {
-		return new WaitTimeout(timeout, timeoutTimeUnit, interval, intervalTimeUnit);
+		return of(timeout, timeoutTimeUnit, FixedDelayStrategy.of(interval, intervalTimeUnit));
 	}
 
 	/**
@@ -122,11 +122,23 @@ public class WaitTimeout implements Wait {
 	}
 
 	/**
+	 * Wait object builder.
+	 *
+	 * @param timeout timeout
+	 * @param timeoutTimeUnit timeout time unit
+	 * @param delayStrategy strategy that determines the sleep interval between checks
+	 * @return the wait object
+	 */
+	public static WaitTimeout of(final long timeout, final TimeUnit timeoutTimeUnit, final DelayStrategy delayStrategy) {
+		return new WaitTimeout(timeout, timeoutTimeUnit, delayStrategy);
+	}
+
+	/**
 	 * @see Wait#interval()
 	 */
 	@Override
 	public long interval() {
-		return interval;
+		return delayStrategy.delay(attempt.get());
 	}
 
 	/**
@@ -134,7 +146,7 @@ public class WaitTimeout implements Wait {
 	 */
 	@Override
 	public TimeUnit timeUnit() {
-		return intervalTimeUnit;
+		return delayStrategy.timeUnit();
 	}
 
 	/**
@@ -151,6 +163,7 @@ public class WaitTimeout implements Wait {
 	 * @param start time to set
 	 */
 	protected void start(final Instant start) {
+		this.attempt.set(1);
 		this.start = start;
 	}
 
@@ -160,9 +173,11 @@ public class WaitTimeout implements Wait {
 	@Override
 	public void now() {
 		// don't wait if the timeout is over
-		if (keepWaiting()) {
-			Wait.super.now();
+		if (!keepWaiting()) {
+			return;
 		}
+		Wait.super.now();
+		attempt.updateAndGet(value -> value == Integer.MAX_VALUE ? value : value + 1);
 	}
 
 	/**
@@ -214,14 +229,11 @@ public class WaitTimeout implements Wait {
 	 */
 	@Override
 	public WaitTimeout copy() {
-		return WaitTimeout.of(timeout, timeoutTimeUnit, interval, intervalTimeUnit);
+		return WaitTimeout.of(timeout, timeoutTimeUnit, delayStrategy);
 	}
 
 	/**
-	 * Equals method that also verifies that objects are of the same class.
-	 *
-	 * @param that object to test equality with
-	 * @return true if objects are equal, false otherwise
+	 * @see Object#equals(Object)
 	 */
 	@Override
 	public boolean equals(final Object that) {
@@ -232,20 +244,18 @@ public class WaitTimeout implements Wait {
 			return false;
 		}
 		WaitTimeout thatWait = (WaitTimeout) that;
-		return Objects.equals(timeout, thatWait.timeout)
-				&& Objects.equals(timeoutTimeUnit, thatWait.timeoutTimeUnit)
-				&& Objects.equals(interval, thatWait.interval)
-				&& Objects.equals(intervalTimeUnit, thatWait.intervalTimeUnit)
+		return timeout == thatWait.timeout
+				&& timeoutTimeUnit == thatWait.timeoutTimeUnit
+				&& Objects.equals(delayStrategy, thatWait.delayStrategy)
+				&& attempt.get() == thatWait.attempt.get()
 				&& Objects.equals(start, thatWait.start);
 	}
 
 	/**
-	 * Hash code implementation.
-	 *
-	 * @return hash code
+	 * @see Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(timeout, timeoutTimeUnit, interval, intervalTimeUnit, start);
+		return Objects.hash(timeout, timeoutTimeUnit, delayStrategy, attempt.get(), start);
 	}
 }

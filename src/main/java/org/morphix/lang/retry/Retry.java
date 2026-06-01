@@ -282,7 +282,7 @@ public class Retry {
 	}
 
 	/**
-	 * Equals method that also verifies that objects are of the same class.
+	 * @see Object#equals(Object)
 	 */
 	@Override
 	public boolean equals(final Object obj) {
@@ -296,7 +296,7 @@ public class Retry {
 	}
 
 	/**
-	 * Hash code implementation.
+	 * @see Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {

@@ -151,7 +151,7 @@ public class ExpandableFields {
 	}
 
 	/**
-	 * see {@link Object#equals(Object)}
+	 * @see Object#equals(Object)
 	 */
 	@Override
 	public boolean equals(final Object obj) {
@@ -169,7 +169,7 @@ public class ExpandableFields {
 	}
 
 	/**
-	 * see {@link Object#hashCode()}
+	 * @see Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {

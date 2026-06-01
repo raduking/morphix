@@ -176,7 +176,7 @@ public class WaitCounter implements Wait {
 	}
 
 	/**
-	 * Equals method that also verifies that objects are of the same class.
+	 * @see Object#equals(Object)
 	 */
 	@Override
 	public boolean equals(final Object that) {
@@ -187,14 +187,14 @@ public class WaitCounter implements Wait {
 			return false;
 		}
 		WaitCounter thatWait = (WaitCounter) that;
-		return Objects.equals(interval, thatWait.interval)
-				&& Objects.equals(intervalTimeUnit, thatWait.intervalTimeUnit)
-				&& Objects.equals(maxCount, thatWait.maxCount)
-				&& Objects.equals(count, thatWait.count);
+		return interval == thatWait.interval
+				&& intervalTimeUnit == thatWait.intervalTimeUnit
+				&& maxCount == thatWait.maxCount
+				&& count == thatWait.count;
 	}
 
 	/**
-	 * Hash code implementation.
+	 * @see Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
