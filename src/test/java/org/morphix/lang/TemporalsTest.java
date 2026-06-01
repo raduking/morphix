@@ -37,7 +37,7 @@ class TemporalsTest {
 	class FormatToSecondsTest {
 
 		@ParameterizedTest
-		@ValueSource(doubles = {0.0, 1.234, 12.3456, 123.456789})
+		@ValueSource(doubles = { 0.0, 1.234, 12.3456, 123.456789 })
 		void shouldFormatDoubleDurationToSecondsWithThreeDecimals(final double duration) {
 			String formatted = Temporals.formatToSeconds(duration);
 
