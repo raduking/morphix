@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.39`
+
+---
+
 `1.0.38`
 
 - Added `DelayStrategy` interface for retry delay calculation with default conversion helpers.
