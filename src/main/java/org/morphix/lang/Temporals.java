@@ -117,13 +117,11 @@ public interface Temporals {
 	 * @throws NullPointerException if {@code duration} or {@code timeUnit} is null
 	 */
 	static long toLong(final Duration duration, final TimeUnit timeUnit) {
-		switch (timeUnit) {
-			case NANOSECONDS:
-				return duration.toNanos();
-			case MICROSECONDS:
-				return duration.toNanos() / 1_000;
-			default:
-				return timeUnit.convert(duration.toMillis(), TimeUnit.MILLISECONDS);
-		}
+		return switch (timeUnit) {
+			case NANOSECONDS -> duration.toNanos();
+			case MICROSECONDS -> duration.toNanos() / 1_000;
+			case MILLISECONDS -> duration.toMillis();
+			default -> timeUnit.convert(duration.toSeconds(), TimeUnit.SECONDS);
+		};
 	}
 }

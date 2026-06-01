@@ -34,6 +34,50 @@ import org.junit.jupiter.params.provider.ValueSource;
 class TemporalsTest {
 
 	@Nested
+	class ToDoubleTest {
+
+		@Test
+		void shouldConvertDurationToDoubleSecondsAndMilliseconds() {
+			Duration duration = Duration.ofSeconds(1).plusMillis(250);
+
+			double result = Temporals.toDouble(duration);
+
+			assertThat(result, equalTo(1.25d));
+		}
+
+		@Test
+		void shouldConvertNegativeDurationToDouble() {
+			Duration duration = Duration.ofSeconds(-1).plusMillis(500);
+
+			double result = Temporals.toDouble(duration);
+
+			assertThat(result, equalTo(-0.5d));
+		}
+	}
+
+	@Nested
+	class ToSecondsTest {
+
+		@Test
+		void shouldConvertMillisecondsToSecondsAsDouble() {
+			long millis = 1234;
+
+			double result = Temporals.toSeconds(millis);
+
+			assertThat(result, equalTo(1.234d));
+		}
+
+		@Test
+		void shouldConvertDurationToSecondsAsDouble() {
+			Duration duration = Duration.ofMillis(1234);
+
+			double result = Temporals.toSeconds(duration);
+
+			assertThat(result, equalTo(1.234d));
+		}
+	}
+
+	@Nested
 	class FormatToSecondsTest {
 
 		@ParameterizedTest
@@ -65,6 +109,20 @@ class TemporalsTest {
 		@Test
 		void shouldReturnNotAvailableIfInputIsNaNOnFormatToSecondsWithDouble() {
 			String result = Temporals.formatToSeconds(Double.NaN);
+
+			assertThat(result, equalTo("N/A"));
+		}
+
+		@Test
+		void shouldFormatToSecondsUsingProvidedLocale() {
+			String result = Temporals.formatToSeconds(1.5d, Locale.FRANCE);
+
+			assertThat(result, equalTo("1,500s"));
+		}
+
+		@Test
+		void shouldReturnNotAvailableIfInputIsNaNOnFormatToSecondsWithLocale() {
+			String result = Temporals.formatToSeconds(Double.NaN, Locale.FRANCE);
 
 			assertThat(result, equalTo("N/A"));
 		}
@@ -124,6 +182,18 @@ class TemporalsTest {
 			IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Temporals.parseSimpleDuration(duration));
 
 			assertThat(e.getMessage(), equalTo("Input cannot be empty or null"));
+		}
+
+		@Test
+		void shouldThrowExceptionIfInputIsNull() {
+			IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Temporals.parseSimpleDuration(null));
+
+			assertThat(e.getMessage(), equalTo("Input cannot be empty or null"));
+		}
+
+		@Test
+		void shouldThrowNumberFormatExceptionIfNumericPartIsInvalid() {
+			assertThrows(NumberFormatException.class, () -> Temporals.parseSimpleDuration("abcs"));
 		}
 	}
 
