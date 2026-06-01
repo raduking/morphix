@@ -13,10 +13,13 @@
 package org.morphix.lang;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Duration;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,29 +33,41 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 class TemporalsTest {
 
-	@Test
-	void shouldFormatADoubleToStringAsSecondsWith3DecimalsRoundingDown() {
-		double value = 1.2341;
+	@Nested
+	class FormatToSecondsTest {
 
-		String result = Temporals.formatToSeconds(value);
+		@ParameterizedTest
+		@ValueSource(doubles = {0.0, 1.234, 12.3456, 123.456789})
+		void shouldFormatDoubleDurationToSecondsWithThreeDecimals(final double duration) {
+			String formatted = Temporals.formatToSeconds(duration);
 
-		assertThat(result, equalTo("1.234s"));
-	}
+			assertThat(formatted, is(equalTo(String.format(Locale.ROOT, "%.3fs", duration))));
+		}
 
-	@Test
-	void shouldFormatADoubleToStringAsSecondsWith3DecimalsRoundingUp() {
-		double value = 1.2346;
+		@Test
+		void shouldFormatADoubleToStringAsSecondsWith3DecimalsRoundingDown() {
+			double value = 1.2341;
 
-		String result = Temporals.formatToSeconds(value);
+			String result = Temporals.formatToSeconds(value);
 
-		assertThat(result, equalTo("1.235s"));
-	}
+			assertThat(result, equalTo("1.234s"));
+		}
 
-	@Test
-	void shouldReturnNotAvailableIfInputIsNaNOnFormatToSecondsWithDouble() {
-		String result = Temporals.formatToSeconds(Double.NaN);
+		@Test
+		void shouldFormatADoubleToStringAsSecondsWith3DecimalsRoundingUp() {
+			double value = 1.2346;
 
-		assertThat(result, equalTo("N/A"));
+			String result = Temporals.formatToSeconds(value);
+
+			assertThat(result, equalTo("1.235s"));
+		}
+
+		@Test
+		void shouldReturnNotAvailableIfInputIsNaNOnFormatToSecondsWithDouble() {
+			String result = Temporals.formatToSeconds(Double.NaN);
+
+			assertThat(result, equalTo("N/A"));
+		}
 	}
 
 	@Nested
@@ -109,6 +124,32 @@ class TemporalsTest {
 			IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Temporals.parseSimpleDuration(duration));
 
 			assertThat(e.getMessage(), equalTo("Input cannot be empty or null"));
+		}
+	}
+
+	@Nested
+	class ToLongTests {
+
+		@Test
+		void shouldConvertDurationToSpecifiedTimeUnit() {
+			Duration duration = Duration.ofHours(2);
+
+			assertThat(Temporals.toLong(duration, TimeUnit.SECONDS), is(7200L));
+			assertThat(Temporals.toLong(duration, TimeUnit.MINUTES), is(120L));
+			assertThat(Temporals.toLong(duration, TimeUnit.HOURS), is(2L));
+			assertThat(Temporals.toLong(duration, TimeUnit.MILLISECONDS), is(7_200_000L));
+		}
+
+		@Test
+		void shouldThrowNullPointerExceptionWhenDurationIsNull() {
+			assertThrows(NullPointerException.class, () -> Temporals.toLong(null, TimeUnit.SECONDS));
+		}
+
+		@Test
+		void shouldThrowNullPointerExceptionWhenTimeUnitIsNull() {
+			Duration duration = Duration.ofMinutes(5);
+
+			assertThrows(NullPointerException.class, () -> Temporals.toLong(duration, null));
 		}
 	}
 }
