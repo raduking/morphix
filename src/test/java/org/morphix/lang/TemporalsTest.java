@@ -141,6 +141,38 @@ class TemporalsTest {
 		}
 
 		@Test
+		void shouldConvertDurationToNanoseconds() {
+			Duration duration = Duration.ofNanos(1_234_567);
+
+			long result = Temporals.toLong(duration, TimeUnit.NANOSECONDS);
+
+			assertThat(result, is(1_234_567L));
+		}
+
+		@Test
+		void shouldConvertDurationToMicrosecondsUsingNanosecondPrecision() {
+			Duration duration = Duration.ofNanos(1_999);
+
+			long result = Temporals.toLong(duration, TimeUnit.MICROSECONDS);
+
+			assertThat(result, is(1L));
+		}
+
+		@Test
+		void shouldThrowArithmeticExceptionWhenNanosecondsConversionOverflows() {
+			Duration duration = Duration.ofSeconds(Long.MAX_VALUE);
+
+			assertThrows(ArithmeticException.class, () -> Temporals.toLong(duration, TimeUnit.NANOSECONDS));
+		}
+
+		@Test
+		void shouldThrowArithmeticExceptionWhenMicrosecondsConversionOverflows() {
+			Duration duration = Duration.ofSeconds(Long.MAX_VALUE);
+
+			assertThrows(ArithmeticException.class, () -> Temporals.toLong(duration, TimeUnit.MICROSECONDS));
+		}
+
+		@Test
 		void shouldThrowNullPointerExceptionWhenDurationIsNull() {
 			assertThrows(NullPointerException.class, () -> Temporals.toLong(null, TimeUnit.SECONDS));
 		}
