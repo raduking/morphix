@@ -59,6 +59,34 @@ public interface Iterables {
 	}
 
 	/**
+	 * Return true if the given iterable is {@code null} or empty.
+	 *
+	 * @param <T> element type
+	 *
+	 * @param iterable an iterable
+	 * @return true if the given iterable is null or empty
+	 */
+	static <T> boolean isEmpty(final Iterable<T> iterable) {
+		return switch (iterable) {
+			case null -> true;
+			case Collection<T> collection -> collection.isEmpty();
+			default -> !iterable.iterator().hasNext();
+		};
+	}
+
+	/**
+	 * Return true if the given iterable is {@code null} or empty.
+	 *
+	 * @param <T> element type
+	 *
+	 * @param iterable an iterable
+	 * @return true if the given iterable is null or empty
+	 */
+	static <T> boolean isNotEmpty(final Iterable<T> iterable) {
+		return !isEmpty(iterable);
+	}
+
+	/**
 	 * Partitions the given iterable into sublists of the given size. The last sublist may be smaller than the given size if
 	 * the total number of elements in the iterable is not a multiple of the size.
 	 * <p>

@@ -79,6 +79,70 @@ class IterablesTest {
 	}
 
 	@Nested
+	class EmptyChecksTest {
+
+		@Test
+		void shouldReturnTrueOnIsEmptyForNullIterable() {
+			boolean result = Iterables.isEmpty(null);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnIsEmptyForEmptyCollection() {
+			boolean result = Iterables.isEmpty(List.of());
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnIsEmptyForNonEmptyCollection() {
+			boolean result = Iterables.isEmpty(List.of(1));
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnIsEmptyForEmptyNonCollectionIterable() {
+			Iterable<Integer> iterable = () -> Collections.<Integer>emptyIterator();
+
+			boolean result = Iterables.isEmpty(iterable);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnIsEmptyForNonEmptyNonCollectionIterable() {
+			Iterable<Integer> iterable = () -> List.of(1).iterator();
+
+			boolean result = Iterables.isEmpty(iterable);
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnIsNotEmptyForNullIterable() {
+			boolean result = Iterables.isNotEmpty(null);
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnIsNotEmptyForEmptyIterable() {
+			boolean result = Iterables.isNotEmpty(List.of());
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnIsNotEmptyForNonEmptyIterable() {
+			boolean result = Iterables.isNotEmpty(List.of(1));
+
+			assertTrue(result);
+		}
+	}
+
+	@Nested
 	class PartitionTest {
 
 		@Test

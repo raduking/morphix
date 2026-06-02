@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.UnaryOperator;
 
 import org.junit.jupiter.api.Nested;
@@ -208,6 +209,71 @@ class MapsTest {
 			Map<String, Object> result = Maps.convertKeys(map, TO_UPPER);
 
 			assertThat(result, hasEntry("KEY", 123));
+		}
+	}
+
+	@Nested
+	class ReplaceTests {
+
+		@Test
+		void shouldReturnNullWhenReplacingValuesInNullMapWithValueFunction() {
+			Map<String, String> result = Maps.replace(null, key -> true, String::toUpperCase);
+
+			assertThat(result, is(equalTo(null)));
+		}
+
+		@Test
+		void shouldReturnTheSameEmptyMapWhenReplacingValuesInEmptyMapWithValueFunction() {
+			Map<String, String> map = Map.of();
+
+			Map<String, String> result = Maps.replace(map, key -> true, String::toUpperCase);
+
+			assertThat(result, is(equalTo(map)));
+		}
+
+		@Test
+		void shouldReplaceOnlyMatchingKeysWithValueFunction() {
+			Map<String, String> map = new LinkedHashMap<>();
+			map.put("a", "one");
+			map.put("b", "two");
+
+			Map<String, String> result = Maps.replace(map, "a"::equals, String::toUpperCase);
+
+			assertThat(result.get("a"), equalTo("ONE"));
+			assertThat(result.get("b"), equalTo("two"));
+			assertThat(result.size(), equalTo(2));
+		}
+
+		@Test
+		void shouldReplaceOnlyMatchingKeysWithValueSupplier() {
+			Map<String, String> map = new LinkedHashMap<>();
+			map.put("a", "one");
+			map.put("b", "two");
+			AtomicInteger supplierCalls = new AtomicInteger(0);
+
+			Map<String, String> result = Maps.replace(map, "b"::equals, () -> {
+				supplierCalls.incrementAndGet();
+				return "replaced";
+			});
+
+			assertThat(result.get("a"), equalTo("one"));
+			assertThat(result.get("b"), equalTo("replaced"));
+			assertThat(supplierCalls.get(), equalTo(1));
+		}
+
+		@Test
+		void shouldNotCallValueSupplierWhenNoKeyMatches() {
+			Map<String, String> map = new LinkedHashMap<>();
+			map.put("a", "one");
+			AtomicInteger supplierCalls = new AtomicInteger(0);
+
+			Map<String, String> result = Maps.replace(map, key -> false, () -> {
+				supplierCalls.incrementAndGet();
+				return "replaced";
+			});
+
+			assertThat(result.get("a"), equalTo("one"));
+			assertThat(supplierCalls.get(), equalTo(0));
 		}
 	}
 }
