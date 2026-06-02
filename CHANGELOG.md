@@ -2,6 +2,11 @@
 
 `1.0.39`
 
+- Added `Iterables.isEmpty` to check if an `Iterable` is empty.
+- Added `Iterables.isNotEmpty` to check if an `Iterable` is not empty.
+- Added `Maps.replace(Map, Predicate, Function)` to return a map with values replaced for matching keys.
+- Added `Maps.replace(Map, Predicate, Supplier)` to return a map with supplied values replaced for matching keys.
+
 ---
 
 `1.0.38`

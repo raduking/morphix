@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -136,10 +137,13 @@ public interface Maps {
 	 * <p>
 	 * Null returns true.
 	 *
+	 * @param <K> the map's key type
+	 * @param <V> the map's value type
+	 *
 	 * @param map the map to check, may be null
 	 * @return true if empty or null
 	 */
-	static boolean isEmpty(final Map<?, ?> map) {
+	static <K, V> boolean isEmpty(final Map<K, V> map) {
 		return null == map || map.isEmpty();
 	}
 
@@ -148,10 +152,55 @@ public interface Maps {
 	 * <p>
 	 * Null returns false.
 	 *
+	 * @param <K> the map's key type
+	 * @param <V> the map's value type
+	 *
 	 * @param map the map to check, may be null
 	 * @return true if non-null and non-empty
 	 */
-	static boolean isNotEmpty(final Map<?, ?> map) {
+	static <K, V> boolean isNotEmpty(final Map<K, V> map) {
 		return !isEmpty(map);
+	}
+
+	/**
+	 * Returns a new map with the values replaced by the given value function if the key matches the given key predicate.
+	 *
+	 * @param <K> The map's key type
+	 * @param <V> The map's value type
+	 *
+	 * @param map the map to replace values in
+	 * @param keyPredicate the predicate to test keys against
+	 * @param valueFunction the function to apply to values of matching keys
+	 * @return a new map with replaced values
+	 */
+	static <K, V> Map<K, V> replace(final Map<K, V> map, final Predicate<? super K> keyPredicate,
+			final Function<? super V, ? extends V> valueFunction) {
+		if (isEmpty(map)) {
+			return map;
+		}
+		Map<K, V> resultMap = LinkedHashMap.newLinkedHashMap(map.size());
+		for (Map.Entry<K, V> entry : map.entrySet()) {
+			K key = entry.getKey();
+			V value = keyPredicate.test(key)
+					? valueFunction.apply(entry.getValue())
+					: entry.getValue();
+			resultMap.put(key, value);
+		}
+		return resultMap;
+	}
+
+	/**
+	 * Returns a new map with the values replaced by the given value supplier if the key matches the given key predicate.
+	 *
+	 * @param <K> The map's key type
+	 * @param <V> The map's value type
+	 *
+	 * @param map the map to replace values in
+	 * @param keyPredicate the predicate to test keys against
+	 * @param valueSupplier the supplier to provide new values for matching keys
+	 * @return a new map with replaced values
+	 */
+	static <K, V> Map<K, V> replace(final Map<K, V> map, final Predicate<? super K> keyPredicate, final Supplier<V> valueSupplier) {
+		return replace(map, keyPredicate, value -> valueSupplier.get());
 	}
 }
