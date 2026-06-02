@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.40`
+
+---
+
 `1.0.39`
 
 - Added `Iterables.isEmpty` to check if an `Iterable` is empty.
