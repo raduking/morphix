@@ -10,6 +10,10 @@
 - Added `Iterables.isNotEmpty` to check if an `Iterable` is not empty.
 - Added `Maps.replace(Map, Predicate, Function)` to return a map with values replaced for matching keys.
 - Added `Maps.replace(Map, Predicate, Supplier)` to return a map with supplied values replaced for matching keys.
+- Changed `ReschedulingTask` to use a generated default name when none is provided.
+- Changed `ReschedulingTask` to use a managed default scheduler when none is provided.
+- Added `LoggerAdapter.logIfEnabled` for guarded logging.
+- Changed `LoggerAdapter` default convenience methods (`trace`, `debug`, `info`, `warn`, `error`) to consistently use guarded logging via `logIfEnabled`.
 
 ---
 
