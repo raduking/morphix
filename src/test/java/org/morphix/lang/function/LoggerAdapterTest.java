@@ -16,6 +16,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.util.logging.Level;
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.morphix.lang.function.LoggerAdapter.LoggingLevel;
 import org.morphix.utils.Tests;
 
 /**
@@ -48,6 +51,7 @@ class LoggerAdapterTest {
 		void shouldIgnoreAllLogMessages() {
 			LoggerAdapter noneAdapter = LoggerAdapter.none();
 
+			assertDoesNotThrow(() -> noneAdapter.log(LoggingLevel.INFO, "direct log"));
 			assertDoesNotThrow(() -> noneAdapter.trace("trace message", "arg1"));
 			assertDoesNotThrow(() -> noneAdapter.debug("debug message", "arg2"));
 			assertDoesNotThrow(() -> noneAdapter.info("info message"));
@@ -63,7 +67,8 @@ class LoggerAdapterTest {
 		private LoggerAdapter mockAdapter;
 
 		@Test
-		void shouldCallLogWithTraceLevel() {
+		void shouldCallLogWithTraceLevelIfEnabled() {
+			doReturn(true).when(mockAdapter).isEnabled(LoggingLevel.TRACE);
 			String message = "trace message: {}";
 			Object[] args = new Object[] { "arg1" };
 
@@ -73,7 +78,18 @@ class LoggerAdapterTest {
 		}
 
 		@Test
-		void shouldCallLogWithDebugLevel() {
+		void shouldNotCallLogWithTraceLevelIfDisabled() {
+			String message = "trace message: {}";
+			Object[] args = new Object[] { "arg1" };
+
+			mockAdapter.trace(message, args);
+
+			verify(mockAdapter, never()).log(LoggerAdapter.LoggingLevel.TRACE, message, args);
+		}
+
+		@Test
+		void shouldCallLogWithDebugLevelIfEnabled() {
+			doReturn(true).when(mockAdapter).isEnabled(LoggingLevel.DEBUG);
 			String message = "debug message";
 
 			mockAdapter.debug(message);
@@ -82,7 +98,8 @@ class LoggerAdapterTest {
 		}
 
 		@Test
-		void shouldCallLogWithInfoLevel() {
+		void shouldCallLogWithInfoLevelIfEnabled() {
+			doReturn(true).when(mockAdapter).isEnabled(LoggingLevel.INFO);
 			String message = "info message: {} {}";
 			Object[] args = new Object[] { "arg1", "arg2" };
 
@@ -92,7 +109,8 @@ class LoggerAdapterTest {
 		}
 
 		@Test
-		void shouldCallLogWithWarnLevel() {
+		void shouldCallLogWithWarnLevelIfEnabled() {
+			doReturn(true).when(mockAdapter).isEnabled(LoggerAdapter.LoggingLevel.WARN);
 			String message = "warn message";
 
 			mockAdapter.warn(message);
@@ -101,7 +119,17 @@ class LoggerAdapterTest {
 		}
 
 		@Test
-		void shouldCallLogWithErrorLevel() {
+		void shouldNotCallLogWithWarnLevelIfDisabled() {
+			String message = "warn message";
+
+			mockAdapter.warn(message);
+
+			verify(mockAdapter, never()).log(LoggerAdapter.LoggingLevel.WARN, message);
+		}
+
+		@Test
+		void shouldCallLogWithErrorLevelIfEnabled() {
+			doReturn(true).when(mockAdapter).isEnabled(LoggingLevel.ERROR);
 			String message = "error message: {}";
 			Object[] args = new Object[] { "error detail" };
 
@@ -112,6 +140,11 @@ class LoggerAdapterTest {
 
 		@Test
 		void shouldPassCorrectArgumentsToLog() {
+			doReturn(true).when(mockAdapter).isEnabled(LoggingLevel.TRACE);
+			doReturn(true).when(mockAdapter).isEnabled(LoggingLevel.DEBUG);
+			doReturn(true).when(mockAdapter).isEnabled(LoggingLevel.INFO);
+			doReturn(true).when(mockAdapter).isEnabled(LoggingLevel.WARN);
+			doReturn(true).when(mockAdapter).isEnabled(LoggingLevel.ERROR);
 			String traceMsg = "trace";
 			String debugMsg = "debug";
 			String infoMsg = "info";
@@ -209,6 +242,25 @@ class LoggerAdapterTest {
 			assertThat(noneAdapter.isDisabled(LoggerAdapter.LoggingLevel.INFO), is(true));
 			assertThat(noneAdapter.isDisabled(LoggerAdapter.LoggingLevel.WARN), is(true));
 			assertThat(noneAdapter.isDisabled(LoggerAdapter.LoggingLevel.ERROR), is(true));
+		}
+
+		@Test
+		void shouldReturnFalseIfLevelIsEnabled() {
+			LoggerAdapter adapter = new LoggerAdapter() {
+				@Override
+				public void log(final LoggingLevel level, final String message, final Object... args) {
+					// empty
+				}
+
+				@Override
+				public boolean isEnabled(final LoggingLevel level) {
+					return true;
+				}
+			};
+
+			boolean result = adapter.isDisabled(LoggerAdapter.LoggingLevel.INFO);
+
+			assertThat(result, is(false));
 		}
 	}
 }

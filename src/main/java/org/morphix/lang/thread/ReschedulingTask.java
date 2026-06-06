@@ -15,6 +15,7 @@ package org.morphix.lang.thread;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -88,6 +89,16 @@ public class ReschedulingTask implements AutoCloseable {
 		 * set to a different value.
 		 */
 		public static final Duration TERMINATION_TIMEOUT = Duration.ZERO;
+
+		/**
+		 * Returns a default scheduler instance using virtual threads. This is a good default for most use cases, as it allows
+		 * for efficient scheduling of tasks without blocking threads.
+		 *
+		 * @return a new instance of {@link ScheduledExecutorService} using virtual threads
+		 */
+		public static ScheduledExecutorService scheduler() {
+			return Executors.newScheduledThreadPool(0, Thread.ofVirtual().factory());
+		}
 
 		/**
 		 * Hide constructor.
@@ -173,13 +184,15 @@ public class ReschedulingTask implements AutoCloseable {
 	 * @param builder the builder
 	 */
 	private ReschedulingTask(final Builder builder) {
-		this.name = Objects.requireNonNull(builder.name, "name must not be null");
-		this.scheduler = Objects.requireNonNull(builder.scheduler, "scheduler must not be null");
 		this.refreshTask = Objects.requireNonNull(builder.refreshTask, "refreshTask must not be null");
 		this.nextDelaySupplier = Objects.requireNonNull(builder.nextDelaySupplier, "nextDelaySupplier must not be null");
 
-		this.executionWrapper = Nullables.nonNullOrDefault(builder.executionWrapper, ExecutionWrapper::identity);
+		this.name = Nullables.nonNullOrDefault(builder.name, () -> "rescheduling-task-" + System.identityHashCode(this));
 		this.logger = Nullables.nonNullOrDefault(builder.logger, LoggerAdapter::none);
+
+		this.scheduler = Nullables.nonNullOrDefault(builder.scheduler, () -> ScopedResource.managed(Default.scheduler()));
+		this.executionWrapper = Nullables.nonNullOrDefault(builder.executionWrapper, ExecutionWrapper::identity);
+
 		this.minDelay = Nullables.nonNullOrDefault(builder.minDelay, () -> Default.MIN_DELAY);
 		if (minDelay.isNegative() || minDelay.isZero()) {
 			throw new IllegalArgumentException("minDelay must be positive");

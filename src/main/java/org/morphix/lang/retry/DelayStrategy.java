@@ -15,17 +15,18 @@ package org.morphix.lang.retry;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
+import org.morphix.lang.Copyable;
 import org.morphix.reflection.Constructors;
 
 /**
  * Strategy for computing consecutive delay values.
  * <p>
- * Attempt indexes are 1-based.
+ * Attempt indexes are 0-based.
  *
  * @author Radu Sebastian LAZIN
  */
 @FunctionalInterface
-public interface DelayStrategy {
+public interface DelayStrategy extends Copyable {
 
 	/**
 	 * Default values namespace.
@@ -50,7 +51,7 @@ public interface DelayStrategy {
 	/**
 	 * Returns the delay for the provided attempt.
 	 *
-	 * @param attempt retry attempt number (1-based)
+	 * @param attempt retry attempt number (0-based)
 	 * @return delay value for the attempt
 	 */
 	long delay(int attempt);
@@ -74,19 +75,19 @@ public interface DelayStrategy {
 	}
 
 	/**
-	 * Returns the delay for the first attempt.
+	 * Returns the delay for the first attempt (0-based). It is equivalent to {@code delay(0)}.
 	 *
-	 * @return delay for attempt 1
+	 * @return delay for the first attempt
 	 */
 	default long delay() {
-		return delay(1);
+		return delay(0);
 	}
 
 	/**
 	 * Returns the delay for the first attempt converted to the provided unit.
 	 *
 	 * @param timeUnit target time unit
-	 * @return converted delay for attempt 1
+	 * @return converted delay for the first attempt
 	 * @throws NullPointerException if {@code timeUnit} is null
 	 */
 	default long delay(final TimeUnit timeUnit) {
@@ -103,5 +104,18 @@ public interface DelayStrategy {
 	 */
 	default long delay(final int attempt, final TimeUnit timeUnit) {
 		return timeUnit.convert(delay(attempt), timeUnit());
+	}
+
+	/**
+	 * Returns a copy of the current object.
+	 * <p>
+	 * This is needed for thread safety. By default, it doesn't create a copy, so any class that doesn't implement it is not
+	 * thread safe.
+	 *
+	 * @return a copy of the current object
+	 */
+	@Override
+	default DelayStrategy copy() {
+		return this;
 	}
 }

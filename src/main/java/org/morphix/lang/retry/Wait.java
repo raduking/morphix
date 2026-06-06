@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 
+import org.morphix.lang.Copyable;
 import org.morphix.lang.thread.Threads;
 import org.morphix.reflection.Constructors;
 
@@ -26,7 +27,7 @@ import org.morphix.reflection.Constructors;
  * @author Radu Sebastian LAZIN
  */
 @FunctionalInterface
-public interface Wait {
+public interface Wait extends Copyable {
 
 	/**
 	 * Default values name space.
@@ -92,6 +93,7 @@ public interface Wait {
 	 *
 	 * @return a copy of the current object
 	 */
+	@Override
 	default Wait copy() {
 		return this;
 	}

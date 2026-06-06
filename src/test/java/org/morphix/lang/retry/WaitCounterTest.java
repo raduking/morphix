@@ -38,6 +38,17 @@ class WaitCounterTest {
 	private static final int MAX_COUNT = 3;
 
 	@Test
+	void shouldCreateWaitCounterUsingDelayStrategy() {
+		DelayStrategy delayStrategy = attempt -> attempt;
+		WaitCounter waitCounter = WaitCounter.of(MAX_COUNT, delayStrategy);
+
+		assertThat(waitCounter.interval(), equalTo(1L));
+		waitCounter.keepWaiting();
+		assertThat(waitCounter.interval(), equalTo(2L));
+		assertThat(waitCounter.timeUnit(), equalTo(TimeUnit.MILLISECONDS));
+	}
+
+	@Test
 	void shouldReturnTrueOnTwoEqualObjects() {
 		WaitCounter waitCounter1 = WaitCounter.of(MAX_COUNT, INTERVAL);
 		WaitCounter waitCounter2 = WaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.MILLISECONDS);

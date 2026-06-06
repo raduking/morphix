@@ -152,27 +152,29 @@ class ReschedulingTaskTest {
 
 		@Test
 		@SuppressWarnings("resource")
-		void shouldThrowExceptionWhenNameIsNull() {
-			ReschedulingTask.Builder taskBuilder = ReschedulingTask.builder()
+		void shouldUseDefaultNameWhenNotProvided() {
+			ReschedulingTask task = ReschedulingTask.builder()
 					.scheduler(scheduler())
 					.task(Runnables.doNothing())
-					.nextDelay(() -> DELAY);
+					.nextDelay(() -> DELAY)
+					.build();
 
-			NullPointerException ex = assertThrows(NullPointerException.class, taskBuilder::build);
-
-			assertThat(ex.getMessage(), is("name must not be null"));
+			assertThat(task.getName(), equalTo("rescheduling-task-" + System.identityHashCode(task)));
 		}
 
 		@Test
-		void shouldThrowExceptionWhenSchedulerIsNull() {
-			ReschedulingTask.Builder taskBuilder = ReschedulingTask.builder()
+		@SuppressWarnings("resource")
+		void shouldUseDefaultSchedulerWhenNotProvided() throws Exception {
+			ReschedulingTask task = ReschedulingTask.builder()
 					.name(TASK_NAME)
 					.task(Runnables.doNothing())
-					.nextDelay(() -> DELAY);
+					.nextDelay(DELAY)
+					.build();
 
-			NullPointerException ex = assertThrows(NullPointerException.class, taskBuilder::build);
+			assertThat(task.getScheduler(), is(notNullValue()));
+			assertThat(task.getScheduler().isManaged(), is(true));
 
-			assertThat(ex.getMessage(), is("scheduler must not be null"));
+			task.close();
 		}
 
 		@Test
@@ -244,6 +246,24 @@ class ReschedulingTaskTest {
 			IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, taskBuilder::build);
 
 			assertThat(ex.getMessage(), is("terminationTimeout must be greater than or equal to zero"));
+		}
+
+		@Test
+		void shouldThrowExceptionWhenNameSetterReceivesNull() {
+			ReschedulingTask.Builder builder = ReschedulingTask.builder();
+
+			NullPointerException ex = assertThrows(NullPointerException.class, () -> builder.name(null));
+
+			assertThat(ex.getMessage(), is("name must not be null"));
+		}
+
+		@Test
+		void shouldThrowExceptionWhenSchedulerSetterReceivesNull() {
+			ReschedulingTask.Builder builder = ReschedulingTask.builder();
+
+			NullPointerException ex = assertThrows(NullPointerException.class, () -> builder.scheduler(null));
+
+			assertThat(ex.getMessage(), is("scheduler must not be null"));
 		}
 
 		@Test
@@ -838,6 +858,31 @@ class ReschedulingTaskTest {
 
 			verify(scheduledExecutor, times(1)).shutdownNow();
 			verify(scheduledExecutor, never()).awaitTermination(anyLong(), any(TimeUnit.class));
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldNotCancelWhenScheduledFutureIsAlreadyDone() throws Exception {
+			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
+			ScheduledFuture<?> scheduledFuture = mock(ScheduledFuture.class);
+			doReturn(scheduledFuture).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+			doReturn(true).when(scheduledFuture).isDone();
+
+			ScopedResource<ScheduledExecutorService> resource = ScopedResource.unmanaged(scheduledExecutor);
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(resource)
+					.task(Runnables.doNothing())
+					.nextDelay(() -> Duration.ofSeconds(5))
+					.build();
+
+			task.enable();
+			task.disable();
+
+			try (task) {
+				verify(scheduledFuture, never()).cancel(anyBoolean());
+			}
 		}
 
 		@Test

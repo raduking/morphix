@@ -1,5 +1,23 @@
 ## Release Notes
 
+`1.0.40`
+
+- Changed `ReschedulingTask` to use a generated default name when none is provided.
+- Changed `ReschedulingTask` to use a managed default scheduler when none is provided.
+- Added `LoggerAdapter.logIfEnabled` for guarded logging.
+- Changed `LoggerAdapter` default convenience methods (`trace`, `debug`, `info`, `warn`, `error`) to consistently use guarded logging via `logIfEnabled`.
+- Added `Copyable` interface for explicit copy support.
+- Changed `Wait` to extend `Copyable<Wait>`.
+- Changed `DelayStrategy` to extend `Copyable<DelayStrategy>`.
+- Added `DelayStrategy.copy` default implementation.
+- Changed `DelayStrategy` attempt indexing semantics to be 0-based.
+- Added `FixedDelayStrategy.copy` implementation.
+- Added `ExponentialDelayStrategy.copy` implementation.
+- Added `WaitCounter.of(int, DelayStrategy)` overload.
+- Changed `WaitCounter` to use `DelayStrategy` for interval and time unit resolution.
+
+---
+
 `1.0.39`
 
 - Added `Iterables.isEmpty` to check if an `Iterable` is empty.

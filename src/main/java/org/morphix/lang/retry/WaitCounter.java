@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import org.morphix.lang.retry.delay.FixedDelayStrategy;
 import org.morphix.reflection.Constructors;
 
 /**
@@ -57,14 +58,9 @@ public class WaitCounter implements Wait {
 	public static final WaitCounter DEFAULT = WaitCounter.of(Default.MAX_COUNT, Default.SLEEP);
 
 	/**
-	 * Interval between waits
+	 * The delay strategy used to compute the interval between retries.
 	 */
-	private final long interval;
-
-	/**
-	 * Interval time unit
-	 */
-	private final TimeUnit intervalTimeUnit;
+	private DelayStrategy delayStrategy;
 
 	/**
 	 * Maximum times to wait.
@@ -82,11 +78,21 @@ public class WaitCounter implements Wait {
 	 * @param interval interval
 	 * @param intervalTimeUnit interval time unit
 	 */
-	private WaitCounter(final int maxCount, final long interval, final TimeUnit intervalTimeUnit) {
+	private WaitCounter(final int maxCount, final DelayStrategy delayStrategy) {
 		this.maxCount = maxCount;
-		this.interval = interval;
-		this.intervalTimeUnit = intervalTimeUnit;
 		this.count = 0;
+		this.delayStrategy = delayStrategy;
+	}
+
+	/**
+	 * Wait object builder.
+	 *
+	 * @param maxCount maximum number of retries
+	 * @param delayStrategy delay strategy
+	 * @return the wait object
+	 */
+	public static WaitCounter of(final int maxCount, final DelayStrategy delayStrategy) {
+		return new WaitCounter(maxCount, delayStrategy);
 	}
 
 	/**
@@ -98,7 +104,7 @@ public class WaitCounter implements Wait {
 	 * @return the wait object
 	 */
 	public static WaitCounter of(final int maxCount, final long interval, final TimeUnit intervalTimeUnit) {
-		return new WaitCounter(maxCount, interval, intervalTimeUnit);
+		return of(maxCount, FixedDelayStrategy.of(interval, intervalTimeUnit));
 	}
 
 	/**
@@ -117,7 +123,7 @@ public class WaitCounter implements Wait {
 	 */
 	@Override
 	public long interval() {
-		return interval;
+		return delayStrategy.delay(count + 1);
 	}
 
 	/**
@@ -125,7 +131,7 @@ public class WaitCounter implements Wait {
 	 */
 	@Override
 	public TimeUnit timeUnit() {
-		return intervalTimeUnit;
+		return delayStrategy.timeUnit();
 	}
 
 	/**
@@ -172,7 +178,7 @@ public class WaitCounter implements Wait {
 	 */
 	@Override
 	public WaitCounter copy() {
-		return WaitCounter.of(maxCount, interval, intervalTimeUnit);
+		return WaitCounter.of(maxCount, delayStrategy.copy());
 	}
 
 	/**
@@ -187,8 +193,7 @@ public class WaitCounter implements Wait {
 			return false;
 		}
 		WaitCounter thatWait = (WaitCounter) that;
-		return interval == thatWait.interval
-				&& intervalTimeUnit == thatWait.intervalTimeUnit
+		return Objects.equals(delayStrategy, thatWait.delayStrategy)
 				&& maxCount == thatWait.maxCount
 				&& count == thatWait.count;
 	}
@@ -198,6 +203,6 @@ public class WaitCounter implements Wait {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(interval, intervalTimeUnit, maxCount, count);
+		return Objects.hash(delayStrategy, maxCount, count);
 	}
 }

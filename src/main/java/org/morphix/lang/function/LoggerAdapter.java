@@ -33,6 +33,15 @@ public interface LoggerAdapter {
 
 	/**
 	 * Logs a message with the specified level, format, and arguments.
+	 * <p>
+	 * This method should be implemented by concrete logger adapters to delegate the logging to the underlying logging
+	 * framework. The message may contain placeholders (e.g., "{}") that will be replaced by the provided arguments in a
+	 * manner consistent with the conventions of the underlying logging framework.
+	 * <p>
+	 * For guarded logging that checks if the specified log level is enabled before performing message formatting and
+	 * logging the {@link #logIfEnabled(LoggingLevel, String, Object...)} method can be used.
+	 *
+	 * @see #logIfEnabled(LoggingLevel, String, Object...)
 	 *
 	 * @param level the log level
 	 * @param message the log message format
@@ -89,6 +98,27 @@ public interface LoggerAdapter {
 	}
 
 	/**
+	 * Guarded logging method that logs the specified message if logging is enabled for the specified level.
+	 * <p>
+	 * This method checks if logging is enabled for the given level before formatting the message and logging it, which can
+	 * help improve performance by avoiding unnecessary message formatting when logging is disabled for that level. The
+	 * default implementation delegates to {@link #isEnabled(LoggingLevel)} and
+	 * {@link #log(LoggingLevel, String, Object...)}.
+	 * <p>
+	 * Implementations may override this method to provide more efficient logging by checking if logging is enabled for the
+	 * specified level before formatting the message and logging it.
+	 *
+	 * @param level the log level
+	 * @param message the log message format
+	 * @param args the arguments to include in the log message
+	 */
+	default void logIfEnabled(final LoggingLevel level, final String message, final Object... args) {
+		if (isEnabled(level)) {
+			log(level, message, args);
+		}
+	}
+
+	/**
 	 * Returns logger adapter that ignores all log messages.
 	 *
 	 * @return an empty logger adapter
@@ -104,7 +134,7 @@ public interface LoggerAdapter {
 	 * @param args the arguments to include in the log message
 	 */
 	default void trace(final String message, final Object... args) {
-		log(LoggingLevel.TRACE, message, args);
+		logIfEnabled(LoggingLevel.TRACE, message, args);
 	}
 
 	/**
@@ -114,7 +144,7 @@ public interface LoggerAdapter {
 	 * @param args the arguments to include in the log message
 	 */
 	default void debug(final String message, final Object... args) {
-		log(LoggingLevel.DEBUG, message, args);
+		logIfEnabled(LoggingLevel.DEBUG, message, args);
 	}
 
 	/**
@@ -124,7 +154,7 @@ public interface LoggerAdapter {
 	 * @param args the arguments to include in the log message
 	 */
 	default void info(final String message, final Object... args) {
-		log(LoggingLevel.INFO, message, args);
+		logIfEnabled(LoggingLevel.INFO, message, args);
 	}
 
 	/**
@@ -134,7 +164,7 @@ public interface LoggerAdapter {
 	 * @param args the arguments to include in the log message
 	 */
 	default void warn(final String message, final Object... args) {
-		log(LoggingLevel.WARN, message, args);
+		logIfEnabled(LoggingLevel.WARN, message, args);
 	}
 
 	/**
@@ -144,7 +174,7 @@ public interface LoggerAdapter {
 	 * @param args the arguments to include in the log message
 	 */
 	default void error(final String message, final Object... args) {
-		log(LoggingLevel.ERROR, message, args);
+		logIfEnabled(LoggingLevel.ERROR, message, args);
 	}
 
 	/**

@@ -580,7 +580,7 @@ public interface Fields {
 			if (null == cls) {
 				return null;
 			}
-			Field field = getOneDeclared(cls, fieldName);
+			Field field = Safe.getOneDeclared(cls, fieldName);
 			if (null != field) {
 				return field;
 			}

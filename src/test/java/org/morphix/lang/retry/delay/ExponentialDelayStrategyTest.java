@@ -42,7 +42,7 @@ class ExponentialDelayStrategyTest {
 		ExponentialDelayStrategy strategy = ExponentialDelayStrategy.of(MIN_DELAY, MAX_DELAY, TIME_UNIT, MULTIPLIER);
 
 		assertThat(strategy.timeUnit(), equalTo(TIME_UNIT));
-		assertThat(strategy.delay(1), equalTo(MIN_DELAY));
+		assertThat(strategy.delay(0), equalTo(MIN_DELAY));
 	}
 
 	@Test
@@ -50,19 +50,23 @@ class ExponentialDelayStrategyTest {
 		ExponentialDelayStrategy strategy = ExponentialDelayStrategy.of(Duration.ofMillis(MIN_DELAY), Duration.ofMillis(MAX_DELAY), MULTIPLIER);
 
 		assertThat(strategy.timeUnit(), equalTo(TimeUnit.MILLISECONDS));
-		assertThat(strategy.delay(1), equalTo(MIN_DELAY));
+		assertThat(strategy.delay(0), equalTo(MIN_DELAY));
 	}
 
 	@Test
 	void shouldThrowExceptionWhenMinimumDurationIsNull() {
+		Duration maxDuration = Duration.ofMillis(MAX_DELAY);
+
 		assertThrows(NullPointerException.class,
-				() -> ExponentialDelayStrategy.of(null, Duration.ofMillis(MAX_DELAY), MULTIPLIER));
+				() -> ExponentialDelayStrategy.of(null, maxDuration, MULTIPLIER));
 	}
 
 	@Test
 	void shouldThrowExceptionWhenMaximumDurationIsNull() {
+		Duration minDuration = Duration.ofMillis(MIN_DELAY);
+
 		assertThrows(NullPointerException.class,
-				() -> ExponentialDelayStrategy.of(Duration.ofMillis(MIN_DELAY), null, MULTIPLIER));
+				() -> ExponentialDelayStrategy.of(minDuration, null, MULTIPLIER));
 	}
 
 	@Test
@@ -76,9 +80,9 @@ class ExponentialDelayStrategyTest {
 	void shouldComputeExponentialDelayForAttempts() {
 		ExponentialDelayStrategy strategy = new ExponentialDelayStrategy(MIN_DELAY, MAX_DELAY, TIME_UNIT, MULTIPLIER);
 
-		assertThat(strategy.delay(1), equalTo(100L));
-		assertThat(strategy.delay(2), equalTo(200L));
-		assertThat(strategy.delay(3), equalTo(400L));
+		assertThat(strategy.delay(0), equalTo(100L));
+		assertThat(strategy.delay(1), equalTo(200L));
+		assertThat(strategy.delay(2), equalTo(400L));
 	}
 
 	@Test
@@ -88,13 +92,6 @@ class ExponentialDelayStrategyTest {
 		long result = strategy.delay(10);
 
 		assertThat(result, equalTo(MAX_DELAY));
-	}
-
-	@Test
-	void shouldThrowExceptionForAttemptZero() {
-		ExponentialDelayStrategy strategy = new ExponentialDelayStrategy(MIN_DELAY, MAX_DELAY, TIME_UNIT, MULTIPLIER);
-
-		assertThrows(IllegalArgumentException.class, () -> strategy.delay(0));
 	}
 
 	@Test
@@ -198,6 +195,16 @@ class ExponentialDelayStrategyTest {
 		boolean result = strategy1.equals(strategy2);
 
 		assertFalse(result);
+	}
+
+	@Test
+	void shouldReturnCopyForCopyMethod() {
+		ExponentialDelayStrategy strategy = new ExponentialDelayStrategy(MIN_DELAY, MAX_DELAY, TIME_UNIT, MULTIPLIER);
+
+		var copy = strategy.copy();
+
+		assertEquals(strategy, copy);
+		assertFalse(strategy == copy);
 	}
 
 	@Test
