@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.41`
+
+---
+
 `1.0.40`
 
 - Changed `ReschedulingTask` to use a generated default name when none is provided.
