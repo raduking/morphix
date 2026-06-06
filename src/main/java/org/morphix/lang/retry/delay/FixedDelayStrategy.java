@@ -69,14 +69,22 @@ public class FixedDelayStrategy implements DelayStrategy {
 	/**
 	 * @see DelayStrategy#delay(int)
 	 *
-	 * @throws IllegalArgumentException if {@code attempt <= 0}
+	 * @throws IllegalArgumentException if {@code attempt < 0}
 	 */
 	@Override
 	public long delay(final int attempt) {
-		if (attempt <= 0) {
-			throw new IllegalArgumentException("Attempt must be greater than 0");
+		if (attempt < 0) {
+			throw new IllegalArgumentException("Attempt number must not be negative");
 		}
 		return delay;
+	}
+
+	/**
+	 * @see DelayStrategy#copy()
+	 */
+	@Override
+	public DelayStrategy copy() {
+		return FixedDelayStrategy.of(delay, timeUnit);
 	}
 
 	/**

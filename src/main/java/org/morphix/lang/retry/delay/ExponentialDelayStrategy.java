@@ -131,12 +131,20 @@ public final class ExponentialDelayStrategy implements DelayStrategy {
 	 */
 	@Override
 	public long delay(final int attempt) {
-		if (attempt <= 0) {
-			throw new IllegalArgumentException("Attempt must be greater than 0");
+		if (attempt < 0) {
+			throw new IllegalArgumentException("Attempt must not be negative");
 		}
-		long exponent = Math.max(0, attempt - 1);
+		long exponent = Math.max(0, attempt);
 		double delay = minDelay * Math.pow(multiplier, exponent);
 		return Math.min((long) Math.ceil(delay), maxDelay);
+	}
+
+	/**
+	 * @see DelayStrategy#copy()
+	 */
+	@Override
+	public DelayStrategy copy() {
+		return ExponentialDelayStrategy.of(minDelay, maxDelay, timeUnit, multiplier);
 	}
 
 	/**

@@ -51,17 +51,11 @@ class FixedDelayStrategyTest {
 	}
 
 	@Test
-	void shouldThrowExceptionForAttemptZero() {
-		FixedDelayStrategy strategy = new FixedDelayStrategy(DELAY, TIME_UNIT);
-
-		assertThrows(IllegalArgumentException.class, () -> strategy.delay(0));
-	}
-
-	@Test
 	void shouldThrowExceptionForNegativeAttempt() {
 		FixedDelayStrategy strategy = new FixedDelayStrategy(DELAY, TIME_UNIT);
 
-		assertThrows(IllegalArgumentException.class, () -> strategy.delay(-1));
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> strategy.delay(-1));
+		assertThat(e.getMessage(), equalTo("Attempt number must not be negative"));
 	}
 
 	@Test
@@ -118,6 +112,16 @@ class FixedDelayStrategyTest {
 		boolean result = strategy1.equals(strategy2);
 
 		assertFalse(result);
+	}
+
+	@Test
+	void shouldReturnCopyForCopyMethod() {
+		FixedDelayStrategy strategy = new FixedDelayStrategy(DELAY, TIME_UNIT);
+
+		var copy = strategy.copy();
+
+		assertEquals(strategy, copy);
+		assertFalse(strategy == copy);
 	}
 
 	@Test

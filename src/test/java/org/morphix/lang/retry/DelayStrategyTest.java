@@ -66,7 +66,7 @@ class DelayStrategyTest {
 
 	@Test
 	void shouldReturnDelayForFirstAttemptWhenCallingDelayWithoutArguments() {
-		DelayStrategy strategy = attempt -> attempt * 10;
+		DelayStrategy strategy = attempt -> (attempt + 1) * 10;
 
 		long result = strategy.delay();
 
@@ -110,6 +110,15 @@ class DelayStrategyTest {
 		UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(DelayStrategy.Default.class);
 
 		assertThat(e.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
+	}
+
+	@Test
+	void shouldReturnSameInstanceOnDefaultCopy() {
+		DelayStrategy strategy = attempt -> attempt;
+
+		DelayStrategy copy = strategy.copy();
+
+		assertThat(copy, equalTo(strategy));
 	}
 
 	@Test
