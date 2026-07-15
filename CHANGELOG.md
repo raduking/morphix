@@ -2,6 +2,15 @@
 
 `1.0.41`
 
+- Added `Throwables` utility class for `Throwable` related helper methods.
+- Added `Throwables.anyMatch(Throwable, Predicate<? super Throwable>)` to match any throwable in a cause chain with cycle detection.
+- Added `Throwables.anyMatch(Throwable, Class<? extends Throwable>)` to match any throwable in a cause chain by type.
+- Added `Throwables.hasCause(Throwable, Predicate<? super Throwable>)` to check if a throwable has any cause matching a predicate.
+- Added `Throwables.hasCause(Throwable, Class<? extends Throwable>)` to check if a throwable has a matching cause type.
+- Added `Throwables.hasDirectCause(Throwable, Class<? extends Throwable>)` to check if a throwable has a direct cause of a given type.
+- Added `Throwables.isOrHasCause(Throwable, Predicate<? super Throwable>)` to check if a throwable or any of its causes matches a predicate.
+- Added `Throwables.isOrHasCause(Throwable, Class<? extends Throwable>)` to check if a throwable or any of its causes matches a type.
+
 ---
 
 `1.0.40`
@@ -495,5 +504,3 @@
 - First official release.
 
 ---
-
-

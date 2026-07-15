@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.morphix.lang.JavaObjects;
+import org.morphix.lang.Throwables;
 
 /**
  * Utility reflection methods for java fields.
@@ -819,7 +820,7 @@ public interface Fields {
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
 			MemberAccessor.on(obj, field, () -> Fields.set(obj, field, value), e -> {
-				if (e.getCause() instanceof IllegalArgumentException) {
+				if (Throwables.hasDirectCause(e, IllegalArgumentException.class)) {
 					throw e;
 				}
 				// only final fields will reach this code
