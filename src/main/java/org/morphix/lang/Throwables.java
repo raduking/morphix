@@ -46,19 +46,16 @@ public final class Throwables {
 		// Use 2 pointers to detect cycles in the cause chain.
 		Throwable slow = throwable;
 		Throwable fast = throwable;
+		int fastSteps = 2;
 		do {
-			if (predicate.test(fast)) {
-				return true;
-			}
-			fast = fast.getCause();
-			if (null != fast) {
+			for (int i = 0; i < fastSteps; ++i) {
 				if (predicate.test(fast)) {
 					return true;
 				}
 				fast = fast.getCause();
-			}
-			if (null == fast) {
-				return false;
+				if (null == fast) {
+					return false;
+				}
 			}
 			slow = slow.getCause();
 		} while (slow != fast);
