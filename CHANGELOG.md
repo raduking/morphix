@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.42`
+
+---
+
 `1.0.41`
 
 - Added `Throwables` utility class for `Throwable` related helper methods.
