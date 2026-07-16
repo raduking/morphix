@@ -1,5 +1,22 @@
 ## Release Notes
 
+`1.0.41`
+
+- Added `Throwables` utility class for `Throwable` related helper methods.
+- Added `Throwables.anyMatch(Throwable, Predicate<? super Throwable>)` to match any throwable in a cause chain with cycle detection.
+- Added `Throwables.anyMatch(Throwable, Class<? extends Throwable>)` to match any throwable in a cause chain by type.
+- Added `Throwables.hasCause(Throwable, Predicate<? super Throwable>)` to check if a throwable has any cause matching a predicate.
+- Added `Throwables.hasCause(Throwable, Class<? extends Throwable>)` to check if a throwable has a matching cause type.
+- Added `Throwables.hasDirectCause(Throwable, Class<? extends Throwable>)` to check if a throwable has a direct cause of a given type.
+- Added `Throwables.isOrHasCause(Throwable, Predicate<? super Throwable>)` to check if a throwable or any of its causes matches a predicate.
+- Added `Throwables.isOrHasCause(Throwable, Class<? extends Throwable>)` to check if a throwable or any of its causes matches a type.
+- Upgraded `central-publishing-maven-plugin` to `0.11.0`.
+- Upgraded `spotless-maven-plugin` to `3.8.0`.
+- Upgraded `pitest-maven` to `1.25.7`.
+- Upgraded `jacoco-maven-plugin` to `0.8.15`.
+
+---
+
 `1.0.40`
 
 - Changed `ReschedulingTask` to use a generated default name when none is provided.
@@ -491,5 +508,3 @@
 - First official release.
 
 ---
-
-
