@@ -10,6 +10,10 @@
 - Added `Throwables.hasDirectCause(Throwable, Class<? extends Throwable>)` to check if a throwable has a direct cause of a given type.
 - Added `Throwables.isOrHasCause(Throwable, Predicate<? super Throwable>)` to check if a throwable or any of its causes matches a predicate.
 - Added `Throwables.isOrHasCause(Throwable, Class<? extends Throwable>)` to check if a throwable or any of its causes matches a type.
+- Upgraded `central-publishing-maven-plugin` to `0.11.0`.
+- Upgraded `spotless-maven-plugin` to `3.8.0`.
+- Upgraded `pitest-maven` to `1.25.7`.
+- Upgraded `jacoco-maven-plugin` to `0.8.15`.
 
 ---
 
