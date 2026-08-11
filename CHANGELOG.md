@@ -2,6 +2,11 @@
 
 `1.0.42`
 
+- Added `Threads.execute(List<? extends Runnable>, int, Duration, ExecutionType)` for rate-limited runnable execution by execution type.
+- Added `Threads.execute(List<? extends Runnable>, int, Duration, Executor)` for rate-limited runnable execution by executor.
+- Added `Threads.executeThrottled(List<? extends Runnable>, int, Duration, ExecutionType)` as an alias for the execution-type overload.
+- Added `Threads.executeThrottled(List<? extends Runnable>, int, Duration, Executor)` as an alias for the executor overload.
+
 ---
 
 `1.0.41`
