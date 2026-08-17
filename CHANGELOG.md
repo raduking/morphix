@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.43`
+
+---
+
 `1.0.42`
 
 - Added `Threads.execute(List<? extends Runnable>, int, Duration, ExecutionType)` for rate-limited runnable execution by execution type.
