@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -565,6 +566,92 @@ class ThreadsTest {
 			Threads.waitUntil(() -> !thread.isAlive());
 
 			assertFalse(condition.get());
+		}
+	}
+
+	@Nested
+	class ExecuteRunnablesWithRateLimitTest {
+
+		@Test
+		void shouldExecuteAllRunnablesWithExecutionType() {
+			AtomicInteger executions = new AtomicInteger(0);
+			List<Runnable> runnables = IntStream.range(0, THREAD_COUNT)
+					.mapToObj(i -> (Runnable) executions::incrementAndGet)
+					.toList();
+
+			Threads.execute(runnables, 2, Duration.ofMillis(1), ExecutionType.VIRTUAL);
+
+			assertThat(executions.get(), equalTo(THREAD_COUNT));
+		}
+
+		@Test
+		void shouldExecuteAllRunnablesWithExecutor() {
+			AtomicInteger executions = new AtomicInteger(0);
+			List<Runnable> runnables = IntStream.range(0, THREAD_COUNT)
+					.mapToObj(i -> (Runnable) executions::incrementAndGet)
+					.toList();
+
+			try (ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT)) {
+				Threads.execute(runnables, 2, Duration.ofMillis(1), executor);
+			}
+
+			assertThat(executions.get(), equalTo(THREAD_COUNT));
+		}
+
+		@Test
+		void shouldExecuteAllRunnablesWhenThreadCountIsNotPositive() {
+			AtomicInteger executions = new AtomicInteger(0);
+			List<Runnable> runnables = IntStream.range(0, THREAD_COUNT)
+					.mapToObj(i -> (Runnable) executions::incrementAndGet)
+					.toList();
+
+			Threads.execute(runnables, 0, Duration.ofSeconds(1), ExecutionType.SEQUENTIAL);
+
+			assertThat(executions.get(), equalTo(THREAD_COUNT));
+		}
+
+		@Test
+		void shouldRespectRateLimitBetweenBatchesForExecutionTypeOverload() {
+			int threadCount = 2;
+			Duration interval = Duration.ofMillis(100);
+			int totalRunnables = 5;
+			int batches = (totalRunnables + threadCount - 1) / threadCount;
+			long expectedMinimumMillis = (batches - 1) * interval.toMillis();
+			List<Runnable> runnables = IntStream.range(0, totalRunnables)
+					.mapToObj(i -> (Runnable) () -> {
+						// empty
+					})
+					.toList();
+
+			long start = System.nanoTime();
+			Threads.execute(runnables, threadCount, interval, ExecutionType.SEQUENTIAL);
+			long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+
+			assertTrue(elapsedMillis >= expectedMinimumMillis);
+		}
+
+		@Test
+		void shouldExecuteThrottledWithExecutionTypeAsAlias() {
+			AtomicInteger executions = new AtomicInteger(0);
+			List<Runnable> runnables = IntStream.range(0, THREAD_COUNT)
+					.mapToObj(i -> (Runnable) executions::incrementAndGet)
+					.toList();
+
+			Threads.executeThrottled(runnables, 2, Duration.ofMillis(1), ExecutionType.VIRTUAL);
+
+			assertThat(executions.get(), equalTo(THREAD_COUNT));
+		}
+
+		@Test
+		void shouldExecuteThrottledWithExecutorAsAlias() {
+			AtomicInteger executions = new AtomicInteger(0);
+			List<Runnable> runnables = IntStream.range(0, THREAD_COUNT)
+					.mapToObj(i -> (Runnable) executions::incrementAndGet)
+					.toList();
+
+			Threads.executeThrottled(runnables, 2, Duration.ofMillis(1), (Executor) null);
+
+			assertThat(executions.get(), equalTo(THREAD_COUNT));
 		}
 	}
 }

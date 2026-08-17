@@ -277,6 +277,114 @@ public class Threads {
 	}
 
 	/**
+	 * Executes the given runnables in batches of {@code threadCount} with a rate limit using the given execution type. Each
+	 * batch waits at least {@code interval} before the next batch is started. The method only returns after all runnables
+	 * have completed.
+	 * <p>
+	 * If {@code threadCount} is not positive, all runnables are executed immediately without any rate limiting.
+	 * <p>
+	 * For performance reasons, this method does not perform defensive input validation. The caller is responsible for
+	 * validating the inputs.
+	 *
+	 * @param <T> runnable type
+	 *
+	 * @param runnables list of runnables to execute
+	 * @param threadCount maximum number of runnables executed in one batch
+	 * @param interval minimum interval between batch starts
+	 * @param executionType execution type
+	 */
+	public static <T extends Runnable> void execute(final List<T> runnables, final int threadCount, final Duration interval,
+			final ExecutionType executionType) {
+		executeInBatches(runnables, threadCount, interval, batch -> execute(batch, executionType));
+	}
+
+	/**
+	 * Executes the given runnables in batches of {@code threadCount} with a rate limit using the given executor. Each batch
+	 * waits at least {@code interval} before the next batch is started. The method only returns after all runnables have
+	 * completed.
+	 * <p>
+	 * If {@code threadCount} is not positive, all runnables are executed immediately without any rate limiting.
+	 * <p>
+	 * For performance reasons, this method does not perform defensive input validation. The caller is responsible for
+	 * validating the inputs.
+	 *
+	 * @param <T> runnable type
+	 *
+	 * @param runnables list of runnables to execute
+	 * @param threadCount maximum number of runnables executed in one batch
+	 * @param interval minimum interval between batch starts
+	 * @param executor task executor (can be null)
+	 */
+	public static <T extends Runnable> void execute(final List<T> runnables, final int threadCount, final Duration interval,
+			final Executor executor) {
+		executeInBatches(runnables, threadCount, interval, batch -> execute(batch, executor));
+	}
+
+	/**
+	 * Executes the given runnables with a rate limit using the given execution type. Alias for
+	 * {@link #execute(List, int, Duration, ExecutionType)}.
+	 *
+	 * @param <T> runnable type
+	 *
+	 * @param runnables list of runnables to execute
+	 * @param threadCount maximum number of runnables executed in one batch
+	 * @param interval minimum interval between batch starts
+	 * @param executionType execution type
+	 */
+	public static <T extends Runnable> void executeThrottled(final List<T> runnables, final int threadCount,
+			final Duration interval, final ExecutionType executionType) {
+		execute(runnables, threadCount, interval, executionType);
+	}
+
+	/**
+	 * Executes the given runnables with a rate limit using the given executor. Alias for
+	 * {@link #execute(List, int, Duration, Executor)}.
+	 *
+	 * @param <T> runnable type
+	 *
+	 * @param runnables list of runnables to execute
+	 * @param threadCount maximum number of runnables executed in one batch
+	 * @param interval minimum interval between batch starts
+	 * @param executor task executor (can be null)
+	 */
+	public static <T extends Runnable> void executeThrottled(final List<T> runnables, final int threadCount,
+			final Duration interval, final Executor executor) {
+		execute(runnables, threadCount, interval, executor);
+	}
+
+	/**
+	 * Executes the given list in batches with optional throttling.
+	 * <p>
+	 * If {@code threadCount} is not positive, the full list is passed to {@code batchExecution} once. Otherwise, the list
+	 * is split into consecutive batches of up to {@code threadCount} items and each batch is executed in order. A
+	 * virtual-thread pacer enforces the minimum interval between batch starts.
+	 * <p>
+	 * For performance reasons, no defensive input validation is performed.
+	 *
+	 * @param <T> item type
+	 *
+	 * @param items items to execute in batches
+	 * @param threadCount maximum number of items in one batch
+	 * @param interval minimum interval between batch starts
+	 * @param batchExecution batch execution strategy
+	 */
+	private static <T> void executeInBatches(final List<T> items, final int threadCount, final Duration interval,
+			final Consumer<List<T>> batchExecution) {
+		if (threadCount <= 0) {
+			batchExecution.accept(items);
+			return;
+		}
+		for (int i = 0; i < items.size(); i += threadCount) {
+			int end = Math.min(i + threadCount, items.size());
+			Thread pacer = end < items.size() ? Thread.ofVirtual().start(() -> safeSleep(interval)) : null;
+			batchExecution.accept(items.subList(i, end));
+			if (null != pacer) {
+				safeJoin(pacer);
+			}
+		}
+	}
+
+	/**
 	 * It is recommended to set interrupt status for the current thread in case {@link InterruptedException} is caught.
 	 *
 	 * @param <T> generic throwable
