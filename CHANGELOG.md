@@ -3,6 +3,7 @@
 `1.0.43`
 
 - Added `Threads.sharedVirtualThreadPerTaskExecutor()` for a shared virtual thread per task executor service.
+- Added `Threads.newShutdownThread` to create a thread that shuts down the given executor when runs.
 - Upgraded `spotless-maven-plugin` to `3.10.0`.
 - Upgraded `pitest-maven` to `1.25.9`.
 

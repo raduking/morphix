@@ -607,6 +607,18 @@ public class Threads {
 	}
 
 	/**
+	 * Creates a new virtual thread that will call {@link ExecutorService#shutdown()} on the given executor service when
+	 * started. This is useful for creating a shutdown hook thread that will properly shut down the executor service when
+	 * the JVM exits.
+	 *
+	 * @param executorService the executor service to shut down
+	 * @return a new virtual thread that will shut down the executor service when started
+	 */
+	public static Thread newShutdownThread(final ExecutorService executorService) {
+		return Thread.ofVirtual().unstarted(executorService::shutdown);
+	}
+
+	/**
 	 * Returns a shared virtual thread per task executor service. This executor can be used for executing tasks in virtual
 	 * threads without creating a new executor each time. It is a singleton and will be shared across the application.
 	 * <p>
@@ -616,7 +628,7 @@ public class Threads {
 	 * The executor is automatically shut down when the JVM exits, so there is no need to manually shut it down. However, if
 	 * you want to shut it down earlier, you can call {@link ExecutorService#shutdown()} on the returned executor.
 	 *
-	 * @return shared virtual thread per task executor service
+	 * @author Radu Sebastian LAZIN
 	 */
 	private static class Holder {
 
@@ -624,9 +636,18 @@ public class Threads {
 		 * Shared virtual thread per task executor service. This executor is created once and shared across the application. It
 		 * is automatically shut down when the JVM exits.
 		 */
-		private static final ExecutorService SHARED_VIRTUAL_THREAD_PER_TASK_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
-		static {
-			Runtime.getRuntime().addShutdownHook(new Thread(SHARED_VIRTUAL_THREAD_PER_TASK_EXECUTOR::shutdown));
+		private static final ExecutorService SHARED_VIRTUAL_THREAD_PER_TASK_EXECUTOR = initializeExecutor(Runtime.getRuntime());
+
+		/**
+		 * Initializes the shared virtual thread per task executor service. This method is called once when the {@link Holder}
+		 * class is loaded, and it creates the executor and registers a shutdown hook to shut it down when the JVM exits.
+		 *
+		 * @return a new virtual thread per task executor service
+		 */
+		private static ExecutorService initializeExecutor(final Runtime runtime) {
+			ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
+			runtime.addShutdownHook(Threads.newShutdownThread(executorService));
+			return executorService;
 		}
 	}
 }

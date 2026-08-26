@@ -22,11 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
@@ -55,7 +57,9 @@ import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.morphix.lang.function.Runnables;
+import org.morphix.lang.retry.Wait;
 import org.morphix.lang.thread.Threads.ExecutionType;
+import org.morphix.reflection.Methods;
 
 /**
  * Test class for {@link Threads}.
@@ -660,6 +664,7 @@ class ThreadsTest {
 	class SharedVirtualThreadPerTaskExecutorTest {
 
 		@Test
+		@SuppressWarnings("resource")
 		void shouldReturnExecutorService() {
 			ExecutorService executor = Threads.sharedVirtualThreadPerTaskExecutor();
 
@@ -667,6 +672,7 @@ class ThreadsTest {
 		}
 
 		@Test
+		@SuppressWarnings("resource")
 		void shouldReturnSameInstance() {
 			ExecutorService executor1 = Threads.sharedVirtualThreadPerTaskExecutor();
 			ExecutorService executor2 = Threads.sharedVirtualThreadPerTaskExecutor();
@@ -675,17 +681,19 @@ class ThreadsTest {
 		}
 
 		@Test
+		@SuppressWarnings("resource")
 		void shouldExecuteRunnable() {
 			ExecutorService executor = Threads.sharedVirtualThreadPerTaskExecutor();
 			AtomicInteger counter = new AtomicInteger(0);
 
 			executor.execute(counter::incrementAndGet);
 
-			Threads.safeSleep(Duration.ofMillis(10));
+			Wait.until(() -> counter.get() > 0, Duration.ofSeconds(1), Duration.ofMillis(10));
 			assertThat(counter.get(), equalTo(1));
 		}
 
 		@Test
+		@SuppressWarnings("resource")
 		void shouldExecuteMultipleRunnables() {
 			ExecutorService executor = Threads.sharedVirtualThreadPerTaskExecutor();
 			AtomicInteger counter = new AtomicInteger(0);
@@ -695,11 +703,12 @@ class ThreadsTest {
 				executor.execute(counter::incrementAndGet);
 			}
 
-			Threads.safeSleep(Duration.ofMillis(50));
+			Wait.until(() -> counter.get() >= taskCount, Duration.ofSeconds(1), Duration.ofMillis(10));
 			assertThat(counter.get(), equalTo(taskCount));
 		}
 
 		@Test
+		@SuppressWarnings("resource")
 		void shouldExecuteCallable() throws Exception {
 			ExecutorService executor = Threads.sharedVirtualThreadPerTaskExecutor();
 
@@ -709,6 +718,7 @@ class ThreadsTest {
 		}
 
 		@Test
+		@SuppressWarnings("resource")
 		void shouldExecuteTasksConcurrently() throws InterruptedException {
 			ExecutorService executor = Threads.sharedVirtualThreadPerTaskExecutor();
 			CountDownLatch startLatch = new CountDownLatch(1);
@@ -736,8 +746,58 @@ class ThreadsTest {
 			doneLatch.countDown();
 			doneLatch.countDown();
 
-			Threads.safeSleep(Duration.ofMillis(10));
+			Wait.until(() -> maxConcurrent.get() >= 2, Duration.ofSeconds(1), Duration.ofMillis(10));
 			assertTrue(maxConcurrent.get() >= 2);
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldShutdownExecutorWhenShutdownThreadIsStarted() {
+			ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+			Thread shutdownThread = Threads.newShutdownThread(executor);
+
+			assertFalse(executor.isShutdown());
+
+			shutdownThread.start();
+			Wait.until(executor::isShutdown, Duration.ofSeconds(1), Duration.ofMillis(10));
+
+			assertTrue(executor.isShutdown());
+		}
+	}
+
+	@Nested
+	class InitializeExecutorTest {
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldCreateExecutorAndRegisterShutdownHook() throws Exception {
+			Runtime runtime = mock(Runtime.class);
+			ExecutorService executor = invokeInitializeExecutor(runtime);
+
+			assertNotNull(executor);
+			verify(runtime).addShutdownHook(any(Thread.class));
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldReturnWorkingVirtualThreadPerTaskExecutor() throws Exception {
+			Runtime runtime = mock(Runtime.class);
+			AtomicBoolean executed = new AtomicBoolean(false);
+
+			ExecutorService executor = invokeInitializeExecutor(runtime);
+
+			assertNotNull(executor);
+			executor.execute(() -> {
+				executed.set(true);
+			});
+			Wait.until(executed::get, Duration.ofSeconds(1), Duration.ofMillis(10));
+			assertTrue(executed.get());
+		}
+
+		private static ExecutorService invokeInitializeExecutor(final Runtime runtime) throws Exception {
+			Class<?> holderClass = Class.forName("org.morphix.lang.thread.Threads$Holder");
+			Method method = holderClass.getDeclaredMethod("initializeExecutor", Runtime.class);
+			return (ExecutorService) Methods.IgnoreAccess.invokeStatic(method, holderClass, runtime);
 		}
 	}
 }
