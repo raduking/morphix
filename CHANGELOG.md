@@ -2,6 +2,10 @@
 
 `1.0.43`
 
+- Added `Threads.sharedVirtualThreadPerTaskExecutor()` for a shared virtual thread per task executor service.
+- Upgraded `spotless-maven-plugin` to `3.10.0`.
+- Upgraded `pitest-maven` to `1.25.9`.
+
 ---
 
 `1.0.42`

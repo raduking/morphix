@@ -595,4 +595,38 @@ public class Threads {
 	public static ExecutionType defaultExecutionType() {
 		return ExecutionType.VIRTUAL;
 	}
+
+	/**
+	 * Returns a shared virtual thread per task executor service. This executor can be used for executing tasks in virtual
+	 * threads without creating a new executor each time. It is a singleton and will be shared across the application.
+	 *
+	 * @return shared virtual thread per task executor service
+	 */
+	public static ExecutorService sharedVirtualThreadPerTaskExecutor() {
+		return Holder.SHARED_VIRTUAL_THREAD_PER_TASK_EXECUTOR;
+	}
+
+	/**
+	 * Returns a shared virtual thread per task executor service. This executor can be used for executing tasks in virtual
+	 * threads without creating a new executor each time. It is a singleton and will be shared across the application.
+	 * <p>
+	 * The executor will not be initialized until the {@link Threads#sharedVirtualThreadPerTaskExecutor()} method is called
+	 * for the first time. This ensures that the executor is only created when it is actually needed, and not before.
+	 * <p>
+	 * The executor is automatically shut down when the JVM exits, so there is no need to manually shut it down. However, if
+	 * you want to shut it down earlier, you can call {@link ExecutorService#shutdown()} on the returned executor.
+	 *
+	 * @return shared virtual thread per task executor service
+	 */
+	private static class Holder {
+
+		/**
+		 * Shared virtual thread per task executor service. This executor is created once and shared across the application. It
+		 * is automatically shut down when the JVM exits.
+		 */
+		private static final ExecutorService SHARED_VIRTUAL_THREAD_PER_TASK_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+		static {
+			Runtime.getRuntime().addShutdownHook(new Thread(SHARED_VIRTUAL_THREAD_PER_TASK_EXECUTOR::shutdown));
+		}
+	}
 }

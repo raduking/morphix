@@ -38,6 +38,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -652,6 +653,91 @@ class ThreadsTest {
 			Threads.executeThrottled(runnables, 2, Duration.ofMillis(1), (Executor) null);
 
 			assertThat(executions.get(), equalTo(THREAD_COUNT));
+		}
+	}
+
+	@Nested
+	class SharedVirtualThreadPerTaskExecutorTest {
+
+		@Test
+		void shouldReturnExecutorService() {
+			ExecutorService executor = Threads.sharedVirtualThreadPerTaskExecutor();
+
+			assertNotNull(executor);
+		}
+
+		@Test
+		void shouldReturnSameInstance() {
+			ExecutorService executor1 = Threads.sharedVirtualThreadPerTaskExecutor();
+			ExecutorService executor2 = Threads.sharedVirtualThreadPerTaskExecutor();
+
+			assertThat(executor1, equalTo(executor2));
+		}
+
+		@Test
+		void shouldExecuteRunnable() {
+			ExecutorService executor = Threads.sharedVirtualThreadPerTaskExecutor();
+			AtomicInteger counter = new AtomicInteger(0);
+
+			executor.execute(counter::incrementAndGet);
+
+			Threads.safeSleep(Duration.ofMillis(10));
+			assertThat(counter.get(), equalTo(1));
+		}
+
+		@Test
+		void shouldExecuteMultipleRunnables() {
+			ExecutorService executor = Threads.sharedVirtualThreadPerTaskExecutor();
+			AtomicInteger counter = new AtomicInteger(0);
+			int taskCount = 100;
+
+			for (int i = 0; i < taskCount; ++i) {
+				executor.execute(counter::incrementAndGet);
+			}
+
+			Threads.safeSleep(Duration.ofMillis(50));
+			assertThat(counter.get(), equalTo(taskCount));
+		}
+
+		@Test
+		void shouldExecuteCallable() throws Exception {
+			ExecutorService executor = Threads.sharedVirtualThreadPerTaskExecutor();
+
+			Future<String> future = executor.submit(() -> "testResult");
+
+			assertThat(future.get(), equalTo("testResult"));
+		}
+
+		@Test
+		void shouldExecuteTasksConcurrently() throws InterruptedException {
+			ExecutorService executor = Threads.sharedVirtualThreadPerTaskExecutor();
+			CountDownLatch startLatch = new CountDownLatch(1);
+			CountDownLatch doneLatch = new CountDownLatch(2);
+			AtomicInteger runningCount = new AtomicInteger(0);
+			AtomicInteger maxConcurrent = new AtomicInteger(0);
+
+			for (int i = 0; i < 2; ++i) {
+				executor.execute(() -> {
+					startLatch.countDown();
+					try {
+						doneLatch.await();
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				});
+			}
+
+			startLatch.await();
+			int current = runningCount.incrementAndGet();
+			maxConcurrent.accumulateAndGet(current, Math::max);
+			Threads.safeSleep(Duration.ofMillis(10));
+			current = runningCount.incrementAndGet();
+			maxConcurrent.accumulateAndGet(current, Math::max);
+			doneLatch.countDown();
+			doneLatch.countDown();
+
+			Threads.safeSleep(Duration.ofMillis(10));
+			assertTrue(maxConcurrent.get() >= 2);
 		}
 	}
 }
