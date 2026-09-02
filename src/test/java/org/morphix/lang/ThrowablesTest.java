@@ -14,8 +14,10 @@ package org.morphix.lang;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.concurrent.CompletionException;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Nested;
@@ -413,6 +415,113 @@ class ThrowablesTest {
 			boolean result = Throwables.hasDirectCause(throwable, IllegalArgumentException.class);
 
 			assertThat(result, equalTo(false));
+		}
+	}
+
+	@Nested
+	class UnwrapTest {
+
+		@Test
+		void shouldThrowWhenTypeIsNull() {
+			Throwable t = new Throwable();
+			NullPointerException nullPointerException = assertThrows(
+					NullPointerException.class,
+					() -> Throwables.unwrap(t, (Class<? extends Throwable>) null));
+
+			assertThat(nullPointerException.getMessage(), equalTo("type cannot be null"));
+		}
+
+		@Test
+		void shouldReturnNullWhenThrowableIsNull() {
+			Throwable result = Throwables.unwrap(null, CompletionException.class);
+
+			assertThat(result, equalTo(null));
+		}
+
+		@Test
+		void shouldReturnThrowableWhenItDoesNotMatchType() {
+			Throwable throwable = new IllegalStateException(MATCH);
+
+			Throwable result = Throwables.unwrap(throwable, CompletionException.class);
+
+			assertThat(result, equalTo(throwable));
+		}
+
+		@Test
+		void shouldReturnThrowableWhenItMatchesButHasNoCause() {
+			CompletionException throwable = new CompletionException((Throwable) null);
+
+			Throwable result = Throwables.unwrap(throwable, CompletionException.class);
+
+			assertThat(result, equalTo(throwable));
+		}
+
+		@Test
+		void shouldReturnCauseWhenSingleMatch() {
+			RuntimeException cause = new RuntimeException(MATCH);
+			CompletionException throwable = new CompletionException(cause);
+
+			Throwable result = Throwables.unwrap(throwable, CompletionException.class);
+
+			assertThat(result, equalTo(cause));
+		}
+
+		@Test
+		void shouldReturnFirstNonMatchingWhenMultipleMatches() {
+			RuntimeException cause = new RuntimeException(MATCH);
+			CompletionException nested = new CompletionException(cause);
+			CompletionException throwable = new CompletionException(nested);
+
+			Throwable result = Throwables.unwrap(throwable, CompletionException.class);
+
+			assertThat(result, equalTo(cause));
+		}
+
+		@Test
+		void shouldKeepDeeperCausesOfReturnedThrowableIntact() {
+			RuntimeException deeper = new RuntimeException("deeper");
+			RuntimeException cause = new RuntimeException(MATCH, deeper);
+			CompletionException throwable = new CompletionException(cause);
+
+			Throwable result = Throwables.unwrap(throwable, CompletionException.class);
+
+			assertThat(result, equalTo(cause));
+			assertThat(result.getCause(), equalTo(deeper));
+		}
+
+		@Test
+		void shouldStopAtFirstNonMatchingEvenWhenDeeperMatchesAgain() {
+			CompletionException deeper = new CompletionException(new RuntimeException(MATCH));
+			RuntimeException cause = new RuntimeException(MATCH, deeper);
+			CompletionException throwable = new CompletionException(cause);
+
+			Throwable result = Throwables.unwrap(throwable, CompletionException.class);
+
+			assertThat(result, equalTo(cause));
+		}
+
+		@Test
+		void shouldReturnOnlyMatchingRootLayerWhenCauseChainIsLong() {
+			RuntimeException leaf = new RuntimeException("leaf");
+			IllegalStateException middle = new IllegalStateException("middle", leaf);
+			RuntimeException cause = new RuntimeException("root", middle);
+			CompletionException throwable = new CompletionException(cause);
+
+			Throwable result = Throwables.unwrap(throwable, CompletionException.class);
+
+			assertThat(result, equalTo(cause));
+		}
+
+		@Test
+		void shouldTerminateWhenCauseChainContainsCycle() {
+			NodeThrowable first = new NodeThrowable("first");
+			NodeThrowable second = new NodeThrowable("second");
+			first.cause = second;
+			second.cause = first;
+
+			Throwable result = Throwables.unwrap(first, NodeThrowable.class);
+
+			assertThat(result, instanceOf(NodeThrowable.class));
 		}
 	}
 

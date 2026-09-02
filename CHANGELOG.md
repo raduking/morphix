@@ -8,6 +8,9 @@
 - Added `AsyncWait` for non-blocking wait strategies that complete a `CompletableFuture` once the wait is over.
 - Added `AsyncWaitTimeout` for timeout-based asynchronous waits with configurable delay strategy and executor.
 - Added `AsyncWaitCounter` for count-based asynchronous waits with configurable delay strategy and executor.
+- Added `AsyncAccumulator` as an async-aware wrapper around an `Accumulator` that feeds the async outcome through the wrapped accumulator.
+- Added `CompletableFutures` utility with `supplyAsync` to convert synchronous supplier exceptions into a failed future.
+- Added `Throwables.unwrap(Throwable, Class<? extends Throwable>)` to peel a throwable type off a cause chain with cycle detection.
 
 ---
 

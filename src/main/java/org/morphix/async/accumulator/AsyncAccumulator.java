@@ -17,7 +17,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.function.Supplier;
 
+import org.morphix.async.CompletableFutures;
 import org.morphix.lang.Unchecked;
+import org.morphix.lang.Throwables;
 import org.morphix.lang.accumulator.Accumulator;
 import org.morphix.lang.function.Runnables;
 import org.morphix.lang.function.Suppliers;
@@ -66,8 +68,8 @@ public class AsyncAccumulator<U> {
 	 */
 	public <T> CompletableFuture<T> accumulate(final Supplier<CompletableFuture<T>> resultSupplier,
 			final Supplier<T> defaultReturnSupplier) {
-		return asyncGet(resultSupplier).handle(AttemptOutcome::new).thenCompose(outcome -> {
-			Throwable error = unwrap(outcome.error);
+		return CompletableFutures.supplyAsync(resultSupplier).handle(AttemptOutcome::new).thenCompose(outcome -> {
+			Throwable error = Throwables.unwrap(outcome.error, CompletionException.class);
 			Supplier<T> valueSupplier = () -> {
 				if (null != error) {
 					return Unchecked.Undeclared.reThrow(error);
@@ -140,36 +142,6 @@ public class AsyncAccumulator<U> {
 			return CompletableFuture.failedFuture(error);
 		}
 		return CompletableFuture.completedFuture(result);
-	}
-
-	/**
-	 * Invokes the asynchronous supplier, converting any synchronous exception to a failed future.
-	 *
-	 * @param <T> result type
-	 *
-	 * @param resultSupplier asynchronous result supplier
-	 * @return a {@link CompletableFuture} with the result
-	 */
-	private static <T> CompletableFuture<T> asyncGet(final Supplier<CompletableFuture<T>> resultSupplier) {
-		try {
-			return resultSupplier.get();
-		} catch (Exception e) {
-			return CompletableFuture.failedFuture(e);
-		}
-	}
-
-	/**
-	 * Unwraps a {@link CompletionException} to its root cause.
-	 *
-	 * @param error error to unwrap
-	 * @return the root cause
-	 */
-	private static Throwable unwrap(final Throwable error) {
-		Throwable cause = error;
-		while (cause instanceof CompletionException && null != cause.getCause()) {
-			cause = cause.getCause();
-		}
-		return cause;
 	}
 
 	/**
