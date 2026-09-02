@@ -1,5 +1,16 @@
 ## Release Notes
 
+`1.0.44`
+
+- Added `AsyncRetry` for asynchronous retry with a fluent policy builder.
+- Added `AsyncRetry.deferUntil(Supplier<CompletableFuture<T>>, ...)` and sync `AsyncRetry.until(Supplier<T>, ...)` overloads.
+- Added `AsyncRetry.AsyncFluentRetry<T,U>` nested builder with `stopWhen`, `consumeBeforeWait`, `doBeforeWait`, `accumulateWith`, `onAsync`, and `on`.
+- Added `AsyncWait` for non-blocking wait strategies that complete a `CompletableFuture` once the wait is over.
+- Added `AsyncWaitTimeout` for timeout-based asynchronous waits with configurable delay strategy and executor.
+- Added `AsyncWaitCounter` for count-based asynchronous waits with configurable delay strategy and executor.
+
+---
+
 `1.0.43`
 
 - Added `Threads.sharedVirtualThreadPerTaskExecutor()` for a shared virtual thread per task executor service.
