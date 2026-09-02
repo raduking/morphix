@@ -26,8 +26,8 @@ import org.morphix.lang.function.Consumers;
 import org.morphix.lang.function.Runnables;
 
 /**
- * A basic configurable async retry implementation. Retries an async supplier until a condition is met or the wait is
- * exhausted, without blocking the calling thread.
+ * A basic configurable asynchronous retry implementation. Retries an asynchronous supplier until a condition is met or
+ * the wait is exhausted, without blocking the calling thread.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -103,7 +103,7 @@ public class AsyncRetry {
 	 * Returns a non-null object.
 	 * <p>
 	 * This method should be used when a retry is needed on a {@link Runnable} and since most retries check for a non
-	 * <code>null</code> result this is a handy way to transform the runnable into an async supplier that returns non
+	 * <code>null</code> result this is a handy way to transform the runnable into an asynchronous supplier that returns non
 	 * {@code null} since the runnable doesn't have a return value.
 	 * <p>
 	 * The method effectively returns an empty {@link Optional}.
@@ -115,11 +115,11 @@ public class AsyncRetry {
 	}
 
 	/**
-	 * Retries the async supplier until the predicate is satisfied or the wait is exhausted.
+	 * Retries the asynchronous supplier until the predicate is satisfied or the wait is exhausted.
 	 *
 	 * @param <T> result type
 	 *
-	 * @param resultSupplier async result supplier
+	 * @param resultSupplier asynchronous result supplier
 	 * @param exitCondition end predicate
 	 * @return a {@link CompletableFuture} with the result
 	 */
@@ -129,11 +129,11 @@ public class AsyncRetry {
 	}
 
 	/**
-	 * Retries the async supplier until the predicate is satisfied or the wait is exhausted.
+	 * Retries the asynchronous supplier until the predicate is satisfied or the wait is exhausted.
 	 *
 	 * @param <T> result type
 	 *
-	 * @param resultSupplier async result supplier
+	 * @param resultSupplier asynchronous result supplier
 	 * @param exitCondition end predicate
 	 * @param beforeWait code to run before wait
 	 * @return a {@link CompletableFuture} with the result
@@ -160,12 +160,12 @@ public class AsyncRetry {
 	}
 
 	/**
-	 * Retries the async supplier until the predicate is satisfied or the wait is exhausted.
+	 * Retries the asynchronous supplier until the predicate is satisfied or the wait is exhausted.
 	 *
 	 * @param <T> result type
 	 * @param <U> the accumulated type
 	 *
-	 * @param resultSupplier async result supplier
+	 * @param resultSupplier asynchronous result supplier
 	 * @param exitCondition end predicate
 	 * @param beforeWait code to run before wait
 	 * @param accumulator information accumulator
@@ -177,12 +177,12 @@ public class AsyncRetry {
 	}
 
 	/**
-	 * Retries the async supplier until the predicate is satisfied or the wait is exhausted.
+	 * Retries the asynchronous supplier until the predicate is satisfied or the wait is exhausted.
 	 *
 	 * @param <T> result type
 	 * @param <U> the accumulated type
 	 *
-	 * @param resultSupplier async result supplier
+	 * @param resultSupplier asynchronous result supplier
 	 * @param exitCondition end predicate
 	 * @param beforeWait code to run before wait
 	 * @return a {@link CompletableFuture} with the result
@@ -193,12 +193,12 @@ public class AsyncRetry {
 	}
 
 	/**
-	 * Retries the async supplier until the predicate is satisfied or the wait is exhausted.
+	 * Retries the asynchronous supplier until the predicate is satisfied or the wait is exhausted.
 	 *
 	 * @param <T> result type
 	 * @param <U> the accumulated type
 	 *
-	 * @param resultSupplier async result supplier
+	 * @param resultSupplier asynchronous result supplier
 	 * @param exitCondition end predicate
 	 * @param afterResult code to run after the result supplier produced a value
 	 * @param beforeWait code to run before wait
@@ -230,7 +230,7 @@ public class AsyncRetry {
 	 * @param <T> result type
 	 * @param <U> the accumulated type
 	 *
-	 * @param resultSupplier async result supplier
+	 * @param resultSupplier asynchronous result supplier
 	 * @param exitCondition end predicate
 	 * @param afterResult code to run after result
 	 * @param beforeWait code to run before wait
@@ -365,12 +365,12 @@ public class AsyncRetry {
 		}
 
 		/**
-		 * Executes the async retry logic using the provided async result supplier.
+		 * Executes the asynchronous retry logic using the provided asynchronous result supplier.
 		 *
-		 * @param resultSupplier the supplier that produces an async result to evaluate.
+		 * @param resultSupplier the supplier that produces an asynchronous result to evaluate.
 		 * @return a {@link CompletableFuture} with the result of the retry operation.
 		 */
-		public CompletableFuture<T> onAsync(final Supplier<CompletableFuture<T>> resultSupplier) {
+		public CompletableFuture<T> on(final Supplier<CompletableFuture<T>> resultSupplier) {
 			return retry.until(resultSupplier, exitCondition, consumeBeforeWait, accumulator);
 		}
 	}

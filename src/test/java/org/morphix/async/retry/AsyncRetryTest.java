@@ -175,7 +175,7 @@ class AsyncRetryTest {
 				.<String, Exception>policy()
 				.stopWhen(STRING_RESULT::equals)
 				.accumulateWith(exceptionsAccumulator)
-				.onAsync(() -> {
+				.on(() -> {
 					inSupplier.foo();
 					int c = counter.incrementAndGet();
 					if (c < RETRY_COUNT) {
@@ -206,7 +206,7 @@ class AsyncRetryTest {
 				.consumeBeforeWait(e -> inConsumer.foo(e))
 				.accumulateWith(exceptionsAccumulator);
 
-		CompletableFuture<String> result = retry.onAsync(() -> {
+		CompletableFuture<String> result = retry.on(() -> {
 			inSupplier.foo();
 			int c = counter.incrementAndGet();
 			if (c < RETRY_COUNT) {
@@ -243,7 +243,7 @@ class AsyncRetryTest {
 					inConsumer.foo(e);
 				});
 
-		CompletableFuture<String> result = retry.onAsync(() -> {
+		CompletableFuture<String> result = retry.on(() -> {
 			inSupplier.foo();
 			int c = retryCounter.incrementAndGet();
 			if (c < RETRY_COUNT) {
@@ -273,7 +273,7 @@ class AsyncRetryTest {
 				.<Object, Exception>policy()
 				.accumulateWith(exceptionsAccumulator);
 
-		CompletableFuture<Object> result = retry.onAsync(() -> {
+		CompletableFuture<Object> result = retry.on(() -> {
 			inSupplier.foo();
 			int c = counter.incrementAndGet();
 			if (c < RETRY_COUNT) {

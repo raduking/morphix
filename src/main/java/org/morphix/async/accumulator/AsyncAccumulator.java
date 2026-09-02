@@ -23,10 +23,10 @@ import org.morphix.lang.function.Runnables;
 import org.morphix.lang.function.Suppliers;
 
 /**
- * An async-aware wrapper around an {@link Accumulator} which invokes an async supplier and absorbs the result/exception
- * plumbing of a single attempt: a synchronous {@link Exception} thrown by the supplier is converted into a failed
- * future, a {@link CompletionException} is unwrapped, and any resulting error is accumulated in the wrapped
- * accumulator.
+ * An async-aware wrapper around an {@link Accumulator} which invokes an asynchronous supplier and absorbs the
+ * result/exception plumbing of a single attempt: a synchronous {@link Exception} thrown by the supplier is converted
+ * into a failed future, a {@link CompletionException} is unwrapped, and any resulting error is accumulated in the
+ * wrapped accumulator.
  *
  * @param <U> accumulated information type
  *
@@ -55,12 +55,12 @@ public class AsyncAccumulator<U> {
 	}
 
 	/**
-	 * Async information accumulator method. The second supplier is used to provide a default return value in case the
-	 * attempt failed. It is a supplier to avoid unnecessary computation of the default return value.
+	 * Asynchronous information accumulator method. The second supplier is used to provide a default return value in case
+	 * the attempt failed. It is a supplier to avoid unnecessary computation of the default return value.
 	 *
 	 * @param <T> result type
 	 *
-	 * @param resultSupplier async result supplier
+	 * @param resultSupplier asynchronous result supplier
 	 * @param defaultReturnSupplier default return supplier
 	 * @return a {@link CompletableFuture} with the supplier result or a default return
 	 */
@@ -86,11 +86,11 @@ public class AsyncAccumulator<U> {
 	}
 
 	/**
-	 * Async information accumulator method.
+	 * Asynchronous information accumulator method.
 	 *
 	 * @param <T> result type
 	 *
-	 * @param resultSupplier async result supplier
+	 * @param resultSupplier asynchronous result supplier
 	 * @return a {@link CompletableFuture} with the supplier result
 	 */
 	public <T> CompletableFuture<T> accumulate(final Supplier<CompletableFuture<T>> resultSupplier) {
@@ -98,9 +98,9 @@ public class AsyncAccumulator<U> {
 	}
 
 	/**
-	 * Async information accumulator method.
+	 * Asynchronous information accumulator method.
 	 *
-	 * @param runnable async action
+	 * @param runnable asynchronous action
 	 * @return a {@link CompletableFuture} with the result
 	 */
 	public CompletableFuture<Void> accumulate(final Runnable runnable) {
@@ -143,11 +143,11 @@ public class AsyncAccumulator<U> {
 	}
 
 	/**
-	 * Invokes the async supplier, converting any synchronous exception to a failed future.
+	 * Invokes the asynchronous supplier, converting any synchronous exception to a failed future.
 	 *
 	 * @param <T> result type
 	 *
-	 * @param resultSupplier async result supplier
+	 * @param resultSupplier asynchronous result supplier
 	 * @return a {@link CompletableFuture} with the result
 	 */
 	private static <T> CompletableFuture<T> asyncGet(final Supplier<CompletableFuture<T>> resultSupplier) {
