@@ -10,17 +10,17 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.lang.retry.async;
+package org.morphix.async.retry;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.morphix.async.accumulator.AsyncAccumulator;
 import org.morphix.lang.accumulator.Accumulator;
 import org.morphix.lang.function.Consumers;
 import org.morphix.lang.function.Runnables;
@@ -210,7 +210,7 @@ public class AsyncRetry {
 			final Accumulator<U> accumulator) {
 		AsyncWait wait = waitPrototype.copy();
 		wait.start();
-		return attempt(resultSupplier, exitCondition, afterResult, beforeWait, accumulator, wait);
+		return attempt(resultSupplier, exitCondition, afterResult, beforeWait, new AsyncAccumulator<>(accumulator), wait);
 	}
 
 	/**
@@ -240,74 +240,18 @@ public class AsyncRetry {
 	 */
 	private static <T, U> CompletableFuture<T> attempt(final Supplier<CompletableFuture<T>> resultSupplier,
 			final Predicate<T> exitCondition, final BiConsumer<T, U> afterResult, final Consumer<U> beforeWait,
-			final Accumulator<U> accumulator, final AsyncWait wait) {
-		return asyncGet(resultSupplier).handle(AttemptOutcome::new).thenCompose(outcome -> {
-			final Throwable error = unwrap(outcome.error);
-			final boolean failed = null != error;
-			if (failed) {
-				if (accumulator == Accumulator.noAccumulator()) {
-					return CompletableFuture.failedFuture(error);
-				}
-				accumulate(accumulator, error);
-			}
-			afterResult.accept(outcome.result, accumulator.lastInformation());
-			if (!failed && exitCondition.test(outcome.result)) {
-				return CompletableFuture.completedFuture(outcome.result);
+			final AsyncAccumulator<U> accumulator, final AsyncWait wait) {
+		return accumulator.accumulate(resultSupplier).thenCompose(result -> {
+			afterResult.accept(result, accumulator.lastInformation());
+			if (exitCondition.test(result)) {
+				return CompletableFuture.completedFuture(result);
 			}
 			if (wait.keepWaiting()) {
 				beforeWait.accept(accumulator.lastInformation());
 				return wait.defer().thenCompose(v -> attempt(resultSupplier, exitCondition, afterResult, beforeWait, accumulator, wait));
 			}
-			if (accumulator != Accumulator.noAccumulator() && accumulator.isNotEmpty()) {
-				accumulator.rest();
-			}
-			return failed ? CompletableFuture.failedFuture(error) : CompletableFuture.completedFuture(outcome.result);
+			return accumulator.exhaust(result);
 		});
-	}
-
-	/**
-	 * Invokes the async supplier, converting any synchronous exception to a failed future.
-	 *
-	 * @param <T> result type
-	 *
-	 * @param resultSupplier async result supplier
-	 * @return a {@link CompletableFuture} with the result
-	 */
-	private static <T> CompletableFuture<T> asyncGet(final Supplier<CompletableFuture<T>> resultSupplier) {
-		try {
-			return resultSupplier.get();
-		} catch (Exception e) {
-			return CompletableFuture.failedFuture(e);
-		}
-	}
-
-	/**
-	 * Unwraps a {@link CompletionException} to its root cause.
-	 *
-	 * @param error error to unwrap
-	 * @return the root cause
-	 */
-	private static Throwable unwrap(final Throwable error) {
-		Throwable cause = error;
-		while (cause instanceof CompletionException && null != cause.getCause()) {
-			cause = cause.getCause();
-		}
-		return cause;
-	}
-
-	/**
-	 * Accumulates an error into the given accumulator, if it's an {@link Exception}.
-	 *
-	 * @param <U> the accumulated type
-	 *
-	 * @param accumulator information accumulator
-	 * @param error error to accumulate
-	 */
-	@SuppressWarnings("unchecked")
-	private static <U> void accumulate(final Accumulator<U> accumulator, final Throwable error) {
-		if (error instanceof Exception e) {
-			accumulator.addInformation((U) e);
-		}
 	}
 
 	/**
@@ -330,37 +274,6 @@ public class AsyncRetry {
 	@Override
 	public int hashCode() {
 		return Objects.hash(waitPrototype);
-	}
-
-	/**
-	 * Outcome of a single attempt, carrying either a result or an error.
-	 *
-	 * @param <T> result type
-	 *
-	 * @author Radu Sebastian LAZIN
-	 */
-	private static final class AttemptOutcome<T> {
-
-		/**
-		 * The result, null if the attempt failed.
-		 */
-		private final T result;
-
-		/**
-		 * The error, null if the attempt succeeded.
-		 */
-		private final Throwable error;
-
-		/**
-		 * Constructor.
-		 *
-		 * @param result result
-		 * @param error error
-		 */
-		private AttemptOutcome(final T result, final Throwable error) {
-			this.result = result;
-			this.error = error;
-		}
 	}
 
 	/**
