@@ -15,6 +15,7 @@ package org.morphix.lang.retry.async;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -68,7 +69,7 @@ class AsyncRetryTest {
 	void shouldRetryGivenTimesWithAsyncSupplier() throws Exception {
 		AsyncRetry retry = AsyncRetry.of(AsyncWaitCounter.of(RETRY_COUNT, Duration.ofSeconds(0)));
 
-		CompletableFuture<Object> result = retry.deferUntil(() -> {
+		CompletableFuture<Object> result = retry.until(() -> {
 			inSupplier.foo();
 			return CompletableFuture.completedFuture(null);
 		}, Objects::nonNull);
@@ -83,7 +84,7 @@ class AsyncRetryTest {
 
 		CompletableFuture<Object> result = retry.until(() -> {
 			inSupplier.foo();
-			return null;
+			return CompletableFuture.completedFuture(null);
 		}, Objects::nonNull);
 
 		assertNull(result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
@@ -96,7 +97,7 @@ class AsyncRetryTest {
 
 		CompletableFuture<Object> result = retry.until(() -> {
 			inSupplier.foo();
-			return null;
+			return CompletableFuture.completedFuture(null);
 		}, Objects::nonNull);
 
 		assertNull(result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
@@ -109,7 +110,7 @@ class AsyncRetryTest {
 
 		CompletableFuture<Object> result = retry.until(() -> {
 			inSupplier.foo();
-			return null;
+			return CompletableFuture.completedFuture(null);
 		}, Objects::nonNull);
 
 		assertNull(result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
@@ -127,7 +128,8 @@ class AsyncRetryTest {
 	void shouldRetryGivenTimesWithEmptyAccumulator() throws Exception {
 		AsyncRetry retry = AsyncRetry.of(AsyncWaitCounter.of(RETRY_COUNT, Duration.ofSeconds(0)));
 
-		CompletableFuture<?> result = retry.until(() -> inSupplier.foo(), Objects::nonNull, Accumulator.empty());
+		CompletableFuture<?> result = retry.until(() -> CompletableFuture.completedFuture(inSupplier.foo()), Objects::nonNull,
+				Accumulator.empty());
 
 		assertNull(result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
 		verify(inSupplier, times(RETRY_COUNT)).foo();
@@ -144,7 +146,7 @@ class AsyncRetryTest {
 
 		AtomicInteger counter = new AtomicInteger(0);
 		ExceptionsAccumulator exceptionsAccumulator = ExceptionsAccumulator.of();
-		CompletableFuture<String> result = retry.deferUntil(() -> {
+		CompletableFuture<String> result = retry.until(() -> {
 			inSupplier.foo();
 			int c = counter.incrementAndGet();
 			if (c < RETRY_COUNT) {
@@ -291,7 +293,7 @@ class AsyncRetryTest {
 		AsyncRetry retry = AsyncRetry.NO_RETRY;
 
 		ExceptionsAccumulator exceptionsAccumulator = ExceptionsAccumulator.of();
-		CompletableFuture<Object> result = retry.deferUntil(() -> {
+		CompletableFuture<Object> result = retry.until(() -> {
 			inSupplier.name();
 			throw new RuntimeException();
 		}, Objects::nonNull, exceptionsAccumulator);
@@ -306,7 +308,7 @@ class AsyncRetryTest {
 		AsyncRetry retry = AsyncRetry.noRetry();
 
 		ExceptionsAccumulator exceptionsAccumulator = ExceptionsAccumulator.of();
-		CompletableFuture<Object> result = retry.deferUntil(() -> {
+		CompletableFuture<Object> result = retry.until(() -> {
 			inSupplier.name();
 			throw new RuntimeException();
 		}, Objects::nonNull, exceptionsAccumulator);
@@ -314,6 +316,22 @@ class AsyncRetryTest {
 		assertThrows(CompletionException.class, () -> result.join());
 		verify(inSupplier).name();
 		assertThat(exceptionsAccumulator.getExceptions(), hasSize(1));
+	}
+
+	@Test
+	void shouldExposeLastErrorOnExhaustionWhenAccumulatorDoesNotThrow() throws Exception {
+		AsyncRetry retry = AsyncRetry.of(AsyncWaitCounter.of(RETRY_COUNT, Duration.ofSeconds(0)));
+
+		ExceptionsAccumulator exceptionsAccumulator = ExceptionsAccumulator.of(ExceptionsAccumulator.Throw.NONE);
+		CompletableFuture<Object> result = retry.until(() -> {
+			inSupplier.foo();
+			throw new IllegalStateException();
+		}, Objects::nonNull, exceptionsAccumulator);
+
+		ExecutionException e = assertThrows(ExecutionException.class, () -> result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
+		assertThat(e.getCause(), instanceOf(IllegalStateException.class));
+		verify(inSupplier, times(RETRY_COUNT)).foo();
+		assertThat(exceptionsAccumulator.getExceptions(), hasSize(RETRY_COUNT));
 	}
 
 	@Test
@@ -382,7 +400,7 @@ class AsyncRetryTest {
 	void shouldFailTheFutureWithErrorOnNoAccumulator() {
 		AsyncRetry retry = AsyncRetry.of(AsyncWaitCounter.of(RETRY_COUNT, Duration.ofSeconds(0)));
 
-		CompletableFuture<Object> result = retry.deferUntil(() -> {
+		CompletableFuture<Object> result = retry.until(() -> {
 			throw new RuntimeException("boom");
 		}, Objects::nonNull);
 

@@ -123,9 +123,9 @@ public class AsyncRetry {
 	 * @param exitCondition end predicate
 	 * @return a {@link CompletableFuture} with the result
 	 */
-	public <T> CompletableFuture<T> deferUntil(final Supplier<CompletableFuture<T>> resultSupplier,
+	public <T> CompletableFuture<T> until(final Supplier<CompletableFuture<T>> resultSupplier,
 			final Predicate<T> exitCondition) {
-		return deferUntil(resultSupplier, exitCondition, Runnables.doNothing());
+		return until(resultSupplier, exitCondition, Runnables.doNothing());
 	}
 
 	/**
@@ -138,9 +138,9 @@ public class AsyncRetry {
 	 * @param beforeWait code to run before wait
 	 * @return a {@link CompletableFuture} with the result
 	 */
-	public <T> CompletableFuture<T> deferUntil(final Supplier<CompletableFuture<T>> resultSupplier,
+	public <T> CompletableFuture<T> until(final Supplier<CompletableFuture<T>> resultSupplier,
 			final Predicate<T> exitCondition, final Runnable beforeWait) {
-		return deferUntil(resultSupplier, exitCondition, e -> beforeWait.run());
+		return until(resultSupplier, exitCondition, e -> beforeWait.run());
 	}
 
 	/**
@@ -154,9 +154,9 @@ public class AsyncRetry {
 	 * @param accumulator information accumulator
 	 * @return a {@link CompletableFuture} with the result
 	 */
-	public <T, U> CompletableFuture<T> deferUntil(final Supplier<CompletableFuture<T>> resultSupplier,
+	public <T, U> CompletableFuture<T> until(final Supplier<CompletableFuture<T>> resultSupplier,
 			final Predicate<T> exitCondition, final Accumulator<U> accumulator) {
-		return deferUntil(resultSupplier, exitCondition, Consumers.consumeNothing(), accumulator);
+		return until(resultSupplier, exitCondition, Consumers.consumeNothing(), accumulator);
 	}
 
 	/**
@@ -171,9 +171,9 @@ public class AsyncRetry {
 	 * @param accumulator information accumulator
 	 * @return a {@link CompletableFuture} with the result
 	 */
-	public <T, U> CompletableFuture<T> deferUntil(final Supplier<CompletableFuture<T>> resultSupplier,
+	public <T, U> CompletableFuture<T> until(final Supplier<CompletableFuture<T>> resultSupplier,
 			final Predicate<T> exitCondition, final Consumer<U> beforeWait, final Accumulator<U> accumulator) {
-		return deferUntil(resultSupplier, exitCondition, Consumers.noBiConsumer(), beforeWait, accumulator);
+		return until(resultSupplier, exitCondition, Consumers.noBiConsumer(), beforeWait, accumulator);
 	}
 
 	/**
@@ -187,9 +187,9 @@ public class AsyncRetry {
 	 * @param beforeWait code to run before wait
 	 * @return a {@link CompletableFuture} with the result
 	 */
-	public <T, U> CompletableFuture<T> deferUntil(final Supplier<CompletableFuture<T>> resultSupplier,
+	public <T, U> CompletableFuture<T> until(final Supplier<CompletableFuture<T>> resultSupplier,
 			final Predicate<T> exitCondition, final Consumer<U> beforeWait) {
-		return deferUntil(resultSupplier, exitCondition, beforeWait, Accumulator.noAccumulator());
+		return until(resultSupplier, exitCondition, beforeWait, Accumulator.noAccumulator());
 	}
 
 	/**
@@ -205,73 +205,12 @@ public class AsyncRetry {
 	 * @param accumulator information accumulator
 	 * @return a {@link CompletableFuture} with the result
 	 */
-	public <T, U> CompletableFuture<T> deferUntil(final Supplier<CompletableFuture<T>> resultSupplier,
+	public <T, U> CompletableFuture<T> until(final Supplier<CompletableFuture<T>> resultSupplier,
 			final Predicate<T> exitCondition, final BiConsumer<T, U> afterResult, final Consumer<U> beforeWait,
 			final Accumulator<U> accumulator) {
 		AsyncWait wait = waitPrototype.copy();
 		wait.start();
 		return attempt(resultSupplier, exitCondition, afterResult, beforeWait, accumulator, wait);
-	}
-
-	/**
-	 * Retries a sync supplier, wrapping it on the configured executor, until the predicate is satisfied or the wait is
-	 * exhausted.
-	 *
-	 * @param <T> result type
-	 *
-	 * @param resultSupplier sync result supplier
-	 * @param exitCondition end predicate
-	 * @return a {@link CompletableFuture} with the result
-	 */
-	public <T> CompletableFuture<T> until(final Supplier<T> resultSupplier, final Predicate<T> exitCondition) {
-		return deferUntil(() -> supplyAsync(resultSupplier), exitCondition);
-	}
-
-	/**
-	 * Retries a sync supplier, wrapping it on the configured executor, until the predicate is satisfied or the wait is
-	 * exhausted.
-	 *
-	 * @param <T> result type
-	 * @param <U> the accumulated type
-	 *
-	 * @param resultSupplier sync result supplier
-	 * @param exitCondition end predicate
-	 * @param accumulator information accumulator
-	 * @return a {@link CompletableFuture} with the result
-	 */
-	public <T, U> CompletableFuture<T> until(final Supplier<T> resultSupplier, final Predicate<T> exitCondition,
-			final Accumulator<U> accumulator) {
-		return deferUntil(() -> supplyAsync(resultSupplier), exitCondition, accumulator);
-	}
-
-	/**
-	 * Retries a sync supplier, wrapping it on the configured executor, until the predicate is satisfied or the wait is
-	 * exhausted.
-	 *
-	 * @param <T> result type
-	 * @param <U> the accumulated type
-	 *
-	 * @param resultSupplier sync result supplier
-	 * @param exitCondition end predicate
-	 * @param beforeWait code to run before wait
-	 * @param accumulator information accumulator
-	 * @return a {@link CompletableFuture} with the result
-	 */
-	public <T, U> CompletableFuture<T> until(final Supplier<T> resultSupplier, final Predicate<T> exitCondition,
-			final Consumer<U> beforeWait, final Accumulator<U> accumulator) {
-		return deferUntil(() -> supplyAsync(resultSupplier), exitCondition, beforeWait, accumulator);
-	}
-
-	/**
-	 * Runs a result supplier asynchronously on the wait's executor.
-	 *
-	 * @param <T> result type
-	 *
-	 * @param supplier result supplier
-	 * @return a {@link CompletableFuture} with the result
-	 */
-	private static <T> CompletableFuture<T> supplyAsync(final Supplier<T> supplier) {
-		return CompletableFuture.supplyAsync(supplier);
 	}
 
 	/**
@@ -302,12 +241,27 @@ public class AsyncRetry {
 	private static <T, U> CompletableFuture<T> attempt(final Supplier<CompletableFuture<T>> resultSupplier,
 			final Predicate<T> exitCondition, final BiConsumer<T, U> afterResult, final Consumer<U> beforeWait,
 			final Accumulator<U> accumulator, final AsyncWait wait) {
-		final CompletableFuture<T> currentAttempt = asyncGet(resultSupplier);
-		return currentAttempt.handle(AttemptOutcome::new).thenCompose(outcome -> {
-			if (null != outcome.error) {
-				return onError(outcome, resultSupplier, exitCondition, afterResult, beforeWait, accumulator, wait);
+		return asyncGet(resultSupplier).handle(AttemptOutcome::new).thenCompose(outcome -> {
+			final Throwable error = unwrap(outcome.error);
+			final boolean failed = null != error;
+			if (failed) {
+				if (accumulator == Accumulator.noAccumulator()) {
+					return CompletableFuture.failedFuture(error);
+				}
+				accumulate(accumulator, error);
 			}
-			return onResult(outcome, resultSupplier, exitCondition, afterResult, beforeWait, accumulator, wait);
+			afterResult.accept(outcome.result, accumulator.lastInformation());
+			if (!failed && exitCondition.test(outcome.result)) {
+				return CompletableFuture.completedFuture(outcome.result);
+			}
+			if (wait.keepWaiting()) {
+				beforeWait.accept(accumulator.lastInformation());
+				return wait.defer().thenCompose(v -> attempt(resultSupplier, exitCondition, afterResult, beforeWait, accumulator, wait));
+			}
+			if (accumulator != Accumulator.noAccumulator() && accumulator.isNotEmpty()) {
+				accumulator.rest();
+			}
+			return failed ? CompletableFuture.failedFuture(error) : CompletableFuture.completedFuture(outcome.result);
 		});
 	}
 
@@ -325,100 +279,6 @@ public class AsyncRetry {
 		} catch (Exception e) {
 			return CompletableFuture.failedFuture(e);
 		}
-	}
-
-	/**
-	 * Handles a successful or non-exceptional result.
-	 *
-	 * @param <T> result type
-	 * @param <U> the accumulated type
-	 *
-	 * @param outcome attempt outcome
-	 * @param resultSupplier async result supplier
-	 * @param exitCondition end predicate
-	 * @param afterResult code to run after result
-	 * @param beforeWait code to run before wait
-	 * @param accumulator information accumulator
-	 * @param wait wait object
-	 * @return a {@link CompletableFuture} with the result
-	 */
-	private static <T, U> CompletableFuture<T> onResult(final AttemptOutcome<T> outcome,
-			final Supplier<CompletableFuture<T>> resultSupplier, final Predicate<T> exitCondition,
-			final BiConsumer<T, U> afterResult, final Consumer<U> beforeWait, final Accumulator<U> accumulator,
-			final AsyncWait wait) {
-		T result = outcome.result;
-		U last = accumulator.lastInformation();
-		afterResult.accept(result, last);
-
-		if (exitCondition.test(result)) {
-			return CompletableFuture.completedFuture(result);
-		}
-		return beforeNext(resultSupplier, exitCondition, afterResult, beforeWait, accumulator, wait, result, null);
-	}
-
-	/**
-	 * Handles an exceptional completion of the current attempt.
-	 *
-	 * @param <T> result type
-	 * @param <U> the accumulated type
-	 *
-	 * @param outcome attempt outcome
-	 * @param resultSupplier async result supplier
-	 * @param exitCondition end predicate
-	 * @param afterResult code to run after result
-	 * @param beforeWait code to run before wait
-	 * @param accumulator information accumulator
-	 * @param wait wait object
-	 * @return a {@link CompletableFuture} with the result
-	 */
-	private static <T, U> CompletableFuture<T> onError(final AttemptOutcome<T> outcome,
-			final Supplier<CompletableFuture<T>> resultSupplier, final Predicate<T> exitCondition,
-			final BiConsumer<T, U> afterResult, final Consumer<U> beforeWait, final Accumulator<U> accumulator,
-			final AsyncWait wait) {
-		Throwable error = unwrap(outcome.error);
-
-		if (accumulator == Accumulator.noAccumulator()) {
-			return CompletableFuture.failedFuture(error);
-		}
-
-		accumulate(accumulator, error);
-		U last = accumulator.lastInformation();
-		afterResult.accept(null, last);
-
-		return beforeNext(resultSupplier, exitCondition, afterResult, beforeWait, accumulator, wait, null, error);
-	}
-
-	/**
-	 * Decides whether to retry after a failed attempt. If the wait says no more retries are available the
-	 * {@link Accumulator#rest()} is invoked (which may throw) and the last result or error is returned.
-	 *
-	 * @param <T> result type
-	 * @param <U> the accumulated type
-	 *
-	 * @param resultSupplier async result supplier
-	 * @param exitCondition end predicate
-	 * @param afterResult code to run after result
-	 * @param beforeWait code to run before wait
-	 * @param accumulator information accumulator
-	 * @param wait wait object
-	 * @param lastResult last result or null
-	 * @param lastError last error or null
-	 * @return a {@link CompletableFuture} with the result or error
-	 */
-	private static <T, U> CompletableFuture<T> beforeNext(final Supplier<CompletableFuture<T>> resultSupplier,
-			final Predicate<T> exitCondition, final BiConsumer<T, U> afterResult, final Consumer<U> beforeWait,
-			final Accumulator<U> accumulator, final AsyncWait wait, final T lastResult, final Throwable lastError) {
-		if (!wait.keepWaiting()) {
-			if (accumulator != Accumulator.noAccumulator() && accumulator.isNotEmpty()) {
-				accumulator.rest();
-			}
-			if (null != lastError) {
-				return CompletableFuture.failedFuture(lastError);
-			}
-			return CompletableFuture.completedFuture(lastResult);
-		}
-		beforeWait.accept(accumulator.lastInformation());
-		return wait.defer().thenCompose(v -> attempt(resultSupplier, exitCondition, afterResult, beforeWait, accumulator, wait));
 	}
 
 	/**
@@ -476,6 +336,8 @@ public class AsyncRetry {
 	 * Outcome of a single attempt, carrying either a result or an error.
 	 *
 	 * @param <T> result type
+	 *
+	 * @author Radu Sebastian LAZIN
 	 */
 	private static final class AttemptOutcome<T> {
 
@@ -596,16 +458,6 @@ public class AsyncRetry {
 		 * @return a {@link CompletableFuture} with the result of the retry operation.
 		 */
 		public CompletableFuture<T> onAsync(final Supplier<CompletableFuture<T>> resultSupplier) {
-			return retry.deferUntil(resultSupplier, exitCondition, consumeBeforeWait, accumulator);
-		}
-
-		/**
-		 * Executes the async retry logic using the provided sync result supplier, wrapping it on the configured executor.
-		 *
-		 * @param resultSupplier the supplier that produces a result to evaluate.
-		 * @return a {@link CompletableFuture} with the result of the retry operation.
-		 */
-		public CompletableFuture<T> on(final Supplier<T> resultSupplier) {
 			return retry.until(resultSupplier, exitCondition, consumeBeforeWait, accumulator);
 		}
 	}
