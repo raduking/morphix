@@ -428,7 +428,7 @@ class ThrowablesTest {
 					NullPointerException.class,
 					() -> Throwables.unwrap(t, (Class<? extends Throwable>) null));
 
-			assertThat(nullPointerException.getMessage(), equalTo("type cannot be null"));
+			assertThat(nullPointerException.getMessage(), equalTo("peelType cannot be null"));
 		}
 
 		@Test
