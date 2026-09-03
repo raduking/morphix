@@ -21,7 +21,6 @@ import org.morphix.async.CompletableFutures;
 import org.morphix.lang.Throwables;
 import org.morphix.lang.Unchecked;
 import org.morphix.lang.accumulator.Accumulator;
-import org.morphix.lang.function.Runnables;
 import org.morphix.lang.function.Suppliers;
 
 /**
@@ -106,7 +105,11 @@ public class AsyncAccumulator<U> {
 	 * @return a {@link CompletableFuture} with the result
 	 */
 	public CompletableFuture<Void> accumulate(final Runnable runnable) {
-		return accumulate(Runnables.toSupplier(runnable));
+		Objects.requireNonNull(runnable, "runnable cannot be null");
+		return accumulate(() -> {
+			runnable.run();
+			return CompletableFuture.completedFuture(null);
+		});
 	}
 
 	/**

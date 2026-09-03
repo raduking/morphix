@@ -15,6 +15,7 @@ package org.morphix.async.retry;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -262,12 +263,14 @@ class AsyncWaitTimeoutTest {
 		Instant after = Instant.now();
 
 		long elapsedMillis = Duration.between(before, after).toMillis();
+
 		assertThat(elapsedMillis, greaterThanOrEqualTo(5L));
 	}
 
 	@Test
 	void shouldNotWaitOnNowAsyncIfTimeoutReached() throws Exception {
-		AsyncWaitTimeout waitTimeout = AsyncWaitTimeout.of(Duration.ofSeconds(-10), Duration.ofMillis(5));
+		long interval = 50;
+		AsyncWaitTimeout waitTimeout = AsyncWaitTimeout.of(Duration.ofSeconds(-10), Duration.ofMillis(interval));
 		waitTimeout.start();
 
 		Instant before = Instant.now();
@@ -275,7 +278,8 @@ class AsyncWaitTimeoutTest {
 		Instant after = Instant.now();
 
 		long elapsedMillis = Duration.between(before, after).toMillis();
-		assertThat(elapsedMillis, greaterThanOrEqualTo(0L));
+
+		assertThat(elapsedMillis, lessThan(interval / 2));
 	}
 
 	@Test

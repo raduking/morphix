@@ -41,7 +41,18 @@ public class AsyncRetry {
 	/**
 	 * No wait object.
 	 */
-	public static final AsyncWait NO_WAIT = () -> false;
+	public static final AsyncWait NO_WAIT = new AsyncWait() {
+
+		@Override
+		public boolean keepWaiting() {
+			return false;
+		}
+
+		@Override
+		public CompletableFuture<Void> defer() {
+			return CompletableFuture.completedFuture(null);
+		}
+	};
 
 	/**
 	 * No retry object.

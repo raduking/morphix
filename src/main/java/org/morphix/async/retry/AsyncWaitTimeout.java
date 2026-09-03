@@ -251,7 +251,7 @@ public class AsyncWaitTimeout implements AsyncWait {
 	@Override
 	public CompletableFuture<Void> defer() {
 		if (!keepWaiting()) {
-			return AsyncWait.super.defer();
+			return CompletableFuture.completedFuture(null);
 		}
 		CompletableFuture<Void> future = AsyncWait.super.defer();
 		return future.whenComplete((v, e) -> attempt.updateAndGet(value -> value == Integer.MAX_VALUE ? value : value + 1));

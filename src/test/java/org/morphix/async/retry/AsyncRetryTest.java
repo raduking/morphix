@@ -106,6 +106,18 @@ class AsyncRetryTest {
 	}
 
 	@Test
+	void shouldNotDeferWhenNoRetry() throws Exception {
+		AsyncRetry retry = AsyncRetry.noRetry();
+
+		long before = System.nanoTime();
+		CompletableFuture<Object> result = retry.until(() -> CompletableFuture.completedFuture(null), Objects::nonNull);
+		result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+		long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - before);
+
+		assertTrue(elapsedMillis < 250);
+	}
+
+	@Test
 	void shouldNotRetryWithNoRetryMethod() throws Exception {
 		AsyncRetry retry = AsyncRetry.noRetry();
 
