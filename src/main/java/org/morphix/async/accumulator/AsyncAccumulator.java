@@ -41,12 +41,6 @@ public class AsyncAccumulator<U> {
 	private final Accumulator<U> accumulator;
 
 	/**
-	 * The error of the last failed attempt, null if the last attempt did not fail. It allows the exhausted state to surface
-	 * the error even when the accumulator does not throw on {@link #rest()}.
-	 */
-	private Throwable lastError;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param accumulator information accumulator to wrap
@@ -77,10 +71,8 @@ public class AsyncAccumulator<U> {
 			};
 			try {
 				T value = accumulator.accumulate(valueSupplier, defaultReturnSupplier);
-				lastError = error;
 				return CompletableFuture.completedFuture(value);
 			} catch (Throwable t) { // NOSONAR the accumulator may rethrow errors that it does not accumulate, which must become a failed future
-				lastError = t;
 				return CompletableFuture.failedFuture(t);
 			}
 		});
@@ -122,6 +114,15 @@ public class AsyncAccumulator<U> {
 	}
 
 	/**
+	 * Returns true if the wrapped accumulator has accumulated information.
+	 *
+	 * @return true if the wrapped accumulator has accumulated information
+	 */
+	public boolean isNotEmpty() {
+		return accumulator.isNotEmpty();
+	}
+
+	/**
 	 * Signals that the accumulator finished accumulating and resets it.
 	 */
 	public void rest() {
@@ -129,22 +130,23 @@ public class AsyncAccumulator<U> {
 	}
 
 	/**
-	 * Finalizes the exhausted state. Resets the accumulator and, if the last attempt failed, surfaces the error as a failed
-	 * future.
+	 * Finalizes accumulation. Calls {@link Accumulator#rest()} when the wrapped accumulator is not empty, matching
+	 * {@link org.morphix.lang.retry.Retry} exhaustion and no-retry completion.
 	 *
 	 * @param <T> result type
 	 *
 	 * @param result the last result
-	 * @return a {@link CompletableFuture} with the result or the last error
+	 * @return a {@link CompletableFuture} with the result, or a failed future if {@link #rest()} throws
 	 */
 	public <T> CompletableFuture<T> exhaust(final T result) {
-		Throwable error = lastError;
-		lastError = null;
-		accumulator.rest();
-		if (null != error) {
-			return CompletableFuture.failedFuture(error);
+		try {
+			if (accumulator.isNotEmpty()) {
+				accumulator.rest();
+			}
+			return CompletableFuture.completedFuture(result);
+		} catch (Throwable t) { // NOSONAR rest() may rethrow accumulated errors, which must become a failed future
+			return CompletableFuture.failedFuture(t);
 		}
-		return CompletableFuture.completedFuture(result);
 	}
 
 	/**

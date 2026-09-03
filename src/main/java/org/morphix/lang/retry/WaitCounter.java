@@ -60,7 +60,7 @@ public class WaitCounter implements Wait {
 	/**
 	 * The delay strategy used to compute the interval between retries.
 	 */
-	private DelayStrategy delayStrategy;
+	private final DelayStrategy delayStrategy;
 
 	/**
 	 * Maximum times to wait.

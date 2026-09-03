@@ -12,9 +12,11 @@
  */
 package org.morphix.async.retry;
 
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
 import org.morphix.lang.Copyable;
 import org.morphix.lang.thread.Threads;
@@ -45,6 +47,11 @@ public interface AsyncWait extends Copyable {
 		 * Default time unit for waiting.
 		 */
 		public static final TimeUnit TIME_UNIT = TimeUnit.SECONDS;
+
+		/**
+		 * Default poll interval for waiting (50 milliseconds).
+		 */
+		public static final Duration POLL_INTERVAL = Duration.ofMillis(50);
 
 		/**
 		 * Private constructor.
@@ -125,5 +132,75 @@ public interface AsyncWait extends Copyable {
 	 */
 	default TimeUnit timeUnit() {
 		return Default.TIME_UNIT;
+	}
+
+	/**
+	 * Waits until the given condition is true or the timeout is reached. The condition is checked at intervals defined by
+	 * the poll interval. If the timeout is zero, it will wait indefinitely until the condition is true. If the timeout is
+	 * negative, it will return immediately.
+	 *
+	 * @param condition condition to check
+	 * @param timeout maximum time to wait for the condition to be true
+	 * @param pollInterval interval between condition checks
+	 * @return a future that completes with true if the condition was met within the timeout, false otherwise
+	 */
+	static CompletableFuture<Boolean> until(final BooleanSupplier condition, final Duration timeout,
+			final Duration pollInterval) {
+		boolean conditionMet = condition.getAsBoolean();
+		if (conditionMet || timeout.isNegative()) {
+			return CompletableFuture.completedFuture(conditionMet);
+		}
+		return pollUntil(condition, timeout, pollInterval, System.nanoTime() + timeout.toNanos());
+	}
+
+	/**
+	 * Waits until the given condition is true or the timeout is reached. The condition is checked at intervals defined by
+	 * the poll interval. If the timeout is zero, it will wait indefinitely until the condition is true. If the timeout is
+	 * negative, it will return immediately.
+	 *
+	 * @param condition condition to check
+	 * @param timeout maximum time to wait for the condition to be true
+	 * @return a future that completes with true if the condition was met within the timeout, false otherwise
+	 */
+	static CompletableFuture<Boolean> until(final BooleanSupplier condition, final Duration timeout) {
+		return until(condition, timeout, Default.POLL_INTERVAL);
+	}
+
+	/**
+	 * Waits until the given condition is true. The condition is checked at intervals defined by the poll interval.
+	 *
+	 * @param condition condition to check
+	 * @return a future that completes with true if the condition was met, false if the thread was interrupted while waiting
+	 */
+	static CompletableFuture<Boolean> until(final BooleanSupplier condition) {
+		return until(condition, Duration.ZERO, Default.POLL_INTERVAL);
+	}
+
+	/**
+	 * Polls the condition until it is met, the timeout is reached or the current thread is interrupted.
+	 *
+	 * @param condition condition to check
+	 * @param timeout maximum time to wait for the condition to be true
+	 * @param pollInterval interval between condition checks
+	 * @param deadline deadline in nanoseconds
+	 * @return a future that completes with the condition result
+	 */
+	private static CompletableFuture<Boolean> pollUntil(final BooleanSupplier condition, final Duration timeout,
+			final Duration pollInterval, final long deadline) {
+		boolean conditionMet = condition.getAsBoolean();
+		if (conditionMet || Threads.isCurrentInterrupted()) {
+			return CompletableFuture.completedFuture(conditionMet);
+		}
+		if (!timeout.isZero() && System.nanoTime() >= deadline) {
+			return CompletableFuture.completedFuture(false);
+		}
+		CompletableFuture<Void> delay = new CompletableFuture<>();
+		try {
+			CompletableFuture.delayedExecutor(pollInterval.toNanos(), TimeUnit.NANOSECONDS,
+					Threads.sharedVirtualThreadPerTaskExecutor()).execute(() -> delay.complete(null));
+		} catch (Exception e) {
+			delay.completeExceptionally(e);
+		}
+		return delay.thenCompose(v -> pollUntil(condition, timeout, pollInterval, deadline));
 	}
 }

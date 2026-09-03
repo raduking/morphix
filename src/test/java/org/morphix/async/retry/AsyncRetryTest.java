@@ -15,7 +15,6 @@ package org.morphix.async.retry;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -42,6 +41,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.morphix.lang.Messages;
 import org.morphix.lang.accumulator.Accumulator;
+import org.morphix.lang.accumulator.DurationAccumulator;
 import org.morphix.lang.accumulator.ExceptionsAccumulator;
 import org.morphix.utils.lang.retry.delay.TrackingDelayStrategy;
 
@@ -143,6 +143,17 @@ class AsyncRetryTest {
 
 		CompletableFuture<?> result = retry.until(() -> CompletableFuture.completedFuture(inSupplier.foo()), Objects::nonNull,
 				Accumulator.empty());
+
+		assertNull(result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
+		verify(inSupplier, times(RETRY_COUNT)).foo();
+	}
+
+	@Test
+	void shouldRetryGivenTimesWithDurationAccumulatorSupplier() throws Exception {
+		AsyncRetry retry = AsyncRetry.of(AsyncWaitCounter.of(RETRY_COUNT, Duration.ofSeconds(0)));
+
+		CompletableFuture<Object> result = retry.until(() -> CompletableFuture.completedFuture(inSupplier.foo()), Objects::nonNull,
+				DurationAccumulator::of);
 
 		assertNull(result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
 		verify(inSupplier, times(RETRY_COUNT)).foo();
@@ -332,7 +343,7 @@ class AsyncRetryTest {
 	}
 
 	@Test
-	void shouldExposeLastErrorOnExhaustionWhenAccumulatorDoesNotThrow() throws Exception {
+	void shouldReturnLastResultOnExhaustionWhenAccumulatorDoesNotThrow() throws Exception {
 		AsyncRetry retry = AsyncRetry.of(AsyncWaitCounter.of(RETRY_COUNT, Duration.ofSeconds(0)));
 
 		ExceptionsAccumulator exceptionsAccumulator = ExceptionsAccumulator.of(ExceptionsAccumulator.Throw.NONE);
@@ -341,8 +352,7 @@ class AsyncRetryTest {
 			throw new IllegalStateException();
 		}, Objects::nonNull, exceptionsAccumulator);
 
-		ExecutionException e = assertThrows(ExecutionException.class, () -> result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
-		assertThat(e.getCause(), instanceOf(IllegalStateException.class));
+		assertNull(result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
 		verify(inSupplier, times(RETRY_COUNT)).foo();
 		assertThat(exceptionsAccumulator.getExceptions(), hasSize(RETRY_COUNT));
 	}

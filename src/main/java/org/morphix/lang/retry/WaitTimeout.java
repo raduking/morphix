@@ -229,7 +229,7 @@ public class WaitTimeout implements Wait {
 	 */
 	@Override
 	public WaitTimeout copy() {
-		return WaitTimeout.of(timeout, timeoutTimeUnit, delayStrategy);
+		return WaitTimeout.of(timeout, timeoutTimeUnit, delayStrategy.copy());
 	}
 
 	/**

@@ -178,6 +178,22 @@ public class AsyncRetry {
 	 *
 	 * @param resultSupplier asynchronous result supplier
 	 * @param exitCondition end predicate
+	 * @param accumulatorSupplier information accumulator supplier
+	 * @return a {@link CompletableFuture} with the result
+	 */
+	public <T, U> CompletableFuture<T> until(final Supplier<CompletableFuture<T>> resultSupplier,
+			final Predicate<T> exitCondition, final Supplier<Accumulator<U>> accumulatorSupplier) {
+		return until(resultSupplier, exitCondition, Consumers.consumeNothing(), accumulatorSupplier);
+	}
+
+	/**
+	 * Retries the asynchronous supplier until the predicate is satisfied or the wait is exhausted.
+	 *
+	 * @param <T> result type
+	 * @param <U> the accumulated type
+	 *
+	 * @param resultSupplier asynchronous result supplier
+	 * @param exitCondition end predicate
 	 * @param beforeWait code to run before wait
 	 * @param accumulator information accumulator
 	 * @return a {@link CompletableFuture} with the result
@@ -211,6 +227,24 @@ public class AsyncRetry {
 	 *
 	 * @param resultSupplier asynchronous result supplier
 	 * @param exitCondition end predicate
+	 * @param beforeWait code to run before wait
+	 * @param accumulatorSupplier accumulator supplier
+	 * @return a {@link CompletableFuture} with the result
+	 */
+	public <T, U> CompletableFuture<T> until(final Supplier<CompletableFuture<T>> resultSupplier,
+			final Predicate<T> exitCondition, final Consumer<U> beforeWait,
+			final Supplier<Accumulator<U>> accumulatorSupplier) {
+		return until(resultSupplier, exitCondition, beforeWait, accumulatorSupplier.get());
+	}
+
+	/**
+	 * Retries the asynchronous supplier until the predicate is satisfied or the wait is exhausted.
+	 *
+	 * @param <T> result type
+	 * @param <U> the accumulated type
+	 *
+	 * @param resultSupplier asynchronous result supplier
+	 * @param exitCondition end predicate
 	 * @param afterResult code to run after the result supplier produced a value
 	 * @param beforeWait code to run before wait
 	 * @param accumulator information accumulator
@@ -219,9 +253,31 @@ public class AsyncRetry {
 	public <T, U> CompletableFuture<T> until(final Supplier<CompletableFuture<T>> resultSupplier,
 			final Predicate<T> exitCondition, final BiConsumer<T, U> afterResult, final Consumer<U> beforeWait,
 			final Accumulator<U> accumulator) {
+		if (this == NO_RETRY) {
+			return whenNoRetry(resultSupplier, afterResult, new AsyncAccumulator<>(accumulator));
+		}
 		AsyncWait wait = waitPrototype.copy();
 		wait.start();
 		return attempt(resultSupplier, exitCondition, afterResult, beforeWait, new AsyncAccumulator<>(accumulator), wait);
+	}
+
+	/**
+	 * Returns the supplied result with accumulated information when no retry is given.
+	 *
+	 * @param <T> result type
+	 * @param <U> accumulated information type
+	 *
+	 * @param resultSupplier asynchronous result supplier
+	 * @param afterResult code to run after the result supplier was called and accumulator accumulated the value
+	 * @param accumulator information accumulator
+	 * @return a {@link CompletableFuture} with the result
+	 */
+	private static <T, U> CompletableFuture<T> whenNoRetry(final Supplier<CompletableFuture<T>> resultSupplier,
+			final BiConsumer<T, U> afterResult, final AsyncAccumulator<U> accumulator) {
+		return accumulator.accumulate(resultSupplier).thenCompose(result -> {
+			afterResult.accept(result, accumulator.lastInformation());
+			return accumulator.exhaust(result);
+		});
 	}
 
 	/**
@@ -291,7 +347,11 @@ public class AsyncRetry {
 
 	/**
 	 * A fluent adapter for the {@link AsyncRetry} class, providing a more expressive way to configure and execute async
-	 * retry logic.
+	 * retry logic. This class allows for chaining methods to define exit conditions, pre-wait actions, and accumulation of
+	 * results.
+	 * <p>
+	 * Note: This class is intended to be used in a fluent style, enabling more readable and maintainable code when working
+	 * with retry operations but instances should not be reused after calling the {@link #on(Supplier)} method.
 	 *
 	 * @param <T> the type of the result produced by the retry operation.
 	 * @param <U> the type of the accumulated information during retries.
