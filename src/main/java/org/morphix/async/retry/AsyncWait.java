@@ -136,16 +136,18 @@ public interface AsyncWait extends Copyable {
 
 	/**
 	 * Waits until the given condition is true or the timeout is reached. The condition is checked at intervals defined by
-	 * the poll interval. If the timeout is zero, it will wait indefinitely until the condition is true. If the timeout is
-	 * negative, it will return immediately.
+	 * the poll interval.
+	 * <ul>
+	 * <li>If the timeout is zero, it will wait indefinitely until the condition is true.</li>
+	 * <li>If the timeout is negative, it will return immediately.</li>
+	 * </ul>
 	 *
 	 * @param condition condition to check
 	 * @param timeout maximum time to wait for the condition to be true
 	 * @param pollInterval interval between condition checks
 	 * @return a future that completes with true if the condition was met within the timeout, false otherwise
 	 */
-	static CompletableFuture<Boolean> until(final BooleanSupplier condition, final Duration timeout,
-			final Duration pollInterval) {
+	static CompletableFuture<Boolean> until(final BooleanSupplier condition, final Duration timeout, final Duration pollInterval) {
 		boolean conditionMet = condition.getAsBoolean();
 		if (conditionMet || timeout.isNegative()) {
 			return CompletableFuture.completedFuture(conditionMet);
@@ -155,8 +157,11 @@ public interface AsyncWait extends Copyable {
 
 	/**
 	 * Waits until the given condition is true or the timeout is reached. The condition is checked at intervals defined by
-	 * the poll interval. If the timeout is zero, it will wait indefinitely until the condition is true. If the timeout is
-	 * negative, it will return immediately.
+	 * the poll interval.
+	 * <ul>
+	 * <li>If the timeout is zero, it will wait indefinitely until the condition is true.</li>
+	 * <li>If the timeout is negative, it will return immediately.</li>
+	 * </ul>
 	 *
 	 * @param condition condition to check
 	 * @param timeout maximum time to wait for the condition to be true
@@ -185,8 +190,9 @@ public interface AsyncWait extends Copyable {
 	 * @param deadline deadline in nanoseconds
 	 * @return a future that completes with the condition result
 	 */
-	private static CompletableFuture<Boolean> pollUntil(final BooleanSupplier condition, final Duration timeout,
-			final Duration pollInterval, final long deadline) {
+	@SuppressWarnings("resource")
+	private static CompletableFuture<Boolean> pollUntil(final BooleanSupplier condition, final Duration timeout, final Duration pollInterval,
+			final long deadline) {
 		boolean conditionMet = condition.getAsBoolean();
 		if (conditionMet || Threads.isCurrentInterrupted()) {
 			return CompletableFuture.completedFuture(conditionMet);
@@ -195,9 +201,10 @@ public interface AsyncWait extends Copyable {
 			return CompletableFuture.completedFuture(false);
 		}
 		CompletableFuture<Void> delay = new CompletableFuture<>();
+		Executor executor = Threads.sharedVirtualThreadPerTaskExecutor();
 		try {
-			CompletableFuture.delayedExecutor(pollInterval.toNanos(), TimeUnit.NANOSECONDS,
-					Threads.sharedVirtualThreadPerTaskExecutor()).execute(() -> delay.complete(null));
+			CompletableFuture.delayedExecutor(pollInterval.toNanos(), TimeUnit.NANOSECONDS, executor)
+					.execute(() -> delay.complete(null));
 		} catch (Exception e) {
 			delay.completeExceptionally(e);
 		}
