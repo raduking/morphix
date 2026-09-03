@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.44`
+
+---
+
 `1.0.43`
 
 - Added `AsyncRetry` for asynchronous retry with a fluent policy builder.
