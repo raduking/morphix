@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.lang.retry;
+package org.morphix.async.retry;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -21,20 +21,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.lang.retry.DelayStrategy;
+import org.morphix.lang.retry.delay.FixedDelayStrategy;
 import org.morphix.reflection.Constructors;
 import org.morphix.utils.Tests;
 import org.morphix.utils.lang.retry.delay.TrackingDelayStrategy;
 
 /**
- * Test class for {@link WaitCounter}.
+ * Test class for {@link AsyncWaitCounter}.
  *
  * @author Radu Sebastian LAZIN
  */
-class WaitCounterTest {
+class AsyncWaitCounterTest {
 
 	private static final long MILLIS = 1;
 	private static final Duration INTERVAL = Duration.ofMillis(MILLIS);
@@ -43,7 +46,7 @@ class WaitCounterTest {
 	@Test
 	void shouldCreateWaitCounterUsingDelayStrategy() {
 		DelayStrategy delayStrategy = attempt -> attempt;
-		WaitCounter waitCounter = WaitCounter.of(MAX_COUNT, delayStrategy);
+		AsyncWaitCounter waitCounter = AsyncWaitCounter.of(MAX_COUNT, delayStrategy);
 
 		assertThat(waitCounter.interval(), equalTo(1L));
 		waitCounter.keepWaiting();
@@ -53,8 +56,8 @@ class WaitCounterTest {
 
 	@Test
 	void shouldReturnTrueOnTwoEqualObjects() {
-		WaitCounter waitCounter1 = WaitCounter.of(MAX_COUNT, INTERVAL);
-		WaitCounter waitCounter2 = WaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.MILLISECONDS);
+		AsyncWaitCounter waitCounter1 = AsyncWaitCounter.of(MAX_COUNT, INTERVAL);
+		AsyncWaitCounter waitCounter2 = AsyncWaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.MILLISECONDS);
 
 		boolean result = waitCounter1.equals(waitCounter2);
 
@@ -63,7 +66,7 @@ class WaitCounterTest {
 
 	@Test
 	void shouldReturnTrueOnTheSameObject() {
-		WaitCounter waitCounter = WaitCounter.of(MAX_COUNT, INTERVAL);
+		AsyncWaitCounter waitCounter = AsyncWaitCounter.of(MAX_COUNT, INTERVAL);
 
 		boolean result = waitCounter.equals(waitCounter);
 
@@ -72,8 +75,8 @@ class WaitCounterTest {
 
 	@Test
 	void shouldReturnTrueOnTwoEqualObjectsWhenCountersAdvance() {
-		WaitCounter waitCounter1 = WaitCounter.of(MAX_COUNT, INTERVAL);
-		WaitCounter waitCounter2 = WaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.MILLISECONDS);
+		AsyncWaitCounter waitCounter1 = AsyncWaitCounter.of(MAX_COUNT, INTERVAL);
+		AsyncWaitCounter waitCounter2 = AsyncWaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.MILLISECONDS);
 
 		waitCounter1.start();
 		waitCounter2.start();
@@ -88,8 +91,8 @@ class WaitCounterTest {
 
 	@Test
 	void shouldReturnFalseOnEqualsTwoObjectsWhenOneCounterAdvances() {
-		WaitCounter waitCounter1 = WaitCounter.of(MAX_COUNT, INTERVAL);
-		WaitCounter waitCounter2 = WaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.MILLISECONDS);
+		AsyncWaitCounter waitCounter1 = AsyncWaitCounter.of(MAX_COUNT, INTERVAL);
+		AsyncWaitCounter waitCounter2 = AsyncWaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.MILLISECONDS);
 
 		waitCounter1.start();
 		waitCounter1.keepWaiting();
@@ -101,8 +104,8 @@ class WaitCounterTest {
 
 	@Test
 	void shouldReturnFalseOnEqualsTwoObjectsWithDifferentMaxCounts() {
-		WaitCounter waitCounter1 = WaitCounter.of(MAX_COUNT, INTERVAL);
-		WaitCounter waitCounter2 = WaitCounter.of(MAX_COUNT + 1, MILLIS, TimeUnit.MILLISECONDS);
+		AsyncWaitCounter waitCounter1 = AsyncWaitCounter.of(MAX_COUNT, INTERVAL);
+		AsyncWaitCounter waitCounter2 = AsyncWaitCounter.of(MAX_COUNT + 1, MILLIS, TimeUnit.MILLISECONDS);
 
 		boolean result = waitCounter1.equals(waitCounter2);
 
@@ -111,8 +114,8 @@ class WaitCounterTest {
 
 	@Test
 	void shouldReturnFalseOnEqualsTwoObjectsWithDifferentInterval() {
-		WaitCounter waitCounter1 = WaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.MILLISECONDS);
-		WaitCounter waitCounter2 = WaitCounter.of(MAX_COUNT, MILLIS + 1, TimeUnit.MILLISECONDS);
+		AsyncWaitCounter waitCounter1 = AsyncWaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.MILLISECONDS);
+		AsyncWaitCounter waitCounter2 = AsyncWaitCounter.of(MAX_COUNT, MILLIS + 1, TimeUnit.MILLISECONDS);
 
 		boolean result = waitCounter1.equals(waitCounter2);
 
@@ -121,8 +124,8 @@ class WaitCounterTest {
 
 	@Test
 	void shouldReturnFalseOnEqualsTwoObjectsWithDifferentTimeUnits() {
-		WaitCounter waitCounter1 = WaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.HOURS);
-		WaitCounter waitCounter2 = WaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.MILLISECONDS);
+		AsyncWaitCounter waitCounter1 = AsyncWaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.HOURS);
+		AsyncWaitCounter waitCounter2 = AsyncWaitCounter.of(MAX_COUNT, MILLIS, TimeUnit.MILLISECONDS);
 
 		boolean result = waitCounter1.equals(waitCounter2);
 
@@ -131,9 +134,9 @@ class WaitCounterTest {
 
 	@Test
 	void shouldReturnACopy() {
-		WaitCounter waitCounter = WaitCounter.of(MAX_COUNT, INTERVAL);
+		AsyncWaitCounter waitCounter = AsyncWaitCounter.of(MAX_COUNT, INTERVAL);
 
-		WaitCounter waitCounterCopy = waitCounter.copy();
+		AsyncWaitCounter waitCounterCopy = waitCounter.copy();
 
 		assertNotSame(waitCounter, waitCounterCopy);
 		assertEquals(waitCounter, waitCounterCopy);
@@ -141,7 +144,7 @@ class WaitCounterTest {
 
 	@Test
 	void shouldReturnFalseOnEqualsIfOtherIsNull() {
-		WaitCounter waitCounter = WaitCounter.of(MAX_COUNT, INTERVAL);
+		AsyncWaitCounter waitCounter = AsyncWaitCounter.of(MAX_COUNT, INTERVAL);
 
 		boolean result = waitCounter.equals(null);
 
@@ -150,7 +153,7 @@ class WaitCounterTest {
 
 	@Test
 	void shouldReturnFalseOnEqualsIfOtherIsADifferentClass() {
-		WaitCounter waitCounter = WaitCounter.of(MAX_COUNT, INTERVAL);
+		AsyncWaitCounter waitCounter = AsyncWaitCounter.of(MAX_COUNT, INTERVAL);
 
 		boolean result = waitCounter.equals(new Object());
 
@@ -158,31 +161,76 @@ class WaitCounterTest {
 	}
 
 	@Test
+	void shouldReturnFalseOnEqualsIfExecutorIsDifferent() {
+		Executor executor1 = Runnable::run;
+		Executor executor2 = command -> command.run();
+		AsyncWaitCounter waitCounter1 = AsyncWaitCounter.of(MAX_COUNT, FixedDelayStrategy.of(MILLIS, TimeUnit.MILLISECONDS), executor1);
+		AsyncWaitCounter waitCounter2 = AsyncWaitCounter.of(MAX_COUNT, FixedDelayStrategy.of(MILLIS, TimeUnit.MILLISECONDS), executor2);
+
+		boolean result = waitCounter1.equals(waitCounter2);
+
+		assertFalse(result);
+	}
+
+	@Test
+	void shouldReturnTrueOnEqualsIfExecutorsAreTheSame() {
+		Executor executor = Runnable::run;
+		AsyncWaitCounter waitCounter1 = AsyncWaitCounter.of(MAX_COUNT, FixedDelayStrategy.of(MILLIS, TimeUnit.MILLISECONDS), executor);
+		AsyncWaitCounter waitCounter2 = AsyncWaitCounter.of(MAX_COUNT, FixedDelayStrategy.of(MILLIS, TimeUnit.MILLISECONDS), executor);
+
+		boolean result = waitCounter1.equals(waitCounter2);
+
+		assertTrue(result);
+		assertEquals(waitCounter1.hashCode(), waitCounter2.hashCode());
+		assertThat(waitCounter1.executor(), equalTo(executor));
+	}
+
+	@Test
 	void shouldThrowExceptionWhenTryingToInstantiateWaitCounterDefaultConstructor() {
-		UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(WaitCounter.Default.class);
+		UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(AsyncWaitCounter.Default.class);
 
 		assertThat(e.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 	}
 
 	@Test
 	void shouldHaveTheCorrectDefaultValues() {
-		assertThat(WaitCounter.Default.MAX_COUNT, equalTo(3));
-		assertThat(WaitCounter.Default.SLEEP, equalTo(Duration.ofSeconds(1)));
+		assertThat(AsyncWaitCounter.Default.MAX_COUNT, equalTo(3));
+		assertThat(AsyncWaitCounter.Default.SLEEP, equalTo(Duration.ofSeconds(1)));
 	}
 
 	@Test
 	void shouldInstantiateWaitCounterWithDefaultValues() {
-		WaitCounter waitCounter = WaitCounter.DEFAULT;
+		AsyncWaitCounter waitCounter = AsyncWaitCounter.DEFAULT;
 
-		assertThat(waitCounter.maxCount(), equalTo(WaitCounter.Default.MAX_COUNT));
-		assertThat(waitCounter.interval(), equalTo(WaitCounter.Default.SLEEP.toMillis()));
+		assertThat(waitCounter.maxCount(), equalTo(AsyncWaitCounter.Default.MAX_COUNT));
+		assertThat(waitCounter.interval(), equalTo(AsyncWaitCounter.Default.SLEEP.toMillis()));
 		assertThat(waitCounter.timeUnit(), equalTo(TimeUnit.MILLISECONDS));
+	}
+
+	@Test
+	void shouldRunUntimeoutAfterWait() throws Exception {
+		AsyncWaitCounter waitCounter = AsyncWaitCounter.of(MAX_COUNT, Duration.ZERO);
+
+		waitCounter.defer().get();
+
+		assertTrue(true);
+	}
+
+	@Test
+	void shouldStopWaitingAfterMaxCount() {
+		AsyncWaitCounter waitCounter = AsyncWaitCounter.of(MAX_COUNT, Duration.ZERO);
+
+		waitCounter.start();
+
+		assertTrue(waitCounter.keepWaiting());
+		assertTrue(waitCounter.keepWaiting());
+		assertFalse(waitCounter.keepWaiting());
 	}
 
 	@Test
 	void shouldCallDelayWithCorrectAttemptValues() {
 		TrackingDelayStrategy delayStrategy = new TrackingDelayStrategy();
-		WaitCounter waitCounter = WaitCounter.of(MAX_COUNT, delayStrategy);
+		AsyncWaitCounter waitCounter = AsyncWaitCounter.of(MAX_COUNT, delayStrategy);
 		List<Integer> expected = IntStream.rangeClosed(1, MAX_COUNT).boxed().toList();
 
 		for (int i = 0; i < MAX_COUNT - 1; ++i) {

@@ -10,12 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.lang.retry;
+package org.morphix.async.retry;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
+import org.morphix.lang.retry.DelayStrategy;
 import org.morphix.lang.retry.delay.FixedDelayStrategy;
 import org.morphix.reflection.Constructors;
 
@@ -25,7 +27,7 @@ import org.morphix.reflection.Constructors;
  *
  * @author Radu Sebastian LAZIN
  */
-public class WaitCounter implements Wait {
+public class AsyncWaitCounter implements AsyncWait {
 
 	/**
 	 * Default values name space.
@@ -53,9 +55,9 @@ public class WaitCounter implements Wait {
 	}
 
 	/**
-	 * Default wait counter: 3 times one second apart.
+	 * Default async wait counter: 3 times one second apart.
 	 */
-	public static final WaitCounter DEFAULT = WaitCounter.of(Default.MAX_COUNT, Default.SLEEP);
+	public static final AsyncWaitCounter DEFAULT = AsyncWaitCounter.of(Default.MAX_COUNT, Default.SLEEP);
 
 	/**
 	 * The delay strategy used to compute the interval between retries.
@@ -73,15 +75,22 @@ public class WaitCounter implements Wait {
 	private int count;
 
 	/**
+	 * Executor used to schedule delays.
+	 */
+	private final Executor executor;
+
+	/**
 	 * Private constructor.
 	 *
-	 * @param interval interval
-	 * @param intervalTimeUnit interval time unit
+	 * @param maxCount maximum number of retries
+	 * @param delayStrategy delay strategy
+	 * @param executor executor used to schedule delays
 	 */
-	private WaitCounter(final int maxCount, final DelayStrategy delayStrategy) {
+	private AsyncWaitCounter(final int maxCount, final DelayStrategy delayStrategy, final Executor executor) {
 		this.maxCount = maxCount;
 		this.count = 0;
 		this.delayStrategy = delayStrategy;
+		this.executor = executor;
 	}
 
 	/**
@@ -91,8 +100,8 @@ public class WaitCounter implements Wait {
 	 * @param delayStrategy delay strategy
 	 * @return the wait object
 	 */
-	public static WaitCounter of(final int maxCount, final DelayStrategy delayStrategy) {
-		return new WaitCounter(maxCount, delayStrategy);
+	public static AsyncWaitCounter of(final int maxCount, final DelayStrategy delayStrategy) {
+		return new AsyncWaitCounter(maxCount, delayStrategy, null);
 	}
 
 	/**
@@ -103,7 +112,7 @@ public class WaitCounter implements Wait {
 	 * @param intervalTimeUnit interval time unit
 	 * @return the wait object
 	 */
-	public static WaitCounter of(final int maxCount, final long interval, final TimeUnit intervalTimeUnit) {
+	public static AsyncWaitCounter of(final int maxCount, final long interval, final TimeUnit intervalTimeUnit) {
 		return of(maxCount, FixedDelayStrategy.of(interval, intervalTimeUnit));
 	}
 
@@ -114,12 +123,24 @@ public class WaitCounter implements Wait {
 	 * @param interval interval
 	 * @return the wait object
 	 */
-	public static WaitCounter of(final int maxCount, final Duration interval) {
+	public static AsyncWaitCounter of(final int maxCount, final Duration interval) {
 		return of(maxCount, interval.toMillis(), TimeUnit.MILLISECONDS);
 	}
 
 	/**
-	 * @see Wait#interval()
+	 * Wait object builder with custom executor.
+	 *
+	 * @param maxCount maximum number of retries
+	 * @param delayStrategy delay strategy
+	 * @param executor executor used to schedule delays
+	 * @return the wait object
+	 */
+	public static AsyncWaitCounter of(final int maxCount, final DelayStrategy delayStrategy, final Executor executor) {
+		return new AsyncWaitCounter(maxCount, delayStrategy, executor);
+	}
+
+	/**
+	 * @see AsyncWait#interval()
 	 */
 	@Override
 	public long interval() {
@@ -127,11 +148,19 @@ public class WaitCounter implements Wait {
 	}
 
 	/**
-	 * @see Wait#timeUnit()
+	 * @see AsyncWait#timeUnit()
 	 */
 	@Override
 	public TimeUnit timeUnit() {
 		return delayStrategy.timeUnit();
+	}
+
+	/**
+	 * @see AsyncWait#executor()
+	 */
+	@Override
+	public Executor executor() {
+		return null != executor ? executor : AsyncWait.super.executor();
 	}
 
 	/**
@@ -144,7 +173,7 @@ public class WaitCounter implements Wait {
 	}
 
 	/**
-	 * Resets the start time.
+	 * Resets the counter.
 	 */
 	@Override
 	public void start() {
@@ -177,8 +206,8 @@ public class WaitCounter implements Wait {
 	 * @return a copy
 	 */
 	@Override
-	public WaitCounter copy() {
-		return WaitCounter.of(maxCount, delayStrategy.copy());
+	public AsyncWaitCounter copy() {
+		return AsyncWaitCounter.of(maxCount, delayStrategy.copy(), executor);
 	}
 
 	/**
@@ -192,10 +221,11 @@ public class WaitCounter implements Wait {
 		if (null == that || that.getClass() != getClass()) {
 			return false;
 		}
-		WaitCounter thatWait = (WaitCounter) that;
+		AsyncWaitCounter thatWait = (AsyncWaitCounter) that;
 		return Objects.equals(delayStrategy, thatWait.delayStrategy)
 				&& maxCount == thatWait.maxCount
-				&& count == thatWait.count;
+				&& count == thatWait.count
+				&& Objects.equals(executor, thatWait.executor);
 	}
 
 	/**
@@ -203,6 +233,6 @@ public class WaitCounter implements Wait {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(delayStrategy, maxCount, count);
+		return Objects.hash(delayStrategy, maxCount, count, executor);
 	}
 }

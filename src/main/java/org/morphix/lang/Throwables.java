@@ -43,7 +43,7 @@ public final class Throwables {
 		if (null == throwable) {
 			return false;
 		}
-		// Use 2 pointers to detect cycles in the cause chain.
+		// use 2 pointers to detect cycles in the cause chain.
 		Throwable slow = throwable;
 		Throwable fast = throwable;
 		int fastSteps = 2;
@@ -142,5 +142,38 @@ public final class Throwables {
 	public static boolean isOrHasCause(final Throwable throwable, final Class<? extends Throwable> type) {
 		Objects.requireNonNull(type, "type cannot be null");
 		return isOrHasCause(throwable, type::isInstance);
+	}
+
+	/**
+	 * Peels the given throwable type off the cause chain, returning the first cause that is not an instance of the given
+	 * type (with any deeper causes intact) or the last matching throwable when the chain is exhausted. If the chain is
+	 * cyclic, the throwable at the point where the cycle repeats is returned to avoid an infinite loop.
+	 *
+	 * @param throwable throwable to unwrap
+	 * @param peelType throwable type to peel off
+	 * @return the throwable with the given type peeled off, or {@code null} when the throwable is {@code null}
+	 */
+	public static Throwable unwrap(final Throwable throwable, final Class<? extends Throwable> peelType) {
+		Objects.requireNonNull(peelType, "peelType cannot be null");
+		if (null == throwable) {
+			return null;
+		}
+		// use 2 pointers to detect cycles in the cause chain.
+		Throwable slow = throwable;
+		Throwable fast = throwable;
+		do {
+			for (int i = 0; i < 2; ++i) {
+				if (!peelType.isInstance(fast)) {
+					return fast;
+				}
+				Throwable cause = fast.getCause();
+				if (null == cause) {
+					return fast;
+				}
+				fast = cause;
+			}
+			slow = slow.getCause();
+		} while (fast != slow);
+		return fast;
 	}
 }

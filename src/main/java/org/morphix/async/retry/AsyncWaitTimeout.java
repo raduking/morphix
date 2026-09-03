@@ -10,23 +10,26 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.morphix.lang.retry;
+package org.morphix.async.retry;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.morphix.lang.retry.DelayStrategy;
 import org.morphix.lang.retry.delay.FixedDelayStrategy;
 import org.morphix.reflection.Constructors;
 
 /**
- * Timeout wait implementation.
+ * Async timeout wait implementation.
  *
  * @author Radu Sebastian LAZIN
  */
-public class WaitTimeout implements Wait {
+public class AsyncWaitTimeout implements AsyncWait {
 
 	/**
 	 * Default values name space.
@@ -54,12 +57,12 @@ public class WaitTimeout implements Wait {
 	}
 
 	/**
-	 * Default Wait object.
+	 * Default AsyncWaitTimeout object.
 	 */
-	public static final WaitTimeout DEFAULT = WaitTimeout.of(Default.TIMEOUT, Default.SLEEP);
+	public static final AsyncWaitTimeout DEFAULT = AsyncWaitTimeout.of(Default.TIMEOUT, Default.SLEEP);
 
 	/**
-	 * Timeout
+	 * Timeout value.
 	 */
 	private final long timeout;
 
@@ -84,16 +87,23 @@ public class WaitTimeout implements Wait {
 	private Instant start;
 
 	/**
+	 * Executor used to schedule delays.
+	 */
+	private final Executor executor;
+
+	/**
 	 * Private constructor.
 	 *
 	 * @param timeout timeout
 	 * @param timeoutTimeUnit timeout time unit
 	 * @param delayStrategy strategy that determines the sleep interval between checks
+	 * @param executor executor used to schedule delays
 	 */
-	protected WaitTimeout(final long timeout, final TimeUnit timeoutTimeUnit, final DelayStrategy delayStrategy) {
+	protected AsyncWaitTimeout(final long timeout, final TimeUnit timeoutTimeUnit, final DelayStrategy delayStrategy, final Executor executor) {
 		this.timeout = timeout;
 		this.timeoutTimeUnit = timeoutTimeUnit;
 		this.delayStrategy = delayStrategy;
+		this.executor = executor;
 		start();
 	}
 
@@ -106,7 +116,8 @@ public class WaitTimeout implements Wait {
 	 * @param intervalTimeUnit interval time unit
 	 * @return the wait object
 	 */
-	public static WaitTimeout of(final long timeout, final TimeUnit timeoutTimeUnit, final long interval, final TimeUnit intervalTimeUnit) {
+	public static AsyncWaitTimeout of(final long timeout, final TimeUnit timeoutTimeUnit, final long interval,
+			final TimeUnit intervalTimeUnit) {
 		return of(timeout, timeoutTimeUnit, FixedDelayStrategy.of(interval, intervalTimeUnit));
 	}
 
@@ -117,7 +128,7 @@ public class WaitTimeout implements Wait {
 	 * @param interval interval
 	 * @return the wait object
 	 */
-	public static WaitTimeout of(final Duration timeout, final Duration interval) {
+	public static AsyncWaitTimeout of(final Duration timeout, final Duration interval) {
 		return of(timeout.toMillis(), TimeUnit.MILLISECONDS, interval.toMillis(), TimeUnit.MILLISECONDS);
 	}
 
@@ -129,12 +140,26 @@ public class WaitTimeout implements Wait {
 	 * @param delayStrategy strategy that determines the sleep interval between checks
 	 * @return the wait object
 	 */
-	public static WaitTimeout of(final long timeout, final TimeUnit timeoutTimeUnit, final DelayStrategy delayStrategy) {
-		return new WaitTimeout(timeout, timeoutTimeUnit, delayStrategy);
+	public static AsyncWaitTimeout of(final long timeout, final TimeUnit timeoutTimeUnit, final DelayStrategy delayStrategy) {
+		return new AsyncWaitTimeout(timeout, timeoutTimeUnit, delayStrategy, null);
 	}
 
 	/**
-	 * @see Wait#interval()
+	 * Wait object builder with custom executor.
+	 *
+	 * @param timeout timeout
+	 * @param timeoutTimeUnit timeout time unit
+	 * @param delayStrategy strategy that determines the sleep interval between checks
+	 * @param executor executor used to schedule delays
+	 * @return the wait object
+	 */
+	public static AsyncWaitTimeout of(final long timeout, final TimeUnit timeoutTimeUnit, final DelayStrategy delayStrategy,
+			final Executor executor) {
+		return new AsyncWaitTimeout(timeout, timeoutTimeUnit, delayStrategy, executor);
+	}
+
+	/**
+	 * @see AsyncWait#interval()
 	 */
 	@Override
 	public long interval() {
@@ -142,11 +167,19 @@ public class WaitTimeout implements Wait {
 	}
 
 	/**
-	 * @see Wait#timeUnit()
+	 * @see AsyncWait#timeUnit()
 	 */
 	@Override
 	public TimeUnit timeUnit() {
 		return delayStrategy.timeUnit();
+	}
+
+	/**
+	 * @see AsyncWait#executor()
+	 */
+	@Override
+	public Executor executor() {
+		return null != executor ? executor : AsyncWait.super.executor();
 	}
 
 	/**
@@ -165,19 +198,6 @@ public class WaitTimeout implements Wait {
 	protected void start(final Instant start) {
 		this.attempt.set(1);
 		this.start = start;
-	}
-
-	/**
-	 * @see Wait#now()
-	 */
-	@Override
-	public void now() {
-		// don't wait if the timeout is over
-		if (!keepWaiting()) {
-			return;
-		}
-		Wait.super.now();
-		attempt.updateAndGet(value -> value == Integer.MAX_VALUE ? value : value + 1);
 	}
 
 	/**
@@ -223,13 +243,28 @@ public class WaitTimeout implements Wait {
 	}
 
 	/**
+	 * Defers the wait asynchronously, returning a {@link CompletableFuture} that completes after the delay, incrementing
+	 * the attempt counter once the wait is over.
+	 *
+	 * @return a future that completes after the configured delay
+	 */
+	@Override
+	public CompletableFuture<Void> defer() {
+		if (!keepWaiting()) {
+			return CompletableFuture.completedFuture(null);
+		}
+		CompletableFuture<Void> future = AsyncWait.super.defer();
+		return future.whenComplete((v, e) -> attempt.updateAndGet(value -> value == Integer.MAX_VALUE ? value : value + 1));
+	}
+
+	/**
 	 * Returns a copy.
 	 *
 	 * @return a copy
 	 */
 	@Override
-	public WaitTimeout copy() {
-		return WaitTimeout.of(timeout, timeoutTimeUnit, delayStrategy.copy());
+	public AsyncWaitTimeout copy() {
+		return AsyncWaitTimeout.of(timeout, timeoutTimeUnit, delayStrategy.copy(), executor);
 	}
 
 	/**
@@ -243,12 +278,13 @@ public class WaitTimeout implements Wait {
 		if (null == that || that.getClass() != getClass()) {
 			return false;
 		}
-		WaitTimeout thatWait = (WaitTimeout) that;
+		AsyncWaitTimeout thatWait = (AsyncWaitTimeout) that;
 		return timeout == thatWait.timeout
 				&& timeoutTimeUnit == thatWait.timeoutTimeUnit
 				&& Objects.equals(delayStrategy, thatWait.delayStrategy)
 				&& attempt.get() == thatWait.attempt.get()
-				&& Objects.equals(start, thatWait.start);
+				&& Objects.equals(start, thatWait.start)
+				&& Objects.equals(executor, thatWait.executor);
 	}
 
 	/**
@@ -256,6 +292,6 @@ public class WaitTimeout implements Wait {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(timeout, timeoutTimeUnit, delayStrategy, attempt.get(), start);
+		return Objects.hash(timeout, timeoutTimeUnit, delayStrategy, attempt.get(), start, executor);
 	}
 }

@@ -1,5 +1,23 @@
 ## Release Notes
 
+`1.0.43`
+
+- Added `AsyncRetry` for asynchronous retry with a fluent policy builder.
+- Added `AsyncRetry.until(Supplier<CompletableFuture>, ...)` asynchronous overloads.
+- Added `AsyncRetry.AsyncFluentRetry` nested builder with `stopWhen`, `consumeBeforeWait`, `doBeforeWait`, `accumulateWith`, and `on`.
+- Added `AsyncWait` for non-blocking wait strategies that complete a `CompletableFuture` once the wait is over.
+- Added `AsyncWaitTimeout` for timeout-based asynchronous waits with configurable delay strategy and executor.
+- Added `AsyncWaitCounter` for count-based asynchronous waits with configurable delay strategy and executor.
+- Added `AsyncAccumulator` as an async-aware wrapper around an `Accumulator` that feeds the asynchronous outcome through the wrapped accumulator.
+- Added `CompletableFutures` utility with `invoke` to invoke supplier and convert synchronous supplier exceptions into a failed future.
+- Added `Throwables.unwrap(Throwable, Class<? extends Throwable>)` to peel a throwable type off a cause chain with cycle detection.
+- Added `Threads.sharedVirtualThreadPerTaskExecutor()` for a shared virtual thread per task executor service.
+- Added `Threads.newShutdownThread` to create a thread that shuts down the given executor when runs.
+- Upgraded `spotless-maven-plugin` to `3.10.0`.
+- Upgraded `pitest-maven` to `1.25.9`.
+
+---
+
 `1.0.42`
 
 - Added `Threads.execute(List<? extends Runnable>, int, Duration, ExecutionType)` for rate-limited runnable execution by execution type.
