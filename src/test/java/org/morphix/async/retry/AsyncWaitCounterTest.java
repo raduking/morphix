@@ -21,11 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.lang.retry.DelayStrategy;
+import org.morphix.lang.retry.delay.FixedDelayStrategy;
 import org.morphix.reflection.Constructors;
 import org.morphix.utils.Tests;
 import org.morphix.utils.lang.retry.delay.TrackingDelayStrategy;
@@ -156,6 +158,31 @@ class AsyncWaitCounterTest {
 		boolean result = waitCounter.equals(new Object());
 
 		assertFalse(result);
+	}
+
+	@Test
+	void shouldReturnFalseOnEqualsIfExecutorIsDifferent() {
+		Executor executor1 = Runnable::run;
+		Executor executor2 = command -> command.run();
+		AsyncWaitCounter waitCounter1 = AsyncWaitCounter.of(MAX_COUNT, FixedDelayStrategy.of(MILLIS, TimeUnit.MILLISECONDS), executor1);
+		AsyncWaitCounter waitCounter2 = AsyncWaitCounter.of(MAX_COUNT, FixedDelayStrategy.of(MILLIS, TimeUnit.MILLISECONDS), executor2);
+
+		boolean result = waitCounter1.equals(waitCounter2);
+
+		assertFalse(result);
+	}
+
+	@Test
+	void shouldReturnTrueOnEqualsIfExecutorsAreTheSame() {
+		Executor executor = Runnable::run;
+		AsyncWaitCounter waitCounter1 = AsyncWaitCounter.of(MAX_COUNT, FixedDelayStrategy.of(MILLIS, TimeUnit.MILLISECONDS), executor);
+		AsyncWaitCounter waitCounter2 = AsyncWaitCounter.of(MAX_COUNT, FixedDelayStrategy.of(MILLIS, TimeUnit.MILLISECONDS), executor);
+
+		boolean result = waitCounter1.equals(waitCounter2);
+
+		assertTrue(result);
+		assertEquals(waitCounter1.hashCode(), waitCounter2.hashCode());
+		assertThat(waitCounter1.executor(), equalTo(executor));
 	}
 
 	@Test

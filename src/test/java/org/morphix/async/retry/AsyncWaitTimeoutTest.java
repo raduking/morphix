@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.morphix.lang.retry.delay.FixedDelayStrategy;
 import org.morphix.reflection.Constructors;
 import org.morphix.reflection.Fields;
 import org.morphix.utils.Tests;
@@ -165,6 +166,41 @@ class AsyncWaitTimeoutTest {
 		boolean result = waitTimeout.equals(new Object());
 
 		assertFalse(result);
+	}
+
+	@Test
+	void shouldReturnFalseOnEqualsIfExecutorIsDifferent() {
+		Executor executor1 = Runnable::run;
+		Executor executor2 = command -> command.run();
+		AsyncWaitTimeout waitTimeout1 = AsyncWaitTimeout.of(TIMEOUT_MS, TimeUnit.MILLISECONDS,
+				FixedDelayStrategy.of(INTERVAL_MS, TimeUnit.MILLISECONDS), executor1);
+		AsyncWaitTimeout waitTimeout2 = AsyncWaitTimeout.of(TIMEOUT_MS, TimeUnit.MILLISECONDS,
+				FixedDelayStrategy.of(INTERVAL_MS, TimeUnit.MILLISECONDS), executor2);
+
+		waitTimeout1.start(START);
+		waitTimeout2.start(START);
+
+		boolean result = waitTimeout1.equals(waitTimeout2);
+
+		assertFalse(result);
+	}
+
+	@Test
+	void shouldReturnTrueOnEqualsIfExecutorsAreTheSame() {
+		Executor executor = Runnable::run;
+		AsyncWaitTimeout waitTimeout1 = AsyncWaitTimeout.of(TIMEOUT_MS, TimeUnit.MILLISECONDS,
+				FixedDelayStrategy.of(INTERVAL_MS, TimeUnit.MILLISECONDS), executor);
+		AsyncWaitTimeout waitTimeout2 = AsyncWaitTimeout.of(TIMEOUT_MS, TimeUnit.MILLISECONDS,
+				FixedDelayStrategy.of(INTERVAL_MS, TimeUnit.MILLISECONDS), executor);
+
+		waitTimeout1.start(START);
+		waitTimeout2.start(START);
+
+		boolean result = waitTimeout1.equals(waitTimeout2);
+
+		assertTrue(result);
+		assertThat(waitTimeout1.hashCode(), equalTo(waitTimeout2.hashCode()));
+		assertThat(waitTimeout1.executor(), equalTo(executor));
 	}
 
 	@Test

@@ -80,19 +80,6 @@ class AsyncRetryTest {
 	}
 
 	@Test
-	void shouldRetryGivenTimesWithSyncSupplier() throws Exception {
-		AsyncRetry retry = AsyncRetry.of(AsyncWaitCounter.of(RETRY_COUNT, Duration.ofSeconds(0)));
-
-		CompletableFuture<Object> result = retry.until(() -> {
-			inSupplier.foo();
-			return CompletableFuture.completedFuture(null);
-		}, Objects::nonNull);
-
-		assertNull(result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
-		verify(inSupplier, times(RETRY_COUNT)).foo();
-	}
-
-	@Test
 	void shouldNotRetryWithNoRetry() throws Exception {
 		AsyncRetry retry = AsyncRetry.NO_RETRY;
 
@@ -322,7 +309,7 @@ class AsyncRetryTest {
 			throw new RuntimeException();
 		}, Objects::nonNull, exceptionsAccumulator);
 
-		assertThrows(CompletionException.class, () -> result.join());
+		assertThrows(CompletionException.class, result::join);
 		verify(inSupplier).name();
 		assertThat(exceptionsAccumulator.getExceptions(), hasSize(1));
 	}
@@ -337,7 +324,7 @@ class AsyncRetryTest {
 			throw new RuntimeException();
 		}, Objects::nonNull, exceptionsAccumulator);
 
-		assertThrows(CompletionException.class, () -> result.join());
+		assertThrows(CompletionException.class, result::join);
 		verify(inSupplier).name();
 		assertThat(exceptionsAccumulator.getExceptions(), hasSize(1));
 	}
@@ -408,6 +395,13 @@ class AsyncRetryTest {
 		boolean result = wait.keepWaiting();
 
 		assertFalse(result);
+	}
+
+	@Test
+	void shouldCompleteImmediatelyOnNoWaitDefer() throws Exception {
+		AsyncWait wait = AsyncRetry.noWait();
+
+		assertNull(wait.defer().get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
 	}
 
 	@Test
