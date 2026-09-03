@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.lang.retry.DelayStrategy;
@@ -203,6 +204,7 @@ class AsyncWaitCounterTest {
 	void shouldCallDelayWithCorrectAttemptValues() {
 		TrackingDelayStrategy delayStrategy = new TrackingDelayStrategy();
 		AsyncWaitCounter waitCounter = AsyncWaitCounter.of(MAX_COUNT, delayStrategy);
+		List<Integer> expected = IntStream.rangeClosed(1, MAX_COUNT).boxed().toList();
 
 		for (int i = 0; i < MAX_COUNT - 1; ++i) {
 			waitCounter.interval();
@@ -211,6 +213,6 @@ class AsyncWaitCounterTest {
 
 		waitCounter.interval();
 		assertFalse(waitCounter.keepWaiting());
-		assertThat(delayStrategy.getAttempts(), equalTo(List.of(1, 2, 3)));
+		assertThat(delayStrategy.getAttempts(), equalTo(expected));
 	}
 }
