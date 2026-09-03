@@ -68,7 +68,7 @@ public class AsyncAccumulator<U> {
 	 */
 	public <T> CompletableFuture<T> accumulate(final Supplier<CompletableFuture<T>> resultSupplier,
 			final Supplier<T> defaultReturnSupplier) {
-		return CompletableFutures.supplyAsync(resultSupplier).handle(AttemptOutcome::new).thenCompose(outcome -> {
+		return CompletableFutures.invoke(resultSupplier).handle(AttemptOutcome::new).thenCompose(outcome -> {
 			Throwable error = Throwables.unwrap(outcome.error, CompletionException.class);
 			Supplier<T> valueSupplier = () -> {
 				if (null != error) {

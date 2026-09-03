@@ -39,7 +39,7 @@ public final class CompletableFutures {
 	 * @param supplier the asynchronous supplier
 	 * @return the supplier's {@link CompletableFuture}, or a failed future if the supplier throws synchronously
 	 */
-	public static <T> CompletableFuture<T> supplyAsync(final Supplier<CompletableFuture<T>> supplier) {
+	public static <T> CompletableFuture<T> invoke(final Supplier<CompletableFuture<T>> supplier) {
 		try {
 			return supplier.get();
 		} catch (Exception e) {
