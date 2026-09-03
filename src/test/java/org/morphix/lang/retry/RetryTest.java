@@ -40,6 +40,7 @@ import org.morphix.lang.accumulator.DurationAccumulator;
 import org.morphix.lang.accumulator.ExceptionsAccumulator;
 import org.morphix.lang.thread.Threads;
 import org.morphix.lang.thread.Threads.ExecutionType;
+import org.morphix.utils.lang.retry.delay.TrackingDelayStrategy;
 
 /**
  * Test class for {@link Retry}.
@@ -416,6 +417,43 @@ class RetryTest {
 		boolean result = wait == Retry.NO_WAIT;
 
 		assertTrue(result);
+	}
+
+	@Test
+	void shouldCallDelayWithCorrectAttemptValues() {
+		TrackingDelayStrategy delayStrategy = new TrackingDelayStrategy();
+		WaitCounter waitCounter = WaitCounter.of(RETRY_COUNT, delayStrategy);
+		Retry retry = Retry.of(waitCounter);
+		List<Integer> expected = IntStream.rangeClosed(1, RETRY_COUNT - 1).boxed().toList();
+
+		AtomicInteger counter = new AtomicInteger(0);
+		retry.until(() -> {
+			inSupplier.foo();
+			int c = counter.incrementAndGet();
+			if (c < RETRY_COUNT) {
+				return null;
+			}
+			return STRING_RESULT;
+		}, Objects::nonNull);
+
+		verify(inSupplier, times(RETRY_COUNT)).foo();
+		assertThat(delayStrategy.getAttempts(), equalTo(expected));
+	}
+
+	@Test
+	void shouldCallDelayWithCorrectAttemptValuesWhenAllRetriesFail() {
+		TrackingDelayStrategy delayStrategy = new TrackingDelayStrategy();
+		WaitCounter waitCounter = WaitCounter.of(RETRY_COUNT, delayStrategy);
+		Retry retry = Retry.of(waitCounter);
+		List<Integer> expected = IntStream.rangeClosed(1, RETRY_COUNT).boxed().toList();
+
+		retry.until(() -> {
+			inSupplier.foo();
+			return null;
+		}, Objects::nonNull);
+
+		verify(inSupplier, times(RETRY_COUNT)).foo();
+		assertThat(delayStrategy.getAttempts(), equalTo(expected));
 	}
 
 	public static class Foo {

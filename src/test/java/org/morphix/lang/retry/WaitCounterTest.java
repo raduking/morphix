@@ -20,11 +20,14 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.reflection.Constructors;
 import org.morphix.utils.Tests;
+import org.morphix.utils.lang.retry.delay.TrackingDelayStrategy;
 
 /**
  * Test class for {@link WaitCounter}.
@@ -174,5 +177,21 @@ class WaitCounterTest {
 		assertThat(waitCounter.maxCount(), equalTo(WaitCounter.Default.MAX_COUNT));
 		assertThat(waitCounter.interval(), equalTo(WaitCounter.Default.SLEEP.toMillis()));
 		assertThat(waitCounter.timeUnit(), equalTo(TimeUnit.MILLISECONDS));
+	}
+
+	@Test
+	void shouldCallDelayWithCorrectAttemptValues() {
+		TrackingDelayStrategy delayStrategy = new TrackingDelayStrategy();
+		WaitCounter waitCounter = WaitCounter.of(MAX_COUNT, delayStrategy);
+		List<Integer> expected = IntStream.rangeClosed(1, MAX_COUNT).boxed().toList();
+
+		for (int i = 0; i < MAX_COUNT - 1; ++i) {
+			waitCounter.interval();
+			assertTrue(waitCounter.keepWaiting());
+		}
+
+		waitCounter.interval();
+		assertFalse(waitCounter.keepWaiting());
+		assertThat(delayStrategy.getAttempts(), equalTo(expected));
 	}
 }

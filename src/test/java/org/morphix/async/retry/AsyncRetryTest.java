@@ -43,6 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.morphix.lang.Messages;
 import org.morphix.lang.accumulator.Accumulator;
 import org.morphix.lang.accumulator.ExceptionsAccumulator;
+import org.morphix.utils.lang.retry.delay.TrackingDelayStrategy;
 
 /**
  * Test class for {@link AsyncRetry}.
@@ -406,6 +407,43 @@ class AsyncRetryTest {
 
 		Exception e = assertThrows(ExecutionException.class, () -> result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
 		assertThat(e.getCause().getMessage(), equalTo("boom"));
+	}
+
+	@Test
+	void shouldCallDelayWithCorrectAttemptValues() throws Exception {
+		TrackingDelayStrategy delayStrategy = new TrackingDelayStrategy();
+		AsyncRetry retry = AsyncRetry.of(AsyncWaitCounter.of(RETRY_COUNT, delayStrategy));
+		List<Integer> expected = IntStream.rangeClosed(1, RETRY_COUNT - 1).boxed().toList();
+
+		AtomicInteger counter = new AtomicInteger(0);
+		CompletableFuture<String> result = retry.until(() -> {
+			inSupplier.foo();
+			int c = counter.incrementAndGet();
+			if (c < RETRY_COUNT) {
+				return CompletableFuture.completedFuture(null);
+			}
+			return CompletableFuture.completedFuture(STRING_RESULT);
+		}, Objects::nonNull);
+
+		assertThat(result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS), equalTo(STRING_RESULT));
+		verify(inSupplier, times(RETRY_COUNT)).foo();
+		assertThat(delayStrategy.getAttempts(), equalTo(expected));
+	}
+
+	@Test
+	void shouldCallDelayWithCorrectAttemptValuesWhenAllRetriesFail() throws Exception {
+		TrackingDelayStrategy delayStrategy = new TrackingDelayStrategy();
+		AsyncRetry retry = AsyncRetry.of(AsyncWaitCounter.of(RETRY_COUNT, delayStrategy));
+		List<Integer> expected = IntStream.rangeClosed(1, RETRY_COUNT).boxed().toList();
+
+		CompletableFuture<Object> result = retry.until(() -> {
+			inSupplier.foo();
+			return CompletableFuture.completedFuture(null);
+		}, Objects::nonNull);
+
+		assertNull(result.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
+		verify(inSupplier, times(RETRY_COUNT)).foo();
+		assertThat(delayStrategy.getAttempts(), equalTo(expected));
 	}
 
 	public static class Foo {

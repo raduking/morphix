@@ -15,6 +15,22 @@ import org.morphix.utils.Tests;
  */
 class AsyncWaitTest {
 
+	static class TestAsyncWait implements AsyncWait {
+
+		@Override
+		public boolean keepWaiting() {
+			return false;
+		}
+	}
+
+	@Test
+	void shouldReturnDefaultIntervalAndTimeUnit() {
+		TestAsyncWait asyncWait = new TestAsyncWait();
+
+		assertThat(asyncWait.interval(), equalTo(AsyncWait.Default.INTERVAL));
+		assertThat(asyncWait.timeUnit(), equalTo(AsyncWait.Default.TIME_UNIT));
+	}
+
 	@Test
 	void shouldHaveFunctionalInterfaceAnnotation() {
 		assertTrue(AsyncWait.class.isAnnotationPresent(FunctionalInterface.class));

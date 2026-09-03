@@ -39,12 +39,12 @@ public interface AsyncWait extends Copyable {
 		/**
 		 * Default interval for waiting.
 		 */
-		public static final long INTERVAL = 50;
+		public static final long INTERVAL = 1;
 
 		/**
 		 * Default time unit for waiting.
 		 */
-		public static final TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
+		public static final TimeUnit TIME_UNIT = TimeUnit.SECONDS;
 
 		/**
 		 * Private constructor.

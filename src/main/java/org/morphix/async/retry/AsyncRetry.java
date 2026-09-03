@@ -246,11 +246,13 @@ public class AsyncRetry {
 			if (exitCondition.test(result)) {
 				return CompletableFuture.completedFuture(result);
 			}
-			if (wait.keepWaiting()) {
-				beforeWait.accept(accumulator.lastInformation());
-				return wait.defer().thenCompose(v -> attempt(resultSupplier, exitCondition, afterResult, beforeWait, accumulator, wait));
-			}
-			return accumulator.exhaust(result);
+			beforeWait.accept(accumulator.lastInformation());
+			return wait.defer().thenCompose(v -> {
+				if (wait.keepWaiting()) {
+					return attempt(resultSupplier, exitCondition, afterResult, beforeWait, accumulator, wait);
+				}
+				return accumulator.exhaust(result);
+			});
 		});
 	}
 
