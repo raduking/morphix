@@ -26,6 +26,7 @@ import org.morphix.reflection.Constructors;
  *
  * @author Radu Sebastian LAZIN
  */
+@FunctionalInterface
 public interface AsyncWait extends Copyable {
 
 	/**
@@ -70,15 +71,12 @@ public interface AsyncWait extends Copyable {
 	 */
 	default CompletableFuture<Void> defer() {
 		CompletableFuture<Void> future = new CompletableFuture<>();
-		executor().execute(() -> {
-			try {
-				Thread.sleep(TimeUnit.MILLISECONDS.convert(interval(), timeUnit()));
-				future.complete(null);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				future.completeExceptionally(e);
-			}
-		});
+		try {
+			CompletableFuture.delayedExecutor(interval(), timeUnit(), executor())
+					.execute(() -> future.complete(null));
+		} catch (Exception e) {
+			future.completeExceptionally(e);
+		}
 		return future;
 	}
 

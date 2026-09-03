@@ -191,6 +191,7 @@ class AsyncWaitCounterTest {
 		AsyncWaitCounter waitCounter = AsyncWaitCounter.of(MAX_COUNT, Duration.ZERO);
 
 		waitCounter.start();
+
 		assertTrue(waitCounter.keepWaiting());
 		assertTrue(waitCounter.keepWaiting());
 		assertFalse(waitCounter.keepWaiting());
