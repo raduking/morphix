@@ -1,5 +1,17 @@
 ## Release Notes
 
+`1.0.44`
+
+- Added `Throwables.find(Throwable, Class)` to return the first throwable in a cause chain matching a given type.
+- Added `TypedArgument` record to describe an argument together with its type.
+- Added `TypedArgument.of(Class<?>, Object)` factory method.
+- Added `TypedArguments` record to describe a set of typed arguments for a reflective invocation.
+- Added `TypedArguments.of(TypedArgument...)` and `TypedArguments.of(Class<?>, Object)` factory methods.
+- Added `TypedArguments.types()`, `TypedArguments.values()`, `TypedArguments.isEmpty()` and `TypedArguments.size()`.
+- Added `Libraries.instance(TypedArguments, Supplier<T>, OptionalLibrary<? extends T>...)` to initialize a library instance using typed arguments.
+
+---
+
 `1.0.43`
 
 - Added `AsyncRetry` for asynchronous retry with a fluent policy builder.

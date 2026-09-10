@@ -12,10 +12,13 @@
  */
 package org.morphix.runtime;
 
+import java.lang.reflect.Constructor;
 import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.morphix.lang.JavaArrays;
+import org.morphix.reflection.Constructors;
+import org.morphix.reflection.TypedArguments;
 
 /**
  * Utility interface for initializing libraries based on their presence in the descriptors.
@@ -41,6 +44,32 @@ public interface Libraries {
 			for (OptionalLibrary<? extends T> libraryDescriptor : libraryDescriptors) {
 				if (libraryDescriptor.isPresent()) {
 					return libraryDescriptor.getSpecificInstance();
+				}
+			}
+		}
+		return fallbackSupplier.get();
+	}
+
+	/**
+	 * Initializes and returns an instance of the first available library from the provided descriptors using the given
+	 * typed arguments. If none of the libraries are present, it uses the fallback supplier to provide a default instance.
+	 *
+	 * @param <T> the type of the library instance
+	 *
+	 * @param arguments the typed arguments to be passed to the constructor of the library instance, must not be null
+	 * @param fallbackSupplier the supplier to provide a default instance if no libraries are present, must not be null
+	 * @param descriptors the library descriptors to check for presence
+	 * @return an instance of the first available library or a default instance from the fallback supplier
+	 */
+	@SafeVarargs
+	static <T> T instance(final TypedArguments arguments, final Supplier<T> fallbackSupplier, final OptionalLibrary<? extends T>... descriptors) {
+		Objects.requireNonNull(arguments, "arguments must not be null");
+		Objects.requireNonNull(fallbackSupplier, "fallbackSupplier must not be null");
+		if (JavaArrays.isNotEmpty(descriptors)) {
+			for (OptionalLibrary<? extends T> libraryDescriptor : descriptors) {
+				if (libraryDescriptor.isPresent()) {
+					Constructor<? extends T> constructor = Constructors.Safe.getDeclared(libraryDescriptor.getFacadeClass(), arguments.types());
+					return Constructors.IgnoreAccess.newInstance(constructor, arguments.values());
 				}
 			}
 		}
