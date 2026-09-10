@@ -419,6 +419,100 @@ class ThrowablesTest {
 	}
 
 	@Nested
+	class FindTest {
+
+		@Test
+		void shouldThrowWhenTypeIsNull() {
+			Throwable t = new Throwable();
+			NullPointerException nullPointerException = assertThrows(
+					NullPointerException.class,
+					() -> Throwables.find(t, null));
+
+			assertThat(nullPointerException.getMessage(), equalTo("type cannot be null"));
+		}
+
+		@Test
+		void shouldReturnNullWhenThrowableIsNull() {
+			IllegalArgumentException result = Throwables.find(null, IllegalArgumentException.class);
+
+			assertThat(result, equalTo(null));
+		}
+
+		@Test
+		void shouldReturnRootWhenRootMatches() {
+			IllegalArgumentException throwable = new IllegalArgumentException(MATCH);
+
+			IllegalArgumentException result = Throwables.find(throwable, IllegalArgumentException.class);
+
+			assertThat(result, equalTo(throwable));
+		}
+
+		@Test
+		void shouldReturnCauseWhenCauseMatches() {
+			IllegalArgumentException cause = new IllegalArgumentException(MATCH);
+			Throwable throwable = new RuntimeException("root", cause);
+
+			IllegalArgumentException result = Throwables.find(throwable, IllegalArgumentException.class);
+
+			assertThat(result, equalTo(cause));
+		}
+
+		@Test
+		void shouldReturnFirstMatchWhenMultipleMatch() {
+			IllegalArgumentException leaf = new IllegalArgumentException("leaf");
+			IllegalArgumentException cause = new IllegalArgumentException(MATCH, leaf);
+			Throwable throwable = new RuntimeException("root", cause);
+
+			IllegalArgumentException result = Throwables.find(throwable, IllegalArgumentException.class);
+
+			assertThat(result, equalTo(cause));
+		}
+
+		@Test
+		void shouldReturnSubclassWhenLookingForSupertype() {
+			IllegalArgumentException cause = new IllegalArgumentException(MATCH);
+			Throwable throwable = new Exception("root", cause);
+
+			RuntimeException result = Throwables.find(throwable, RuntimeException.class);
+
+			assertThat(result, equalTo(cause));
+		}
+
+		@Test
+		void shouldReturnNullWhenNoThrowableMatches() {
+			Throwable throwable = new RuntimeException("root", new IllegalStateException("state"));
+
+			IllegalArgumentException result = Throwables.find(throwable, IllegalArgumentException.class);
+
+			assertThat(result, equalTo(null));
+		}
+
+		@Test
+		void shouldReturnNullWhenCauseChainContainsCycleAndNoMatch() {
+			NodeThrowable first = new NodeThrowable("first");
+			NodeThrowable second = new NodeThrowable("second");
+			first.cause = second;
+			second.cause = first;
+
+			IllegalArgumentException result = Throwables.find(first, IllegalArgumentException.class);
+
+			assertThat(result, equalTo(null));
+		}
+
+		@Test
+		void shouldReturnMatchWhenCauseChainContainsCycle() {
+			NodeThrowable first = new NodeThrowable("first");
+			NodeThrowable second = new NodeThrowable(MATCH);
+			first.cause = second;
+			second.cause = first;
+
+			NodeThrowable result = Throwables.find(first, NodeThrowable.class);
+
+			assertThat(result, equalTo(first));
+		}
+	}
+
+	@Nested
 	class UnwrapTest {
 
 		@Test

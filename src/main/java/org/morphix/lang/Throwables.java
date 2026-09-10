@@ -176,4 +176,37 @@ public final class Throwables {
 		} while (fast != slow);
 		return fast;
 	}
+
+	/**
+	 * Returns the first throwable in the cause chain that is an instance of the given type, including the given throwable
+	 * itself. If the chain is cyclic and no match is found, {@code null} is returned to avoid an infinite loop.
+	 *
+	 * @param <T> type of throwable to find
+	 *
+	 * @param throwable throwable to inspect
+	 * @param typeToFind throwable type to find
+	 * @return the first matching throwable, or {@code null} when the throwable is {@code null} or no match is found
+	 */
+	public static <T extends Throwable> T find(final Throwable throwable, final Class<T> typeToFind) {
+		Objects.requireNonNull(typeToFind, "typeToFind cannot be null");
+		if (null == throwable) {
+			return null;
+		}
+		// use 2 pointers to detect cycles in the cause chain.
+		Throwable slow = throwable;
+		Throwable fast = throwable;
+		do {
+			for (int i = 0; i < 2; ++i) {
+				if (typeToFind.isInstance(fast)) {
+					return typeToFind.cast(fast);
+				}
+				fast = fast.getCause();
+				if (null == fast) {
+					return null;
+				}
+			}
+			slow = slow.getCause();
+		} while (fast != slow);
+		return null;
+	}
 }
