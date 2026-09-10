@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.45`
+
+---
+
 `1.0.44`
 
 - Added `Throwables.find(Throwable, Class)` to return the first throwable in a cause chain matching a given type.
