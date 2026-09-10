@@ -422,13 +422,13 @@ class ThrowablesTest {
 	class FindTest {
 
 		@Test
-		void shouldThrowWhenTypeIsNull() {
+		void shouldThrowWhenTypeToFindIsNull() {
 			Throwable t = new Throwable();
 			NullPointerException nullPointerException = assertThrows(
 					NullPointerException.class,
 					() -> Throwables.find(t, null));
 
-			assertThat(nullPointerException.getMessage(), equalTo("type cannot be null"));
+			assertThat(nullPointerException.getMessage(), equalTo("typeToFind cannot be null"));
 		}
 
 		@Test
