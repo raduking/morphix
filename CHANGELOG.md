@@ -2,6 +2,8 @@
 
 `1.0.45`
 
+- Added `LibraryVersion` to encapsulate reading, comparing, and verifying a library's runtime version (via `Package.getImplementationVersion()` of an anchor class).
+
 ---
 
 `1.0.44`
