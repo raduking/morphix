@@ -117,6 +117,42 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	}
 
 	/**
+	 * Builds a {@link LibraryVersion} from the given semantic version components.
+	 *
+	 * @param name the library name
+	 * @param major the major version component
+	 * @param minor the minor version component
+	 * @param patch the patch version component
+	 * @return a new {@link LibraryVersion}
+	 */
+	public static LibraryVersion of(final String name, final int major, final int minor, final int patch) {
+		return new LibraryVersion(name, major + "." + minor + "." + patch);
+	}
+
+	/**
+	 * Builds a {@link LibraryVersion} from the given semantic version components.
+	 *
+	 * @param name the library name
+	 * @param major the major version component
+	 * @param minor the minor version component
+	 * @return a new {@link LibraryVersion}
+	 */
+	public static LibraryVersion of(final String name, final int major, final int minor) {
+		return new LibraryVersion(name, major + "." + minor);
+	}
+
+	/**
+	 * Builds a {@link LibraryVersion} from the given semantic version components.
+	 *
+	 * @param name the library name
+	 * @param major the major version component
+	 * @return a new {@link LibraryVersion}
+	 */
+	public static LibraryVersion of(final String name, final int major) {
+		return new LibraryVersion(name, Integer.toString(major));
+	}
+
+	/**
 	 * Returns the library name.
 	 *
 	 * @return the library name

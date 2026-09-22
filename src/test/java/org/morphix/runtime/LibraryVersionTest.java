@@ -70,6 +70,39 @@ class LibraryVersionTest {
 
 			assertThat(libraryVersion.value(), is(nullValue()));
 		}
+
+		@Test
+		void shouldBuildVersionFromMajorMinorAndPatch() {
+			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, 5, 4, 3);
+
+			assertThat(libraryVersion.getName(), is(LIBRARY_NAME));
+			assertThat(libraryVersion.value(), is("5.4.3"));
+			assertThat(libraryVersion.major(), is(5));
+			assertThat(libraryVersion.minor(), is(4));
+			assertThat(libraryVersion.patch(), is(3));
+		}
+
+		@Test
+		void shouldBuildVersionFromMajorAndMinor() {
+			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, 5, 4);
+
+			assertThat(libraryVersion.getName(), is(LIBRARY_NAME));
+			assertThat(libraryVersion.value(), is("5.4"));
+			assertThat(libraryVersion.major(), is(5));
+			assertThat(libraryVersion.minor(), is(4));
+			assertThat(libraryVersion.patch(), is(0));
+		}
+
+		@Test
+		void shouldBuildVersionFromMajorOnly() {
+			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, 5);
+
+			assertThat(libraryVersion.getName(), is(LIBRARY_NAME));
+			assertThat(libraryVersion.value(), is("5"));
+			assertThat(libraryVersion.major(), is(5));
+			assertThat(libraryVersion.minor(), is(0));
+			assertThat(libraryVersion.patch(), is(0));
+		}
 	}
 
 	@Nested
