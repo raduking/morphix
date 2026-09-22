@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import org.morphix.lang.JavaArrays;
 import org.morphix.lang.Messages;
 import org.morphix.reflection.Classes;
 
@@ -67,10 +68,10 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	protected LibraryVersion(final String name, final String version) {
 		this.name = name;
 		this.version = version;
-		String[] parts = null != version ? version.split("\\.") : new String[0];
-		this.major = parts.length > 0 ? parseVersionPart(parts[0]) : 0;
-		this.minor = parts.length > 1 ? parseVersionPart(parts[1]) : 0;
-		this.patch = parts.length > 2 ? parseVersionPart(parts[2]) : 0;
+		String[] parts = null != version ? version.split("\\.") : JavaArrays.empty(String.class);
+		this.major = parseVersionPart(parts, 0);
+		this.minor = parseVersionPart(parts, 1);
+		this.patch = parseVersionPart(parts, 2);
 	}
 
 	/**
@@ -289,5 +290,17 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 			++end;
 		}
 		return end > 0 ? Integer.parseInt(part.substring(0, end)) : 0;
+	}
+
+	/**
+	 * Parses the leading digits of a version component at the given index in a dot separated version string, ignoring any
+	 * non-numeric suffix. Missing trailing components are treated as zero.
+	 *
+	 * @param parts the dot separated version string split into components
+	 * @param index the index of the component to parse
+	 * @return the numeric value of the leading digits, or zero if there are none or if the component is missing
+	 */
+	private static int parseVersionPart(final String[] parts, final int index) {
+		return parts.length > index ? parseVersionPart(parts[index]) : 0;
 	}
 }

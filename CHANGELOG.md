@@ -3,6 +3,7 @@
 `1.0.45`
 
 - Added `LibraryVersion` to encapsulate reading, comparing, and verifying a library's runtime version (via `Package.getImplementationVersion()` of an anchor class).
+- Added `JavaArrays.empty(Class)` utility method that returns an empty array of the given component type.
 
 ---
 

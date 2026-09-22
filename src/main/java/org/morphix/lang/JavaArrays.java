@@ -32,9 +32,8 @@ public interface JavaArrays {
 	 * @param componentType due to type erasure this information is needed to create an empty array
 	 * @return the given array if not null, empty array otherwise
 	 */
-	@SuppressWarnings("unchecked")
 	static <T> T[] safe(final T[] array, final Class<T> componentType) {
-		return null == array ? (T[]) Array.newInstance(componentType, 0) : array;
+		return null == array ? empty(componentType) : array;
 	}
 
 	/**
@@ -111,5 +110,16 @@ public interface JavaArrays {
 	 */
 	static <T> boolean isNotEmpty(final T[] array) {
 		return !isEmpty(array);
+	}
+
+	/**
+	 * Creates and returns an empty array of the specified class type.
+	 *
+	 * @param componentType the class type of the array elements
+	 * @return an empty array of the specified class type
+	 */
+	@SuppressWarnings("unchecked")
+	static <T> T[] empty(final Class<T> componentType) {
+		return (T[]) Array.newInstance(componentType, 0);
 	}
 }
