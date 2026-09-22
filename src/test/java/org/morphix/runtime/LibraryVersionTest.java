@@ -40,21 +40,21 @@ class LibraryVersionTest {
 		void shouldReturnVersionFromAnchorClassPackage() {
 			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, LibraryVersion.class);
 
-			assertThat(libraryVersion.getVersion(), is(LibraryVersion.class.getPackage().getImplementationVersion()));
+			assertThat(libraryVersion.value(), is(LibraryVersion.class.getPackage().getImplementationVersion()));
 		}
 
 		@Test
 		void shouldReturnVersionFromAnchorClassName() {
 			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, LibraryVersion.class.getName());
 
-			assertThat(libraryVersion.getVersion(), is(LibraryVersion.class.getPackage().getImplementationVersion()));
+			assertThat(libraryVersion.value(), is(LibraryVersion.class.getPackage().getImplementationVersion()));
 		}
 
 		@Test
 		void shouldReturnNullVersionWhenAnchorClassIsNotPresent() {
 			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, LibraryVersion.class.getName() + "$NonExistentClass");
 
-			assertThat(libraryVersion.getVersion(), is(nullValue()));
+			assertThat(libraryVersion.value(), is(nullValue()));
 		}
 
 		@Test
@@ -68,7 +68,93 @@ class LibraryVersionTest {
 		void shouldReturnNullVersionWhenAnchorPackageIsNull() {
 			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, (Package) null);
 
-			assertThat(libraryVersion.getVersion(), is(nullValue()));
+			assertThat(libraryVersion.value(), is(nullValue()));
+		}
+	}
+
+	@Nested
+	class SemanticVersionComponentsTests {
+
+		@Test
+		void shouldParseMajorMinorAndPatch() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.4.3");
+
+			assertThat(libraryVersion.major(), is(5));
+			assertThat(libraryVersion.minor(), is(4));
+			assertThat(libraryVersion.patch(), is(3));
+		}
+
+		@Test
+		void shouldKeepOriginalVersionString() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.4.3");
+
+			assertThat(libraryVersion.value(), is("5.4.3"));
+		}
+
+		@Test
+		void shouldTreatMissingMinorAndPatchAsZero() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5");
+
+			assertThat(libraryVersion.major(), is(5));
+			assertThat(libraryVersion.minor(), is(0));
+			assertThat(libraryVersion.patch(), is(0));
+		}
+
+		@Test
+		void shouldTreatMissingPatchAsZero() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.4");
+
+			assertThat(libraryVersion.major(), is(5));
+			assertThat(libraryVersion.minor(), is(4));
+			assertThat(libraryVersion.patch(), is(0));
+		}
+
+		@Test
+		void shouldIgnoreNonNumericSuffixOnPatch() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.4.3-SNAPSHOT");
+
+			assertThat(libraryVersion.patch(), is(3));
+		}
+
+		@Test
+		void shouldReturnZeroForAllComponentsWhenVersionCannotBeDetermined() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+
+			assertThat(libraryVersion.major(), is(0));
+			assertThat(libraryVersion.minor(), is(0));
+			assertThat(libraryVersion.patch(), is(0));
+		}
+	}
+
+	@Nested
+	class ToStringTests {
+
+		@Test
+		void shouldReturnSemanticVersionString() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.4.3");
+
+			assertThat(libraryVersion.toString(), is("5.4.3"));
+		}
+
+		@Test
+		void shouldPadMissingComponentsWithZero() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5");
+
+			assertThat(libraryVersion.toString(), is("5.0.0"));
+		}
+
+		@Test
+		void shouldStripNonNumericSuffixFromComponents() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.4.3-SNAPSHOT");
+
+			assertThat(libraryVersion.toString(), is("5.4.3"));
+		}
+
+		@Test
+		void shouldReturnAllZerosWhenVersionCannotBeDetermined() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+
+			assertThat(libraryVersion.toString(), is("0.0.0"));
 		}
 	}
 
@@ -273,6 +359,15 @@ class LibraryVersionTest {
 
 			assertThat(undetermined.compareTo(determined), is(lessThan(0)));
 			assertThat(determined.compareTo(undetermined), is(greaterThan(0)));
+		}
+
+		@Test
+		void shouldNotNecessarilyBeConsistentWithEquals() {
+			LibraryVersion version1 = new LibraryVersion(LIBRARY_NAME, "5.5");
+			LibraryVersion version2 = new LibraryVersion(LIBRARY_NAME, "5.5.0");
+
+			assertThat(version1.compareTo(version2), is(0));
+			assertThat(version1, is(not(version2)));
 		}
 	}
 }

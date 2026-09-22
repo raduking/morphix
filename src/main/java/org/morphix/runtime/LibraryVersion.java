@@ -14,6 +14,7 @@ package org.morphix.runtime;
 
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import org.morphix.lang.Messages;
 import org.morphix.reflection.Classes;
@@ -25,8 +26,8 @@ import org.morphix.reflection.Classes;
  * the one the depending code actually requires at runtime.
  * <p>
  * If the runtime version cannot be determined (e.g. missing manifest information, or the anchor class is not present on
- * the classpath), {@link #getVersion()} returns {@code null} and
- * {@link #isAtLeast(String)}/{@link #verifyAtLeast(String)} treat the check as unenforceable rather than failing.
+ * the classpath), {@link #value()} returns {@code null} and {@link #isAtLeast(String)}/{@link #verifyAtLeast(String)}
+ * treat the check as unenforceable rather than failing.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -43,6 +44,21 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	private final String version;
 
 	/**
+	 * The major version component, as per semantic versioning. Zero if the version could not be determined.
+	 */
+	private final int major;
+
+	/**
+	 * The minor version component, as per semantic versioning. Zero if the version could not be determined.
+	 */
+	private final int minor;
+
+	/**
+	 * The patch version component, as per semantic versioning. Zero if the version could not be determined.
+	 */
+	private final int patch;
+
+	/**
 	 * Constructor with the library name and its detected runtime version.
 	 *
 	 * @param name the library name
@@ -51,6 +67,10 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	protected LibraryVersion(final String name, final String version) {
 		this.name = name;
 		this.version = version;
+		String[] parts = null != version ? version.split("\\.") : new String[0];
+		this.major = parts.length > 0 ? parseVersionPart(parts[0]) : 0;
+		this.minor = parts.length > 1 ? parseVersionPart(parts[1]) : 0;
+		this.patch = parts.length > 2 ? parseVersionPart(parts[2]) : 0;
 	}
 
 	/**
@@ -109,8 +129,35 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 *
 	 * @return the detected runtime version, or {@code null} if it could not be determined
 	 */
-	public String getVersion() {
+	public String value() {
 		return version;
+	}
+
+	/**
+	 * Returns the major version component, as per semantic versioning.
+	 *
+	 * @return the major version component, or zero if the version could not be determined
+	 */
+	public int major() {
+		return major;
+	}
+
+	/**
+	 * Returns the minor version component, as per semantic versioning.
+	 *
+	 * @return the minor version component, or zero if the version could not be determined
+	 */
+	public int minor() {
+		return minor;
+	}
+
+	/**
+	 * Returns the patch version component, as per semantic versioning.
+	 *
+	 * @return the patch version component, or zero if the version could not be determined
+	 */
+	public int patch() {
+		return patch;
 	}
 
 	/**
@@ -132,16 +179,33 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * @throws IllegalStateException if the detected runtime version is older than the minimum version
 	 */
 	public void verifyAtLeast(final String minimumVersion) {
+		verifyAtLeast(minimumVersion, message -> {
+			throw new IllegalStateException(message);
+		});
+	}
+
+	/**
+	 * Verifies that the detected runtime version is at least the given minimum version. If the runtime version could not be
+	 * determined the check is skipped since it cannot be reliably enforced.
+	 *
+	 * @param minimumVersion the minimum required version
+	 * @param onError a callback to handle the error message if the detected runtime version is older than the minimum
+	 *     version
+	 */
+	public void verifyAtLeast(final String minimumVersion, final Consumer<String> onError) {
 		if (!isAtLeast(minimumVersion)) {
-			throw new IllegalStateException(
-					Messages.message("Unsupported {} version: {}, minimum required version is {}", name, version, minimumVersion));
+			onError.accept(Messages.message("Unsupported {} version: {}, minimum required version is {}", name, version, minimumVersion));
 		}
 	}
 
 	/**
 	 * Compares this library version with another by their detected versions, numerically (see
-	 * {@link #compare(String, String)}), and by name if the detected versions are equal. Undetermined versions and names
-	 * ({@code null}) sort first. The comparison is consistent with {@link #equals(Object)}.
+	 * {@link #compare(String, String)}), and by name if the detected versions compare as equal. Undetermined versions and
+	 * names ({@code null}) sort first.
+	 * <p>
+	 * This ordering is <b>not</b> necessarily consistent with {@link #equals(Object)}: {@link #equals(Object)} compares the
+	 * raw detected version strings, while this method compares them numerically, so e.g. {@code "5.5"} and {@code "5.5.0"}
+	 * compare as equal here even though they are not {@link #equals(Object)}.
 	 *
 	 * @param that the other library version
 	 * @return a negative number if this library version is older than the other, a positive number if it is newer, or zero
@@ -177,6 +241,16 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	@Override
 	public int hashCode() {
 		return Objects.hash(name, version);
+	}
+
+	/**
+	 * Returns the semantic version representation of this library version as {@code <major>.<minor>.<patch>}.
+	 *
+	 * @see Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return major + "." + minor + "." + patch;
 	}
 
 	/**
