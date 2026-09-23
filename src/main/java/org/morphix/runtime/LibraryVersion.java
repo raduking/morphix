@@ -18,7 +18,6 @@ import java.util.function.Consumer;
 
 import org.morphix.lang.JavaArrays;
 import org.morphix.lang.Messages;
-import org.morphix.reflection.Classes;
 
 /**
  * Represents the runtime version of a library, as reported by the {@linkplain Package#getImplementationVersion()
@@ -104,16 +103,14 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	}
 
 	/**
-	 * Builds a {@link LibraryVersion} by reading the implementation version from the package of the class with the given
-	 * name. If the class cannot be loaded the resulting version is {@code null}.
+	 * Builds a {@link LibraryVersion} from the given version string.
 	 *
 	 * @param name the library name
-	 * @param anchorClassName the fully qualified name of a class belonging to the library
+	 * @param version the version string, may be {@code null} if the version could not be determined
 	 * @return a new {@link LibraryVersion}
 	 */
-	public static LibraryVersion of(final String name, final String anchorClassName) {
-		Class<?> anchorClass = Classes.Safe.getOne(anchorClassName);
-		return of(name, anchorClass);
+	public static LibraryVersion of(final String name, final String version) {
+		return new LibraryVersion(name, version);
 	}
 
 	/**
@@ -126,7 +123,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * @return a new {@link LibraryVersion}
 	 */
 	public static LibraryVersion of(final String name, final int major, final int minor, final int patch) {
-		return new LibraryVersion(name, major + "." + minor + "." + patch);
+		return of(name, major + "." + minor + "." + patch);
 	}
 
 	/**
@@ -138,7 +135,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * @return a new {@link LibraryVersion}
 	 */
 	public static LibraryVersion of(final String name, final int major, final int minor) {
-		return new LibraryVersion(name, major + "." + minor);
+		return of(name, major + "." + minor);
 	}
 
 	/**
@@ -149,7 +146,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * @return a new {@link LibraryVersion}
 	 */
 	public static LibraryVersion of(final String name, final int major) {
-		return new LibraryVersion(name, Integer.toString(major));
+		return of(name, Integer.toString(major));
 	}
 
 	/**
@@ -209,6 +206,17 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	}
 
 	/**
+	 * Checks whether the detected runtime version is at least the given minimum version. If the runtime version could not
+	 * be determined the check cannot be enforced and this method returns {@code true}.
+	 *
+	 * @param minimumVersion the minimum required version
+	 * @return true if the runtime version is at least the minimum version, or if it could not be determined
+	 */
+	public boolean isAtLeast(final LibraryVersion minimumVersion) {
+		return compareTo(minimumVersion) >= 0;
+	}
+
+	/**
 	 * Verifies that the detected runtime version is at least the given minimum version. If the runtime version could not be
 	 * determined the check is skipped since it cannot be reliably enforced.
 	 *
@@ -226,10 +234,37 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * determined the check is skipped since it cannot be reliably enforced.
 	 *
 	 * @param minimumVersion the minimum required version
+	 * @throws IllegalStateException if the detected runtime version is older than the minimum version
+	 */
+	public void verifyAtLeast(final LibraryVersion minimumVersion) {
+		verifyAtLeast(minimumVersion, message -> {
+			throw new IllegalStateException(message);
+		});
+	}
+
+	/**
+	 * Verifies that the detected runtime version is at least the given minimum version. If the runtime version could not be
+	 * determined the check is skipped since it cannot be reliably enforced.
+	 *
+	 * @param minimumVersion the minimum required version
 	 * @param onError a callback to handle the error message if the detected runtime version is older than the minimum
 	 *     version
 	 */
 	public void verifyAtLeast(final String minimumVersion, final Consumer<String> onError) {
+		if (!isAtLeast(minimumVersion)) {
+			onError.accept(Messages.message("Unsupported {} version: {}, minimum required version is {}", name, version, minimumVersion));
+		}
+	}
+
+	/**
+	 * Verifies that the detected runtime version is at least the given minimum version. If the runtime version could not be
+	 * determined the check is skipped since it cannot be reliably enforced.
+	 *
+	 * @param minimumVersion the minimum required version
+	 * @param onError a callback to handle the error message if the detected runtime version is older than the minimum
+	 *     version
+	 */
+	public void verifyAtLeast(final LibraryVersion minimumVersion, final Consumer<String> onError) {
 		if (!isAtLeast(minimumVersion)) {
 			onError.accept(Messages.message("Unsupported {} version: {}, minimum required version is {}", name, version, minimumVersion));
 		}

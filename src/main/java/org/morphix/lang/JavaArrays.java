@@ -115,6 +115,8 @@ public interface JavaArrays {
 	/**
 	 * Creates and returns an empty array of the specified class type.
 	 *
+	 * @param <T> the component type of the array
+	 *
 	 * @param componentType the class type of the array elements
 	 * @return an empty array of the specified class type
 	 */

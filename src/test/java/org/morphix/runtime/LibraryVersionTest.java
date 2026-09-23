@@ -44,15 +44,19 @@ class LibraryVersionTest {
 		}
 
 		@Test
-		void shouldReturnVersionFromAnchorClassName() {
-			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, LibraryVersion.class.getName());
+		void shouldBuildVersionFromString() {
+			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, "5.4.3");
 
-			assertThat(libraryVersion.value(), is(LibraryVersion.class.getPackage().getImplementationVersion()));
+			assertThat(libraryVersion.getName(), is(LIBRARY_NAME));
+			assertThat(libraryVersion.value(), is("5.4.3"));
+			assertThat(libraryVersion.major(), is(5));
+			assertThat(libraryVersion.minor(), is(4));
+			assertThat(libraryVersion.patch(), is(3));
 		}
 
 		@Test
-		void shouldReturnNullVersionWhenAnchorClassIsNotPresent() {
-			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, LibraryVersion.class.getName() + "$NonExistentClass");
+		void shouldReturnNullVersionWhenVersionStringIsNull() {
+			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, (String) null);
 
 			assertThat(libraryVersion.value(), is(nullValue()));
 		}
