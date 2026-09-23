@@ -18,6 +18,7 @@ import java.util.function.Consumer;
 
 import org.morphix.lang.JavaArrays;
 import org.morphix.lang.Messages;
+import org.morphix.lang.Nullables;
 
 /**
  * Represents the runtime version of a library, as reported by the {@linkplain Package#getImplementationVersion()
@@ -67,10 +68,19 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	protected LibraryVersion(final String name, final String version) {
 		this.name = name;
 		this.version = version;
-		String[] parts = null != version ? version.split("\\.") : JavaArrays.empty(String.class);
+		String[] parts = Nullables.apply(version, v -> v.split("\\."), () -> JavaArrays.empty(String.class));
 		this.major = parseVersionPart(parts, 0);
 		this.minor = parseVersionPart(parts, 1);
 		this.patch = parseVersionPart(parts, 2);
+	}
+
+	/**
+	 * Constructor with the library name only, for cases where the version cannot be determined.
+	 *
+	 * @param name the library name
+	 */
+	protected LibraryVersion(final String name) {
+		this(name, null);
 	}
 
 	/**
@@ -81,25 +91,21 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * @return a new {@link LibraryVersion}
 	 */
 	public static LibraryVersion of(final String name, final Class<?> anchorClass) {
-		if (null == anchorClass) {
-			return new LibraryVersion(name, null);
-		}
-		return of(name, anchorClass.getPackage());
+		return Nullables.apply(anchorClass, c -> of(name, c.getPackage()), () -> new LibraryVersion(name));
 	}
 
 	/**
 	 * Builds a {@link LibraryVersion} by reading the implementation version from the given anchor package.
+	 * <p>
+	 * Note: anchor packages are typically obtained from an anchor class, e.g. {@code MyClass.class.getPackage()} and can be
+	 * {@code null} if the class is loaded from a directory instead of a jar (when running from an IDE).
 	 *
 	 * @param name the library name
 	 * @param anchorPackage a package belonging to the library
 	 * @return a new {@link LibraryVersion}
 	 */
 	public static LibraryVersion of(final String name, final Package anchorPackage) {
-		if (null == anchorPackage) {
-			// can happen if the class is loaded from a directory instead of a jar (when running from an IDE)
-			return new LibraryVersion(name, null);
-		}
-		return new LibraryVersion(name, anchorPackage.getImplementationVersion());
+		return Nullables.apply(anchorPackage, p -> new LibraryVersion(name, p.getImplementationVersion()), () -> new LibraryVersion(name));
 	}
 
 	/**
