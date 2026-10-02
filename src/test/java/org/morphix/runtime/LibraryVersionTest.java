@@ -16,10 +16,15 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -91,7 +96,7 @@ class LibraryVersionTest {
 			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, 5, 4);
 
 			assertThat(libraryVersion.getName(), is(LIBRARY_NAME));
-			assertThat(libraryVersion.value(), is("5.4"));
+			assertThat(libraryVersion.value(), is("5.4.0"));
 			assertThat(libraryVersion.major(), is(5));
 			assertThat(libraryVersion.minor(), is(4));
 			assertThat(libraryVersion.patch(), is(0));
@@ -102,10 +107,28 @@ class LibraryVersionTest {
 			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, 5);
 
 			assertThat(libraryVersion.getName(), is(LIBRARY_NAME));
-			assertThat(libraryVersion.value(), is("5"));
+			assertThat(libraryVersion.value(), is("5.0.0"));
 			assertThat(libraryVersion.major(), is(5));
 			assertThat(libraryVersion.minor(), is(0));
 			assertThat(libraryVersion.patch(), is(0));
+		}
+
+		@Test
+		void shouldBuildCanonicalVersionEqualToSameVersionBuiltFromString() {
+			LibraryVersion fromComponents = LibraryVersion.of(LIBRARY_NAME, 5, 4, 3);
+			LibraryVersion fromString = LibraryVersion.of(LIBRARY_NAME, "5.4.3");
+
+			assertThat(fromComponents, is(fromString));
+			assertThat(fromComponents.hashCode(), is(fromString.hashCode()));
+			assertThat(fromComponents.compareTo(fromString), is(0));
+		}
+
+		@Test
+		void shouldKeepDetectedVersionStringWhenBuiltFromString() {
+			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, "5.4.3-SNAPSHOT");
+
+			assertThat(libraryVersion.value(), is("5.4.3-SNAPSHOT"));
+			assertThat(libraryVersion.toString(), is("5.4.3"));
 		}
 	}
 
@@ -196,6 +219,58 @@ class LibraryVersionTest {
 	}
 
 	@Nested
+	class ValueVersusToStringTests {
+
+		@Test
+		void shouldKeepRawVersionWithFewerComponentsAndRenderAllThree() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5");
+
+			assertThat(libraryVersion.value(), is("5"));
+			assertThat(libraryVersion.toString(), is("5.0.0"));
+		}
+
+		@Test
+		void shouldKeepRawVersionWithExtraComponentsAndDropThemWhenRendering() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "1.2.3.4");
+
+			assertThat(libraryVersion.value(), is("1.2.3.4"));
+			assertThat(libraryVersion.toString(), is("1.2.3"));
+		}
+
+		@Test
+		void shouldKeepRawSuffixAndStripItWhenRendering() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.4.3-SNAPSHOT");
+
+			assertThat(libraryVersion.value(), is("5.4.3-SNAPSHOT"));
+			assertThat(libraryVersion.toString(), is("5.4.3"));
+		}
+
+		@Test
+		void shouldReturnNullValueButRenderZerosWhenVersionCannotBeDetermined() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+
+			assertThat(libraryVersion.value(), is(nullValue()));
+			assertThat(libraryVersion.toString(), is("0.0.0"));
+		}
+
+		@Test
+		void shouldHaveValueEqualToToStringWhenBuiltFromComponents() {
+			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, 5, 4, 3);
+
+			assertThat(libraryVersion.value(), is(libraryVersion.toString()));
+		}
+
+		@Test
+		void shouldNotBeEqualWhenRawVersionsDifferButRenderTheSame() {
+			LibraryVersion shorter = new LibraryVersion(LIBRARY_NAME, "5.5");
+			LibraryVersion longer = new LibraryVersion(LIBRARY_NAME, "5.5.0");
+
+			assertThat(shorter.toString(), is(longer.toString()));
+			assertThat(shorter, is(not(longer)));
+		}
+	}
+
+	@Nested
 	class IsAtLeastTests {
 
 		@Test
@@ -217,6 +292,42 @@ class LibraryVersionTest {
 			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.4.4");
 
 			assertThat(libraryVersion.isAtLeast("5.5"), is(false));
+		}
+
+		@Test
+		void shouldReturnTrueWhenVersionIsAtLeastMinimumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+
+			assertThat(libraryVersion.isAtLeast(new LibraryVersion(LIBRARY_NAME, "5.5")), is(true));
+		}
+
+		@Test
+		void shouldReturnTrueWhenVersionIsNewerThanMinimumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+
+			assertThat(libraryVersion.isAtLeast(new LibraryVersion(LIBRARY_NAME, "5.4")), is(true));
+		}
+
+		@Test
+		void shouldReturnFalseWhenVersionIsOlderThanMinimumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.4.4");
+
+			assertThat(libraryVersion.isAtLeast(new LibraryVersion(LIBRARY_NAME, "5.5")), is(false));
+		}
+
+		@Test
+		void shouldConsiderVersionAtLeastMinimumVersionInstanceWhenVersionCannotBeDetermined() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+
+			assertThat(libraryVersion.isAtLeast(new LibraryVersion(LIBRARY_NAME, "999.0")), is(true));
+		}
+
+		@Test
+		void shouldIgnoreMinimumVersionInstanceName() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+
+			assertThat(libraryVersion.isAtLeast(new LibraryVersion("zzz-library", "5.5.1")), is(true));
+			assertThat(libraryVersion.isAtLeast(new LibraryVersion("aaa-library", "5.5.1")), is(true));
 		}
 	}
 
@@ -244,6 +355,60 @@ class LibraryVersionTest {
 			IllegalStateException exception = assertThrows(IllegalStateException.class, () -> libraryVersion.verifyAtLeast("5.5"));
 
 			assertThat(exception.getMessage(), is("Unsupported test-library version: 5.4.4, minimum required version is 5.5"));
+		}
+
+		@Test
+		void shouldNotThrowWhenVersionIsAtLeastMinimumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+
+			assertDoesNotThrow(() -> libraryVersion.verifyAtLeast(new LibraryVersion(LIBRARY_NAME, "5.5")));
+		}
+
+		@Test
+		void shouldNotThrowWhenVersionCannotBeDeterminedForMinimumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+
+			assertDoesNotThrow(() -> libraryVersion.verifyAtLeast(new LibraryVersion(LIBRARY_NAME, "999.0")));
+		}
+
+		@Test
+		void shouldThrowWhenVersionIsOlderThanMinimumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.4.4");
+
+			IllegalStateException exception = assertThrows(IllegalStateException.class,
+					() -> libraryVersion.verifyAtLeast(new LibraryVersion(LIBRARY_NAME, "5.5")));
+
+			assertThat(exception.getMessage(), is("Unsupported test-library version: 5.4.4, minimum required version is 5.5"));
+		}
+
+		@Test
+		void shouldUseErrorCallbackForStringMinimumVersion() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.4.4");
+			List<String> errorMessages = new ArrayList<>();
+
+			libraryVersion.verifyAtLeast("5.5", errorMessages::add);
+
+			assertThat(errorMessages, contains("Unsupported test-library version: 5.4.4, minimum required version is 5.5"));
+		}
+
+		@Test
+		void shouldUseErrorCallbackForMinimumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.4.4");
+			List<String> errorMessages = new ArrayList<>();
+
+			libraryVersion.verifyAtLeast(new LibraryVersion(LIBRARY_NAME, "5.5"), errorMessages::add);
+
+			assertThat(errorMessages, contains("Unsupported test-library version: 5.4.4, minimum required version is 5.5"));
+		}
+
+		@Test
+		void shouldNotUseErrorCallbackWhenVersionCannotBeDetermined() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+			List<String> errorMessages = new ArrayList<>();
+
+			libraryVersion.verifyAtLeast("999.0", errorMessages::add);
+
+			assertThat(errorMessages, is(empty()));
 		}
 	}
 
@@ -283,6 +448,11 @@ class LibraryVersionTest {
 		@Test
 		void shouldCompareEmptyVersionsAsEqual() {
 			assertThat(LibraryVersion.compare("", ""), is(0));
+		}
+
+		@Test
+		void shouldIgnoreComponentsBeyondTheThreeSemanticOnes() {
+			assertThat(LibraryVersion.compare("1.2.3.4", "1.2.3.5"), is(0));
 		}
 	}
 
@@ -331,6 +501,58 @@ class LibraryVersionTest {
 		@Test
 		void shouldNotBeEqualForObjectOfDifferentClass() {
 			assertThat(new LibraryVersion(LIBRARY_NAME, "5.5.1"), is(not(new Object())));
+		}
+
+		@Test
+		void shouldBeEqualForSameRawStringBuiltFromDifferentFactories() {
+			LibraryVersion fromComponents = LibraryVersion.of(LIBRARY_NAME, 5, 4, 3);
+			LibraryVersion fromString = LibraryVersion.of(LIBRARY_NAME, "5.4.3");
+
+			assertThat(fromComponents, is(fromString));
+			assertThat(fromComponents.hashCode(), is(fromString.hashCode()));
+		}
+
+		@Test
+		void shouldNotBeEqualForSameComponentsWithDifferentSuffix() {
+			LibraryVersion release = new LibraryVersion(LIBRARY_NAME, "5.4.3");
+			LibraryVersion snapshot = new LibraryVersion(LIBRARY_NAME, "5.4.3-SNAPSHOT");
+
+			assertThat(release.major(), is(snapshot.major()));
+			assertThat(release.minor(), is(snapshot.minor()));
+			assertThat(release.patch(), is(snapshot.patch()));
+			assertThat(release, is(not(snapshot)));
+		}
+
+		@Test
+		void shouldNotBeEqualForSameComponentsWithMissingComponentInRawString() {
+			LibraryVersion shorter = new LibraryVersion(LIBRARY_NAME, "5.5");
+			LibraryVersion longer = new LibraryVersion(LIBRARY_NAME, "5.5.0");
+
+			assertThat(shorter.major(), is(longer.major()));
+			assertThat(shorter.minor(), is(longer.minor()));
+			assertThat(shorter.patch(), is(longer.patch()));
+			assertThat(shorter, is(not(longer)));
+		}
+
+		@Test
+		void shouldNotBeEqualForSameComponentsWithExtraComponentInRawString() {
+			LibraryVersion shorter = new LibraryVersion(LIBRARY_NAME, "1.2.3");
+			LibraryVersion longer = new LibraryVersion(LIBRARY_NAME, "1.2.3.4");
+
+			assertThat(shorter.major(), is(longer.major()));
+			assertThat(shorter.minor(), is(longer.minor()));
+			assertThat(shorter.patch(), is(longer.patch()));
+			assertThat(shorter, is(not(longer)));
+		}
+
+		@Test
+		void shouldNotBeEqualForMajorOnlyFactoryAndEquivalentRawString() {
+			LibraryVersion fromMajor = LibraryVersion.of(LIBRARY_NAME, 5);
+			LibraryVersion fromString = LibraryVersion.of(LIBRARY_NAME, "5");
+
+			assertThat(fromMajor.value(), is("5.0.0"));
+			assertThat(fromString.value(), is("5"));
+			assertThat(fromMajor, is(not(fromString)));
 		}
 	}
 
@@ -396,6 +618,15 @@ class LibraryVersionTest {
 
 			assertThat(undetermined.compareTo(determined), is(lessThan(0)));
 			assertThat(determined.compareTo(undetermined), is(greaterThan(0)));
+		}
+
+		@Test
+		void shouldSortUndeterminedVersionBeforeZeroVersion() {
+			LibraryVersion undetermined = new LibraryVersion(LIBRARY_NAME, null);
+			LibraryVersion zero = new LibraryVersion(LIBRARY_NAME, "0.0.0");
+
+			assertThat(undetermined.compareTo(zero), is(lessThan(0)));
+			assertThat(zero.compareTo(undetermined), is(greaterThan(0)));
 		}
 
 		@Test

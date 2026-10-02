@@ -35,6 +35,11 @@ import org.morphix.lang.Nullables;
 public class LibraryVersion implements Comparable<LibraryVersion> {
 
 	/**
+	 * The number of semantic version components (major, minor, patch) taken into account when comparing versions.
+	 */
+	private static final int COMPONENTS = 3;
+
+	/**
 	 * The library name, used only for diagnostic messages.
 	 */
 	private final String name;
@@ -72,6 +77,23 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 		this.major = parseVersionPart(parts, 0);
 		this.minor = parseVersionPart(parts, 1);
 		this.patch = parseVersionPart(parts, 2);
+	}
+
+	/**
+	 * Constructor with the library name and its semantic version components. The detected version is the canonical
+	 * {@code <major>.<minor>.<patch>} representation of the given components.
+	 *
+	 * @param name the library name
+	 * @param major the major version component
+	 * @param minor the minor version component
+	 * @param patch the patch version component
+	 */
+	protected LibraryVersion(final String name, final int major, final int minor, final int patch) {
+		this.name = name;
+		this.version = major + "." + minor + "." + patch;
+		this.major = major;
+		this.minor = minor;
+		this.patch = patch;
 	}
 
 	/**
@@ -129,7 +151,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * @return a new {@link LibraryVersion}
 	 */
 	public static LibraryVersion of(final String name, final int major, final int minor, final int patch) {
-		return of(name, major + "." + minor + "." + patch);
+		return new LibraryVersion(name, major, minor, patch);
 	}
 
 	/**
@@ -141,7 +163,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * @return a new {@link LibraryVersion}
 	 */
 	public static LibraryVersion of(final String name, final int major, final int minor) {
-		return of(name, major + "." + minor);
+		return new LibraryVersion(name, major, minor, 0);
 	}
 
 	/**
@@ -152,7 +174,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * @return a new {@link LibraryVersion}
 	 */
 	public static LibraryVersion of(final String name, final int major) {
-		return of(name, Integer.toString(major));
+		return new LibraryVersion(name, major, 0, 0);
 	}
 
 	/**
@@ -165,9 +187,27 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	}
 
 	/**
-	 * Returns the detected runtime version.
+	 * Returns the raw version string of this library version, exactly as it was detected or as it was provided, or
+	 * {@code null} if it could not be determined.
+	 * <p>
+	 * Depending on how this instance was built, this is either:
+	 * <ul>
+	 * <li>the {@linkplain Package#getImplementationVersion() implementation version} reported by the anchor
+	 * {@linkplain #of(String, Class) class} or {@linkplain #of(String, Package) package}, which is {@code null} when it is
+	 * unavailable (e.g. the library was not loaded from a jar, as when running from an IDE);</li>
+	 * <li>the string given to {@link #of(String, String)}, returned verbatim;</li>
+	 * <li>the canonical {@code <major>.<minor>.<patch>} form built by {@link #of(String, int, int, int)} and its overloads,
+	 * which is never {@code null}.</li>
+	 * </ul>
+	 * <p>
+	 * This string is <b>not</b> normalized: it may keep a non-numeric suffix (e.g. {@code "5.4.3-SNAPSHOT"}), may declare
+	 * fewer than three components (e.g. {@code "5"}) or more than the three semantic ones (e.g. {@code "1.2.3.4"}), and
+	 * therefore generally differs from {@link #toString()}. Use it for diagnostics, such as error messages and logging,
+	 * where reporting exactly what is deployed matters. To compare versions use {@link #isAtLeast(String)} or
+	 * {@link #isAtLeast(LibraryVersion)}, which ignore suffixes and missing components.
 	 *
-	 * @return the detected runtime version, or {@code null} if it could not be determined
+	 * @return the raw version string, or {@code null} if it could not be determined
+	 * @see #toString()
 	 */
 	public String value() {
 		return version;
@@ -208,7 +248,11 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * @return true if the runtime version is at least the minimum version, or if it could not be determined
 	 */
 	public boolean isAtLeast(final String minimumVersion) {
-		return null == version || compare(version, minimumVersion) >= 0;
+		if (null == version) {
+			return true;
+		}
+		String[] parts = minimumVersion.split("\\.");
+		return compareTo(parseVersionPart(parts, 0), parseVersionPart(parts, 1), parseVersionPart(parts, 2)) >= 0;
 	}
 
 	/**
@@ -219,7 +263,8 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * @return true if the runtime version is at least the minimum version, or if it could not be determined
 	 */
 	public boolean isAtLeast(final LibraryVersion minimumVersion) {
-		return compareTo(minimumVersion) >= 0;
+		Objects.requireNonNull(minimumVersion, "minimumVersion must not be null");
+		return null == version || compareTo(minimumVersion.major, minimumVersion.minor, minimumVersion.patch) >= 0;
 	}
 
 	/**
@@ -258,7 +303,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 */
 	public void verifyAtLeast(final String minimumVersion, final Consumer<String> onError) {
 		if (!isAtLeast(minimumVersion)) {
-			onError.accept(Messages.message("Unsupported {} version: {}, minimum required version is {}", name, version, minimumVersion));
+			onError.accept(errorMessage(minimumVersion));
 		}
 	}
 
@@ -272,8 +317,29 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 */
 	public void verifyAtLeast(final LibraryVersion minimumVersion, final Consumer<String> onError) {
 		if (!isAtLeast(minimumVersion)) {
-			onError.accept(Messages.message("Unsupported {} version: {}, minimum required version is {}", name, version, minimumVersion));
+			onError.accept(errorMessage(minimumVersionString(minimumVersion)));
 		}
+	}
+
+	/**
+	 * Returns the error message for a failed version check against the given minimum version.
+	 *
+	 * @param minimumVersion the minimum required version, as displayed in the message
+	 * @return the error message
+	 */
+	private String errorMessage(final String minimumVersion) {
+		return Messages.message("Unsupported {} version: {}, minimum required version is {}", name, version, minimumVersion);
+	}
+
+	/**
+	 * Returns the detected version of the given minimum version, falling back to its semantic representation if it cannot
+	 * be determined. Used only for diagnostics, the check itself always compares the already parsed components.
+	 *
+	 * @param minimumVersion the minimum required version, must not be null
+	 * @return the minimum required version as a string
+	 */
+	private static String minimumVersionString(final LibraryVersion minimumVersion) {
+		return Nullables.apply(minimumVersion, LibraryVersion::value, minimumVersion::toString);
 	}
 
 	/**
@@ -291,7 +357,12 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 */
 	@Override
 	public int compareTo(final LibraryVersion that) {
-		int comparison = Objects.compare(this.version, that.version, Comparator.nullsFirst(LibraryVersion::compare));
+		Objects.requireNonNull(that, "that must not be null");
+		boolean thisUndetermined = null == this.version;
+		boolean thatUndetermined = null == that.version;
+		int comparison = thisUndetermined || thatUndetermined
+				? Boolean.compare(thatUndetermined, thisUndetermined)
+				: compareTo(that.major, that.minor, that.patch);
 		if (0 != comparison) {
 			return comparison;
 		}
@@ -299,7 +370,50 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	}
 
 	/**
-	 * @see Object#equals(Object)
+	 * Compares the already parsed version components of this library version with the given ones, ignoring the library
+	 * names and whether the versions could be determined at all.
+	 *
+	 * @param otherMajor the major version component to compare with
+	 * @param otherMinor the minor version component to compare with
+	 * @param otherPatch the patch version component to compare with
+	 * @return a negative number if this library version is older, a positive number if it is newer, or zero if the
+	 * components represent the same version
+	 */
+	private int compareTo(final int otherMajor, final int otherMinor, final int otherPatch) {
+		int comparison = Integer.compare(major, otherMajor);
+		if (0 != comparison) {
+			return comparison;
+		}
+		comparison = Integer.compare(minor, otherMinor);
+		if (0 != comparison) {
+			return comparison;
+		}
+		return Integer.compare(patch, otherPatch);
+	}
+
+	/**
+	 * Checks whether the given object is a {@link LibraryVersion} with the same {@linkplain #getName() library name} and
+	 * the same {@linkplain #value() raw version string} as this one.
+	 * <p>
+	 * Equality is representational, not semantic: it holds only for versions built the same way.
+	 * <p>
+	 * Two instances describing the same semantic version are NOT equal whenever their raw version strings differ:
+	 * <ul>
+	 * <li>{@code "5.5"} and {@code "5.5.0"} — a missing component;</li>
+	 * <li>{@code "5.4.3"} and {@code "5.4.3-SNAPSHOT"} — a non-numeric suffix;</li>
+	 * <li>{@code "1.2.3"} and {@code "1.2.3.4"} — components beyond the three semantic ones;</li>
+	 * <li>{@code "5"} and {@code "5.0.0"} — as built by {@link #of(String, String)} and {@link #of(String, int)}
+	 * respectively.</li>
+	 * </ul>
+	 * The parsed components are never consulted, so {@link #major()}, {@link #minor()} and {@link #patch()} may all agree
+	 * while the two instances are still unequal. Conversely, the library name is compared as well, so the same version of
+	 * two different libraries is never equal.
+	 * <p>
+	 * To compare versions semantically use {@link #compareTo(LibraryVersion)}, which orders them by the parsed components
+	 * and the name and is <b>not</b> consistent with this method, or {@link #isAtLeast(String)} and
+	 * {@link #isAtLeast(LibraryVersion)} to check them against a minimum version.
+	 *
+	 * @see #hashCode()
 	 */
 	@Override
 	public boolean equals(final Object obj) {
@@ -314,6 +428,10 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	}
 
 	/**
+	 * Returns a hash code consistent with {@link #equals(Object)}, derived from the library name and the
+	 * {@linkplain #value() raw version string}. Versions that are unequal only because they were built from differently
+	 * spelled strings still have different hash codes.
+	 *
 	 * @see Object#hashCode()
 	 */
 	@Override
@@ -322,9 +440,21 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	}
 
 	/**
-	 * Returns the semantic version representation of this library version as {@code <major>.<minor>.<patch>}.
+	 * Returns the normalized semantic version of this library version as {@code <major>.<minor>.<patch>}, always with
+	 * exactly three numeric components and never {@code null}.
+	 * <p>
+	 * In contrast to {@link #value()}, any non-numeric suffix is dropped ({@code "5.4.3-SNAPSHOT"} becomes
+	 * {@code "5.4.3"}), missing components are padded with zeros ({@code "5"} becomes {@code "5.0.0"}), and components
+	 * beyond the three semantic ones are dropped ({@code "1.2.3.4"} becomes {@code "1.2.3"}). An undetermined version is
+	 * rendered as {@code "0.0.0"}.
+	 * <p>
+	 * Use it for display and whenever a stable, comparable textual form is needed. Do not use it to test equality:
+	 * {@link #equals(Object)} compares the raw version strings, so {@code "5.5"} and {@code "5.5.0"} are not equal even
+	 * though both render as {@code "5.5.0"}. Use {@link #equals(Object)} to test equality and
+	 * {@link #compareTo(LibraryVersion)} to order versions.
 	 *
 	 * @see Object#toString()
+	 * @see #value()
 	 */
 	@Override
 	public String toString() {
@@ -333,7 +463,8 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 
 	/**
 	 * Compares two dot separated numeric version strings (e.g. {@code "5.2.1"}), ignoring any non-numeric suffix (e.g.
-	 * {@code "-SNAPSHOT"} or {@code "-alpha"}) on each component. Missing trailing components are treated as zero.
+	 * {@code "-SNAPSHOT"} or {@code "-alpha"}) on each component. Missing trailing components are treated as zero, and any
+	 * components beyond the {@value #COMPONENTS} semantic ones (major, minor, patch) are ignored.
 	 *
 	 * @param version1 the first version to compare
 	 * @param version2 the second version to compare
@@ -341,13 +472,21 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * zero if they represent the same version
 	 */
 	public static int compare(final String version1, final String version2) {
-		String[] parts1 = version1.split("\\.");
-		String[] parts2 = version2.split("\\.");
-		int length = Math.max(parts1.length, parts2.length);
-		for (int i = 0; i < length; ++i) {
-			int part1 = i < parts1.length ? parseVersionPart(parts1[i]) : 0;
-			int part2 = i < parts2.length ? parseVersionPart(parts2[i]) : 0;
-			int comparison = Integer.compare(part1, part2);
+		return compare(version1.split("\\."), version2.split("\\."));
+	}
+
+	/**
+	 * Compares the first {@value #COMPONENTS} components of two dot separated version strings, ignoring any non-numeric
+	 * suffix. Missing components are treated as zero.
+	 *
+	 * @param parts1 the first version to compare, split into components
+	 * @param parts2 the second version to compare, split into components
+	 * @return a negative number if {@code parts1} is older than {@code parts2}, a positive number if it is newer, or zero
+	 * if they represent the same version
+	 */
+	private static int compare(final String[] parts1, final String[] parts2) {
+		for (int i = 0; i < COMPONENTS; ++i) {
+			int comparison = Integer.compare(parseVersionPart(parts1, i), parseVersionPart(parts2, i));
 			if (0 != comparison) {
 				return comparison;
 			}
