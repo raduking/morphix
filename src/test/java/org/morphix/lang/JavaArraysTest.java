@@ -13,8 +13,11 @@
 package org.morphix.lang;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.List;
@@ -155,5 +158,36 @@ class JavaArraysTest {
 		boolean result = JavaArrays.isNotEmpty(array);
 
 		assertThat(result, equalTo(false));
+	}
+
+	@Test
+	void shouldReturnEmptyArrayForGivenComponentType() {
+		String[] result = JavaArrays.empty(String.class);
+
+		assertNotNull(result);
+		assertThat(result.length, equalTo(0));
+		assertThat(result.getClass().getComponentType(), equalTo(String.class));
+	}
+
+	@Test
+	void shouldReturnEmptyArrayForCustomComponentType() {
+		JavaArraysTest[] result = JavaArrays.empty(JavaArraysTest.class);
+
+		assertNotNull(result);
+		assertThat(result.length, equalTo(0));
+		assertThat(result.getClass().getComponentType(), equalTo(JavaArraysTest.class));
+	}
+
+	@Test
+	void shouldReturnNewEmptyArrayOnEachCall() {
+		String[] first = JavaArrays.empty(String.class);
+		String[] second = JavaArrays.empty(String.class);
+
+		assertThat(first, not(sameInstance(second)));
+	}
+
+	@Test
+	void shouldThrowWhenComponentTypeIsNull() {
+		assertThrows(NullPointerException.class, () -> JavaArrays.empty(null));
 	}
 }

@@ -1,5 +1,12 @@
 ## Release Notes
 
+`1.0.45`
+
+- Added `LibraryVersion` to encapsulate reading, comparing, and verifying a library's runtime version (via `Package.getImplementationVersion()` of an anchor class).
+- Added `JavaArrays.empty(Class)` utility method that returns an empty array of the given component type.
+
+---
+
 `1.0.44`
 
 - Added `Throwables.find(Throwable, Class)` to return the first throwable in a cause chain matching a given type.
