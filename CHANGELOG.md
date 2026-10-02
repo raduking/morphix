@@ -2,6 +2,9 @@
 
 `1.0.46`
 
+- The build now fails fast, at the `validate` phase, when Maven is running on any JDK other than 21.
+- Upgraded parent to `4.1.1`.
+
 ---
 
 `1.0.45`

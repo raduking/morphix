@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.6</version>
+		<version>4.1.1</version>
 		<relativePath />
 	</parent>
 
@@ -49,6 +49,8 @@
 
 	<properties>
 		<java.version>21</java.version>
+		<!-- Exclusive upper bound of the JDK range enforced by maven-enforcer-plugin, must always be one major above java.version -->
+		<java.version.next>22</java.version.next>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<maven.compiler.release>${java.version}</maven.compiler.release>
@@ -144,6 +146,32 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-java-version</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<version>[${java.version},${java.version.next})</version>
+									<message>Morphix must be built with JDK ${java.version}, but Maven is running on
+										JDK ${java.runtime.version}. Switch to a JDK ${java.version} installation before
+										building, otherwise the resulting build is not compatible with the supported
+										runtime.</message>
+								</requireJavaVersion>
+							</rules>
+							<fail>true</fail>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
