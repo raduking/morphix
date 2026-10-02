@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.46`
+
+---
+
 `1.0.45`
 
 - Added `LibraryVersion` to encapsulate reading, comparing, and verifying a library's runtime version (via `Package.getImplementationVersion()` of an anchor class).
