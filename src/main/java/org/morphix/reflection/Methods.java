@@ -514,19 +514,30 @@ public interface Methods {
 		/**
 		 * Invokes all methods that are annotated with the given annotation. The annotated method should have no parameters and
 		 * should return <code>void</code>
+		 * <p>
+		 * Note: if the object supplied is a {@link Class} then there is no instance to invoke on, so only the annotated
+		 * {@code static} methods are invoked and the annotated instance methods are skipped. This mirrors
+		 * {@link Fields.Safe#get(Object, String)}, where a {@link Class} argument also selects the static members.
+		 * <p>
+		 * Note: this method does not reach the methods declared by the interfaces of the class, use
+		 * {@link Complete#getAllDeclaredInHierarchy(Class, Set)} based variants if the interface hierarchy is needed.
 		 *
 		 * @param <T> object type
 		 * @param <A> annotation type
 		 *
-		 * @param obj object on which to invoke the methods
+		 * @param obj object on which to invoke the methods, or the {@link Class} declaring them
 		 * @param annotationClass annotation class
 		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, A extends Annotation> void invokeWithAnnotation(final T obj, final Class<A> annotationClass) {
 			Class<?> cls = Classes.getFrom(obj);
 			List<Method> methods = Methods.getAllDeclaredInHierarchy(cls, MemberPredicates.withAnnotation(annotationClass));
+			// when obj is the class itself there is no instance, so only its static methods can be invoked
+			boolean instanceAvailable = obj != cls;
 			for (Method method : methods) {
-				IgnoreAccess.invoke(method, obj);
+				if (instanceAvailable || JavaModifier.STATIC.isPresentOn(method)) {
+					IgnoreAccess.invoke(method, obj);
+				}
 			}
 		}
 

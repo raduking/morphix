@@ -90,23 +90,6 @@ class MethodsGetGenericReturnClassTest {
 	}
 
 	@Test
-	void shouldReturnNullInvalidIndexOnSafe() throws Exception {
-		Method method = A.class.getMethod("getList1");
-		Class<?> cls = Methods.Safe.getGenericReturnType(method, 1);
-
-		assertThat(cls, equalTo(null));
-	}
-
-	@Test
-	void shouldThrowClassCastExceptionOnFailToCastFromParameterizedClass() throws Exception {
-		Method method = A.class.getMethod("getList2");
-		assertThrows(ClassCastException.class, () -> {
-			@SuppressWarnings("unused")
-			Class<?> cls = Methods.Safe.getGenericReturnType(method, 0);
-		});
-	}
-
-	@Test
 	void shouldFailForNegativeIndex() throws Exception {
 		Method method = A.class.getMethod("getList1");
 

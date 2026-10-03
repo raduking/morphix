@@ -54,6 +54,66 @@ class ListsTest {
 	}
 
 	@Test
+	void shouldReturnAMutableListWithTheGivenElementsOnMutableListOf() {
+		List<String> list = Lists.mutableListOf("a", "b", "c");
+
+		assertThat(list, contains("a", "b", "c"));
+	}
+
+	@Test
+	void shouldReturnAnEmptyMutableListOnMutableListOfWithoutElements() {
+		List<String> list = Lists.mutableListOf();
+
+		list.add("a");
+
+		assertThat(list, contains("a"));
+	}
+
+	@Test
+	void shouldReturnAnEmptyMutableListOnMutableListOfWhenTheArrayIsNull() {
+		List<String> list = Lists.mutableListOf((String[]) null);
+
+		list.add("a");
+
+		assertThat(list, contains("a"));
+	}
+
+	@Test
+	void shouldNotBeAffectedByLaterChangesToTheSourceArrayOnMutableListOf() {
+		String[] array = { "a", "b" };
+
+		List<String> list = Lists.mutableListOf(array);
+		array[0] = "changed";
+
+		assertThat(list, contains("a", "b"));
+	}
+
+	@Test
+	void shouldReturnAMutableLinkedListWithTheGivenElements() {
+		List<String> list = Lists.mutableLinkedListOf("a", "b", "c");
+
+		assertThat(list, contains("a", "b", "c"));
+	}
+
+	@Test
+	void shouldReturnAnEmptyMutableLinkedListWhenNoElementsAreGiven() {
+		List<String> list = Lists.mutableLinkedListOf();
+
+		list.addFirst("a");
+
+		assertThat(list, contains("a"));
+	}
+
+	@Test
+	void shouldReturnAnEmptyMutableLinkedListWhenTheArrayIsNull() {
+		List<String> list = Lists.mutableLinkedListOf((String[]) null);
+
+		list.addFirst("a");
+
+		assertThat(list, contains("a"));
+	}
+
+	@Test
 	void shouldReturnTheFirstElementFromAList() {
 		List<Integer> list = List.of(1, 2, 3);
 

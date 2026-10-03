@@ -15,6 +15,7 @@ package org.morphix.lang.collections;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -73,6 +74,46 @@ public interface Lists {
 	@SafeVarargs
 	static <T> List<T> asList(final T... a) {
 		return null != a ? List.of(a) : Collections.emptyList();
+	}
+
+	/**
+	 * Creates a mutable list with the given elements, in the order they are given.
+	 * <p>
+	 * The counterpart of {@link List#of(Object...)}, which returns an immutable list.
+	 *
+	 * @param <T> element type
+	 *
+	 * @param elements the elements to add in the list
+	 * @return a mutable list with the given elements
+	 */
+	@SafeVarargs
+	static <T> List<T> mutableListOf(final T... elements) {
+		List<T> list = new ArrayList<>(null != elements ? elements.length : 0);
+		if (null != elements) {
+			Collections.addAll(list, elements);
+		}
+		return list;
+	}
+
+	/**
+	 * Creates a mutable linked list with the given elements, in the order they are given.
+	 * <p>
+	 * The counterpart of {@link List#of(Object...)}, which returns an immutable list, and a linked list alternative to
+	 * {@link #mutableListOf(Object...)} for cases where prepend operations (such as {@link LinkedList#addFirst(Object)}) or
+	 * iterator performance characteristics matter.
+	 *
+	 * @param <T> element type
+	 *
+	 * @param elements the elements to add in the list
+	 * @return a mutable linked list with the given elements
+	 */
+	@SafeVarargs
+	static <T> List<T> mutableLinkedListOf(final T... elements) {
+		List<T> list = new LinkedList<>();
+		if (null != elements) {
+			Collections.addAll(list, elements);
+		}
+		return list;
 	}
 
 	/**

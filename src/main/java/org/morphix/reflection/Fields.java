@@ -131,11 +131,11 @@ public interface Fields {
 	 */
 	static List<Field> filter(final List<Field> fields, final Predicate<Field> predicate) {
 		List<Field> fieldsMatchingPredicate = new ArrayList<>(fields.size());
-		for (Field field : fields) {
+		fields.forEach(field -> {
 			if (predicate.test(field)) {
 				fieldsMatchingPredicate.add(field);
 			}
-		}
+		});
 		return fieldsMatchingPredicate;
 	}
 

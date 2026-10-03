@@ -8,28 +8,23 @@
 - Fixed `ExtendedFields.findAllNonStatic` returning `static` getters as instance properties.
 - Added `Annotations.getInHierarchy(Method, Class)` to read an annotation from the nearest declaration of a method, in its class and interface hierarchy.
 - Added `Interfaces.getAll(Class)` to return all the interfaces implemented directly or indirectly by a class.
-- Added `Classes.getCanonicalName(Class)` to return the canonical name of a class, null if the class is null.
+- Added `Classes.getCanonicalName(Class)` to return the canonical name of a class, `null` if the class is null.
 - Added `Classes.getCanonicalName(Object)` to return the canonical name of the object's class, or of the object itself when it is a `Class`.
 - Added `Classes.getCanonicalName(Method, Object)` to return the class name used in error messages when invoking a method.
-- Added `Classes.Safe.getCanonicalName(Class)` to return the canonical name of a class, null if the class is null.
+- Added `Classes.Safe.getCanonicalName(Class)` to return the canonical name of a class, `null` if the class is null.
 - Added `Classes.Safe.getCanonicalName(Object)` to return the canonical name of the object's class, or of the object itself when it is a `Class`.
 - Added `Classes.Safe.getCanonicalName(Method, Object)` to return the class name used in error messages when invoking a method.
-- Fixed `Fields.Safe.getByPath` throwing a `ReflectionException` instead of returning null for a missing single segment path.
+- Fixed `Fields.Safe.getByPath` throwing a `ReflectionException` instead of returning `null` for a missing single segment path.
 - Changed `Fields.Safe.getByPath` to read the field directly instead of going through its getter, for paths with any number of segments.
-- Fixed `Fields.getAllDeclaredInHierarchy(Class)` returning no fields at all when given an interface, since interfaces have no super class.
-- Fixed `Methods.getAllDeclaredInHierarchy(Class)` returning no methods at all when given an interface, since interfaces have no super class.
-- Fixed `Methods.getAllDeclaredInHierarchy(Class, Predicate)` returning no methods at all when given an interface, since interfaces have no super class.
 - Changed `Methods.getGenericReturnType(Method, int)` to throw a `ReflectionException` for a negative index instead of an `ArrayIndexOutOfBoundsException`.
-- Changed `Methods.getGenericReturnType(Method, int)` to throw a `ReflectionException` for a null method instead of a `NullPointerException`.
-- Changed `Methods.getGenericReturnClass(Method, int)` to throw a `ReflectionException` for a null method instead of a `NullPointerException`.
-- Changed `Methods.Safe.getGenericReturnType(Method, int)` to return null for a negative index instead of an `ArrayIndexOutOfBoundsException`.
-- Changed `Methods.Safe.getGenericReturnType(Method, int)` to return null for a null method instead of a `NullPointerException`.
-- Changed `Methods.getAllDeclared(Class)` to return an empty list for a null class.
-- Changed `Methods.getAllDeclared(Class, Predicate)` to return an empty list for a null class or predicate.
-- Changed `Methods.getAllDeclaredInHierarchy(Class)` to return an empty list for a null class.
-- Changed `Methods.getAllDeclaredInHierarchy(Class, Predicate)` to return an empty list for a null class or predicate.
-- Changed `Methods.getFunctionalInterfaceMethod(Class)` to throw a `ReflectionException` for a null class.
-- Changed `Methods.Safe.getOneDeclaredInHierarchy` to return null for a null class or method name.
+- Changed `Methods.getGenericReturnType(Method, int)` to throw a `ReflectionException` for a `null` method instead of a `NullPointerException`.
+- Changed `Methods.getGenericReturnClass(Method, int)` to throw a `ReflectionException` for a `null` method instead of a `NullPointerException`.
+- Changed `Methods.Safe.getGenericReturnType(Method, int)` to return `null` for a negative index or `null` method.
+- Added `Lists.mutableListOf` to create a mutable list, as the counterpart of the immutable `List.of`.
+- Changed `Methods.getFunctionalInterfaceMethod(Class)` to throw a `ReflectionException` for a `null` class.
+- Changed `Methods.Safe.getOneDeclaredInHierarchy` to return `null` for a `null` class or method name.
+- Changed the return types of the `Fields` collection retrieval methods to be mutable lists.
+- Changed the return types of the `Methods` collection retrieval methods and the semantics of `Methods.IgnoreAccess.invokeWithAnnotation` to be more consistent.
 - Fixed `@Src` being ignored when placed on a super class or interface getter that is overridden without it.
 - Upgraded parent to `4.1.1`.
 - Upgraded `spotless-maven-plugin` to `3.10.3`.
@@ -483,7 +478,7 @@
 - Upgraded `central-publishing-maven-plugin` to `0.9.0`.
 - Moved `Reflection.findSubclass` method to `Classes`.
 - Added `Serializable` to `ObjectConverter` to allow serialization of converters.
-- Added `Nullables.Chain.thenNotNull` to chain null checks.
+- Added `Nullables.Chain.thenNotNull` to chain `null` checks.
 
 ---
 
@@ -496,7 +491,7 @@
 `1.0.10`
 
 - Added `Fields.getOneDeclared` to retrieve a declared field in a given class.
-- Added `Methods.Safe` name space for methods that return null on expected errors (exceptions).
+- Added `Methods.Safe` name space for methods that return `null` on expected errors (exceptions).
 - Renamed and moved `Methods.getSafeOneDeclaredInHierarchy` method to `Methods.Safe.getOneDeclaredInHierarchy`.
 - Renamed and moved `Methods.getSafeGenericReturnType` method to `Methods.Safe.getGenericReturnType`.
 - Added `Methods.Safe.getOneDeclared` methods to return a declared method from a class or an object.

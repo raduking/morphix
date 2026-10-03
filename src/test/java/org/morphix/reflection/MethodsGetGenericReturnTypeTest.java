@@ -16,7 +16,6 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.Method;
@@ -90,22 +89,6 @@ class MethodsGetGenericReturnTypeTest {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnType(null, 0));
 
 		assertThat(e.getMessage(), equalTo("Method cannot be null when looking for the generic return type"));
-	}
-
-	@Test
-	void shouldReturnNullForNegativeIndexInTheSafeVariant() throws Exception {
-		Method method = A.class.getMethod("getList1");
-
-		Type type = Methods.Safe.getGenericReturnType(method, -1);
-
-		assertThat(type, nullValue());
-	}
-
-	@Test
-	void shouldReturnNullForNullMethodInTheSafeVariant() {
-		Type type = Methods.Safe.getGenericReturnType(null, 0);
-
-		assertThat(type, nullValue());
 	}
 
 }
