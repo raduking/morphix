@@ -14,6 +14,7 @@ package org.morphix.reflection;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 
 import java.lang.reflect.Method;
@@ -88,6 +89,21 @@ class MethodsGetAllDeclaredTest {
 		for (int i = 0; i < sizeE; ++i) {
 			assertThat(methods.get(i), equalTo(methodsE[i]));
 		}
+	}
+
+	@Test
+	void shouldReturnEmptyListIfClassIsNull() {
+		assertThat(Methods.getAllDeclared(null), empty());
+	}
+
+	@Test
+	void shouldReturnEmptyListIfClassIsNullWithPredicate() {
+		assertThat(Methods.getAllDeclared(null, method -> true), empty());
+	}
+
+	@Test
+	void shouldReturnEmptyListIfPredicateIsNull() {
+		assertThat(Methods.getAllDeclared(MethodsGetAllDeclaredTest.class, null), empty());
 	}
 
 }

@@ -73,4 +73,11 @@ class MethodsGetFunctionalInterfaceMethodTest {
 		assertThat(e.getMessage(), equalTo(D.class + " is not a functional interface because it has no abstract method"));
 	}
 
+	@Test
+	void shouldThrowExceptionIfTheClassIsNull() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getFunctionalInterfaceMethod(null));
+
+		assertThat(e.getMessage(), equalTo("Class cannot be null when looking for the functional interface method"));
+	}
+
 }

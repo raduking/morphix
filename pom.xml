@@ -13,13 +13,13 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.6</version>
+		<version>4.1.1</version>
 		<relativePath />
 	</parent>
 
 	<groupId>io.github.raduking</groupId>
 	<artifactId>morphix-all</artifactId>
-	<version>1.0.45</version>
+	<version>1.0.46</version>
 	<packaging>jar</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -28,7 +28,7 @@
 
 	<licenses>
 		<license>
-			<name>Apache License, Version 2.0</name>
+			<name>Apache-2.0</name>
 			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
 		</license>
 	</licenses>
@@ -49,6 +49,8 @@
 
 	<properties>
 		<java.version>21</java.version>
+		<!-- Exclusive upper bound of the JDK range enforced by maven-enforcer-plugin, must always be one major above java.version -->
+		<java.version.next>22</java.version.next>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<maven.compiler.release>${java.version}</maven.compiler.release>
@@ -59,14 +61,14 @@
 		<central.publishing.maven.plugin.version>0.11.0</central.publishing.maven.plugin.version>
 
 		<!-- Other plugin versions -->
-		<spotless.maven.plugin.version>3.10.0</spotless.maven.plugin.version>
+		<spotless.maven.plugin.version>3.10.3</spotless.maven.plugin.version>
 		<org.eclipse.jdt.core.version>3.44.0</org.eclipse.jdt.core.version>
 		<eclipse.formatter.version>4.38</eclipse.formatter.version>
 		<code.format.version>1.0.0</code.format.version>
 		<properties.maven.plugin.version>1.3.0</properties.maven.plugin.version>
 
 		<!-- Testing dependencies versions -->
-		<pitest.maven.plugin.version>1.25.9</pitest.maven.plugin.version>
+		<pitest.maven.plugin.version>1.30.0</pitest.maven.plugin.version>
 		<pitest.plugin.junit5.version>1.2.3</pitest.plugin.junit5.version>
 		<jacoco.maven.plugin.version>0.8.15</jacoco.maven.plugin.version>
 		<maven.project.info.reports.plugin.version>3.9.0</maven.project.info.reports.plugin.version>
@@ -144,6 +146,33 @@
 
 	<build>
 		<plugins>
+			<!--- Enforce the Java version -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-java-version</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<version>[${java.version},${java.version.next})</version>
+									<message>Morphix must be built with JDK ${java.version}, but Maven is running on
+										JDK ${java.runtime.version}. Switch to a JDK ${java.version} installation before
+										building, otherwise the resulting build is not compatible with the supported
+										runtime.</message>
+								</requireJavaVersion>
+							</rules>
+							<fail>true</fail>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

@@ -31,8 +31,7 @@ import java.util.Objects;
  *
  * @author Radu Sebastian LAZIN
  */
-@SuppressWarnings("unused")
-public abstract class GenericClass<T> {
+public abstract class GenericClass<T> { // NOSONAR need to have a generic type parameter to capture the generic type
 
 	/**
 	 * Captured generic type.

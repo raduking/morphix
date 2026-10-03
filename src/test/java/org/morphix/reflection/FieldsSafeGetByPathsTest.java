@@ -86,4 +86,17 @@ class FieldsSafeGetByPathsTest {
 
 		assertThat(result, nullValue());
 	}
+
+	@Test
+	void shouldReturnNullIfAPathIsNull() {
+		A a = new A();
+		a.x = TEST_STRING;
+		B b = new B();
+		b.a = a;
+
+		String x = Fields.Safe.getByPaths(b, new String[] { null });
+
+		assertThat(x, nullValue());
+	}
+
 }

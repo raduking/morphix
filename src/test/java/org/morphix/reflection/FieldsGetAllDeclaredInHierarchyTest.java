@@ -67,6 +67,10 @@ class FieldsGetAllDeclaredInHierarchyTest {
 		int y;
 	}
 
+	public static interface WithConstant {
+		int CONSTANT = 13;
+	}
+
 	public record R(int x) {
 		// record class
 	}
@@ -220,6 +224,29 @@ class FieldsGetAllDeclaredInHierarchyTest {
 			Field resultField = fieldsIt.next(), expectedField = expectedIt.next();
 			assertThat(resultField, equalTo(expectedField));
 		}
+	}
+
+	@Test
+	void shouldReturnTheOwnFieldsOfAnInterface() {
+		List<Field> fields = Fields.getAllDeclaredInHierarchy(WithConstant.class);
+
+		assertThat(fields, hasSize(WithConstant.class.getDeclaredFields().length));
+		assertThat(fields.get(0).getName(), equalTo("CONSTANT"));
+	}
+
+	@Test
+	void shouldReturnTheOwnFieldsOfAnInterfaceWithPredicate() {
+		List<Field> fields = Fields.getAllDeclaredInHierarchy(WithConstant.class, field -> true);
+
+		assertThat(fields, hasSize(WithConstant.class.getDeclaredFields().length));
+		assertThat(fields.get(0).getName(), equalTo("CONSTANT"));
+	}
+
+	@Test
+	void shouldStillReturnNoFieldsForObjectItself() {
+		List<Field> fields = Fields.getAllDeclaredInHierarchy(Object.class);
+
+		assertThat(fields, hasSize(0));
 	}
 
 }

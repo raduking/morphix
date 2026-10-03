@@ -13,6 +13,8 @@
 package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 
 import java.lang.reflect.Method;
@@ -47,6 +49,16 @@ class MethodsGetAllDeclaredInHierarchyTest {
 		// empty class
 	}
 
+	public static interface WithDefaults {
+		default String defaultMethod() {
+			return "default";
+		}
+
+		static String staticMethod() {
+			return "static";
+		}
+	}
+
 	@Test
 	void shouldGetAllMethodsInHierarchy() {
 		List<Method> methods = Methods.getAllDeclaredInHierarchy(B.class);
@@ -74,6 +86,50 @@ class MethodsGetAllDeclaredInHierarchyTest {
 		int sizeE = E.class.getDeclaredMethods().length;
 
 		assertThat(methods, hasSize(sizeEnum + sizeE));
+	}
+
+	@Test
+	void shouldReturnEmptyListIfClassIsNull() {
+		assertThat(Methods.getAllDeclaredInHierarchy(null), empty());
+	}
+
+	@Test
+	void shouldReturnEmptyListIfClassIsNullWithPredicate() {
+		assertThat(Methods.getAllDeclaredInHierarchy(null, method -> true), empty());
+	}
+
+	@Test
+	void shouldReturnEmptyListIfPredicateIsNull() {
+		assertThat(Methods.getAllDeclaredInHierarchy(MethodsGetAllDeclaredInHierarchyTest.class, null), empty());
+	}
+
+	@Test
+	void shouldReturnTheOwnMethodsOfAnInterface() {
+		List<Method> methods = Methods.getAllDeclaredInHierarchy(WithDefaults.class);
+
+		assertThat(namesOf(methods), containsInAnyOrder("defaultMethod", "staticMethod"));
+	}
+
+	@Test
+	void shouldReturnTheOwnMethodsOfAnInterfaceWithPredicate() {
+		List<Method> methods = Methods.getAllDeclaredInHierarchy(WithDefaults.class, method -> true);
+
+		assertThat(namesOf(methods), containsInAnyOrder("defaultMethod", "staticMethod"));
+	}
+
+	// synthetic methods, such as the ones added by the coverage instrumentation, are not part of the contract here
+	private static List<String> namesOf(List<Method> methods) {
+		return methods.stream()
+				.filter(method -> !method.isSynthetic())
+				.map(Method::getName)
+				.toList();
+	}
+
+	@Test
+	void shouldStillReturnNoMethodsForObjectItself() {
+		List<Method> methods = Methods.getAllDeclaredInHierarchy(Object.class);
+
+		assertThat(methods, empty());
 	}
 
 }
