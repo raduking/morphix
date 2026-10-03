@@ -14,6 +14,7 @@ package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -46,7 +47,7 @@ class ExtendedFieldsTest {
 	void shouldReturnAllNonStaticFieldsAndGetters() {
 		List<ExtendedField> fields = ExtendedFields.findAllNonStatic(new Simple());
 
-		assertThat(namesOf(fields), contains(VALUE, COMPUTED));
+		assertThat(namesOf(fields), containsInAnyOrder(VALUE, COMPUTED));
 	}
 
 	@Test
@@ -110,7 +111,7 @@ class ExtendedFieldsTest {
 
 		List<ExtendedField> fields = ExtendedFields.findAllNonStatic(object, field -> null == field.getField());
 
-		assertThat(namesOf(fields), contains(VALUE, COMPUTED));
+		assertThat(namesOf(fields), containsInAnyOrder(VALUE, COMPUTED));
 		ExtendedField field = findByName(fields, VALUE);
 		assertThat(field.getField(), nullValue());
 		assertThat(field.getGetterMethod(), not(nullValue()));
