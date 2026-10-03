@@ -13,6 +13,7 @@
 package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 
@@ -46,6 +47,16 @@ class MethodsGetAllDeclaredInHierarchyTest {
 
 	public static class C {
 		// empty class
+	}
+
+	public static interface WithDefaults {
+		default String defaultMethod() {
+			return "default";
+		}
+
+		static String staticMethod() {
+			return "static";
+		}
 	}
 
 	@Test
@@ -90,6 +101,35 @@ class MethodsGetAllDeclaredInHierarchyTest {
 	@Test
 	void shouldReturnEmptyListIfPredicateIsNull() {
 		assertThat(Methods.getAllDeclaredInHierarchy(MethodsGetAllDeclaredInHierarchyTest.class, null), empty());
+	}
+
+	@Test
+	void shouldReturnTheOwnMethodsOfAnInterface() {
+		List<Method> methods = Methods.getAllDeclaredInHierarchy(WithDefaults.class);
+
+		assertThat(namesOf(methods), containsInAnyOrder("defaultMethod", "staticMethod"));
+	}
+
+	@Test
+	void shouldReturnTheOwnMethodsOfAnInterfaceWithPredicate() {
+		List<Method> methods = Methods.getAllDeclaredInHierarchy(WithDefaults.class, method -> true);
+
+		assertThat(namesOf(methods), containsInAnyOrder("defaultMethod", "staticMethod"));
+	}
+
+	// synthetic methods, such as the ones added by the coverage instrumentation, are not part of the contract here
+	private static List<String> namesOf(List<Method> methods) {
+		return methods.stream()
+				.filter(method -> !method.isSynthetic())
+				.map(Method::getName)
+				.toList();
+	}
+
+	@Test
+	void shouldStillReturnNoMethodsForObjectItself() {
+		List<Method> methods = Methods.getAllDeclaredInHierarchy(Object.class);
+
+		assertThat(methods, empty());
 	}
 
 }

@@ -16,6 +16,14 @@
 - Added `Classes.Safe.getCanonicalName(Method, Object)` to return the class name used in error messages when invoking a method.
 - Fixed `Fields.Safe.getByPath` throwing a `ReflectionException` instead of returning null for a missing single segment path.
 - Changed `Fields.Safe.getByPath` to read the field directly instead of going through its getter, for paths with any number of segments.
+- Fixed `Fields.getAllDeclaredInHierarchy(Class)` returning no fields at all when given an interface, since interfaces have no super class.
+- Fixed `Methods.getAllDeclaredInHierarchy(Class)` returning no methods at all when given an interface, since interfaces have no super class.
+- Fixed `Methods.getAllDeclaredInHierarchy(Class, Predicate)` returning no methods at all when given an interface, since interfaces have no super class.
+- Changed `Methods.getGenericReturnType(Method, int)` to throw a `ReflectionException` for a negative index instead of an `ArrayIndexOutOfBoundsException`.
+- Changed `Methods.getGenericReturnType(Method, int)` to throw a `ReflectionException` for a null method instead of a `NullPointerException`.
+- Changed `Methods.getGenericReturnClass(Method, int)` to throw a `ReflectionException` for a null method instead of a `NullPointerException`.
+- Changed `Methods.Safe.getGenericReturnType(Method, int)` to return null for a negative index instead of an `ArrayIndexOutOfBoundsException`.
+- Changed `Methods.Safe.getGenericReturnType(Method, int)` to return null for a null method instead of a `NullPointerException`.
 - Changed `Methods.getAllDeclared(Class)` to return an empty list for a null class.
 - Changed `Methods.getAllDeclared(Class, Predicate)` to return an empty list for a null class or predicate.
 - Changed `Methods.getAllDeclaredInHierarchy(Class)` to return an empty list for a null class.

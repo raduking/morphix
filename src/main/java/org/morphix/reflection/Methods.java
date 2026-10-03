@@ -124,6 +124,10 @@ public interface Methods {
 	 * method does not return methods from interfaces or from {@link Object} class. This is a simpler version of
 	 * {@link Complete#getAllDeclaredInHierarchy(Class)} because most of the time only the class hierarchy is needed.
 	 * <p>
+	 * Note: if the class given as parameter is an interface then the methods declared by that interface are returned, but
+	 * not the ones declared by its super interfaces, since those are interfaces as well. Use
+	 * {@link Complete#getAllDeclaredInHierarchy(Class)} for the full interface hierarchy.
+	 * <p>
 	 * {@link LinkedList} is used because:
 	 * <ul>
 	 * <li>it is more efficient in terms of memory consumption</li>
@@ -140,10 +144,16 @@ public interface Methods {
 	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
-		if (null == cls || null == cls.getSuperclass()) {
+		if (null == cls) {
 			return new LinkedList<>();
 		}
-		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass());
+		// an interface has no super class, but it does declare methods of its own
+		Class<?> superClass = cls.getSuperclass();
+		List<Method> methods = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass);
+		if (Object.class == cls) {
+			// the methods declared by Object itself are never included
+			return methods;
+		}
 		Method[] declared = cls.getDeclaredMethods();
 		for (int i = declared.length - 1; i >= 0; --i) {
 			methods.addFirst(declared[i]);
@@ -163,10 +173,16 @@ public interface Methods {
 	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
-		if (null == cls || null == predicate || null == cls.getSuperclass()) {
+		if (null == cls || null == predicate) {
 			return new LinkedList<>();
 		}
-		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), predicate);
+		// an interface has no super class, but it does declare methods of its own
+		Class<?> superClass = cls.getSuperclass();
+		List<Method> methods = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass, predicate);
+		if (Object.class == cls) {
+			// the methods declared by Object itself are never included
+			return methods;
+		}
 		Method[] declared = cls.getDeclaredMethods();
 		for (int i = declared.length - 1; i >= 0; --i) {
 			if (predicate.test(declared[i])) {
@@ -194,10 +210,13 @@ public interface Methods {
 	 * @param method method for which the generic return type is needed
 	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return type
-	 * @throws ReflectionException if the method has a raw return type or if the generic return type cannot be found at the
-	 *     given index
+	 * @throws ReflectionException if the method is null, if the method has a raw return type or if the generic return type
+	 *     cannot be found at the given index
 	 */
 	static <T extends Type> T getGenericReturnType(final Method method, final int index) {
+		if (null == method) {
+			throw new ReflectionException("Method cannot be null when looking for the generic return type");
+		}
 		Type type = method.getGenericReturnType();
 		if (!(type instanceof ParameterizedType parameterizedType)) {
 			throw new ReflectionException(
@@ -205,7 +224,7 @@ public interface Methods {
 					type.getTypeName(), method.getDeclaringClass().getCanonicalName(), method.getName());
 		}
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-		if (index >= actualTypeArguments.length) {
+		if (index < 0 || index >= actualTypeArguments.length) {
 			throw new ReflectionException(
 					"Could not find generic argument at index {} for generic return type {} with {} generic argument(s) for method {}.{}",
 					index, parameterizedType.getTypeName(), actualTypeArguments.length,
@@ -233,9 +252,12 @@ public interface Methods {
 	 * @param method method for which the generic return type is needed
 	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return class
-	 * @throws ReflectionException if the generic return type cannot be cast to a Class
+	 * @throws ReflectionException if the method is null or if the generic return type cannot be cast to a Class
 	 */
 	static <T> Class<T> getGenericReturnClass(final Method method, final int index) {
+		if (null == method) {
+			throw new ReflectionException("Method cannot be null when looking for the generic return class");
+		}
 		try {
 			return getGenericReturnType(method, index);
 		} catch (ClassCastException e) {
@@ -638,12 +660,15 @@ public interface Methods {
 		 * @return generic return type
 		 */
 		static <T extends Type> T getGenericReturnType(final Method method, final int index) {
+			if (null == method) {
+				return null;
+			}
 			Type type = method.getGenericReturnType();
 			if (!(type instanceof ParameterizedType parameterizedType)) {
 				return null;
 			}
 			Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-			if (index >= actualTypeArguments.length) {
+			if (index < 0 || index >= actualTypeArguments.length) {
 				return null;
 			}
 			Type returnType = actualTypeArguments[index];

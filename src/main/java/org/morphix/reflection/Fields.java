@@ -142,6 +142,9 @@ public interface Fields {
 	/**
 	 * Returns a list with all the fields in the class given as parameter including the ones in all it's super classes.
 	 * <p>
+	 * Note: if the class given as parameter is an interface then the fields declared by that interface are returned, but
+	 * not the ones declared by its super interfaces, since those are interfaces as well.
+	 * <p>
 	 * {@link LinkedList} is used because:
 	 * <ul>
 	 * <li>it is more efficient in terms of memory consumption</li>
@@ -161,10 +164,10 @@ public interface Fields {
 		if (null == cls) {
 			return List.of();
 		}
-		if (null == cls.getSuperclass()) {
-			return new LinkedList<>();
-		}
-		List<Field> fields = getAllDeclaredInHierarchy(cls.getSuperclass());
+		// an interface has no super class, but it does declare fields of its own
+		Class<?> superClass = cls.getSuperclass();
+		List<Field> fields = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass);
+		// Object declares no fields, so no special case is needed for it here
 		fields.addAll(0, getAllDeclared(cls));
 		return fields;
 	}
