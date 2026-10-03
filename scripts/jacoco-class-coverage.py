@@ -11,6 +11,10 @@ Usage:
     org.morphix.lang.retry.DelayStrategy \
     org.morphix.lang.retry.delay.FixedDelayStrategy
 
+  # nested classes may be queried with either notation: the JVM's Outer$Inner
+  # or the Outer.Inner form used by the report itself
+  ./scripts/jacoco-class-coverage.py 'org.morphix.reflection.Classes$Safe'
+
   # custom jacoco csv path
   ./scripts/jacoco-class-coverage.py -c target/site/jacoco.csv org.example.MyClass
 
@@ -20,6 +24,7 @@ Usage:
 
 import argparse
 import csv
+import difflib
 import pathlib
 import sys
 
@@ -75,6 +80,22 @@ def full_class_name_from_row(row: dict[str, str]) -> str:
     return f"{row['PACKAGE']}.{row['CLASS']}"
 
 
+def normalize_class_name(class_name: str) -> str:
+    """
+    Normalize a class name to the form used as key in the report.
+
+    JaCoCo writes nested classes as `Outer.Inner`, while the JVM, IDEs and
+    `Class.getName()` use `Outer$Inner`. Accepting both means a caller can paste
+    either notation without first having to know how the report spells it.
+    """
+    return class_name.replace("$", ".")
+
+
+def suggest_class_names(class_name: str, candidates: list[str], limit: int = 3) -> list[str]:
+    """Return the report entries closest to a name that was not found."""
+    return difflib.get_close_matches(normalize_class_name(class_name), candidates, n=limit, cutoff=0.6)
+
+
 def print_class_coverage(class_name: str, row: dict[str, str]) -> None:
     mi = int(row["INSTRUCTION_MISSED"])
     ci = int(row["INSTRUCTION_COVERED"])
@@ -108,6 +129,7 @@ def main() -> int:
     csv_path = resolve_csv_path(args.csv)
     rows = load_rows(csv_path)
     by_class = {full_class_name_from_row(r): r for r in rows}
+    all_class_names = sorted(by_class)
 
     if args.list:
         for name in sorted(by_class):
@@ -119,7 +141,7 @@ def main() -> int:
 
     missing = []
     for class_name in args.classes:
-        row = by_class.get(class_name)
+        row = by_class.get(normalize_class_name(class_name))
         if row is None:
             missing.append(class_name)
             continue
@@ -129,6 +151,9 @@ def main() -> int:
         print("\nClass(es) not found in report:", file=sys.stderr)
         for m in missing:
             print(f"  - {m}", file=sys.stderr)
+            for suggestion in suggest_class_names(m, all_class_names):
+                print(f"      did you mean: {suggestion} ?", file=sys.stderr)
+        print("\nRun with --list to see all classes in the report.", file=sys.stderr)
         return 2
 
     return 0

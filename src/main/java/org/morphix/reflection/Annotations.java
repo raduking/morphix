@@ -48,7 +48,8 @@ public class Annotations {
 	 * deliberately ignored, so that covariant overrides and implementations of generic methods are matched as well.
 	 * <p>
 	 * Note: if several interfaces declare the same annotation on the same method, the one returned is the first found,
-	 * following the order given by {@link Class#getInterfaces()}, which is not specified by the JDK.
+	 * following the traversal order of {@link Interfaces#getAll(Class)}, which is rooted in the unspecified
+	 * {@link Class#getInterfaces()} order.
 	 *
 	 * @param <T> annotation type
 	 *

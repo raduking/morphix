@@ -8,7 +8,10 @@
 - Fixed `ExtendedFields.findAllNonStatic` returning `static` getters as instance properties.
 - Added `Annotations.getOneInHierarchy(Method, Class)` to read an annotation from the nearest declaration of a method, in its class and interface hierarchy.
 - Added `Interfaces.getAll(Class)` to return all the interfaces implemented directly or indirectly by a class.
-- Added `Classes.getCanonicalName(Class)`, `Classes.getCanonicalName(Object)` and `Classes.getCanonicalName(Method, Object)` utility methods.
+- Added `Classes.getCanonicalName(Class)` to return the canonical name of a class, null if the class is null.
+- Added `Classes.getCanonicalName(Object)` to return the canonical name of the object's class, or of the object itself when it is a `Class`.
+- Added `Classes.getCanonicalName(Method, Object)` to return the class name used in error messages when invoking a method.
+- Added null-safe `Classes.Safe` variants of the three `getCanonicalName` methods.
 - Fixed `@Src` being ignored when placed on a super class or interface getter that is overridden without it.
 - Upgraded parent to `4.1.1`.
 

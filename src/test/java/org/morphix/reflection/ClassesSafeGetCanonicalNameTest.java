@@ -24,16 +24,16 @@ import org.junit.jupiter.api.Test;
  * Test class for:
  *
  * <ul>
- * <li>{@link Classes#getCanonicalName(Class)}</li>
- * <li>{@link Classes#getCanonicalName(Object)}</li>
- * <li>{@link Classes#getCanonicalName(Method, Object)}</li>
+ * <li>{@link Classes.Safe#getCanonicalName(Class)}</li>
+ * <li>{@link Classes.Safe#getCanonicalName(Object)}</li>
+ * <li>{@link Classes.Safe#getCanonicalName(Method, Object)}</li>
  * </ul>
  *
  * @author Radu Sebastian LAZIN
  */
-class ClassesGetCanonicalNameTest {
+class ClassesSafeGetCanonicalNameTest {
 
-	private static final String NESTED_CANONICAL_NAME = ClassesGetCanonicalNameTest.class.getCanonicalName() + ".Nested";
+	private static final String NESTED_CANONICAL_NAME = ClassesSafeGetCanonicalNameTest.class.getCanonicalName() + ".Nested";
 
 	private static final String STRING_CANONICAL_NAME = String.class.getCanonicalName();
 
@@ -59,56 +59,56 @@ class ClassesGetCanonicalNameTest {
 
 	@Test
 	void shouldReturnCanonicalNameOfClass() {
-		assertThat(Classes.getCanonicalName(Nested.class), equalTo(NESTED_CANONICAL_NAME));
+		assertThat(Classes.Safe.getCanonicalName(Nested.class), equalTo(NESTED_CANONICAL_NAME));
 	}
 
 	@Test
 	void shouldReturnCanonicalNameOfObjectsClass() {
-		assertThat(Classes.getCanonicalName(new WithValue()), equalTo(WithValue.class.getCanonicalName()));
+		assertThat(Classes.Safe.getCanonicalName(new WithValue()), equalTo(WithValue.class.getCanonicalName()));
 	}
 
 	@Test
 	void shouldReturnCanonicalNameOfClassObject() {
-		assertThat(Classes.getCanonicalName((Object) Nested.class), equalTo(NESTED_CANONICAL_NAME));
+		assertThat(Classes.Safe.getCanonicalName((Object) Nested.class), equalTo(NESTED_CANONICAL_NAME));
 	}
 
 	@Test
 	void shouldReturnNullForNullClass() {
-		assertThat(Classes.getCanonicalName((Class<?>) null), nullValue());
+		assertThat(Classes.Safe.getCanonicalName((Class<?>) null), nullValue());
 	}
 
 	@Test
 	void shouldReturnNullForNullObject() {
-		assertThat(Classes.getCanonicalName((Object) null), nullValue());
+		assertThat(Classes.Safe.getCanonicalName((Object) null), nullValue());
 	}
 
 	@Test
 	void shouldReturnDeclaringClassCanonicalNameForNullObjectAndMethod() throws NoSuchMethodException {
-		assertThat(Classes.getCanonicalName(valueMethod(), null), equalTo(NESTED_CANONICAL_NAME));
+		assertThat(Classes.Safe.getCanonicalName(valueMethod(), null), equalTo(NESTED_CANONICAL_NAME));
 	}
 
 	@Test
 	void shouldReturnNullForNullMethodAndNullObject() {
-		assertThat(Classes.getCanonicalName((Method) null, null), nullValue());
+		assertThat(Classes.Safe.getCanonicalName((Method) null, null), nullValue());
 	}
 
 	@Test
 	void shouldReturnObjectsClassCanonicalNameForMethodAndObject() throws NoSuchMethodException {
-		assertThat(Classes.getCanonicalName(valueMethod(), new WithValue()), equalTo(WithValue.class.getCanonicalName()));
+		assertThat(Classes.Safe.getCanonicalName(valueMethod(), new WithValue()), equalTo(WithValue.class.getCanonicalName()));
 	}
 
 	@Test
 	void shouldReturnClassObjectCanonicalNameForMethodAndClassObject() throws NoSuchMethodException {
-		assertThat(Classes.getCanonicalName(valueMethod(), String.class), equalTo(STRING_CANONICAL_NAME));
+		assertThat(Classes.Safe.getCanonicalName(valueMethod(), String.class), equalTo(STRING_CANONICAL_NAME));
 	}
 
 	@Test
 	void shouldIgnoreNullMethodWhenObjectIsNotNull() {
-		assertThat(Classes.getCanonicalName((Method) null, new WithValue()), equalTo(WithValue.class.getCanonicalName()));
+		assertThat(Classes.Safe.getCanonicalName((Method) null, new WithValue()), equalTo(WithValue.class.getCanonicalName()));
 	}
 
 	@Test
 	void shouldIgnoreNullMethodWhenClassObjectIsNotNull() {
-		assertThat(Classes.getCanonicalName((Method) null, String.class), equalTo(STRING_CANONICAL_NAME));
+		assertThat(Classes.Safe.getCanonicalName((Method) null, String.class), equalTo(STRING_CANONICAL_NAME));
 	}
 }

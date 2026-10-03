@@ -23,8 +23,13 @@ import java.util.Set;
 public interface Interfaces {
 
 	/**
-	 * Returns all the interfaces implemented directly or indirectly by the given class, in no particular order and without
-	 * duplicates. The given type itself is never part of the result, not even when it is an interface.
+	 * Returns all the interfaces implemented directly or indirectly by the given class, without duplicates. The given type
+	 * itself is never part of the result, not even when it is an interface.
+	 * <p>
+	 * The traversal is depth-first: the directly implemented interfaces come first, in the order given by
+	 * {@link Class#getInterfaces()}, and each of them is immediately followed by its own super interfaces. That order is
+	 * not specified by the JDK, so callers that need a specific interface to win over another should not rely on it, see
+	 * {@link Annotations#getOneInHierarchy(java.lang.reflect.Method, Class)}.
 	 *
 	 * @param cls class to get the interfaces of
 	 * @return all the interfaces implemented by the given class
