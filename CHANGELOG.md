@@ -14,6 +14,8 @@
 - Added null-safe `Classes.Safe` variants of the three `getCanonicalName` methods.
 - Fixed `@Src` being ignored when placed on a super class or interface getter that is overridden without it.
 - Upgraded parent to `4.1.1`.
+- Upgraded `spotless-maven-plugin` to `3.10.3`.
+- Upgraded `pitest-maven` to `1.30.0`.
 
 ---
 
