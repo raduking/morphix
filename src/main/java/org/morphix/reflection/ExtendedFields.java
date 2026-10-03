@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 
 import org.morphix.lang.function.Predicates;
 import org.morphix.reflection.predicates.MemberPredicates;
+import org.morphix.reflection.predicates.MethodPredicates;
 
 /**
  * Utility methods for working with {@link ExtendedField}.
@@ -51,7 +52,7 @@ public interface ExtendedFields {
 				});
 			}
 		}
-		List<Method> getterMethods = Methods.getAllDeclaredInHierarchy(obj.getClass(), MethodType.GETTER.predicate());
+		List<Method> getterMethods = Methods.getAllDeclaredInHierarchy(obj.getClass(), getterMethodPredicate());
 		for (Method getterMethod : getterMethods) {
 			String fieldName = MethodType.GETTER.getFieldName(getterMethod);
 			ExtendedField extendedField = nameToFieldMap.get(fieldName);
@@ -83,5 +84,21 @@ public interface ExtendedFields {
 	 */
 	static <T> List<ExtendedField> findAllNonStatic(final T obj) {
 		return findAllNonStatic(obj, Predicates.acceptAll());
+	}
+
+	/**
+	 * Returns the predicate for the getter methods considered when looking for fields: instance, non synthetic getters
+	 * only. Synthetic methods, such as the bridge methods generated for covariant return types or for implementations of
+	 * generic methods, would otherwise shadow the real getter declaration, making the result depend on the unspecified
+	 * order in which {@link Class#getDeclaredMethods()} returns them. Static getters are excluded as well, for the same
+	 * reason the static fields are.
+	 *
+	 * @return predicate selecting the getter methods to be considered
+	 */
+	private static Predicate<Method> getterMethodPredicate() {
+		return Predicates.allOf(
+				MethodType.GETTER.predicate(),
+				MemberPredicates.isNotStatic(),
+				MethodPredicates.isNotSynthetic());
 	}
 }

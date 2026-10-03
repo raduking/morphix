@@ -15,6 +15,7 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
@@ -35,8 +36,11 @@ class ExtendedFieldsTest {
 	private static final String SHADOWED = "shadowed";
 	private static final String WITH_GETTER = "withGetter";
 	private static final String COMPUTED = "computed";
+	private static final String BOXED = "boxed";
+	private static final String ITEM = "item";
 	private static final String BASE_MAPPING = "baseMapping";
 	private static final String DERIVED_MAPPING = "derivedMapping";
+	private static final String BOX_MAPPING = "boxMapping";
 
 	@Test
 	void shouldReturnAllNonStaticFieldsAndGetters() {
@@ -116,6 +120,39 @@ class ExtendedFieldsTest {
 	@Test
 	void shouldReturnNoFieldsWhenEverythingIsFilteredOut() {
 		assertThat(ExtendedFields.findAllNonStatic(new Simple(), field -> false), equalTo(List.of()));
+	}
+
+	@Test
+	void shouldNotPreferTheBridgeMethodGeneratedForAGenericInterface() {
+		ExtendedField field = findByName(ExtendedFields.findAllNonStatic(new StringBox()), BOXED);
+
+		assertThat(field.getGetterMethod().isBridge(), is(false));
+		assertThat(field.getGetterMethod().isSynthetic(), is(false));
+		assertThat(field.getGetterMethod().getDeclaringClass(), equalTo(StringBox.class));
+		assertThat(field.getGetterMethod().getAnnotation(Src.class).value(), equalTo(BOX_MAPPING));
+		assertThat(field.getFieldValue(), equalTo("value"));
+	}
+
+	@Test
+	void shouldNotPreferTheBridgeMethodGeneratedForACovariantReturnType() {
+		List<ExtendedField> fields = ExtendedFields.findAllNonStatic(new CovariantDerived());
+
+		assertThat(namesOf(fields), contains(ITEM));
+		assertThat(fields.get(0).getGetterMethod().isBridge(), is(false));
+		assertThat(fields.get(0).getGetterMethod().getDeclaringClass(), equalTo(CovariantDerived.class));
+	}
+
+	@Test
+	void shouldNotAttachStaticGetterToField() {
+		ExtendedField field = findByName(ExtendedFields.findAllNonStatic(new WithStaticGetter()), VALUE);
+
+		assertThat(field.getGetterMethod(), nullValue());
+		assertThat(field.getFieldValue(), equalTo(Long.valueOf(1L)));
+	}
+
+	@Test
+	void shouldNotReturnStaticGetterAsAProperty() {
+		assertThat(ExtendedFields.findAllNonStatic(new WithOnlyStaticGetter()), equalTo(List.of()));
 	}
 
 	private static List<String> namesOf(final List<ExtendedField> fields) {
@@ -199,6 +236,53 @@ class ExtendedFieldsTest {
 		@Override
 		public Long getComputed() {
 			return 2L;
+		}
+	}
+
+	public interface Box<T> {
+
+		T getBoxed();
+	}
+
+	public static class StringBox implements Box<String> {
+
+		String boxed = "value";
+
+		@Src(BOX_MAPPING)
+		@Override
+		public String getBoxed() {
+			return boxed;
+		}
+	}
+
+	public static class CovariantBase {
+
+		public Object getItem() {
+			return Integer.valueOf(1);
+		}
+	}
+
+	public static class CovariantDerived extends CovariantBase {
+
+		@Override
+		public String getItem() {
+			return "value";
+		}
+	}
+
+	public static class WithStaticGetter {
+
+		Long value = 1L;
+
+		public static Long getValue() {
+			return 2L;
+		}
+	}
+
+	public static class WithOnlyStaticGetter {
+
+		public static Long getValue() {
+			return 1L;
 		}
 	}
 }

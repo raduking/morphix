@@ -81,6 +81,14 @@ class LibraryVersionTest {
 		}
 
 		@Test
+		void shouldReturnNullVersionWhenAnchorClassIsNull() {
+			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, (Class<?>) null);
+
+			assertThat(libraryVersion.getName(), is(LIBRARY_NAME));
+			assertThat(libraryVersion.value(), is(nullValue()));
+		}
+
+		@Test
 		void shouldBuildVersionFromMajorMinorAndPatch() {
 			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, 5, 4, 3);
 
@@ -593,6 +601,24 @@ class LibraryVersionTest {
 			LibraryVersion newer = new LibraryVersion(LIBRARY_NAME, "5.10");
 
 			assertThat(older.compareTo(newer), is(lessThan(0)));
+		}
+
+		@Test
+		void shouldReturnNegativeWhenMajorComponentDiffers() {
+			LibraryVersion older = new LibraryVersion(LIBRARY_NAME, "4.9.9");
+			LibraryVersion newer = new LibraryVersion(LIBRARY_NAME, "5.0.0");
+
+			assertThat(older.compareTo(newer), is(lessThan(0)));
+			assertThat(newer.compareTo(older), is(greaterThan(0)));
+		}
+
+		@Test
+		void shouldCompareMajorComponentNumerically() {
+			LibraryVersion older = new LibraryVersion(LIBRARY_NAME, "9.9.9");
+			LibraryVersion newer = new LibraryVersion(LIBRARY_NAME, "10.0.0");
+
+			assertThat(older.compareTo(newer), is(lessThan(0)));
+			assertThat(newer.compareTo(older), is(greaterThan(0)));
 		}
 
 		@Test
