@@ -53,6 +53,9 @@ public interface Methods {
 	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclared(final Class<T> cls) {
+		if (null == cls) {
+			return List.of();
+		}
 		return List.of(cls.getDeclaredMethods());
 	}
 
@@ -66,6 +69,9 @@ public interface Methods {
 	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclared(final Class<T> cls, final Predicate<? super Method> predicate) {
+		if (null == cls || null == predicate) {
+			return List.of();
+		}
 		Method[] declared = cls.getDeclaredMethods();
 		if (declared.length == 0) {
 			return List.of();
@@ -87,8 +93,7 @@ public interface Methods {
 	 * @param methodName the name of the method
 	 * @param cls class containing the method
 	 * @param parameterTypes parameter types
-	 * @return the method with the given name
-	 * @throws ReflectionException if no such method is found
+	 * @return the method with the given name, null if it is not found or if the class or the method name is null
 	 */
 	static <T> Method getOneDeclared(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
 		return Safe.getOneDeclared(methodName, cls, parameterTypes);
@@ -135,7 +140,7 @@ public interface Methods {
 	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
-		if (null == cls.getSuperclass()) {
+		if (null == cls || null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass());
@@ -158,7 +163,7 @@ public interface Methods {
 	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
-		if (null == cls.getSuperclass()) {
+		if (null == cls || null == predicate || null == cls.getSuperclass()) {
 			return new LinkedList<>();
 		}
 		List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), predicate);
@@ -388,9 +393,12 @@ public interface Methods {
 	 *
 	 * @param cls functional interface class
 	 * @return the functional interface method if the given class is a functional interface
-	 * @throws ReflectionException if the class is not a functional interface
+	 * @throws ReflectionException if the class is null or if it is not a functional interface
 	 */
 	static <T> Method getFunctionalInterfaceMethod(final Class<T> cls) {
+		if (null == cls) {
+			throw new ReflectionException("Class cannot be null when looking for the functional interface method");
+		}
 		Method singleAbstractMethod = null;
 		for (Method method : cls.getMethods()) {
 			if (JavaModifier.ABSTRACT.isPresentOn(method)) {
@@ -604,6 +612,9 @@ public interface Methods {
 		 * @return found method, null otherwise
 		 */
 		static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
+			if (null == cls || null == methodName) {
+				return null;
+			}
 			try {
 				return cls.getDeclaredMethod(methodName, parameterTypes);
 			} catch (NoSuchMethodException e) {
@@ -651,6 +662,9 @@ public interface Methods {
 		/**
 		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
 		 * interfaces.
+		 * <p>
+		 * Note: unlike the simpler {@link Methods#getAllDeclaredInHierarchy(Class)}, this method does include the methods
+		 * declared by {@link Object}, since the whole hierarchy is walked up to and including it.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -666,6 +680,12 @@ public interface Methods {
 		 * interfaces.
 		 * <p>
 		 * Note: the excluded set is also used to avoid cyclic dependencies in the class hierarchy.
+		 * <p>
+		 * Note: unlike the simpler {@link Methods#getAllDeclaredInHierarchy(Class, Predicate)}, this method does include the
+		 * methods declared by {@link Object}, since the whole hierarchy is walked up to and including it.
+		 * <p>
+		 * Note: a null class short-circuits the walk and returns an empty list, so in that case the excluded set is never
+		 * validated and no exception is thrown for it.
 		 *
 		 * @param <T> type to get the methods from
 		 *

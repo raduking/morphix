@@ -13,6 +13,7 @@
 package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 
 import java.lang.reflect.Method;
@@ -74,6 +75,21 @@ class MethodsGetAllDeclaredInHierarchyTest {
 		int sizeE = E.class.getDeclaredMethods().length;
 
 		assertThat(methods, hasSize(sizeEnum + sizeE));
+	}
+
+	@Test
+	void shouldReturnEmptyListIfClassIsNull() {
+		assertThat(Methods.getAllDeclaredInHierarchy(null), empty());
+	}
+
+	@Test
+	void shouldReturnEmptyListIfClassIsNullWithPredicate() {
+		assertThat(Methods.getAllDeclaredInHierarchy(null, method -> true), empty());
+	}
+
+	@Test
+	void shouldReturnEmptyListIfPredicateIsNull() {
+		assertThat(Methods.getAllDeclaredInHierarchy(MethodsGetAllDeclaredInHierarchyTest.class, null), empty());
 	}
 
 }

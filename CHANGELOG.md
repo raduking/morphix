@@ -11,7 +11,17 @@
 - Added `Classes.getCanonicalName(Class)` to return the canonical name of a class, null if the class is null.
 - Added `Classes.getCanonicalName(Object)` to return the canonical name of the object's class, or of the object itself when it is a `Class`.
 - Added `Classes.getCanonicalName(Method, Object)` to return the class name used in error messages when invoking a method.
-- Added null-safe `Classes.Safe` variants of the three `getCanonicalName` methods.
+- Added `Classes.Safe.getCanonicalName(Class)` to return the canonical name of a class, null if the class is null.
+- Added `Classes.Safe.getCanonicalName(Object)` to return the canonical name of the object's class, or of the object itself when it is a `Class`.
+- Added `Classes.Safe.getCanonicalName(Method, Object)` to return the class name used in error messages when invoking a method.
+- Fixed `Fields.Safe.getByPath` throwing a `ReflectionException` instead of returning null for a missing single segment path.
+- Changed `Fields.Safe.getByPath` to read the field directly instead of going through its getter, for paths with any number of segments.
+- Changed `Methods.getAllDeclared(Class)` to return an empty list for a null class.
+- Changed `Methods.getAllDeclared(Class, Predicate)` to return an empty list for a null class or predicate.
+- Changed `Methods.getAllDeclaredInHierarchy(Class)` to return an empty list for a null class.
+- Changed `Methods.getAllDeclaredInHierarchy(Class, Predicate)` to return an empty list for a null class or predicate.
+- Changed `Methods.getFunctionalInterfaceMethod(Class)` to throw a `ReflectionException` for a null class.
+- Changed `Methods.Safe.getOneDeclaredInHierarchy` to return null for a null class or method name.
 - Fixed `@Src` being ignored when placed on a super class or interface getter that is overridden without it.
 - Upgraded parent to `4.1.1`.
 - Upgraded `spotless-maven-plugin` to `3.10.3`.

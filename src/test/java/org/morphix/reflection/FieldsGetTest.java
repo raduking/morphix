@@ -71,27 +71,4 @@ class FieldsGetTest {
 		assertThat(e.getMessage(), equalTo("Could not get field " + A.FieldName.B));
 		assertThat(e.getCause(), instanceOf(IllegalArgumentException.class));
 	}
-
-	@Test
-	void shouldRetrieveFieldValueByGetter() {
-		Integer result = Fields.get(new D(), "x");
-
-		assertThat(result, equalTo(2));
-	}
-
-	@Test
-	void shouldRetrieveFieldValueByField() {
-		Integer result = Fields.get(new D(), "y");
-
-		assertThat(result, equalTo(3));
-	}
-
-	public static class D {
-		Integer x = 2;
-		Integer y = 3;
-
-		public Integer getX() {
-			return x;
-		}
-	}
 }

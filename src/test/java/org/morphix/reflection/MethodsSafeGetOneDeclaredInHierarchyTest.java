@@ -65,4 +65,18 @@ class MethodsSafeGetOneDeclaredInHierarchyTest {
 		assertThat(method, equalTo(null));
 	}
 
+	@Test
+	void shouldReturnNullIfClassIsNull() {
+		Method method = Methods.Safe.getOneDeclaredInHierarchy("fooA", (Class<?>) null);
+
+		assertThat(method, equalTo(null));
+	}
+
+	@Test
+	void shouldReturnNullIfMethodNameIsNull() {
+		Method method = Methods.Safe.getOneDeclaredInHierarchy(null, A.class);
+
+		assertThat(method, equalTo(null));
+	}
+
 }
