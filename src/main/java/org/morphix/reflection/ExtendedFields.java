@@ -41,7 +41,6 @@ public interface ExtendedFields {
 	 */
 	static <T> List<ExtendedField> findAllNonStatic(final T obj, final Predicate<? super ExtendedField> filter) {
 		List<ExtendedField> result = new ArrayList<>();
-		// TODO: check duplicate fields (with the same name) in hierarchy (fields/getters)
 		Map<String, ExtendedField> nameToFieldMap = new HashMap<>();
 		for (Field field : Fields.getAllDeclaredInHierarchy(obj.getClass(), MemberPredicates.isNotStatic())) {
 			ExtendedField extendedField = ExtendedField.of(field, obj);
@@ -57,7 +56,10 @@ public interface ExtendedFields {
 			String fieldName = MethodType.GETTER.getFieldName(getterMethod);
 			ExtendedField extendedField = nameToFieldMap.get(fieldName);
 			if (null != extendedField) {
-				extendedField.setGetterMethod(getterMethod);
+				// getters are returned from the most to the least derived declaration, so only the first one found is kept
+				if (null == extendedField.getGetterMethod()) {
+					extendedField.setGetterMethod(getterMethod);
+				}
 			} else {
 				ExtendedField getterField = ExtendedField.of(getterMethod, obj);
 				if (filter.test(getterField)) {

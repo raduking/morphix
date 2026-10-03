@@ -2,7 +2,8 @@
 
 `1.0.46`
 
-- The build now fails fast, at the `validate` phase, when Maven is running on any JDK other than 21.
+- Changed the build, now fails fast at the `validate` phase, when Maven is running on any JDK other than 21.
+- Fixed `ExtendedFields.findAllNonStatic` attaching the getter declared in the most general class instead of the most derived one when a getter is overridden.
 - Upgraded parent to `4.1.1`.
 
 ---
