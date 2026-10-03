@@ -169,20 +169,20 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldReturnCorrectPercentileFromAccumulatedDurations() {
-		accumulator.accumulate(() -> Threads.safeSleep(Duration.ofMillis(10)));
-		accumulator.accumulate(() -> Threads.safeSleep(Duration.ofMillis(20)));
-		accumulator.accumulate(() -> Threads.safeSleep(Duration.ofMillis(30)));
-		accumulator.accumulate(() -> Threads.safeSleep(Duration.ofMillis(40)));
+		accumulator.getInformationList().add(Duration.ofMillis(10));
+		accumulator.getInformationList().add(Duration.ofMillis(20));
+		accumulator.getInformationList().add(Duration.ofMillis(30));
+		accumulator.getInformationList().add(Duration.ofMillis(40));
 
 		double p25 = accumulator.percentile(25.0);
 		double p50 = accumulator.percentile(50.0);
 		double p75 = accumulator.percentile(75.0);
 		double p100 = accumulator.percentile(100.0);
 
-		assertThat(p25, closeTo(0.015, 0.01)); // ~15ms
-		assertThat(p50, closeTo(0.025, 0.01)); // ~25ms
-		assertThat(p75, closeTo(0.035, 0.01)); // ~35ms
-		assertThat(p100, closeTo(0.04, 0.01)); // ~40ms
+		assertThat(p25, equalTo(0.01));
+		assertThat(p50, equalTo(0.02));
+		assertThat(p75, equalTo(0.03));
+		assertThat(p100, equalTo(0.04));
 	}
 
 	@Test
@@ -250,32 +250,32 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldClampPercentileIndexAtEdges() {
-		accumulator.accumulate(() -> Threads.safeSleep(Duration.ofMillis(10)));
-		accumulator.accumulate(() -> Threads.safeSleep(Duration.ofMillis(20)));
+		accumulator.getInformationList().add(Duration.ofMillis(10));
+		accumulator.getInformationList().add(Duration.ofMillis(20));
 
 		double p0 = accumulator.percentile(0.0);
 		double p100 = accumulator.percentile(100.0);
 
-		assertThat(p0, closeTo(0.01, 0.01)); // minimum value
-		assertThat(p100, closeTo(0.02, 0.01)); // maximum value
+		assertThat(p0, equalTo(0.01)); // index clamped to the first value
+		assertThat(p100, equalTo(0.02)); // index clamped to the last value
 	}
 
 	@Test
 	void shouldBuildCorrectStatistics() {
-		accumulator.accumulate(() -> Threads.safeSleep(Duration.ofMillis(10)));
-		accumulator.accumulate(() -> Threads.safeSleep(Duration.ofMillis(20)));
-		accumulator.accumulate(() -> Threads.safeSleep(Duration.ofMillis(30)));
-		accumulator.accumulate(() -> Threads.safeSleep(Duration.ofMillis(40)));
+		accumulator.getInformationList().add(Duration.ofMillis(10));
+		accumulator.getInformationList().add(Duration.ofMillis(20));
+		accumulator.getInformationList().add(Duration.ofMillis(30));
+		accumulator.getInformationList().add(Duration.ofMillis(40));
 
 		DurationAccumulator.Statistics stats = accumulator.buildStatistics();
 
 		assertThat(stats.getRequestCount(), equalTo(4));
 
 		double expectedAvg = (0.01 + 0.02 + 0.03 + 0.04) / 4;
-		assertThat(stats.getAvgRequestTime(), closeTo(expectedAvg, 0.01));
-		assertThat(stats.getMaxRequestTime(), closeTo(0.04, 0.01));
-		assertThat(stats.getP95RequestTime(), closeTo(0.04, 0.01));
-		assertThat(stats.getP90RequestTime(), closeTo(0.04, 0.01));
+		assertThat(stats.getAvgRequestTime(), closeTo(expectedAvg, 1e-9));
+		assertThat(stats.getMaxRequestTime(), equalTo(0.04));
+		assertThat(stats.getP95RequestTime(), equalTo(0.04));
+		assertThat(stats.getP90RequestTime(), equalTo(0.04));
 	}
 
 	@Test

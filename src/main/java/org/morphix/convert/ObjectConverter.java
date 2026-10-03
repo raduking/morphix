@@ -28,6 +28,7 @@ import org.morphix.convert.strategy.FieldFinderStrategy;
 import org.morphix.lang.function.InstanceFunction;
 import org.morphix.reflection.ExtendedField;
 import org.morphix.reflection.ExtendedFields;
+import org.morphix.reflection.Annotations;
 
 /**
  * Converter class that will try to convert an object of type S (source) to an object of type D (destination).
@@ -223,7 +224,7 @@ public class ObjectConverter<S, D> implements
 		Src srcAnnotation = null;
 		Method getterMethod = dfo.getGetterMethod();
 		if (null != getterMethod) {
-			srcAnnotation = getterMethod.getAnnotation(Src.class);
+			srcAnnotation = Annotations.getOneInHierarchy(getterMethod, Src.class);
 		}
 		Field field = dfo.getField();
 		if (null == srcAnnotation && null != field) {

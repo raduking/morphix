@@ -423,32 +423,13 @@ public interface Methods {
 		} catch (InvocationTargetException e) {
 			// e is just a wrapper on the real exception, escalate the real one
 			Throwable cause = Reflection.unwrapInvocationTargetException(e);
-			String className = getCanonicalClassName(method, obj);
+			String className = Classes.getCanonicalName(method, obj);
 			throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), cause.getMessage());
 		} catch (Exception e) {
 			// escalate any exception invoking the method
-			String className = getCanonicalClassName(method, obj);
+			String className = Classes.getCanonicalName(method, obj);
 			throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), e.getMessage());
 		}
-	}
-
-	/**
-	 * Returns the canonical class name for the given method and object. If the object is null, the declaring class of the
-	 * method is used. If the object is a Class, its canonical name is used. Otherwise, the canonical name of the object's
-	 * class is used. This method is used to build error messages when invoking methods.
-	 *
-	 * @param method method for which the class name is needed
-	 * @param obj object on which the method is invoked
-	 * @return canonical class name for the given method and object
-	 */
-	private static String getCanonicalClassName(final Method method, final Object obj) {
-		if (null == obj) {
-			return method.getDeclaringClass().getCanonicalName();
-		}
-		if (obj instanceof Class<?> cls) {
-			return cls.getCanonicalName();
-		}
-		return obj.getClass().getCanonicalName();
 	}
 
 	/**

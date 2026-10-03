@@ -14,6 +14,7 @@ package org.morphix.reflection;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
@@ -28,6 +29,73 @@ public class Annotations {
 	 * The name of the internal field holding annotation member values.
 	 */
 	static final String FIELD_NAME_MEMBER_VALUES = "memberValues";
+
+	/**
+	 * Returns the given annotation as found on the given method or, if the method does not carry it, on the nearest
+	 * declaration of the same method in its class and interface hierarchy.
+	 * <p>
+	 * Java does not inherit method annotations, so a method overriding a superclass or implementing an interface method
+	 * only carries the annotations of its own declaration. This method is meant for the annotations that describe the
+	 * method itself, in a contract-like fashion, and where an annotation declared once on the general declaration is
+	 * expected to be honored by all the more derived ones. Use {@link Method#getAnnotation(Class)} instead for annotations
+	 * describing a particular declaration only.
+	 * <p>
+	 * The hierarchy is searched starting from the given method's declaring class, up through its super classes and then
+	 * through its interfaces, including their super interfaces, so the most derived declaration wins. The class hierarchy
+	 * is searched before the interfaces because a class method always overrides an interface method.
+	 * <p>
+	 * A declaration matches the given method if it has the same name and the same parameter types. The return type is
+	 * deliberately ignored, so that covariant overrides and implementations of generic methods are matched as well.
+	 * <p>
+	 * Note: if several interfaces declare the same annotation on the same method, the one returned is the first found,
+	 * following the order given by {@link Class#getInterfaces()}, which is not specified by the JDK.
+	 *
+	 * @param <T> annotation type
+	 *
+	 * @param method method to get the annotation for
+	 * @param annotationClass annotation class
+	 * @return the annotation if it is present in the method's hierarchy, null otherwise
+	 */
+	public static <T extends Annotation> T getOneInHierarchy(final Method method, final Class<T> annotationClass) {
+		T annotation = method.getAnnotation(annotationClass);
+		if (null != annotation) {
+			return annotation;
+		}
+		Class<?> declaringClass = method.getDeclaringClass();
+		for (Class<?> cls = declaringClass.getSuperclass(); null != cls && Object.class != cls; cls = cls.getSuperclass()) {
+			annotation = getDeclaredIn(method, cls, annotationClass);
+			if (null != annotation) {
+				return annotation;
+			}
+		}
+		for (Class<?> iface : Interfaces.getAll(declaringClass)) {
+			annotation = getDeclaredIn(method, iface, annotationClass);
+			if (null != annotation) {
+				return annotation;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the given annotation as declared on the same method, if any, in the given type.
+	 *
+	 * @param <T> annotation type
+	 *
+	 * @param method method to look for in the given type
+	 * @param type type to look the method up in
+	 * @param annotationClass annotation class
+	 * @return the annotation if it is present, null otherwise
+	 */
+	private static <T extends Annotation> T getDeclaredIn(final Method method, final Class<?> type, final Class<T> annotationClass) {
+		Method declared;
+		try {
+			declared = type.getDeclaredMethod(method.getName(), method.getParameterTypes());
+		} catch (NoSuchMethodException e) {
+			return null;
+		}
+		return declared.getAnnotation(annotationClass);
+	}
 
 	/**
 	 * Overrides a specific attribute value of an annotation instance.

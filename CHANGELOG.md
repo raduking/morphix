@@ -4,6 +4,12 @@
 
 - Changed the build, now fails fast at the `validate` phase, when Maven is running on any JDK other than 21.
 - Fixed `ExtendedFields.findAllNonStatic` attaching the getter declared in the most general class instead of the most derived one when a getter is overridden.
+- Fixed `ExtendedFields.findAllNonStatic` picking synthetic methods, such as bridge methods, which would drop the annotations of the real getter declaration.
+- Fixed `ExtendedFields.findAllNonStatic` returning `static` getters as instance properties.
+- Added `Annotations.getOneInHierarchy(Method, Class)` to read an annotation from the nearest declaration of a method, in its class and interface hierarchy.
+- Added `Interfaces.getAll(Class)` to return all the interfaces implemented directly or indirectly by a class.
+- Added `Classes.getCanonicalName(Class)`, `Classes.getCanonicalName(Object)` and `Classes.getCanonicalName(Method, Object)` utility methods.
+- Fixed `@Src` being ignored when placed on a super class or interface getter that is overridden without it.
 - Upgraded parent to `4.1.1`.
 
 ---
