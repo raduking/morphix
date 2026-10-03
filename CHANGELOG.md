@@ -6,7 +6,7 @@
 - Fixed `ExtendedFields.findAllNonStatic` attaching the getter declared in the most general class instead of the most derived one when a getter is overridden.
 - Fixed `ExtendedFields.findAllNonStatic` picking synthetic methods, such as bridge methods, which would drop the annotations of the real getter declaration.
 - Fixed `ExtendedFields.findAllNonStatic` returning `static` getters as instance properties.
-- Added `Annotations.getOneInHierarchy(Method, Class)` to read an annotation from the nearest declaration of a method, in its class and interface hierarchy.
+- Added `Annotations.getInHierarchy(Method, Class)` to read an annotation from the nearest declaration of a method, in its class and interface hierarchy.
 - Added `Interfaces.getAll(Class)` to return all the interfaces implemented directly or indirectly by a class.
 - Added `Classes.getCanonicalName(Class)` to return the canonical name of a class, null if the class is null.
 - Added `Classes.getCanonicalName(Object)` to return the canonical name of the object's class, or of the object itself when it is a `Class`.

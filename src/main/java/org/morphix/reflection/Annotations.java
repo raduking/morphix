@@ -50,6 +50,12 @@ public class Annotations {
 	 * Note: if several interfaces declare the same annotation on the same method, the one returned is the first found,
 	 * following the traversal order of {@link Interfaces#getAll(Class)}, which is rooted in the unspecified
 	 * {@link Class#getInterfaces()} order.
+	 * <p>
+	 * There is no need to qualify the result with a count, as there is for
+	 * {@link Methods#getOneDeclaredInHierarchy(String, Class, Class[])}: a single element carries at most one instance of a
+	 * given annotation type. The one exception are {@link java.lang.annotation.Repeatable repeatable} annotations, which
+	 * are stored in their container and are therefore not visible to this method, not even in the declaration that holds
+	 * them.
 	 *
 	 * @param <T> annotation type
 	 *
@@ -57,7 +63,7 @@ public class Annotations {
 	 * @param annotationClass annotation class
 	 * @return the annotation if it is present in the method's hierarchy, null otherwise
 	 */
-	public static <T extends Annotation> T getOneInHierarchy(final Method method, final Class<T> annotationClass) {
+	public static <T extends Annotation> T getInHierarchy(final Method method, final Class<T> annotationClass) {
 		T annotation = method.getAnnotation(annotationClass);
 		if (null != annotation) {
 			return annotation;
@@ -89,10 +95,8 @@ public class Annotations {
 	 * @return the annotation if it is present, null otherwise
 	 */
 	private static <T extends Annotation> T getDeclaredIn(final Method method, final Class<?> type, final Class<T> annotationClass) {
-		Method declared;
-		try {
-			declared = type.getDeclaredMethod(method.getName(), method.getParameterTypes());
-		} catch (NoSuchMethodException e) {
+		Method declared = Methods.Safe.getOneDeclared(method.getName(), type, method.getParameterTypes());
+		if (null == declared) {
 			return null;
 		}
 		return declared.getAnnotation(annotationClass);

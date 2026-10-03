@@ -29,7 +29,7 @@ public interface Interfaces {
 	 * The traversal is depth-first: the directly implemented interfaces come first, in the order given by
 	 * {@link Class#getInterfaces()}, and each of them is immediately followed by its own super interfaces. That order is
 	 * not specified by the JDK, so callers that need a specific interface to win over another should not rely on it, see
-	 * {@link Annotations#getOneInHierarchy(java.lang.reflect.Method, Class)}.
+	 * {@link Annotations#getInHierarchy(java.lang.reflect.Method, Class)}.
 	 *
 	 * @param cls class to get the interfaces of
 	 * @return all the interfaces implemented by the given class

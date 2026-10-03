@@ -224,7 +224,7 @@ public class ObjectConverter<S, D> implements
 		Src srcAnnotation = null;
 		Method getterMethod = dfo.getGetterMethod();
 		if (null != getterMethod) {
-			srcAnnotation = Annotations.getOneInHierarchy(getterMethod, Src.class);
+			srcAnnotation = Annotations.getInHierarchy(getterMethod, Src.class);
 		}
 		Field field = dfo.getField();
 		if (null == srcAnnotation && null != field) {

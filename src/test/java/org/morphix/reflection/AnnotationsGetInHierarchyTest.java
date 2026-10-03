@@ -16,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
@@ -24,11 +25,11 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Annotations#getOneInHierarchy(Method, Class)}.
+ * Test class for {@link Annotations#getInHierarchy(Method, Class)}.
  *
  * @author Radu Sebastian LAZIN
  */
-class AnnotationsGetOneInHierarchyTest {
+class AnnotationsGetInHierarchyTest {
 
 	private static final String GET_VALUE_METHOD_NAME = "getValue";
 
@@ -59,6 +60,36 @@ class AnnotationsGetOneInHierarchyTest {
 		@TestAnnotation(SUPER)
 		public String getValue() {
 			return RETURN_VALUE;
+		}
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Repeatable(RepeatableTestAnnotations.class)
+	@interface RepeatableTestAnnotation {
+		String value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface RepeatableTestAnnotations {
+		RepeatableTestAnnotation[] value();
+	}
+
+	static class WithRepeatableAnnotations {
+
+		@RepeatableTestAnnotation(OWN)
+		@RepeatableTestAnnotation(SUPER)
+		public String getValue() {
+			return RETURN_VALUE;
+		}
+	}
+
+	static class OverridesRepeatableAnnotations extends BaseWithAnnotation {
+
+		@RepeatableTestAnnotation(OWN)
+		@RepeatableTestAnnotation(SUPER)
+		@Override
+		public String getValue() {
+			return super.getValue();
 		}
 	}
 
@@ -190,21 +221,21 @@ class AnnotationsGetOneInHierarchyTest {
 	void shouldReturnTheAnnotationOnTheMethodItself() {
 		Method method = nonBridgeMethod(WithOwnAnnotation.class, GET_VALUE_METHOD_NAME);
 
-		assertThat(Annotations.getOneInHierarchy(method, TestAnnotation.class).value(), equalTo(OWN));
+		assertThat(Annotations.getInHierarchy(method, TestAnnotation.class).value(), equalTo(OWN));
 	}
 
 	@Test
 	void shouldReturnTheAnnotationFromTheSuperclassDeclaration() {
 		Method method = nonBridgeMethod(DerivedWithoutAnnotation.class, GET_VALUE_METHOD_NAME);
 
-		assertThat(Annotations.getOneInHierarchy(method, TestAnnotation.class).value(), equalTo(SUPER));
+		assertThat(Annotations.getInHierarchy(method, TestAnnotation.class).value(), equalTo(SUPER));
 	}
 
 	@Test
 	void shouldReturnTheAnnotationFromTheInterfaceDeclaration() {
 		Method method = nonBridgeMethod(ImplementsInterfaceWithoutAnnotation.class, GET_VALUE_METHOD_NAME);
 
-		assertThat(Annotations.getOneInHierarchy(method, TestAnnotation.class).value(), equalTo(IFACE));
+		assertThat(Annotations.getInHierarchy(method, TestAnnotation.class).value(), equalTo(IFACE));
 	}
 
 	@Test
@@ -212,56 +243,70 @@ class AnnotationsGetOneInHierarchyTest {
 		Method method = nonBridgeMethod(ImplementsCovariantInterface.class, GET_VALUE_METHOD_NAME);
 
 		assertThat(method.getReturnType(), equalTo(String.class));
-		assertThat(Annotations.getOneInHierarchy(method, TestAnnotation.class).value(), equalTo(COVARIANT));
+		assertThat(Annotations.getInHierarchy(method, TestAnnotation.class).value(), equalTo(COVARIANT));
 	}
 
 	@Test
 	void shouldReturnTheAnnotationFromTheSuperinterfaceOfAnInterfaceDeclaration() {
 		Method method = nonBridgeMethod(MiddleWithoutAnnotation.class, GET_VALUE_METHOD_NAME);
 
-		assertThat(Annotations.getOneInHierarchy(method, TestAnnotation.class).value(), equalTo(ROOT));
+		assertThat(Annotations.getInHierarchy(method, TestAnnotation.class).value(), equalTo(ROOT));
 	}
 
 	@Test
 	void shouldPreferTheSuperclassDeclarationOverTheInterfaceOne() {
 		Method method = nonBridgeMethod(ExtendsBaseAndImplementsInterface.class, GET_VALUE_METHOD_NAME);
 
-		assertThat(Annotations.getOneInHierarchy(method, TestAnnotation.class).value(), equalTo(SUPER));
+		assertThat(Annotations.getInHierarchy(method, TestAnnotation.class).value(), equalTo(SUPER));
 	}
 
 	@Test
 	void shouldReturnTheAnnotationFromASuperinterfaceSharedByDiamondInterfaces() {
 		Method method = nonBridgeMethod(Diamond.class, GET_VALUE_METHOD_NAME);
 
-		assertThat(Annotations.getOneInHierarchy(method, TestAnnotation.class).value(), equalTo(LEFT));
+		assertThat(Annotations.getInHierarchy(method, TestAnnotation.class).value(), equalTo(LEFT));
 	}
 
 	@Test
 	void shouldKeepSearchingWhenAnIntermediateSuperclassHasNoAnnotation() {
 		Method method = nonBridgeMethod(PlainBottom.class, GET_VALUE_METHOD_NAME);
 
-		assertThat(Annotations.getOneInHierarchy(method, TestAnnotation.class).value(), equalTo(TOP));
+		assertThat(Annotations.getInHierarchy(method, TestAnnotation.class).value(), equalTo(TOP));
 	}
 
 	@Test
 	void shouldFallBackToTheInterfaceWhenNoSuperclassCarriesTheAnnotation() {
 		Method method = nonBridgeMethod(DerivedFromBaseWithoutAnnotation.class, GET_VALUE_METHOD_NAME);
 
-		assertThat(Annotations.getOneInHierarchy(method, TestAnnotation.class).value(), equalTo(IFACE));
+		assertThat(Annotations.getInHierarchy(method, TestAnnotation.class).value(), equalTo(IFACE));
 	}
 
 	@Test
 	void shouldReturnNullWhenNoDeclarationCarriesTheAnnotation() {
 		Method method = nonBridgeMethod(Unrelated.class, GET_VALUE_METHOD_NAME);
 
-		assertThat(Annotations.getOneInHierarchy(method, TestAnnotation.class), nullValue());
+		assertThat(Annotations.getInHierarchy(method, TestAnnotation.class), nullValue());
 	}
 
 	@Test
 	void shouldReturnNullWhenTheMethodIsNotDeclaredInTheHierarchy() {
 		Method method = nonBridgeMethod(WithOwnAnnotation.class, GET_VALUE_METHOD_NAME);
 
-		assertThat(Annotations.getOneInHierarchy(method, Deprecated.class), nullValue());
+		assertThat(Annotations.getInHierarchy(method, Deprecated.class), nullValue());
+	}
+
+	@Test
+	void shouldNotSeeRepeatableAnnotationsStoredInTheirContainer() {
+		Method method = nonBridgeMethod(WithRepeatableAnnotations.class, GET_VALUE_METHOD_NAME);
+
+		assertThat(Annotations.getInHierarchy(method, RepeatableTestAnnotation.class), nullValue());
+	}
+
+	@Test
+	void shouldFallBackToTheHierarchyWhenOnlyTheMethodCarriesRepeatableAnnotations() {
+		Method method = nonBridgeMethod(OverridesRepeatableAnnotations.class, GET_VALUE_METHOD_NAME);
+
+		assertThat(Annotations.getInHierarchy(method, TestAnnotation.class).value(), equalTo(SUPER));
 	}
 
 	private static Method nonBridgeMethod(final Class<?> cls, final String name) {
