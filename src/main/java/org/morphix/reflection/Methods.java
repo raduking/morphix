@@ -401,8 +401,7 @@ public interface Methods {
 		}
 		method = Methods.getOneDeclaredInHierarchy(methodName, cls, primitiveFieldType);
 		if (null == method) {
-			throw new ReflectionException(
-					"Error finding method: {}({}) or {}({})",
+			throw new ReflectionException(ErrorMessage.ERROR_FINDING_METHOD_OR,
 					methodName, field.getType().getCanonicalName(), methodName, primitiveFieldType.getCanonicalName());
 		}
 		return method;
@@ -467,7 +466,7 @@ public interface Methods {
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
-	class ErrorMessage {
+	final class ErrorMessage { // NOSONAR this is a namespace for error messages
 
 		/**
 		 * Error invoking method message.
@@ -480,10 +479,15 @@ public interface Methods {
 		public static final String ERROR_FINDING_METHOD = "Error finding method: {}({})";
 
 		/**
-		 * Private constructor to avoid instantiation.
+		 * Error finding method or method message. This is used when trying to find a method with two different parameter types.
+		 */
+		public static final String ERROR_FINDING_METHOD_OR = ERROR_FINDING_METHOD + " or {}({})";
+
+		/**
+		 * Private constructor to prevent instantiation.
 		 */
 		private ErrorMessage() {
-			throw Constructors.unsupportedOperationException();
+			throw new UnsupportedOperationException("This class should not be instantiated!");
 		}
 	}
 
