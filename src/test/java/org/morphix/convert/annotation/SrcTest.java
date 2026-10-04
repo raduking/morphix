@@ -85,6 +85,147 @@ class SrcTest {
 		assertThat(b.i, equalTo(13));
 	}
 
+	public static class SrcGetterBase {
+
+		Integer i;
+
+		@Src("s")
+		public Integer getI() {
+			return i;
+		}
+	}
+
+	public static class SrcGetterDerivedWithoutSrc extends SrcGetterBase {
+
+		@Override
+		public Integer getI() {
+			return super.getI();
+		}
+	}
+
+	@Test
+	void shouldFindTheSourceFieldWithAnnotationOnSuperclassGetter() {
+		A1 a = new A1();
+		a.s = "13";
+
+		SrcGetterDerivedWithoutSrc b = convert(a).to(SrcGetterDerivedWithoutSrc::new);
+
+		assertThat(b.i, equalTo(13));
+	}
+
+	public static class SrcGetterDerivedWithOwnSrc extends SrcGetterBase {
+
+		@Override
+		@Src("other")
+		public Integer getI() {
+			return super.getI();
+		}
+	}
+
+	public static class SourceWithTwoFields {
+
+		String s;
+
+		String other;
+
+		public String getS() {
+			return s;
+		}
+
+		public String getOther() {
+			return other;
+		}
+	}
+
+	@Test
+	void shouldPreferTheOwnGetterAnnotationOverTheSuperclassOne() {
+		SourceWithTwoFields a = new SourceWithTwoFields();
+		a.s = "13";
+		a.other = "17";
+
+		SrcGetterDerivedWithOwnSrc b = convert(a).to(SrcGetterDerivedWithOwnSrc::new);
+
+		assertThat(b.i, equalTo(17));
+	}
+
+	public interface SrcGetterInterface {
+
+		@Src("s")
+		Integer getI();
+	}
+
+	public static class SrcGetterInterfaceImpl implements SrcGetterInterface {
+
+		Integer i;
+
+		@Override
+		public Integer getI() {
+			return i;
+		}
+	}
+
+	@Test
+	void shouldFindTheSourceFieldWithAnnotationOnInterfaceGetter() {
+		A1 a = new A1();
+		a.s = "13";
+
+		SrcGetterInterfaceImpl b = convert(a).to(SrcGetterInterfaceImpl::new);
+
+		assertThat(b.i, equalTo(13));
+	}
+
+	public interface GenericSrcGetterInterface<T> {
+
+		@Src("s")
+		T getI();
+	}
+
+	public static class GenericSrcGetterInterfaceImpl implements GenericSrcGetterInterface<Integer> {
+
+		Integer i;
+
+		@Override
+		public Integer getI() {
+			return i;
+		}
+	}
+
+	@Test
+	void shouldFindTheSourceFieldWithAnnotationOnGenericInterfaceGetter() {
+		A1 a = new A1();
+		a.s = "13";
+
+		GenericSrcGetterInterfaceImpl b = convert(a).to(GenericSrcGetterInterfaceImpl::new);
+
+		assertThat(b.i, equalTo(13));
+	}
+
+	public interface FromSrcGetterInterface {
+
+		@Src(from = @From(type = A1.class, path = "s"))
+		Integer getI();
+	}
+
+	public static class FromSrcGetterInterfaceImpl implements FromSrcGetterInterface {
+
+		Integer i;
+
+		@Override
+		public Integer getI() {
+			return i;
+		}
+	}
+
+	@Test
+	void shouldFindTheSourceFieldWithFromAnnotationOnInterfaceGetter() {
+		A1 a = new A1();
+		a.s = "13";
+
+		FromSrcGetterInterfaceImpl b = convert(a).to(FromSrcGetterInterfaceImpl::new);
+
+		assertThat(b.i, equalTo(13));
+	}
+
 	public static class A2 {
 
 		A3 x;

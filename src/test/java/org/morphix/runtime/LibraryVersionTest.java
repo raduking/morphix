@@ -81,6 +81,14 @@ class LibraryVersionTest {
 		}
 
 		@Test
+		void shouldReturnNullVersionWhenAnchorClassIsNull() {
+			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, (Class<?>) null);
+
+			assertThat(libraryVersion.getName(), is(LIBRARY_NAME));
+			assertThat(libraryVersion.value(), is(nullValue()));
+		}
+
+		@Test
 		void shouldBuildVersionFromMajorMinorAndPatch() {
 			LibraryVersion libraryVersion = LibraryVersion.of(LIBRARY_NAME, 5, 4, 3);
 
@@ -328,6 +336,60 @@ class LibraryVersionTest {
 
 			assertThat(libraryVersion.isAtLeast(new LibraryVersion("zzz-library", "5.5.1")), is(true));
 			assertThat(libraryVersion.isAtLeast(new LibraryVersion("aaa-library", "5.5.1")), is(true));
+		}
+	}
+
+	@Nested
+	class IsAtMostTests {
+
+		@Test
+		void shouldConsiderVersionAtMostMaximumWhenVersionCannotBeDetermined() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+
+			assertThat(libraryVersion.isAtMost("0.0"), is(true));
+		}
+
+		@Test
+		void shouldReturnTrueWhenVersionIsAtMostMaximum() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+
+			assertThat(libraryVersion.isAtMost("5.6"), is(true));
+		}
+
+		@Test
+		void shouldReturnFalseWhenVersionIsNewerThanMaximum() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.6.1");
+
+			assertThat(libraryVersion.isAtMost("5.5"), is(false));
+		}
+
+		@Test
+		void shouldReturnTrueWhenVersionIsAtMostMaximumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+
+			assertThat(libraryVersion.isAtMost(new LibraryVersion(LIBRARY_NAME, "5.6")), is(true));
+		}
+
+		@Test
+		void shouldReturnFalseWhenVersionIsNewerThanMaximumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.6.1");
+
+			assertThat(libraryVersion.isAtMost(new LibraryVersion(LIBRARY_NAME, "5.5")), is(false));
+		}
+
+		@Test
+		void shouldConsiderVersionAtMostMaximumVersionInstanceWhenVersionCannotBeDetermined() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+
+			assertThat(libraryVersion.isAtMost(new LibraryVersion(LIBRARY_NAME, "0.0")), is(true));
+		}
+
+		@Test
+		void shouldIgnoreMaximumVersionInstanceName() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+
+			assertThat(libraryVersion.isAtMost(new LibraryVersion("zzz-library", "5.5.1")), is(true));
+			assertThat(libraryVersion.isAtMost(new LibraryVersion("aaa-library", "5.5.1")), is(true));
 		}
 	}
 
@@ -593,6 +655,24 @@ class LibraryVersionTest {
 			LibraryVersion newer = new LibraryVersion(LIBRARY_NAME, "5.10");
 
 			assertThat(older.compareTo(newer), is(lessThan(0)));
+		}
+
+		@Test
+		void shouldReturnNegativeWhenMajorComponentDiffers() {
+			LibraryVersion older = new LibraryVersion(LIBRARY_NAME, "4.9.9");
+			LibraryVersion newer = new LibraryVersion(LIBRARY_NAME, "5.0.0");
+
+			assertThat(older.compareTo(newer), is(lessThan(0)));
+			assertThat(newer.compareTo(older), is(greaterThan(0)));
+		}
+
+		@Test
+		void shouldCompareMajorComponentNumerically() {
+			LibraryVersion older = new LibraryVersion(LIBRARY_NAME, "9.9.9");
+			LibraryVersion newer = new LibraryVersion(LIBRARY_NAME, "10.0.0");
+
+			assertThat(older.compareTo(newer), is(lessThan(0)));
+			assertThat(newer.compareTo(older), is(greaterThan(0)));
 		}
 
 		@Test

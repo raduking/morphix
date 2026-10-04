@@ -13,6 +13,7 @@
 package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -89,19 +90,19 @@ class MethodsGetGenericReturnClassTest {
 	}
 
 	@Test
-	void shouldReturnNullInvalidIndexOnSafe() throws Exception {
+	void shouldFailForNegativeIndex() throws Exception {
 		Method method = A.class.getMethod("getList1");
-		Class<?> cls = Methods.Safe.getGenericReturnType(method, 1);
 
-		assertThat(cls, equalTo(null));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnClass(method, -1));
+
+		assertThat(e.getMessage(), containsString("index -1"));
 	}
 
 	@Test
-	void shouldThrowClassCastExceptionOnFailToCastFromParameterizedClass() throws Exception {
-		Method method = A.class.getMethod("getList2");
-		assertThrows(ClassCastException.class, () -> {
-			@SuppressWarnings("unused")
-			Class<?> cls = Methods.Safe.getGenericReturnType(method, 0);
-		});
+	void shouldFailForNullMethod() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnClass(null, 0));
+
+		assertThat(e.getMessage(), equalTo("Method cannot be null when looking for the generic return class"));
 	}
+
 }

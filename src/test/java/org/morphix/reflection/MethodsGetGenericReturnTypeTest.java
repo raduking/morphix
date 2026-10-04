@@ -13,6 +13,7 @@
 package org.morphix.reflection;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -72,6 +73,22 @@ class MethodsGetGenericReturnTypeTest {
 				equalTo(method.getGenericReturnType().getTypeName() + " is a raw return type for method "
 						+ method.getDeclaringClass().getCanonicalName()
 						+ "." + method.getName()));
+	}
+
+	@Test
+	void shouldFailForNegativeIndex() throws Exception {
+		Method method = A.class.getMethod("getList1");
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnType(method, -1));
+
+		assertThat(e.getMessage(), containsString("index -1"));
+	}
+
+	@Test
+	void shouldFailForNullMethod() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnType(null, 0));
+
+		assertThat(e.getMessage(), equalTo("Method cannot be null when looking for the generic return type"));
 	}
 
 }

@@ -39,6 +39,7 @@ class BuildVersionsTest {
 	private static final String TARGET_CLASSES = TARGET + "/classes";
 
 	private static final String PROPERTY_JAVA_VERSION = "java.version";
+	private static final String PROPERTY_JAVA_VERSION_NEXT = "java.version.next";
 	private static final String PROPERTY_MAVEN_COMPILER_TARGET = "maven.compiler.target";
 
 	private static final String MAVEN_PROPERTIES = TARGET + "/maven.properties";
@@ -60,6 +61,16 @@ class BuildVersionsTest {
 		String actual = javaVersion.startsWith("1.") ? javaVersion.substring(2, 3) : javaVersion.split("\\.")[0];
 
 		assertEquals(target, actual);
+	}
+
+	@Test
+	void shouldEnforceAnExclusiveUpperBoundOnTheSupportedJavaVersion() {
+		String target = PROPERTIES.getProperty(PROPERTY_MAVEN_COMPILER_TARGET);
+		String next = PROPERTIES.getProperty(PROPERTY_JAVA_VERSION_NEXT);
+
+		assertThat(next, not(emptyOrNullString()));
+		assertEquals(Integer.parseInt(target) + 1, Integer.parseInt(next),
+				PROPERTY_JAVA_VERSION_NEXT + " must be exactly one major above " + PROPERTY_MAVEN_COMPILER_TARGET);
 	}
 
 	@Test

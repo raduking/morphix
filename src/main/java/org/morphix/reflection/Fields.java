@@ -131,16 +131,19 @@ public interface Fields {
 	 */
 	static List<Field> filter(final List<Field> fields, final Predicate<Field> predicate) {
 		List<Field> fieldsMatchingPredicate = new ArrayList<>(fields.size());
-		for (Field field : fields) {
+		fields.forEach(field -> {
 			if (predicate.test(field)) {
 				fieldsMatchingPredicate.add(field);
 			}
-		}
+		});
 		return fieldsMatchingPredicate;
 	}
 
 	/**
 	 * Returns a list with all the fields in the class given as parameter including the ones in all it's super classes.
+	 * <p>
+	 * Note: if the class given as parameter is an interface then the fields declared by that interface are returned, but
+	 * not the ones declared by its super interfaces, since those are interfaces as well.
 	 * <p>
 	 * {@link LinkedList} is used because:
 	 * <ul>
@@ -161,10 +164,10 @@ public interface Fields {
 		if (null == cls) {
 			return List.of();
 		}
-		if (null == cls.getSuperclass()) {
-			return new LinkedList<>();
-		}
-		List<Field> fields = getAllDeclaredInHierarchy(cls.getSuperclass());
+		// an interface has no super class, but it does declare fields of its own
+		Class<?> superClass = cls.getSuperclass();
+		List<Field> fields = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass);
+		// Object declares no fields, so no special case is needed for it here
 		fields.addAll(0, getAllDeclared(cls));
 		return fields;
 	}
@@ -630,8 +633,7 @@ public interface Fields {
 		 *
 		 * @param obj object containing the field (null for static fields)
 		 * @param fieldName field name to query
-		 * @return field value
-		 * @throws ReflectionException if the field is not found
+		 * @return field value, null if the field is not found
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
 			Class<?> cls = Classes.getFrom(obj);
@@ -650,8 +652,7 @@ public interface Fields {
 		 *
 		 * @param cls the class that has the static field
 		 * @param fieldName the name of the static field
-		 * @return the value of the static field with the given name
-		 * @throws ReflectionException if the field is not found
+		 * @return the value of the static field with the given name, null if the field is not found or is not static
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
@@ -667,8 +668,7 @@ public interface Fields {
 		 * @param <T> the type of the static field
 		 *
 		 * @param field the static field
-		 * @return the value of the static field with the given name
-		 * @throws ReflectionException if the field is not static
+		 * @return the value of the static field with the given name, null if the field is null or is not static
 		 */
 		static <T> T getStatic(final Field field) {
 			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
@@ -686,7 +686,7 @@ public interface Fields {
 		 *
 		 * @param obj object to search the field in
 		 * @param paths possible paths to the field
-		 * @return field value or null if the field is not found or the field value cannot be returned
+		 * @return field value or null if the field is not found in none of the given paths
 		 */
 		static <T, U> U getByPaths(final T obj, final String... paths) {
 			U result = null;
@@ -712,35 +712,33 @@ public interface Fields {
 		 *
 		 * @param obj object to search the field in
 		 * @param paths comma separated possible paths to the field
-		 * @return field value or null if the field is not found or the field value cannot be returned
+		 * @return field value or null if the field is not found in none of the given paths
+		 * @throws NullPointerException if the paths are null
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
 			return getByPaths(obj, Objects.requireNonNull(paths, "paths").split(","));
 		}
 
 		/**
-		 * Returns the field value given by its qualified path to the required field in the given object.
+		 * Returns the field value given by its qualified path to the required field in the given object. The field is read
+		 * directly, without going through a getter method.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
 		 *
 		 * @param obj object to get the field from
 		 * @param path qualified path to the field
-		 * @return field value or null if the field is not found or the field value cannot be returned
+		 * @return field value or null if the field is not found or if the object is null
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
 			U result = null;
 			String[] fieldNames = path.split("\\.");
 			if (fieldNames.length == 1) {
-				result = Fields.get(obj, fieldNames[0]);
+				result = Safe.get(obj, fieldNames[0]);
 			} else {
 				Object value = obj;
 				for (String fieldName : fieldNames) {
-					try {
-						value = Fields.get(value, fieldName);
-					} catch (ReflectionException e) {
-						value = null;
-					}
+					value = Safe.get(value, fieldName);
 					if (null == value) {
 						break;
 					}

@@ -21,6 +21,10 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation used to annotate destination fields so that the converter knows how to convert it from source.
+ * <p>
+ * When placed on a getter, it is also honoured on the declarations of the same getter in the super classes and
+ * interfaces of the class declaring it, so annotating the general declaration once is enough. The most derived
+ * declaration carrying the annotation wins.
  *
  * @author Radu Sebastian LAZIN
  */

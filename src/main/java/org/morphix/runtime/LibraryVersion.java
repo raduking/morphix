@@ -40,6 +40,16 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	private static final int COMPONENTS = 3;
 
 	/**
+	 * The label used in error messages when the detected version is older than the minimum required version.
+	 */
+	private static final String MAXIMUM = "maximum";
+
+	/**
+	 * The label used in error messages when the detected version is newer than the maximum required version.
+	 */
+	private static final String MINIMUM = "minimum";
+
+	/**
 	 * The library name, used only for diagnostic messages.
 	 */
 	private final String name;
@@ -303,7 +313,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 */
 	public void verifyAtLeast(final String minimumVersion, final Consumer<String> onError) {
 		if (!isAtLeast(minimumVersion)) {
-			onError.accept(errorMessage(minimumVersion));
+			onError.accept(errorMessage(MINIMUM, minimumVersion));
 		}
 	}
 
@@ -317,29 +327,111 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 */
 	public void verifyAtLeast(final LibraryVersion minimumVersion, final Consumer<String> onError) {
 		if (!isAtLeast(minimumVersion)) {
-			onError.accept(errorMessage(minimumVersionString(minimumVersion)));
+			onError.accept(errorMessage(MINIMUM, requiredVersionString(minimumVersion)));
 		}
 	}
 
 	/**
-	 * Returns the error message for a failed version check against the given minimum version.
+	 * Checks whether the detected runtime version is at most the given maximum version. If the runtime version could not be
+	 * determined the check cannot be enforced and this method returns {@code true}.
 	 *
-	 * @param minimumVersion the minimum required version, as displayed in the message
-	 * @return the error message
+	 * @param maximumVersion the maximum required version
+	 * @return true if the runtime version is at most the maximum version, or if it could not be determined
 	 */
-	private String errorMessage(final String minimumVersion) {
-		return Messages.message("Unsupported {} version: {}, minimum required version is {}", name, version, minimumVersion);
+	public boolean isAtMost(final String maximumVersion) {
+		if (null == version) {
+			return true;
+		}
+		String[] parts = maximumVersion.split("\\.");
+		return compareTo(parseVersionPart(parts, 0), parseVersionPart(parts, 1), parseVersionPart(parts, 2)) <= 0;
 	}
 
 	/**
-	 * Returns the detected version of the given minimum version, falling back to its semantic representation if it cannot
+	 * Checks whether the detected runtime version is at most the given maximum version. If the runtime version could not be
+	 * determined the check cannot be enforced and this method returns {@code true}.
+	 *
+	 * @param maximumVersion the maximum required version
+	 * @return true if the runtime version is at most the maximum version, or if it could not be determined
+	 */
+	public boolean isAtMost(final LibraryVersion maximumVersion) {
+		Objects.requireNonNull(maximumVersion, "maximumVersion must not be null");
+		return null == version || compareTo(maximumVersion.major, maximumVersion.minor, maximumVersion.patch) <= 0;
+	}
+
+	/**
+	 * Verifies that the detected runtime version is at most the given maximum version. If the runtime version could not be
+	 * determined the check is skipped since it cannot be reliably enforced.
+	 *
+	 * @param maximumVersion the maximum required version
+	 * @throws IllegalStateException if the detected runtime version is newer than the maximum version
+	 */
+	public void verifyAtMost(final String maximumVersion) {
+		verifyAtMost(maximumVersion, message -> {
+			throw new IllegalStateException(message);
+		});
+	}
+
+	/**
+	 * Verifies that the detected runtime version is at most the given maximum version. If the runtime version could not be
+	 * determined the check is skipped since it cannot be reliably enforced.
+	 *
+	 * @param maximumVersion the maximum required version
+	 * @throws IllegalStateException if the detected runtime version is newer than the maximum version
+	 */
+	public void verifyAtMost(final LibraryVersion maximumVersion) {
+		verifyAtMost(maximumVersion, message -> {
+			throw new IllegalStateException(message);
+		});
+	}
+
+	/**
+	 * Verifies that the detected runtime version is at most the given maximum version. If the runtime version could not be
+	 * determined the check is skipped since it cannot be reliably enforced.
+	 *
+	 * @param maximumVersion the maximum required version
+	 * @param onError a callback to handle the error message if the detected runtime version is newer than the maximum
+	 *     version
+	 */
+	public void verifyAtMost(final String maximumVersion, final Consumer<String> onError) {
+		if (!isAtMost(maximumVersion)) {
+			onError.accept(errorMessage(MAXIMUM, maximumVersion));
+		}
+	}
+
+	/**
+	 * Verifies that the detected runtime version is at most the given maximum version. If the runtime version could not be
+	 * determined the check is skipped since it cannot be reliably enforced.
+	 *
+	 * @param maximumVersion the maximum required version
+	 * @param onError a callback to handle the error message if the detected runtime version is newer than the maximum
+	 *     version
+	 */
+	public void verifyAtMost(final LibraryVersion maximumVersion, final Consumer<String> onError) {
+		if (!isAtMost(maximumVersion)) {
+			onError.accept(errorMessage(MAXIMUM, requiredVersionString(maximumVersion)));
+		}
+	}
+
+	/**
+	 * Returns the error message for a failed version check against the given maximum version.
+	 *
+	 * @param label the label to use in the message, e.g. "maximum" or "minimum"
+	 * @param actualVersion the maximum required version, as displayed in the message
+	 * @return the error message
+	 */
+	private String errorMessage(final String label, final String actualVersion) {
+		return Messages.message("Unsupported {} version: {}, {} required version is {}", name, version, label, actualVersion);
+	}
+
+	/**
+	 * Returns the detected version of the given required version, falling back to its semantic representation if it cannot
 	 * be determined. Used only for diagnostics, the check itself always compares the already parsed components.
 	 *
-	 * @param minimumVersion the minimum required version, must not be null
-	 * @return the minimum required version as a string
+	 * @param requiredVersion the required version, either a minimum or a maximum one, must not be null
+	 * @return the required version as a string
 	 */
-	private static String minimumVersionString(final LibraryVersion minimumVersion) {
-		return Nullables.apply(minimumVersion, LibraryVersion::value, minimumVersion::toString);
+	private static String requiredVersionString(final LibraryVersion requiredVersion) {
+		return Nullables.apply(requiredVersion, LibraryVersion::value, requiredVersion::toString);
 	}
 
 	/**

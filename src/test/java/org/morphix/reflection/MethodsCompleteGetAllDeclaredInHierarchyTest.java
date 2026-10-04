@@ -13,8 +13,10 @@
 package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.constant.Constable;
@@ -118,4 +120,26 @@ class MethodsCompleteGetAllDeclaredInHierarchyTest {
 
 		assertThat(methods, hasSize(sizeEnum + sizeE + sizeObject));
 	}
+
+	@Test
+	void shouldIncludeMethodsDeclaredByObject() {
+		List<Method> methods = Methods.Complete.getAllDeclaredInHierarchy(C.class);
+
+		assertThat(methods.stream().anyMatch(method -> Object.class.equals(method.getDeclaringClass())), is(true));
+	}
+
+	@Test
+	void shouldNotIncludeObjectMethodsInTheSimplerVariant() {
+		List<Method> methods = Methods.getAllDeclaredInHierarchy(C.class);
+
+		assertThat(methods.stream().anyMatch(method -> Object.class.equals(method.getDeclaringClass())), is(false));
+	}
+
+	@Test
+	void shouldReturnEmptyListIfClassAndExcludedSetAreBothNull() {
+		List<Method> methods = Methods.Complete.getAllDeclaredInHierarchy(null, null);
+
+		assertThat(methods, empty());
+	}
+
 }

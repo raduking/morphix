@@ -14,6 +14,7 @@ package org.morphix.reflection;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashSet;
@@ -172,6 +173,41 @@ public interface Classes {
 	}
 
 	/**
+	 * Returns the {@linkplain Class#getCanonicalName() canonical name} of the given class.
+	 *
+	 * @param cls class to get the canonical name of
+	 * @return canonical name of the given class, null if the class is null
+	 */
+	static String getCanonicalName(final Class<?> cls) {
+		return Safe.getCanonicalName(cls);
+	}
+
+	/**
+	 * Returns the {@linkplain Class#getCanonicalName() canonical name} of the given object. If the object is a
+	 * {@link Class} then its own canonical name is returned, otherwise the canonical name of the object's class is
+	 * returned.
+	 *
+	 * @param obj object to get the canonical class name of
+	 * @return canonical class name of the given object, null if the object is null
+	 */
+	static String getCanonicalName(final Object obj) {
+		return Safe.getCanonicalName(obj);
+	}
+
+	/**
+	 * Returns the canonical class name for the given method and object, to be used in error messages when invoking methods.
+	 * If the object is not null, {@link #getCanonicalName(Object)} is used and the method is not needed at all, otherwise
+	 * the canonical name of the method's declaring class is used.
+	 *
+	 * @param method method on which the class name is needed, may be null only if the object is null too
+	 * @param obj object on which the method is invoked
+	 * @return canonical class name for the given method and object, null if both the method and the object are null
+	 */
+	static String getCanonicalName(final Method method, final Object obj) {
+		return Safe.getCanonicalName(method, obj);
+	}
+
+	/**
 	 * Returns true if the class given by its name is present in the classpath, false otherwise.
 	 *
 	 * @param className the {@linkplain ClassLoader##binary-name binary name}
@@ -224,6 +260,55 @@ public interface Classes {
 			}
 		}
 
+		/**
+		 * Returns the {@linkplain Class#getCanonicalName() canonical name} of the given class.
+		 *
+		 * @param cls class to get the canonical name of
+		 * @return canonical name of the given class, null if the class is null
+		 */
+		static String getCanonicalName(final Class<?> cls) {
+			if (null == cls) {
+				return null;
+			}
+			return cls.getCanonicalName();
+		}
+
+		/**
+		 * Returns the {@linkplain Class#getCanonicalName() canonical name} of the given object. If the object is a
+		 * {@link Class} then its own canonical name is returned, otherwise the canonical name of the object's class is
+		 * returned.
+		 *
+		 * @param obj object to get the canonical class name of
+		 * @return canonical class name of the given object, null if the object is null
+		 */
+		static String getCanonicalName(final Object obj) {
+			if (null == obj) {
+				return null;
+			}
+			if (obj instanceof Class<?> cls) {
+				return getCanonicalName(cls);
+			}
+			return getCanonicalName(obj.getClass());
+		}
+
+		/**
+		 * Returns the canonical class name for the given method and object, to be used in error messages when invoking methods.
+		 * If the object is not null, {@link #getCanonicalName(Object)} is used and the method is not needed at all, otherwise
+		 * the canonical name of the method's declaring class is used.
+		 *
+		 * @param method method on which the class name is needed, may be null only if the object is null too
+		 * @param obj object on which the method is invoked
+		 * @return canonical class name for the given method and object, null if both the method and the object are null
+		 */
+		static String getCanonicalName(final Method method, final Object obj) {
+			if (null != obj) {
+				return getCanonicalName(obj);
+			}
+			if (null == method) {
+				return null;
+			}
+			return getCanonicalName(method.getDeclaringClass());
+		}
 	}
 
 	/**
