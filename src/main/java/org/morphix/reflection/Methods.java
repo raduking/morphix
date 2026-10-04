@@ -484,10 +484,10 @@ public interface Methods {
 		public static final String ERROR_FINDING_METHOD_OR = ERROR_FINDING_METHOD + " or {}({})";
 
 		/**
-		 * Private constructor to prevent instantiation.
+		 * Private constructor to avoid instantiation.
 		 */
 		private ErrorMessage() {
-			throw new UnsupportedOperationException("This class should not be instantiated!");
+			throw Constructors.unsupportedOperationException();
 		}
 	}
 
