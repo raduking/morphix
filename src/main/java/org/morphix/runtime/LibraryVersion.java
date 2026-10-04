@@ -327,7 +327,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 */
 	public void verifyAtLeast(final LibraryVersion minimumVersion, final Consumer<String> onError) {
 		if (!isAtLeast(minimumVersion)) {
-			onError.accept(errorMessage(MINIMUM, minimumVersionString(minimumVersion)));
+			onError.accept(errorMessage(MINIMUM, requiredVersionString(minimumVersion)));
 		}
 	}
 
@@ -408,7 +408,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 */
 	public void verifyAtMost(final LibraryVersion maximumVersion, final Consumer<String> onError) {
 		if (!isAtMost(maximumVersion)) {
-			onError.accept(errorMessage(MAXIMUM, minimumVersionString(maximumVersion)));
+			onError.accept(errorMessage(MAXIMUM, requiredVersionString(maximumVersion)));
 		}
 	}
 
@@ -424,14 +424,14 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	}
 
 	/**
-	 * Returns the detected version of the given minimum version, falling back to its semantic representation if it cannot
+	 * Returns the detected version of the given required version, falling back to its semantic representation if it cannot
 	 * be determined. Used only for diagnostics, the check itself always compares the already parsed components.
 	 *
-	 * @param minimumVersion the minimum required version, must not be null
-	 * @return the minimum required version as a string
+	 * @param requiredVersion the required version, either a minimum or a maximum one, must not be null
+	 * @return the required version as a string
 	 */
-	private static String minimumVersionString(final LibraryVersion minimumVersion) {
-		return Nullables.apply(minimumVersion, LibraryVersion::value, minimumVersion::toString);
+	private static String requiredVersionString(final LibraryVersion requiredVersion) {
+		return Nullables.apply(requiredVersion, LibraryVersion::value, requiredVersion::toString);
 	}
 
 	/**
