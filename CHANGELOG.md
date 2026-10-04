@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.47`
+
+---
+
 `1.0.46`
 
 - Changed the build, now fails fast at the `validate` phase, when Maven is running on any JDK other than 21.
