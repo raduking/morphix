@@ -340,6 +340,60 @@ class LibraryVersionTest {
 	}
 
 	@Nested
+	class IsAtMostTests {
+
+		@Test
+		void shouldConsiderVersionAtMostMaximumWhenVersionCannotBeDetermined() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+
+			assertThat(libraryVersion.isAtMost("0.0"), is(true));
+		}
+
+		@Test
+		void shouldReturnTrueWhenVersionIsAtMostMaximum() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+
+			assertThat(libraryVersion.isAtMost("5.6"), is(true));
+		}
+
+		@Test
+		void shouldReturnFalseWhenVersionIsNewerThanMaximum() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.6.1");
+
+			assertThat(libraryVersion.isAtMost("5.5"), is(false));
+		}
+
+		@Test
+		void shouldReturnTrueWhenVersionIsAtMostMaximumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+
+			assertThat(libraryVersion.isAtMost(new LibraryVersion(LIBRARY_NAME, "5.6")), is(true));
+		}
+
+		@Test
+		void shouldReturnFalseWhenVersionIsNewerThanMaximumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.6.1");
+
+			assertThat(libraryVersion.isAtMost(new LibraryVersion(LIBRARY_NAME, "5.5")), is(false));
+		}
+
+		@Test
+		void shouldConsiderVersionAtMostMaximumVersionInstanceWhenVersionCannotBeDetermined() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+
+			assertThat(libraryVersion.isAtMost(new LibraryVersion(LIBRARY_NAME, "0.0")), is(true));
+		}
+
+		@Test
+		void shouldIgnoreMaximumVersionInstanceName() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+
+			assertThat(libraryVersion.isAtMost(new LibraryVersion("zzz-library", "5.5.1")), is(true));
+			assertThat(libraryVersion.isAtMost(new LibraryVersion("aaa-library", "5.5.1")), is(true));
+		}
+	}
+
+	@Nested
 	class VerifyAtLeastTests {
 
 		@Test
