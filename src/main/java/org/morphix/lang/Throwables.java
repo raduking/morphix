@@ -13,8 +13,11 @@
 package org.morphix.lang;
 
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.morphix.lang.function.Functions;
+import org.morphix.lang.function.Predicates;
 import org.morphix.reflection.Constructors;
 
 /**
@@ -40,26 +43,7 @@ public final class Throwables {
 	 */
 	public static boolean anyMatch(final Throwable throwable, final Predicate<? super Throwable> predicate) {
 		Objects.requireNonNull(predicate, "predicate cannot be null");
-		if (null == throwable) {
-			return false;
-		}
-		// use 2 pointers to detect cycles in the cause chain.
-		Throwable slow = throwable;
-		Throwable fast = throwable;
-		int fastSteps = 2;
-		do {
-			for (int i = 0; i < fastSteps; ++i) {
-				if (predicate.test(fast)) {
-					return true;
-				}
-				fast = fast.getCause();
-				if (null == fast) {
-					return false;
-				}
-			}
-			slow = slow.getCause();
-		} while (slow != fast);
-		return false;
+		return walk(throwable, predicate, Functions.returnTrue(), Functions.returnFalse());
 	}
 
 	/**
@@ -155,26 +139,7 @@ public final class Throwables {
 	 */
 	public static Throwable unwrap(final Throwable throwable, final Class<? extends Throwable> peelType) {
 		Objects.requireNonNull(peelType, "peelType cannot be null");
-		if (null == throwable) {
-			return null;
-		}
-		// use 2 pointers to detect cycles in the cause chain.
-		Throwable slow = throwable;
-		Throwable fast = throwable;
-		do {
-			for (int i = 0; i < 2; ++i) {
-				if (!peelType.isInstance(fast)) {
-					return fast;
-				}
-				Throwable cause = fast.getCause();
-				if (null == cause) {
-					return fast;
-				}
-				fast = cause;
-			}
-			slow = slow.getCause();
-		} while (fast != slow);
-		return fast;
+		return walk(throwable, Predicates.not(peelType::isInstance), Function.identity(), Function.identity());
 	}
 
 	/**
@@ -189,24 +154,47 @@ public final class Throwables {
 	 */
 	public static <T extends Throwable> T find(final Throwable throwable, final Class<T> typeToFind) {
 		Objects.requireNonNull(typeToFind, "typeToFind cannot be null");
+		return walk(throwable, typeToFind::isInstance, typeToFind::cast, Functions.returnNull());
+	}
+
+	/**
+	 * Walks the cause chain from {@code throwable}, including the throwable itself, and stops at the first throwable for
+	 * which {@code predicate} returns {@code true}. Floyd's cycle-finding algorithm is used so a cyclic chain cannot loop
+	 * forever.
+	 * <p>
+	 * When {@code throwable} is {@code null}, {@code otherwise} is applied to {@code null}. When the chain ends with no
+	 * match, {@code otherwise} is applied to the last throwable. When a cycle is detected with no match, {@code otherwise}
+	 * is applied to the throwable where the cycle repeats.
+	 *
+	 * @param <R> result type
+	 *
+	 * @param throwable throwable to inspect, may be {@code null}
+	 * @param predicate predicate tested on each throwable in the chain
+	 * @param onMatch result for the first throwable that matches
+	 * @param otherwise result when there is no match
+	 * @return the value produced by {@code onMatch} or {@code otherwise}
+	 */
+	private static <R> R walk(final Throwable throwable, final Predicate<? super Throwable> predicate,
+			final Function<? super Throwable, ? extends R> onMatch, final Function<? super Throwable, ? extends R> otherwise) {
 		if (null == throwable) {
-			return null;
+			return otherwise.apply(null);
 		}
 		// use 2 pointers to detect cycles in the cause chain.
 		Throwable slow = throwable;
 		Throwable fast = throwable;
 		do {
 			for (int i = 0; i < 2; ++i) {
-				if (typeToFind.isInstance(fast)) {
-					return typeToFind.cast(fast);
+				if (predicate.test(fast)) {
+					return onMatch.apply(fast);
 				}
-				fast = fast.getCause();
-				if (null == fast) {
-					return null;
+				Throwable cause = fast.getCause();
+				if (null == cause) {
+					return otherwise.apply(fast);
 				}
+				fast = cause;
 			}
 			slow = slow.getCause();
 		} while (fast != slow);
-		return null;
+		return otherwise.apply(fast);
 	}
 }
