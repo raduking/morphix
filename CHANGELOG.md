@@ -1,5 +1,14 @@
 ## Release Notes
 
+`1.0.47`
+
+- Added `Functions` class with utility methods for functions.
+- Added `Functions.returnTrue` to always return `true`.
+- Added `Functions.returnFalse` to always return `false`.
+- Added `Functions.returnNull` to always return `null`.
+
+---
+
 `1.0.46`
 
 - Changed the build, now fails fast at the `validate` phase, when Maven is running on any JDK other than 21.
