@@ -6,6 +6,10 @@
 - Added `Functions.returnTrue` to always return `true`.
 - Added `Functions.returnFalse` to always return `false`.
 - Added `Functions.returnNull` to always return `null`.
+- Added `TypeDescriptor` to describe a reflected type, either a `Class` or a captured generic type.
+- Added `TypeDescriptor.UNKNOWN_TYPE` to be used as the type name when no type is set.
+- Added `TypeDescriptor.of(Class<?>)` and `TypeDescriptor.of(GenericClass<?>)` factory methods.
+- Added `TypeDescriptor.getClassType()`, `TypeDescriptor.getGenericType()`, `TypeDescriptor.hasClassType()`, `TypeDescriptor.hasGenericType()`, `TypeDescriptor.hasType()`, `TypeDescriptor.getType()` and `TypeDescriptor.getTypeName()`.
 
 ---
 
