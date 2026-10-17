@@ -15,9 +15,8 @@ package org.morphix.reflection;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.ProtectionDomain;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -50,10 +49,10 @@ public class ClassHidingClassLoader extends ClassLoader {
 	 * @param hiddenClassNames exact binary names of classes to hide
 	 * @param localClassNames root binary names of classes to load locally, including their nested classes
 	 */
-	private ClassHidingClassLoader(final ClassLoader parent, final Collection<String> hiddenClassNames, final Collection<String> localClassNames) {
+	protected ClassHidingClassLoader(final ClassLoader parent, final Collection<String> hiddenClassNames, final Collection<String> localClassNames) {
 		super(parent);
-		this.hiddenClassNames = Set.copyOf(hiddenClassNames);
-		this.localClassNames = Set.copyOf(localClassNames);
+		this.hiddenClassNames = Set.copyOf(Objects.requireNonNull(hiddenClassNames, "hiddenClassNames collection must not be null"));
+		this.localClassNames = Set.copyOf(Objects.requireNonNull(localClassNames, "localClassNames collection must not be null"));
 	}
 
 	/**
@@ -91,11 +90,11 @@ public class ClassHidingClassLoader extends ClassLoader {
 	}
 
 	/**
-	 * Defines the class with the given binary name from the bytecode found in the parent class path.
+	 * Defines the class with the given binary name from the byte-code found in the parent class path.
 	 *
 	 * @param name binary name of the class
 	 * @return the defined class
-	 * @throws ClassNotFoundException if the class bytecode cannot be found or read
+	 * @throws ClassNotFoundException if the class byte-code cannot be found or read
 	 */
 	@Override
 	protected Class<?> findClass(final String name) throws ClassNotFoundException {
@@ -144,7 +143,7 @@ public class ClassHidingClassLoader extends ClassLoader {
 	public static class Builder {
 
 		/**
-		 * Parent class loader from which local class bytecode is read. This is the class loader that loaded
+		 * Parent class loader from which local class byte-code is read. This is the class loader that loaded
 		 * {@link ClassHidingClassLoader} when {@link #parent(ClassLoader)} is not called.
 		 */
 		private ClassLoader parent = defaultParent();
@@ -152,12 +151,12 @@ public class ClassHidingClassLoader extends ClassLoader {
 		/**
 		 * Exact binary names of classes to hide.
 		 */
-		private final List<String> hiddenClassNames = new ArrayList<>();
+		private final Set<String> hiddenClassNames = new HashSet<>();
 
 		/**
 		 * Root binary names of classes to load locally.
 		 */
-		private final List<String> localClassNames = new ArrayList<>();
+		private final Set<String> localClassNames = new HashSet<>();
 
 		/**
 		 * Private constructor.
@@ -178,7 +177,7 @@ public class ClassHidingClassLoader extends ClassLoader {
 		}
 
 		/**
-		 * Sets the parent class loader from which local class bytecode is read. The default is the class loader that loaded
+		 * Sets the parent class loader from which local class byte-code is read. The default is the class loader that loaded
 		 * {@link ClassHidingClassLoader}.
 		 *
 		 * @param parent parent class loader

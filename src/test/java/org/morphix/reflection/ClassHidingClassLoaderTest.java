@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -98,6 +100,41 @@ class ClassHidingClassLoaderTest {
 				() -> ClassHidingClassLoader.builder().loadLocally((Class<?>) null));
 
 		assertThat(exception.getMessage(), equalTo("type must not be null"));
+	}
+
+	@Test
+	void shouldThrowNullPointerExceptionWhenHiddenClassNamesIsNull() {
+		ClassLoader parent = ClassHidingClassLoaderTest.class.getClassLoader();
+
+		NullPointerException exception = assertThrows(NullPointerException.class,
+				() -> new ClassHidingClassLoader(parent, null, Set.of()));
+
+		assertThat(exception.getMessage(), equalTo("hiddenClassNames collection must not be null"));
+	}
+
+	@Test
+	void shouldThrowNullPointerExceptionWhenLocalClassNamesIsNull() {
+		ClassLoader parent = ClassHidingClassLoaderTest.class.getClassLoader();
+
+		NullPointerException exception = assertThrows(NullPointerException.class,
+				() -> new ClassHidingClassLoader(parent, Set.of(), null));
+
+		assertThat(exception.getMessage(), equalTo("localClassNames collection must not be null"));
+	}
+
+	@Test
+	void shouldCopyClassNamesWhenBuilt() throws ClassNotFoundException {
+		ClassLoader parent = ClassHidingClassLoaderTest.class.getClassLoader();
+		Set<String> hiddenClassNames = new HashSet<>();
+		Set<String> localClassNames = new HashSet<>();
+
+		ClassHidingClassLoader classLoader = new ClassHidingClassLoader(parent, hiddenClassNames, localClassNames);
+
+		hiddenClassNames.add(STRING);
+		localClassNames.add(EXTENSION_CONTEXT);
+
+		assertSame(String.class, classLoader.loadClass(STRING));
+		assertSame(ExtensionContext.class, classLoader.loadClass(EXTENSION_CONTEXT));
 	}
 
 	@Test
