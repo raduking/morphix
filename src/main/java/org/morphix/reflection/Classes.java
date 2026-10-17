@@ -111,6 +111,18 @@ public interface Classes {
 	}
 
 	/**
+	 * Returns the first class in the class hierarchy of the given class, starting from the given class and going up through
+	 * its superclasses, whose {@linkplain Class#getCanonicalName() canonical name} equals the given canonical name.
+	 *
+	 * @param cls class to search from
+	 * @param canonicalName canonical name of the class to find
+	 * @return the first matching class in the hierarchy, null if none match
+	 */
+	static Class<?> getOneInHierarchy(final Class<?> cls, final String canonicalName) {
+		return Safe.getOneInHierarchy(cls, canonicalName);
+	}
+
+	/**
 	 * Returns the subclass of the expected parent.
 	 *
 	 * @param expectedParent expected parent
@@ -319,6 +331,22 @@ public interface Classes {
 			}
 			Class<?> cls = Classes.getFrom(obj);
 			return getOneInHierarchy(cls, predicate);
+		}
+
+		/**
+		 * Returns the first class in the class hierarchy of the given class, starting from the given class and going up through
+		 * its super-classes, whose {@linkplain Class#getCanonicalName() canonical name} equals the given canonical name. If no
+		 * match is found it returns `null`.
+		 *
+		 * @param cls class to search from
+		 * @param canonicalName canonical name of the class to find
+		 * @return the first matching class in the hierarchy, null if none match
+		 */
+		static Class<?> getOneInHierarchy(final Class<?> cls, final String canonicalName) {
+			if (null == canonicalName) {
+				return null;
+			}
+			return getOneInHierarchy(cls, type -> canonicalName.equals(type.getCanonicalName()));
 		}
 
 		/**

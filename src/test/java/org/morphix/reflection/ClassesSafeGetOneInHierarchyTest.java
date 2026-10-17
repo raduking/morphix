@@ -17,6 +17,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.morphix.reflection.predicates.ClassPredicates.isClass;
 
+import java.util.function.Predicate;
+
 import org.junit.jupiter.api.Test;
 
 /**
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.Test;
  * <ul>
  * <li>{@link Classes.Safe#getOneInHierarchy(Class, java.util.function.Predicate)}</li>
  * <li>{@link Classes.Safe#getOneInHierarchy(Object, java.util.function.Predicate)}</li>
+ * <li>{@link Classes.Safe#getOneInHierarchy(Class, String)}</li>
  * </ul>
  *
  * @author Radu Sebastian LAZIN
@@ -80,7 +83,9 @@ class ClassesSafeGetOneInHierarchyTest {
 
 	@Test
 	void shouldReturnNullWhenPredicateIsNull() {
-		Class<?> cls = Classes.Safe.getOneInHierarchy(C.class, null);
+		Predicate<Class<?>> predicate = null;
+
+		Class<?> cls = Classes.Safe.getOneInHierarchy(C.class, predicate);
 
 		assertThat(cls, nullValue());
 	}
@@ -116,6 +121,57 @@ class ClassesSafeGetOneInHierarchyTest {
 	@Test
 	void shouldReturnNullWhenObjectPredicateIsNull() {
 		Class<?> cls = Classes.Safe.getOneInHierarchy(new C(), null);
+
+		assertThat(cls, nullValue());
+	}
+
+	@Test
+	void shouldReturnTheClassItselfWhenCanonicalNameMatches() {
+		Class<?> cls = Classes.Safe.getOneInHierarchy(C.class, C.class.getCanonicalName());
+
+		assertThat(cls, equalTo(C.class));
+	}
+
+	@Test
+	void shouldReturnTheSuperclassWhenCanonicalNameMatches() {
+		Class<?> cls = Classes.Safe.getOneInHierarchy(C.class, A.class.getCanonicalName());
+
+		assertThat(cls, equalTo(A.class));
+	}
+
+	@Test
+	void shouldReturnObjectClassWhenCanonicalNameMatches() {
+		Class<?> cls = Classes.Safe.getOneInHierarchy(C.class, Object.class.getCanonicalName());
+
+		assertThat(cls, equalTo(Object.class));
+	}
+
+	@Test
+	void shouldReturnNullWhenNoCanonicalNameMatches() {
+		Class<?> cls = Classes.Safe.getOneInHierarchy(C.class, String.class.getCanonicalName());
+
+		assertThat(cls, nullValue());
+	}
+
+	@Test
+	void shouldNotMatchTheSimpleName() {
+		Class<?> cls = Classes.Safe.getOneInHierarchy(C.class, C.class.getSimpleName());
+
+		assertThat(cls, nullValue());
+	}
+
+	@Test
+	void shouldReturnNullWhenClassIsNullForCanonicalName() {
+		Class<?> cls = Classes.Safe.getOneInHierarchy((Class<?>) null, C.class.getCanonicalName());
+
+		assertThat(cls, nullValue());
+	}
+
+	@Test
+	void shouldReturnNullWhenCanonicalNameIsNull() {
+		String canonicalName = null;
+
+		Class<?> cls = Classes.Safe.getOneInHierarchy(C.class, canonicalName);
 
 		assertThat(cls, nullValue());
 	}

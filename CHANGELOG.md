@@ -12,8 +12,10 @@
 - Added `ClassHidingClassLoader` to hide selected classes and load selected classes from its parent class path, so tests can simulate an optional dependency being absent.
 - Added `Classes.getOneInHierarchy(Class, Predicate)` to return the first class in the class hierarchy, starting from the given class, that matches the given predicate.
 - Added `Classes.getOneInHierarchy(Object, Predicate)` to return the first class in the class hierarchy of the object's class that matches the given predicate.
+- Added `Classes.getOneInHierarchy(Class, String)` to return the first class in the class hierarchy whose canonical name equals the given canonical name.
 - Added `Classes.Safe.getOneInHierarchy(Class, Predicate)` to return the first class in the class hierarchy that matches the given predicate, `null` otherwise.
 - Added `Classes.Safe.getOneInHierarchy(Object, Predicate)` to return the first class in the class hierarchy of the object's class and given predicate, `null` otherwise.
+- Added `Classes.Safe.getOneInHierarchy(Class, String)` to return the first class in the class hierarchy given the canonical name to search for, `null` otherwise.
 
 ---
 
