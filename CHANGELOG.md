@@ -9,6 +9,7 @@
 - Added `TypeHolder` to hold a reflected type, either a `Class` or a captured generic type.
 - Added `TypeHolder.NONE` as the type holder that has no type set.
 - Added `TypeHolder.safe(TypeHolder)` to return the given type holder or `TypeHolder.NONE` when it is `null`.
+- Added `ClassHidingClassLoader` to hide selected classes and load selected classes from its parent class path, so tests can simulate an optional dependency being absent.
 
 ---
 
