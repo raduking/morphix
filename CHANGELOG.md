@@ -1,5 +1,24 @@
 ## Release Notes
 
+`1.0.47`
+
+- Added `Functions` class with utility methods for functions.
+- Added `Functions.returnTrue` to always return `true`.
+- Added `Functions.returnFalse` to always return `false`.
+- Added `Functions.returnNull` to always return `null`.
+- Added `TypeHolder` to hold a reflected type, either a `Class` or a captured generic type.
+- Added `TypeHolder.NONE` as the type holder that has no type set.
+- Added `TypeHolder.safe(TypeHolder)` to return the given type holder or `TypeHolder.NONE` when it is `null`.
+- Added `ClassHidingClassLoader` to hide selected classes and load selected classes from its parent class path, so tests can simulate an optional dependency being absent.
+- Added `Classes.getOneInHierarchy(Class, Predicate)` to return the first class in the class hierarchy, starting from the given class, that matches the given predicate.
+- Added `Classes.getOneInHierarchy(Object, Predicate)` to return the first class in the class hierarchy of the object's class that matches the given predicate.
+- Added `Classes.getOneInHierarchy(Class, String)` to return the first class in the class hierarchy whose canonical name equals the given canonical name.
+- Added `Classes.Safe.getOneInHierarchy(Class, Predicate)` to return the first class in the class hierarchy that matches the given predicate, `null` otherwise.
+- Added `Classes.Safe.getOneInHierarchy(Object, Predicate)` to return the first class in the class hierarchy of the object's class and given predicate, `null` otherwise.
+- Added `Classes.Safe.getOneInHierarchy(Class, String)` to return the first class in the class hierarchy given the canonical name to search for, `null` otherwise.
+
+---
+
 `1.0.46`
 
 - Changed the build, now fails fast at the `validate` phase, when Maven is running on any JDK other than 21.
