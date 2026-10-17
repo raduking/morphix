@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.48`
+
+---
+
 `1.0.47`
 
 - Added `Functions` class with utility methods for functions.
