@@ -475,6 +475,87 @@ class LibraryVersionTest {
 	}
 
 	@Nested
+	class VerifyAtMostTests {
+
+		@Test
+		void shouldNotThrowWhenVersionCannotBeDetermined() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+
+			assertDoesNotThrow(() -> libraryVersion.verifyAtMost("0.0"));
+		}
+
+		@Test
+		void shouldNotThrowWhenVersionIsAtMostMaximum() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5");
+
+			assertDoesNotThrow(() -> libraryVersion.verifyAtMost("5.6"));
+		}
+
+		@Test
+		void shouldThrowWhenVersionIsNewerThanMaximum() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+
+			IllegalStateException exception = assertThrows(IllegalStateException.class, () -> libraryVersion.verifyAtMost("5.5"));
+
+			assertThat(exception.getMessage(), is("Unsupported test-library version: 5.5.1, maximum required version is 5.5"));
+		}
+
+		@Test
+		void shouldNotThrowWhenVersionCannotBeDeterminedForMaximumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+
+			assertDoesNotThrow(() -> libraryVersion.verifyAtMost(new LibraryVersion(LIBRARY_NAME, "0.0")));
+		}
+
+		@Test
+		void shouldNotThrowWhenVersionIsAtMostMaximumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5");
+
+			assertDoesNotThrow(() -> libraryVersion.verifyAtMost(new LibraryVersion(LIBRARY_NAME, "5.6")));
+		}
+
+		@Test
+		void shouldThrowWhenVersionIsNewerThanMaximumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+
+			IllegalStateException exception = assertThrows(IllegalStateException.class,
+					() -> libraryVersion.verifyAtMost(new LibraryVersion(LIBRARY_NAME, "5.5")));
+
+			assertThat(exception.getMessage(), is("Unsupported test-library version: 5.5.1, maximum required version is 5.5"));
+		}
+
+		@Test
+		void shouldUseErrorCallbackForStringMaximumVersion() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+			List<String> errorMessages = new ArrayList<>();
+
+			libraryVersion.verifyAtMost("5.5", errorMessages::add);
+
+			assertThat(errorMessages, contains("Unsupported test-library version: 5.5.1, maximum required version is 5.5"));
+		}
+
+		@Test
+		void shouldUseErrorCallbackForMaximumVersionInstance() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, "5.5.1");
+			List<String> errorMessages = new ArrayList<>();
+
+			libraryVersion.verifyAtMost(new LibraryVersion(LIBRARY_NAME, "5.5"), errorMessages::add);
+
+			assertThat(errorMessages, contains("Unsupported test-library version: 5.5.1, maximum required version is 5.5"));
+		}
+
+		@Test
+		void shouldNotUseErrorCallbackWhenVersionCannotBeDetermined() {
+			LibraryVersion libraryVersion = new LibraryVersion(LIBRARY_NAME, null);
+			List<String> errorMessages = new ArrayList<>();
+
+			libraryVersion.verifyAtMost("0.0", errorMessages::add);
+
+			assertThat(errorMessages, is(empty()));
+		}
+	}
+
+	@Nested
 	class CompareTests {
 
 		@Test

@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.morphix.lang.JavaObjects;
 
@@ -83,6 +84,30 @@ public interface Classes {
 		} catch (ClassNotFoundException e) {
 			throw new ReflectionException(e, "Could not load class with prefix: {}", classWithPrefixName);
 		}
+	}
+
+	/**
+	 * Returns the first class in the class hierarchy of the given class, starting from the given class and going up through
+	 * its super-classes, that matches the given predicate. If no match is found it returns `null`.
+	 *
+	 * @param cls class to search from
+	 * @param predicate predicate to match
+	 * @return the first matching class in the hierarchy, null if none match
+	 */
+	static Class<?> getOneInHierarchy(final Class<?> cls, final Predicate<Class<?>> predicate) {
+		return Safe.getOneInHierarchy(cls, predicate);
+	}
+
+	/**
+	 * Variation of {@link #getOneInHierarchy(Class, Predicate)}. It calls the method with the class determined from the
+	 * object supplied as parameter. If no match is found it returns `null`.
+	 *
+	 * @param obj object to determine the class from
+	 * @param predicate predicate to match
+	 * @return the first matching class in the hierarchy, null if none match
+	 */
+	static Class<?> getOneInHierarchy(final Object obj, final Predicate<Class<?>> predicate) {
+		return Safe.getOneInHierarchy(obj, predicate);
 	}
 
 	/**
@@ -258,6 +283,42 @@ public interface Classes {
 			} catch (ReflectionException e) {
 				return null;
 			}
+		}
+
+		/**
+		 * Returns the first class in the class hierarchy of the given class, starting from the given class and going up through
+		 * its super-classes, that matches the given predicate. If no match is found it returns `null`.
+		 *
+		 * @param cls class to search from
+		 * @param predicate predicate to match
+		 * @return the first matching class in the hierarchy, null if none match
+		 */
+		static Class<?> getOneInHierarchy(final Class<?> cls, final Predicate<Class<?>> predicate) {
+			if (null == cls || null == predicate) {
+				return null;
+			}
+			for (Class<?> current = cls; null != current; current = current.getSuperclass()) {
+				if (predicate.test(current)) {
+					return current;
+				}
+			}
+			return null;
+		}
+
+		/**
+		 * Variation of {@link #getOneInHierarchy(Class, Predicate)}. It calls the method with the class determined from the
+		 * object supplied as parameter. If no match is found it returns `null`.
+		 *
+		 * @param obj object to determine the class from
+		 * @param predicate predicate to match
+		 * @return the first matching class in the hierarchy, null if none match
+		 */
+		static Class<?> getOneInHierarchy(final Object obj, final Predicate<Class<?>> predicate) {
+			if (null == obj) {
+				return null;
+			}
+			Class<?> cls = Classes.getFrom(obj);
+			return getOneInHierarchy(cls, predicate);
 		}
 
 		/**
