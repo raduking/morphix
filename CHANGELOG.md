@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.0.49`
+
+---
+
 `1.0.48`
 
 - Added `CaseInsensitiveLinkedHashMap` as a linked hash map with case-insensitive string keys that preserve insertion order and original key casing.

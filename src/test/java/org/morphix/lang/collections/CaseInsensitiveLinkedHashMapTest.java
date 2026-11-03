@@ -1154,6 +1154,7 @@ class CaseInsensitiveLinkedHashMapTest {
 		}
 
 		@Test
+		@SuppressWarnings("unlikely-arg-type")
 		void shouldNotEqualUnrelatedObject() {
 			CaseInsensitiveLinkedHashMap<Integer> map = new CaseInsensitiveLinkedHashMap<>();
 
