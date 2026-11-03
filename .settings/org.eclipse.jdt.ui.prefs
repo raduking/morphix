@@ -55,6 +55,7 @@ sp_cleanup.make_type_abstract_if_missing_method=false
 sp_cleanup.make_variable_declarations_final=true
 sp_cleanup.map_cloning=false
 sp_cleanup.merge_conditional_blocks=false
+sp_cleanup.module_imports=false
 sp_cleanup.multi_catch=false
 sp_cleanup.never_use_blocks=false
 sp_cleanup.never_use_parentheses_in_expressions=true

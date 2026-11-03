@@ -1,5 +1,18 @@
 ## Release Notes
 
+`1.0.48`
+
+- Added `CaseInsensitiveLinkedHashMap` as a linked hash map with case-insensitive string keys that preserve insertion order and original key casing.
+- Upgraded parent to `4.1.2`.
+- Upgraded `jacoco-maven-plugin` to `0.8.16`.
+- Upgraded Eclipse JDT to `3.47.0`.
+- Upgraded `code-format` to `1.1.0`.
+- Upgraded `spotless-maven-plugin` to `3.10.4`.
+- Upgraded `pitest-maven` to `1.30.1`.
+- Upgraded `central-publishing-maven-plugin` to `0.12.0`.
+
+---
+
 `1.0.47`
 
 - Added `Functions` class with utility methods for functions.
