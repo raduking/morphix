@@ -513,7 +513,7 @@ public class CaseInsensitiveLinkedHashMap<V> implements Map<String, V>, Serializ
 	}
 
 	/**
-	 * @see Map#toString()
+	 * @see Object#toString()
 	 */
 	@Override
 	public String toString() {
@@ -870,6 +870,13 @@ public class CaseInsensitiveLinkedHashMap<V> implements Map<String, V>, Serializ
 	protected class KeySetIterator extends InternalIterator<String> {
 
 		/**
+		 * Default constructor, creates an iterator over the internal map keys.
+		 */
+		protected KeySetIterator() {
+			// empty
+		}
+
+		/**
 		 * @see Iterator#next()
 		 */
 		@Override
@@ -886,6 +893,13 @@ public class CaseInsensitiveLinkedHashMap<V> implements Map<String, V>, Serializ
 	protected class ValuesIterator extends InternalIterator<V> {
 
 		/**
+		 * Default constructor, creates an iterator over the internal map values.
+		 */
+		protected ValuesIterator() {
+			// empty
+		}
+
+		/**
 		 * @see Iterator#next()
 		 */
 		@Override
@@ -900,6 +914,13 @@ public class CaseInsensitiveLinkedHashMap<V> implements Map<String, V>, Serializ
 	 * @author Radu Sebastian LAZIN
 	 */
 	protected class EntrySetIterator extends InternalIterator<Entry<String, V>> {
+
+		/**
+		 * Default constructor, creates an iterator over the internal map entries.
+		 */
+		protected EntrySetIterator() {
+			// empty
+		}
 
 		/**
 		 * @see Iterator#next()
