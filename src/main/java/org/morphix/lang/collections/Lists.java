@@ -28,7 +28,7 @@ public interface Lists {
 	/**
 	 * Returns the list given as parameter or an empty list if the parameter is {@code null}.
 	 * <p>
-	 * Usable for iterating on lists that can be {@code null} without null checks.
+	 * Usable for iterating on lists that can be {@code null} without {@code null} checks.
 	 * <p>
 	 * Example:
 	 *
@@ -44,15 +44,15 @@ public interface Lists {
 	 * @param <T> element type
 	 *
 	 * @param list a list
-	 * @return the list given as parameter or an empty list if the parameter is null
+	 * @return the list given as parameter or an empty list if the parameter is {@code null}
 	 */
 	static <T> List<T> safe(final List<T> list) {
 		return null == list ? Collections.emptyList() : list;
 	}
 
 	/**
-	 * Transforms an array to an immutable list. This method returns an immutable list and does the necessary null checks
-	 * which {@link List#of(Object...)} does not do. When calling:
+	 * Transforms an array to an immutable list. This method returns an immutable list and does the necessary {@code null}
+	 * checks which {@link List#of(Object...)} does not do. When calling:
 	 *
 	 * <pre>
 	 * var list = List.of(null);
@@ -117,14 +117,14 @@ public interface Lists {
 	}
 
 	/**
-	 * Returns the first element from the given collection, or {@code null} if the list is null or empty.
+	 * Returns the first element from the given collection, or {@code null} if the list is {@code null} or empty.
 	 * <p>
 	 * Will not throw a {@link NullPointerException} even if the collection is {@code null}.
 	 *
 	 * @param <T> element type
 	 *
 	 * @param list a list
-	 * @return The first element from the given list, if the list is not null or empty, or null otherwise.
+	 * @return the first element from the given list, if the list is not {@code null} or empty, or {@code null} otherwise.
 	 */
 	static <T> T first(final List<T> list) {
 		return first(list, null);
@@ -140,52 +140,52 @@ public interface Lists {
 	 *
 	 * @param list a list
 	 * @param defaultValue default value list doesn't have a first value
-	 * @return The first element from the given list, if the list is not null or empty, defaultValue otherwise.
+	 * @return the first element from the given list, if the list is not {@code null} or empty, defaultValue otherwise.
 	 */
 	static <T> T first(final List<T> list, final T defaultValue) {
 		return isNotEmpty(list) ? list.getFirst() : defaultValue;
 	}
 
 	/**
-	 * Returns the last element from the given list, or {@code null} if the list is null or empty.
+	 * Returns the last element from the given list, or {@code null} if the list is {@code null} or empty.
 	 * <p>
 	 * Will not throw a {@link NullPointerException} even if the list is {@code null}.
 	 *
 	 * @param <T> element type
 	 *
 	 * @param list a list
-	 * @return The last element from the given list, if the list is not null or empty, or null otherwise.
+	 * @return the last element from the given list, if the list is not null or empty, or {@code null} otherwise.
 	 */
 	static <T> T last(final List<T> list) {
 		return isNotEmpty(list) ? list.getLast() : null;
 	}
 
 	/**
-	 * Null-safe check if the specified list is empty.
+	 * {@code null}-safe check if the specified list is empty.
 	 * <p>
-	 * Null returns true.
+	 * {@code null} returns true.
 	 *
 	 * @param <T> element type
 	 *
-	 * @param list the list to check, may be null
-	 * @return true if empty or null
+	 * @param list the list to check, may be {@code null}
+	 * @return true if empty or {@code null}
 	 */
 	static <T> boolean isEmpty(final List<T> list) {
 		return null == list || list.isEmpty();
 	}
 
 	/**
-	 * Null-safe check if the specified list is not empty.
+	 * {@code null}-safe check if the specified list is not empty.
 	 * <p>
-	 * Null returns false.
+	 * {@code null} returns false.
 	 *
 	 * @param <T> element type
 	 *
-	 * @param coll the list to check, may be null
-	 * @return true if non-null and non-empty
+	 * @param list the list to check, may be {@code null}
+	 * @return true if non-{@code null} and non-empty
 	 */
-	static <T> boolean isNotEmpty(final List<T> coll) {
-		return !isEmpty(coll);
+	static <T> boolean isNotEmpty(final List<T> list) {
+		return !isEmpty(list);
 	}
 
 	/**

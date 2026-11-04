@@ -2,6 +2,11 @@
 
 `1.0.49`
 
+- Added `Iterables.isEmpty(Collection)` to check if a `Collection` is empty or `null`.
+- Added `Iterables.isNotEmpty(Collection)` to check if a `Collection` is not empty.
+- Added `StackedContextHolder.isNotInitialized` to check if a thread stack was not initialized.
+- Added `StackedContextHolder.isNotEmpty` to check if a thread stack is not empty.
+
 ---
 
 `1.0.48`

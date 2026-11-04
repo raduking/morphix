@@ -21,11 +21,11 @@ import java.util.NoSuchElementException;
 
 /**
  * Utility methods for iterables. This class is intended for {@link Iterable} and {@link Collection} types that can be
- * {@code null} and we want to avoid null checks when iterating on them.
+ * {@code null} and we want to avoid {@code null} checks when iterating on them.
  * <p>
  * For example, if we have a method that returns a list of elements but it can return {@code null} if there are no
- * elements, we can use the {@link #safe(Iterable)} method to avoid null checks when iterating on the list. This way, we
- * can iterate on the list without worrying about null values and we can also avoid potential
+ * elements, we can use the {@link #safe(Iterable)} method to avoid {@code null} checks when iterating on the list. This
+ * way, we can iterate on the list without worrying about {@code null} values and we can also avoid potential
  * {@link NullPointerException}s.
  * <p>
  * For more specialized methods for lists and maps, see {@link Lists} and {@link Maps}.
@@ -40,7 +40,7 @@ public interface Iterables {
 	 * @param <T> element type
 	 *
 	 * @param iterable an iterable
-	 * @return the iterable given as parameter or an empty iterable if the parameter is null
+	 * @return the iterable given as parameter or an empty iterable if the parameter is {@code null}
 	 */
 	static <T> Iterable<T> safe(final Iterable<T> iterable) {
 		return null == iterable ? Collections.emptyList() : iterable;
@@ -52,7 +52,7 @@ public interface Iterables {
 	 * @param <T> element type
 	 *
 	 * @param collection a collection
-	 * @return the collection given as parameter or an empty collection if the parameter is null
+	 * @return the collection given as parameter or an empty collection if the parameter is {@code null}
 	 */
 	static <T> Collection<T> safe(final Collection<T> collection) {
 		return null == collection ? Collections.emptyList() : collection;
@@ -64,7 +64,7 @@ public interface Iterables {
 	 * @param <T> element type
 	 *
 	 * @param iterable an iterable
-	 * @return true if the given iterable is null or empty
+	 * @return true if the given iterable is {@code null} or empty
 	 */
 	static <T> boolean isEmpty(final Iterable<T> iterable) {
 		return switch (iterable) {
@@ -80,10 +80,38 @@ public interface Iterables {
 	 * @param <T> element type
 	 *
 	 * @param iterable an iterable
-	 * @return true if the given iterable is null or empty
+	 * @return true if the given iterable is {@code null} or empty
 	 */
 	static <T> boolean isNotEmpty(final Iterable<T> iterable) {
 		return !isEmpty(iterable);
+	}
+
+	/**
+	 * {@code null}-safe check if the specified collection is empty.
+	 * <p>
+	 * {@code null} returns true.
+	 *
+	 * @param <T> element type
+	 *
+	 * @param collection the collection to check, may be {@code null}
+	 * @return true if empty or {@code null}
+	 */
+	static <T> boolean isEmpty(final Collection<T> collection) {
+		return null == collection || collection.isEmpty();
+	}
+
+	/**
+	 * {@code null}-safe check if the specified collection is not empty.
+	 * <p>
+	 * {@code null} returns false.
+	 *
+	 * @param <T> element type
+	 *
+	 * @param collection the collection to check, may be {@code null}
+	 * @return true if non-{@code null} and non-empty
+	 */
+	static <T> boolean isNotEmpty(final Collection<T> collection) {
+		return !isEmpty(collection);
 	}
 
 	/**
@@ -92,6 +120,8 @@ public interface Iterables {
 	 * <p>
 	 * The returned iterable is lazy and consumes the underlying iterator as it is iterated. The returned iterator is not
 	 * thread-safe and should be consumed by a single thread.
+	 * <p>
+	 * If your iterable is a {@link List} the you can use {@link Lists#partition(List, int)}.
 	 *
 	 * @param <T> element type
 	 *
@@ -99,6 +129,7 @@ public interface Iterables {
 	 * @param size the size of each partition
 	 * @return an iterable of sublists of the given size
 	 * @throws IllegalArgumentException if the given size is not greater than 0
+	 * @see Lists#partition(List, int)
 	 */
 	static <T> Iterable<List<T>> partition(final Iterable<T> src, final int size) {
 		if (size <= 0) {

@@ -15,6 +15,7 @@ package org.morphix.lang.thread;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,6 +55,43 @@ class StackedContextHolderTest {
 	@BeforeAll
 	static void beforeAll() throws Exception {
 		Tests.configureLogging("src/test/resources/test-logging.properties");
+	}
+
+	@Nested
+	class StackStateChecksTest {
+
+		@Test
+		void shouldDetectInitializedStack() {
+			Stack<String> stack = new Stack<>();
+
+			assertTrue(StackedContextHolder.isInitialized(stack));
+			assertFalse(StackedContextHolder.isNotInitialized(stack));
+		}
+
+		@Test
+		void shouldDetectUninitializedStack() {
+			assertFalse(StackedContextHolder.isInitialized(null));
+			assertTrue(StackedContextHolder.isNotInitialized(null));
+		}
+
+		@Test
+		void shouldDetectEmptyStack() {
+			Stack<String> emptyStack = new Stack<>();
+
+			assertTrue(StackedContextHolder.isEmpty(emptyStack));
+			assertFalse(StackedContextHolder.isNotEmpty(emptyStack));
+			assertTrue(StackedContextHolder.isEmpty(null));
+			assertFalse(StackedContextHolder.isNotEmpty(null));
+		}
+
+		@Test
+		void shouldDetectNonEmptyStack() {
+			Stack<String> stack = new Stack<>();
+			stack.push(TENANT_ID);
+
+			assertFalse(StackedContextHolder.isEmpty(stack));
+			assertTrue(StackedContextHolder.isNotEmpty(stack));
+		}
 	}
 
 	@Test

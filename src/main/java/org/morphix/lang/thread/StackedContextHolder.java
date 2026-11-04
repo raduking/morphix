@@ -28,6 +28,13 @@ import org.morphix.lang.function.SetterFunction;
 
 /**
  * Abstract thread context holder with a stack that provides the appropriate context even in recursive method calls.
+ * <p>
+ * Note: {@link Stack} is used here (rather than {@link java.util.Deque}) deliberately:
+ * <ul>
+ * <li>the return types of {@link #getThreadStack()} and {@link #newStack()} are part of the extensible API</li>
+ * <li>{@link #changeElement(Object)} relies on indexed {@code set(...)}</li>
+ * <li>{@code Stack} tolerates {@code null} elements unlike {@code ArrayDeque}</li>
+ * </ul>
  *
  * @param <T> stack element type
  *
@@ -283,7 +290,7 @@ public abstract class StackedContextHolder<T> {
 			throw new ThreadContextException(getElementName() + " cannot be: " + element);
 		}
 		Stack<T> currentStack = getStack();
-		if (!isInitialized(currentStack)) {
+		if (isNotInitialized(currentStack)) {
 			currentStack = newStack();
 			getThreadStack().set(currentStack);
 		}
@@ -311,7 +318,7 @@ public abstract class StackedContextHolder<T> {
 			throw new ThreadContextException(getElementName() + " cannot be: " + element);
 		}
 		Stack<T> currentStack = getStack();
-		if (!isEmpty(currentStack)) {
+		if (isNotEmpty(currentStack)) {
 			currentStack.set(currentStack.size() - 1, element);
 			currentElement.set(element);
 		}
@@ -355,6 +362,18 @@ public abstract class StackedContextHolder<T> {
 	}
 
 	/**
+	 * Returns true if the current stack was not initialized, false otherwise
+	 *
+	 * @param <T> stack element type
+	 *
+	 * @param currentStack the current stack to check
+	 * @return true if the current stack was not initialized, false otherwise
+	 */
+	protected static <T> boolean isNotInitialized(final Stack<T> currentStack) {
+		return !isInitialized(currentStack);
+	}
+
+	/**
 	 * Returns true if the current stack is empty, false otherwise.
 	 *
 	 * @param <T> stack element type
@@ -364,6 +383,18 @@ public abstract class StackedContextHolder<T> {
 	 */
 	protected static <T> boolean isEmpty(final Stack<T> currentStack) {
 		return null == currentStack || currentStack.isEmpty();
+	}
+
+	/**
+	 * Returns true if the current stack is not empty, false otherwise.
+	 *
+	 * @param <T> stack element type
+	 *
+	 * @param currentStack the current stack to check
+	 * @return true if the current stack is not empty, false otherwise
+	 */
+	protected static <T> boolean isNotEmpty(final Stack<T> currentStack) {
+		return !isEmpty(currentStack);
 	}
 
 	/**
