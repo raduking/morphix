@@ -126,25 +126,25 @@ public class TenantContextHolder extends StackedContextHolder<String> {
 	}
 
 	/**
-	 * Runs the given statements on the current tenant and returns the result from the statements.
+	 * Returns a supplier that runs the given statements with the current tenant as context. The current tenant is captured
+	 * when this method is called, and the captured context is cleared after the statements run. If no current tenant
+	 * exists, the original supplier is returned unchanged.
 	 *
 	 * @param <T> return type
 	 * @param statements statements to run
-	 * @return statements result
+	 * @return a supplier that runs the statements with the captured tenant context
 	 */
 	public static <T> Supplier<T> onCurrentTenant(final Supplier<T> statements) {
 		return onCurrent(instance(), statements::get);
 	}
 
 	/**
-	 * Runs the given function on the current tenant and returns its result.
+	 * Returns a runnable that runs the given runnable with the current tenant as context. The current tenant is captured
+	 * when this method is called, and the captured context is cleared after the runnable runs. If no current tenant exists,
+	 * the original runnable is returned unchanged.
 	 *
-	 * @param <T> function parameter type
-	 * @param <R> function return type
-	 *
-	 * @param function function to run
-	 * @param arg function argument
-	 * @return function result
+	 * @param runnable runnable to run
+	 * @return a runnable that runs the runnable with the captured tenant context
 	 */
 	public static Runnable onCurrentTenant(final Runnable runnable) {
 		return onCurrent(instance(), runnable);

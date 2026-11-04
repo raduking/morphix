@@ -2,14 +2,13 @@
 
 `1.1.0`
 
----
-
-`1.0.49`
-
 - Added `Iterables.isEmpty(Collection)` to check if a `Collection` is empty or `null`.
 - Added `Iterables.isNotEmpty(Collection)` to check if a `Collection` is not empty.
 - Added `StackedContextHolder.isNotInitialized` to check if a thread stack was not initialized.
 - Added `StackedContextHolder.isNotEmpty` to check if a thread stack is not empty.
+- Changed `StackedContextHolder.getThreadStack()` to use `List` instead of `Stack` for performance (`StackedContextHolderBenchmark`) overrides can still us `Stack`.
+- Changed `StackedContextHolder.getStack()` to use `List` instead of `Stack`.
+- Changed `StackedContextHolder.newStack()` to return an `ArrayList` instead of a `Stack`.
 
 ---
 

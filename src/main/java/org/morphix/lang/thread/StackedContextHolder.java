@@ -241,10 +241,11 @@ public abstract class StackedContextHolder<T> {
 	}
 
 	/**
-	 * Runs the given statements on the current element as context and returns the result from the statements. This method
-	 * should be used with {@link CompletableFuture#supplyAsync(Supplier)} to propagate the current context to the new
-	 * thread. The context is propagated by getting the current element and setting it as context in the new thread before
-	 * running the statements. The context is cleared after the statements are run.
+	 * Returns a supplier that runs the given statements with the current element as context. The current element is
+	 * captured when this method is called, so the returned supplier can be used with
+	 * {@link CompletableFuture#supplyAsync(Supplier)} to propagate the current context to another thread. The captured
+	 * context is set before the statements run and cleared afterwards. If no current element exists, the original supplier
+	 * is returned unchanged.
 	 *
 	 * @param <E> element type
 	 * @param <U> return type
@@ -252,7 +253,7 @@ public abstract class StackedContextHolder<T> {
 	 *
 	 * @param contextHolder stacked context holder instance
 	 * @param statements statements to run
-	 * @return statements result
+	 * @return a supplier that runs the statements with the captured context
 	 */
 	public static <E, U, V extends StackedContextHolder<E>> Supplier<U> onCurrent(final V contextHolder, final Supplier<U> statements) {
 		E currentElement = contextHolder.getElement();
@@ -263,17 +264,17 @@ public abstract class StackedContextHolder<T> {
 	}
 
 	/**
-	 * Runs the given runnable on the current element as context. This method should be used with
-	 * {@link CompletableFuture#runAsync(Runnable)} to propagate the current context to the new thread. The context is
-	 * propagated by getting the current element and setting it as context in the new thread before running the runnable.
-	 * The context is cleared after the runnable is run.
+	 * Returns a runnable that runs the given runnable with the current element as context. The current element is captured
+	 * when this method is called, so the returned runnable can be used with {@link CompletableFuture#runAsync(Runnable)} to
+	 * propagate the current context to another thread. The captured context is set before the runnable runs and cleared
+	 * afterwards. If no current element exists, the original runnable is returned unchanged.
 	 *
 	 * @param <E> element type
 	 * @param <V> stacked context holder type
 	 *
 	 * @param contextHolder stacked context holder instance
 	 * @param runnable runnable to run
-	 * @return a runnable that runs the given runnable on the current element as context
+	 * @return a runnable that runs the runnable with the captured context
 	 */
 	public static <E, V extends StackedContextHolder<E>> Runnable onCurrent(final V contextHolder, final Runnable runnable) {
 		E currentElement = contextHolder.getElement();
