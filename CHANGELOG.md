@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.1.0`
+
+---
+
 `1.0.49`
 
 - Added `Iterables.isEmpty(Collection)` to check if a `Collection` is empty or `null`.

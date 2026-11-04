@@ -12,7 +12,7 @@
  */
 package org.morphix.utils.lang.thread;
 
-import java.util.Stack;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -42,7 +42,7 @@ public class TenantContextHolder extends StackedContextHolder<String> {
 	 * Holds the current tenant ID. The {@link ThreadLocal#remove()} is handled correctly by {@link StackedContextHolder} so
 	 * no memory leak problems occur.
 	 */
-	private static final ThreadLocal<Stack<String>> tenantStack = new ThreadLocal<>();
+	private static final ThreadLocal<List<String>> tenantStack = new ThreadLocal<>();
 
 	/**
 	 * Set the name to {@code "Tenant"}.
@@ -57,7 +57,7 @@ public class TenantContextHolder extends StackedContextHolder<String> {
 	 * @return the thread local stack for tenant IDs
 	 */
 	@Override
-	public ThreadLocal<Stack<String>> getThreadStack() {
+	public ThreadLocal<List<String>> getThreadStack() {
 		return tenantStack;
 	}
 

@@ -13,7 +13,8 @@
 package org.morphix.lang.thread;
 
 import java.util.Objects;
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -23,17 +24,18 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import org.morphix.lang.function.Predicates;
 import org.morphix.lang.function.Runnables;
 import org.morphix.lang.function.SetterFunction;
 
 /**
  * Abstract thread context holder with a stack that provides the appropriate context even in recursive method calls.
  * <p>
- * Note: {@link Stack} is used here (rather than {@link java.util.Deque}) deliberately:
+ * Note: {@link List} is used here (rather than {@link java.util.Deque}) deliberately:
  * <ul>
  * <li>the return types of {@link #getThreadStack()} and {@link #newStack()} are part of the extensible API</li>
  * <li>{@link #changeElement(Object)} relies on indexed {@code set(...)}</li>
- * <li>{@code Stack} tolerates {@code null} elements unlike {@code ArrayDeque}</li>
+ * <li>{@link ArrayList} tolerates {@code null} elements unlike {@link java.util.ArrayDeque}</li>
  * </ul>
  *
  * @param <T> stack element type
@@ -98,7 +100,7 @@ public abstract class StackedContextHolder<T> {
 	 *
 	 * @return a thread local object containing a stack
 	 */
-	public abstract ThreadLocal<Stack<T>> getThreadStack();
+	public abstract ThreadLocal<List<T>> getThreadStack();
 
 	/**
 	 * Clears the thread stack. Implement this method to do cleanup including call to {@link ThreadLocal#remove()} method.
@@ -113,7 +115,7 @@ public abstract class StackedContextHolder<T> {
 	 *
 	 * @return the stack object from the thread local
 	 */
-	protected Stack<T> getStack() {
+	protected List<T> getStack() {
 		return getThreadStack().get();
 	}
 
@@ -122,8 +124,82 @@ public abstract class StackedContextHolder<T> {
 	 *
 	 * @return a new stack instance
 	 */
-	protected Stack<T> newStack() {
-		return new Stack<>();
+	protected List<T> newStack() {
+		return new ArrayList<>();
+	}
+
+	/**
+	 * Pushes an element onto the stack.
+	 *
+	 * @param currentStack current stack
+	 * @param element element to push
+	 * @return the pushed element
+	 */
+	protected T push(final List<T> currentStack, final T element) {
+		currentStack.add(element);
+		return element;
+	}
+
+	/**
+	 * Pops an element from the stack.
+	 *
+	 * @param currentStack current stack
+	 * @return the popped element
+	 */
+	protected T pop(final List<T> currentStack) {
+		return currentStack.remove(currentStack.size() - 1);
+	}
+
+	/**
+	 * Returns the element at the top of the stack.
+	 *
+	 * @param currentStack current stack
+	 * @return the top element
+	 */
+	protected T peek(final List<T> currentStack) {
+		return currentStack.get(currentStack.size() - 1);
+	}
+
+	/**
+	 * Replaces an element in the stack.
+	 *
+	 * @param currentStack current stack
+	 * @param index element index
+	 * @param element replacement element
+	 * @return the previous element
+	 */
+	protected T set(final List<T> currentStack, final int index, final T element) {
+		return currentStack.set(index, element);
+	}
+
+	/**
+	 * Returns the stack size.
+	 *
+	 * @param currentStack current stack
+	 * @return the stack size
+	 */
+	protected int size(final List<T> currentStack) {
+		return currentStack.size();
+	}
+
+	/**
+	 * Returns whether the stack is empty. A {@code null} stack is considered empty.
+	 *
+	 * @param currentStack current stack
+	 * @return {@code true} if the stack is null or empty
+	 */
+	protected boolean isEmpty(final List<T> currentStack) {
+		return null == currentStack || currentStack.isEmpty();
+	}
+
+	/**
+	 * Returns whether the stack is not empty. A {@code null} stack is considered empty.
+	 *
+	 * @param currentStack current stack
+	 * @return {@code true} if the stack is not null and not empty
+	 */
+	protected boolean isNotEmpty(final List<T> currentStack) {
+		return !isEmpty(currentStack);
 	}
 
 	/**
@@ -286,15 +362,15 @@ public abstract class StackedContextHolder<T> {
 	public void setElement(final T element) {
 		debug("[START:on{}:{}]", getElementName(), element);
 		currentElement.set(element);
-		if (!validElement().test(element)) {
+		if (Predicates.not(validElement()).test(element)) {
 			throw new ThreadContextException(getElementName() + " cannot be: " + element);
 		}
-		Stack<T> currentStack = getStack();
+		List<T> currentStack = getStack();
 		if (isNotInitialized(currentStack)) {
 			currentStack = newStack();
 			getThreadStack().set(currentStack);
 		}
-		currentStack.push(element);
+		push(currentStack, element);
 	}
 
 	/**
@@ -303,8 +379,8 @@ public abstract class StackedContextHolder<T> {
 	 * @return the current direction
 	 */
 	public T getElement() {
-		Stack<T> currentStack = getStack();
-		return isEmpty(currentStack) ? null : currentStack.peek();
+		List<T> currentStack = getStack();
+		return isEmpty(currentStack) ? null : peek(currentStack);
 	}
 
 	/**
@@ -317,9 +393,9 @@ public abstract class StackedContextHolder<T> {
 		if (!validElement().test(element)) {
 			throw new ThreadContextException(getElementName() + " cannot be: " + element);
 		}
-		Stack<T> currentStack = getStack();
+		List<T> currentStack = getStack();
 		if (isNotEmpty(currentStack)) {
-			currentStack.set(currentStack.size() - 1, element);
+			set(currentStack, size(currentStack) - 1, element);
 			currentElement.set(element);
 		}
 	}
@@ -330,20 +406,20 @@ public abstract class StackedContextHolder<T> {
 	 * @param element element that is being cleared (might be invalid because this method is called in finally).
 	 */
 	protected void clearElement(final T element) {
-		Stack<T> currentStack = getStack();
+		List<T> currentStack = getStack();
 		// the element might be different than the stack peek element if the stack was changed by a changeElement() call, so we
 		// need to check if the current element is the same as the stack peek element before popping it.
 		T peekElement = element;
 		if (isEmpty(currentStack)) {
 			clearThreadStack();
 		} else {
-			if (Objects.equals(currentStack.peek(), currentElement.get())) {
-				peekElement = currentStack.pop();
+			if (Objects.equals(peek(currentStack), currentElement.get())) {
+				peekElement = pop(currentStack);
 			}
 			if (isEmpty(currentStack)) {
 				clearThreadStack();
 			} else {
-				currentElement.set(currentStack.peek());
+				currentElement.set(peek(currentStack));
 			}
 		}
 		debug("[END:on{}:{}]", getElementName(), peekElement);
@@ -357,7 +433,7 @@ public abstract class StackedContextHolder<T> {
 	 * @param currentStack the current stack to check
 	 * @return true if the current stack was initialized, false otherwise
 	 */
-	protected static <T> boolean isInitialized(final Stack<T> currentStack) {
+	protected static <T> boolean isInitialized(final List<T> currentStack) {
 		return null != currentStack;
 	}
 
@@ -369,32 +445,8 @@ public abstract class StackedContextHolder<T> {
 	 * @param currentStack the current stack to check
 	 * @return true if the current stack was not initialized, false otherwise
 	 */
-	protected static <T> boolean isNotInitialized(final Stack<T> currentStack) {
+	protected static <T> boolean isNotInitialized(final List<T> currentStack) {
 		return !isInitialized(currentStack);
-	}
-
-	/**
-	 * Returns true if the current stack is empty, false otherwise.
-	 *
-	 * @param <T> stack element type
-	 *
-	 * @param currentStack the current stack to check
-	 * @return true if the current stack is empty, false otherwise
-	 */
-	protected static <T> boolean isEmpty(final Stack<T> currentStack) {
-		return null == currentStack || currentStack.isEmpty();
-	}
-
-	/**
-	 * Returns true if the current stack is not empty, false otherwise.
-	 *
-	 * @param <T> stack element type
-	 *
-	 * @param currentStack the current stack to check
-	 * @return true if the current stack is not empty, false otherwise
-	 */
-	protected static <T> boolean isNotEmpty(final Stack<T> currentStack) {
-		return !isEmpty(currentStack);
 	}
 
 	/**

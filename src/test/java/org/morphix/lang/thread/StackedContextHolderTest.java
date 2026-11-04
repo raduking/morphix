@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -62,7 +61,7 @@ class StackedContextHolderTest {
 
 		@Test
 		void shouldDetectInitializedStack() {
-			Stack<String> stack = new Stack<>();
+			List<String> stack = new ArrayList<>();
 
 			assertTrue(StackedContextHolder.isInitialized(stack));
 			assertFalse(StackedContextHolder.isNotInitialized(stack));
@@ -76,21 +75,21 @@ class StackedContextHolderTest {
 
 		@Test
 		void shouldDetectEmptyStack() {
-			Stack<String> emptyStack = new Stack<>();
+			List<String> emptyStack = new ArrayList<>();
 
-			assertTrue(StackedContextHolder.isEmpty(emptyStack));
-			assertFalse(StackedContextHolder.isNotEmpty(emptyStack));
-			assertTrue(StackedContextHolder.isEmpty(null));
-			assertFalse(StackedContextHolder.isNotEmpty(null));
+			assertTrue(DummyTenantContextHolder.INSTANCE.isEmpty(emptyStack));
+			assertFalse(DummyTenantContextHolder.INSTANCE.isNotEmpty(emptyStack));
+			assertTrue(DummyTenantContextHolder.INSTANCE.isEmpty(null));
+			assertFalse(DummyTenantContextHolder.INSTANCE.isNotEmpty(null));
 		}
 
 		@Test
 		void shouldDetectNonEmptyStack() {
-			Stack<String> stack = new Stack<>();
-			stack.push(TENANT_ID);
+			List<String> stack = new ArrayList<>();
+			stack.add(TENANT_ID);
 
-			assertFalse(StackedContextHolder.isEmpty(stack));
-			assertTrue(StackedContextHolder.isNotEmpty(stack));
+			assertFalse(DummyTenantContextHolder.INSTANCE.isEmpty(stack));
+			assertTrue(DummyTenantContextHolder.INSTANCE.isNotEmpty(stack));
 		}
 	}
 
@@ -309,7 +308,7 @@ class StackedContextHolderTest {
 	 */
 	static class DummyTenantContextHolder extends TenantContextHolder {
 
-		private static final DummyThreadLocal<Stack<String>> stack = new DummyThreadLocal<>();
+		private static final DummyThreadLocal<List<String>> stack = new DummyThreadLocal<>();
 
 		private static final DummyTenantContextHolder INSTANCE = new DummyTenantContextHolder();
 
@@ -336,12 +335,12 @@ class StackedContextHolderTest {
 		}
 
 		@Override
-		public ThreadLocal<Stack<String>> getThreadStack() {
+		public ThreadLocal<List<String>> getThreadStack() {
 			return stack;
 		}
 
 		@Override
-		protected Stack<String> newStack() {
+		protected List<String> newStack() {
 			DummyStack<String> newStack = new DummyStack<>();
 			this.dummyStackMap.put(Thread.currentThread().getName(), newStack);
 			return newStack;
@@ -377,28 +376,32 @@ class StackedContextHolderTest {
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
-	private static class DummyStack<T> extends Stack<T> {
+	private static class DummyStack<T> extends ArrayList<T> {
 
 		private static final long serialVersionUID = 5387964986959157681L;
 
 		private List<String> operations = new ArrayList<>();
 
 		@Override
-		public T push(final T item) {
+		public boolean add(final T item) {
 			operations.add("push: " + item);
-			return super.push(item);
+			return super.add(item);
 		}
 
 		@Override
-		public synchronized T pop() {
+		public T remove(final int index) {
 			operations.add("pop: " + peek());
-			return super.pop();
+			return super.remove(index);
 		}
 
 		@Override
-		public synchronized T set(final int index, final T element) {
+		public T set(final int index, final T element) {
 			operations.add("change: " + element);
 			return super.set(index, element);
+		}
+
+		private T peek() {
+			return get(size() - 1);
 		}
 	}
 }
