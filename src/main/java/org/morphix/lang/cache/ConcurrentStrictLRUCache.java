@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
-import org.morphix.lang.function.Runnables;
+import org.morphix.lang.thread.Synchronized;
 
 /**
  * A thread-safe concurrent strict LRU (Least Recently Used) cache implementation. This implementation guarantees strict
@@ -124,31 +124,22 @@ public class ConcurrentStrictLRUCache<K, V> extends StrictLRUCache<K, V> {
 	}
 
 	/**
-	 * A helper method that executes the given action while holding the modify lock. This method is used to ensure that
-	 * modifications to the cache are thread-safe by acquiring the lock before executing the action and releasing it
-	 * afterward.
+	 * Executes an action while holding the modify lock.
 	 *
-	 * @param <T> the type of the result returned by the action
-	 * @param action a supplier that provides the action to be executed while holding the lock
-	 * @return the result of the action executed while holding the lock
+	 * @param <T> action result type
+	 * @param action action to execute
+	 * @return the action result
 	 */
 	<T> T locked(final Supplier<T> action) {
-		modifyLock.lock();
-		try {
-			return action.get();
-		} finally {
-			modifyLock.unlock();
-		}
+		return Synchronized.with(modifyLock, action);
 	}
 
 	/**
-	 * A helper method that executes the given action while holding the modify lock. This method is used to ensure that
-	 * modifications to the cache are thread-safe by acquiring the lock before executing the action and releasing it
-	 * afterward.
+	 * Executes an action while holding the modify lock.
 	 *
-	 * @param action a runnable that provides the action to be executed while holding the lock
+	 * @param action action to execute
 	 */
 	void locked(final Runnable action) {
-		locked(Runnables.toSupplier(action));
+		Synchronized.with(modifyLock, action);
 	}
 }

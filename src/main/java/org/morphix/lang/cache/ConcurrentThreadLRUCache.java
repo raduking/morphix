@@ -14,8 +14,11 @@ package org.morphix.lang.cache;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
+
+import org.morphix.lang.thread.Synchronized;
 
 /**
  * A thread-safe concurrent fast LRU (Least Recently Used) cache implementation. Since concurrency is the main focus of
@@ -198,32 +201,24 @@ public class ConcurrentThreadLRUCache<K, V> implements LRUCache<K, V> {
 		if (null == node) {
 			return null;
 		}
-
-		if (size() > capacity()) {
-			if (!writeLock.tryLock()) {
-				return node.value;
-			}
-			try {
-				Thread.ofVirtual().start(this::evict);
-			} finally {
-				writeLock.unlock();
-			}
+		if (size() <= capacity()) {
+			return node.value;
 		}
-		return node.value;
+		return Synchronized.tryWith(writeLock, 0, TimeUnit.NANOSECONDS, () -> {
+			Thread.ofVirtual().start(this::evict);
+			return node.value;
+		}, () -> node.value);
 	}
 
 	/**
 	 * Evicts entries from the cache until the cache size is less than or equal to the maximum size.
 	 */
 	void evict() {
-		writeLock.lock();
-		try {
+		Synchronized.with(writeLock, () -> {
 			while (cache.size() > capacity) {
 				evictLeastRecentlyUsed();
 			}
-		} finally {
-			writeLock.unlock();
-		}
+		});
 	}
 
 	/**
@@ -263,11 +258,6 @@ public class ConcurrentThreadLRUCache<K, V> implements LRUCache<K, V> {
 	 */
 	@Override
 	public void clear() {
-		writeLock.lock();
-		try {
-			cache.clear();
-		} finally {
-			writeLock.unlock();
-		}
+		Synchronized.with(writeLock, cache::clear);
 	}
 }
