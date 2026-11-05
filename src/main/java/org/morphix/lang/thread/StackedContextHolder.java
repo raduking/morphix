@@ -100,7 +100,7 @@ public abstract class StackedContextHolder<T> {
 	 *
 	 * @return a thread local object containing a stack
 	 */
-	public abstract ThreadLocal<List<T>> getThreadStack();
+	protected abstract ThreadLocal<List<T>> getThreadStack();
 
 	/**
 	 * Clears the thread stack. Implement this method to do cleanup including call to {@link ThreadLocal#remove()} method.
