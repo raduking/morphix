@@ -388,20 +388,21 @@ public abstract class StackedContextHolder<T> {
 	}
 
 	/**
-	 * Changes the current element.
+	 * Changes the current element when a context is active. If the current stack is empty, this method does nothing.
 	 *
 	 * @param element new element
 	 */
 	public void changeElement(final T element) {
 		debug("[change{}:{}]", getElementName(), element);
+		List<T> currentStack = getStack();
+		if (isEmpty(currentStack)) {
+			return;
+		}
 		if (!validElement().test(element)) {
 			throw new ThreadContextException(getElementName() + " cannot be: " + element);
 		}
-		List<T> currentStack = getStack();
-		if (isNotEmpty(currentStack)) {
-			set(currentStack, size(currentStack) - 1, element);
-			currentElement.set(element);
-		}
+		set(currentStack, size(currentStack) - 1, element);
+		currentElement.set(element);
 	}
 
 	/**

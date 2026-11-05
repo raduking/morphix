@@ -203,6 +203,7 @@ class StackedContextHolderTest {
 	@Test
 	void shouldNotChangeTenantIdWhenStackIsEmpty() {
 		assertDoesNotThrow(() -> DummyTenantContextHolder.changeTenantId(TENANT_ID));
+		assertDoesNotThrow(() -> DummyTenantContextHolder.changeTenantId(" "));
 		assertThat(DummyTenantContextHolder.getTenantId(), equalTo(null));
 		assertDoesNotThrow(() -> TenantContextHolder.changeTenantId(TENANT_ID));
 		assertThat(TenantContextHolder.getTenantId(), equalTo(null));
