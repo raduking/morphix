@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
+import org.morphix.lang.function.Runnables;
 import org.morphix.lang.thread.Synchronized;
 
 /**
@@ -140,6 +141,6 @@ public class ConcurrentStrictLRUCache<K, V> extends StrictLRUCache<K, V> {
 	 * @param action action to execute
 	 */
 	void locked(final Runnable action) {
-		Synchronized.with(modifyLock, action);
+		locked(Runnables.toSupplier(action));
 	}
 }
