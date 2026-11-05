@@ -85,21 +85,24 @@ class IterablesTest {
 
 		@Test
 		void shouldReturnTrueOnIsEmptyForNullIterable() {
-			boolean result = Iterables.isEmpty(null);
+			Iterable<String> iterable = null;
+			boolean result = Iterables.isEmpty(iterable);
 
 			assertTrue(result);
 		}
 
 		@Test
 		void shouldReturnTrueOnIsEmptyForEmptyCollection() {
-			boolean result = Iterables.isEmpty(List.of());
+			Iterable<String> iterable = List.of();
+			boolean result = Iterables.isEmpty(iterable);
 
 			assertTrue(result);
 		}
 
 		@Test
 		void shouldReturnFalseOnIsEmptyForNonEmptyCollection() {
-			boolean result = Iterables.isEmpty(List.of(1));
+			Iterable<Integer> iterable = List.of(1);
+			boolean result = Iterables.isEmpty(iterable);
 
 			assertFalse(result);
 		}
@@ -124,21 +127,24 @@ class IterablesTest {
 
 		@Test
 		void shouldReturnFalseOnIsNotEmptyForNullIterable() {
-			boolean result = Iterables.isNotEmpty(null);
+			Iterable<String> iterable = null;
+			boolean result = Iterables.isNotEmpty(iterable);
 
 			assertFalse(result);
 		}
 
 		@Test
 		void shouldReturnFalseOnIsNotEmptyForEmptyIterable() {
-			boolean result = Iterables.isNotEmpty(List.of());
+			Iterable<String> iterable = List.of();
+			boolean result = Iterables.isNotEmpty(iterable);
 
 			assertFalse(result);
 		}
 
 		@Test
 		void shouldReturnTrueOnIsNotEmptyForNonEmptyIterable() {
-			boolean result = Iterables.isNotEmpty(List.of(1));
+			Iterable<Integer> iterable = List.of(1);
+			boolean result = Iterables.isNotEmpty(iterable);
 
 			assertTrue(result);
 		}
