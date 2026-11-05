@@ -111,7 +111,7 @@ public abstract class StackedContextHolder<T> {
 	}
 
 	/**
-	 * Returns the stack object from the thread local.
+	 * Returns the list used as a LIFO stack from the thread local.
 	 *
 	 * @return the stack object from the thread local
 	 */
@@ -120,7 +120,7 @@ public abstract class StackedContextHolder<T> {
 	}
 
 	/**
-	 * Creates a new stack instance. Override this method to provide a custom stack implementation.
+	 * Creates a new list used as a LIFO stack. Override this method to provide a custom stack implementation.
 	 *
 	 * @return a new stack instance
 	 */
@@ -455,7 +455,7 @@ public abstract class StackedContextHolder<T> {
 	 * @param currentStack the current stack to check
 	 * @return true if the current stack was initialized, false otherwise
 	 */
-	protected static <T> boolean isInitialized(final List<T> currentStack) {
+	protected boolean isInitialized(final List<T> currentStack) {
 		return null != currentStack;
 	}
 
@@ -467,7 +467,7 @@ public abstract class StackedContextHolder<T> {
 	 * @param currentStack the current stack to check
 	 * @return true if the current stack was not initialized, false otherwise
 	 */
-	protected static <T> boolean isNotInitialized(final List<T> currentStack) {
+	protected boolean isNotInitialized(final List<T> currentStack) {
 		return !isInitialized(currentStack);
 	}
 

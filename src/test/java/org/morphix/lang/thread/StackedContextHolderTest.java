@@ -63,14 +63,14 @@ class StackedContextHolderTest {
 		void shouldDetectInitializedStack() {
 			List<String> stack = new ArrayList<>();
 
-			assertTrue(StackedContextHolder.isInitialized(stack));
-			assertFalse(StackedContextHolder.isNotInitialized(stack));
+			assertTrue(DummyTenantContextHolder.INSTANCE.isInitialized(stack));
+			assertFalse(DummyTenantContextHolder.INSTANCE.isNotInitialized(stack));
 		}
 
 		@Test
 		void shouldDetectUninitializedStack() {
-			assertFalse(StackedContextHolder.isInitialized(null));
-			assertTrue(StackedContextHolder.isNotInitialized(null));
+			assertFalse(DummyTenantContextHolder.INSTANCE.isInitialized(null));
+			assertTrue(DummyTenantContextHolder.INSTANCE.isNotInitialized(null));
 		}
 
 		@Test
