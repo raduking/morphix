@@ -65,8 +65,10 @@ public class CaseInsensitiveLinkedHashMap<V> implements Map<String, V>, Serializ
 
 	/**
 	 * Map that stores entries in insertion order using the original key casing.
+	 * <p>
+	 * {@link LinkedHashMap} is serializable, Java serialization validates each runtime value.
 	 */
-	private LinkedHashMap<String, V> internalMap;
+	private LinkedHashMap<String, V> internalMap; // NOSONAR see JavaDoc for rationale
 
 	/**
 	 * Index from normalized key to the actual key string stored in {@link #internalMap}.
@@ -441,12 +443,15 @@ public class CaseInsensitiveLinkedHashMap<V> implements Map<String, V>, Serializ
 	/**
 	 * Returns a shallow copy of this map. The clone has its own {@link #internalMap} and case-insensitive key index but
 	 * shares value references with this map.
+	 * <p>
+	 * A copy constructor cannot preserve the runtime subtype and its overridden {@link #removeEldestEntry(Map.Entry)}
+	 * behavior, so cloning is used here instead.
 	 *
 	 * @return a shallow copy of this map
 	 * @throws CloneNotSupportedException if cloning is not supported
 	 */
 	@Override
-	public CaseInsensitiveLinkedHashMap<V> clone() throws CloneNotSupportedException {
+	public CaseInsensitiveLinkedHashMap<V> clone() throws CloneNotSupportedException { // NOSONAR see JavaDoc for rationale
 		CaseInsensitiveLinkedHashMap<V> clone = JavaObjects.cast(super.clone());
 		clone.caseInsensitiveKeys = new HashMap<>(caseInsensitiveKeys);
 		clone.internalMap = clone.new InternalLinkedHashMap(internalMap.size());
@@ -636,6 +641,22 @@ public class CaseInsensitiveLinkedHashMap<V> implements Map<String, V>, Serializ
 		public void forEach(final Consumer<? super String> action) {
 			delegate.forEach(action);
 		}
+
+		/**
+		 * @see Set#equals(Object)
+		 */
+		@Override
+		public boolean equals(final Object other) {
+			return this == other || delegate.equals(other);
+		}
+
+		/**
+		 * @see Set#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return delegate.hashCode();
+		}
 	}
 
 	/**
@@ -804,6 +825,22 @@ public class CaseInsensitiveLinkedHashMap<V> implements Map<String, V>, Serializ
 		@Override
 		public void forEach(final Consumer<? super Entry<String, V>> action) {
 			delegate.forEach(action);
+		}
+
+		/**
+		 * @see Set#equals(Object)
+		 */
+		@Override
+		public boolean equals(final Object other) {
+			return this == other || delegate.equals(other);
+		}
+
+		/**
+		 * @see Set#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return delegate.hashCode();
 		}
 	}
 
