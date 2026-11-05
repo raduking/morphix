@@ -20,6 +20,7 @@
 - Added `Synchronized.with` for blocking lock-protected execution.
 - Added `Synchronized.tryWith` for timeout-based lock-protected execution with fallback behavior.
 - Changed `ResourceLeakReference.getAllocationSite()` to return an unmodifiable list.
+- Added `SerializableHolder` for serializable output-parameter values.
 
 ---
 
