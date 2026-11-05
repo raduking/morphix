@@ -450,8 +450,6 @@ public abstract class StackedContextHolder<T> {
 	/**
 	 * Returns true if the current stack was initialized, false otherwise.
 	 *
-	 * @param <T> stack element type
-	 *
 	 * @param currentStack the current stack to check
 	 * @return true if the current stack was initialized, false otherwise
 	 */
@@ -461,8 +459,6 @@ public abstract class StackedContextHolder<T> {
 
 	/**
 	 * Returns true if the current stack was not initialized, false otherwise
-	 *
-	 * @param <T> stack element type
 	 *
 	 * @param currentStack the current stack to check
 	 * @return true if the current stack was not initialized, false otherwise
