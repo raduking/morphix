@@ -220,6 +220,22 @@ class StackedContextHolderTest {
 	}
 
 	@Test
+	void shouldPropagateNullCurrentElement() {
+		NullableContextHolder contextHolder = new NullableContextHolder();
+		contextHolder.setElement(null);
+		try {
+			Supplier<Void> supplier = StackedContextHolder.onCurrent(contextHolder, () -> {
+				contextHolder.changeElement(TEST_STRING);
+				return null;
+			});
+			supplier.get();
+			assertThat(contextHolder.getElement(), equalTo(null));
+		} finally {
+			contextHolder.clearElement();
+		}
+	}
+
+	@Test
 	void shouldPropagateCurrentTenantToCompletedFuture() {
 		String result = TenantContextHolder.onTenant(TENANT_ID, () -> {
 			CompletableFuture<String> future =
@@ -325,23 +341,23 @@ class StackedContextHolderTest {
 
 		private Map<String, DummyStack<String>> dummyStackMap = new HashMap<>();
 
-		public static <T> T onTenant(final String tenantId, final Supplier<T> statements) {
+		public static <T> T onTenant(final String tenantId, final Supplier<T> statements) { // NOSONAR
 			return on(tenantId, INSTANCE, statements::get);
 		}
 
-		public static void onTenant(final String tenantId, final Runnable statements) {
+		public static void onTenant(final String tenantId, final Runnable statements) { // NOSONAR
 			on(tenantId, INSTANCE, statements::run);
 		}
 
-		public static <T> Supplier<T> onCurrentTenant(final Supplier<T> statements) {
+		public static <T> Supplier<T> onCurrentTenant(final Supplier<T> statements) { // NOSONAR
 			return onCurrent(INSTANCE, statements::get);
 		}
 
-		public static void changeTenantId(final String tenantId) {
+		public static void changeTenantId(final String tenantId) { // NOSONAR
 			INSTANCE.changeElement(tenantId);
 		}
 
-		public static String getTenantId() {
+		public static String getTenantId() { // NOSONAR
 			return INSTANCE.getElement();
 		}
 
@@ -359,6 +375,20 @@ class StackedContextHolderTest {
 
 		public DummyStack<String> getDummyStack() {
 			return this.dummyStackMap.get(Thread.currentThread().getName());
+		}
+	}
+
+	private static class NullableContextHolder extends StackedContextHolder<String> {
+
+		private final ThreadLocal<List<String>> stack = new ThreadLocal<>();
+
+		NullableContextHolder() {
+			super("Nullable", value -> true);
+		}
+
+		@Override
+		protected ThreadLocal<List<String>> getThreadStack() {
+			return stack;
 		}
 	}
 

@@ -244,8 +244,9 @@ public abstract class StackedContextHolder<T> {
 	 * Returns a supplier that runs the given statements with the current element as context. The current element is
 	 * captured when this method is called, so the returned supplier can be used with
 	 * {@link CompletableFuture#supplyAsync(Supplier)} to propagate the current context to another thread. The captured
-	 * context is set before the statements run and cleared afterwards. If no current element exists, the original supplier
-	 * is returned unchanged.
+	 * context is set before the statements run and cleared afterwards.
+	 * <p>
+	 * If the current stack is empty, the original supplier is returned unchanged.
 	 *
 	 * @param <E> element type
 	 * @param <U> return type
@@ -256,10 +257,10 @@ public abstract class StackedContextHolder<T> {
 	 * @return a supplier that runs the statements with the captured context
 	 */
 	public static <E, U, V extends StackedContextHolder<E>> Supplier<U> onCurrent(final V contextHolder, final Supplier<U> statements) {
-		E currentElement = contextHolder.getElement();
-		if (null == currentElement) {
+		if (contextHolder.isEmpty(contextHolder.getStack())) {
 			return statements;
 		}
+		E currentElement = contextHolder.getElement();
 		return () -> on(currentElement, contextHolder, statements);
 	}
 
@@ -267,7 +268,9 @@ public abstract class StackedContextHolder<T> {
 	 * Returns a runnable that runs the given runnable with the current element as context. The current element is captured
 	 * when this method is called, so the returned runnable can be used with {@link CompletableFuture#runAsync(Runnable)} to
 	 * propagate the current context to another thread. The captured context is set before the runnable runs and cleared
-	 * afterwards. If no current element exists, the original runnable is returned unchanged.
+	 * afterwards.
+	 * <p>
+	 * If the current stack is empty, the original runnable is returned unchanged.
 	 *
 	 * @param <E> element type
 	 * @param <V> stacked context holder type
@@ -277,10 +280,10 @@ public abstract class StackedContextHolder<T> {
 	 * @return a runnable that runs the runnable with the captured context
 	 */
 	public static <E, V extends StackedContextHolder<E>> Runnable onCurrent(final V contextHolder, final Runnable runnable) {
-		E currentElement = contextHolder.getElement();
-		if (null == currentElement) {
+		if (contextHolder.isEmpty(contextHolder.getStack())) {
 			return runnable;
 		}
+		E currentElement = contextHolder.getElement();
 		return () -> on(currentElement, contextHolder, runnable);
 	}
 
@@ -404,10 +407,12 @@ public abstract class StackedContextHolder<T> {
 	/**
 	 * Removes the element associated with an {@code on(...)} call from the stack.
 	 * <p>
-	 * This method is intended for the {@code finally} callback used by the {@code on(...)} methods. The supplied element
-	 * may be invalid because cleanup can run after an exception. The stack's top element is removed only when it matches
-	 * the internally tracked current element; otherwise the stack is left intact. The previous context is restored when an
-	 * element is removed.
+	 * This method is intended for the {@code finally} callback used by the {@code on(...)} methods.
+	 * <p>
+	 * The supplied element may be invalid because cleanup can run after an exception. The stack's top element is removed
+	 * only when it matches the internally tracked current element, otherwise the stack is left intact.
+	 * <p>
+	 * The previous context is restored when an element is removed.
 	 *
 	 * @param element element associated with the {@code on(...)} call, used for cleanup logging
 	 */
