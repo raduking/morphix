@@ -26,15 +26,15 @@ import org.morphix.convert.function.InstanceConvertFunction;
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.convert.strategy.FieldFinderStrategy;
 import org.morphix.lang.function.InstanceFunction;
+import org.morphix.reflection.Annotations;
 import org.morphix.reflection.ExtendedField;
 import org.morphix.reflection.ExtendedFields;
-import org.morphix.reflection.Annotations;
 
 /**
  * Converter class that will try to convert an object of type S (source) to an object of type D (destination).
  * <p>
- * TODO: reconsider implementing {@link org.morphix.lang.function.InstanceFunction}, {@link InstanceConvertFunction},
- * {@link SimpleConverter}, and {@link ConvertFunction} on the same type (default {@link #instance()} throws).
+ * TODO: reconsider implementing {@link InstanceFunction}, {@link InstanceConvertFunction}, {@link SimpleConverter}, and
+ * {@link ConvertFunction} on the same type (default {@link #instance()} throws).
  *
  * @param <S> Source type.
  * @param <D> Destination type.

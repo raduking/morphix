@@ -37,13 +37,12 @@ import org.morphix.reflection.InstanceCreator;
  * Maps}.
  * <p>
  * Converting to a {@code record} destination type is not supported yet ({@link #to(Class)} uses reflective
- * instantiation like {@link Conversions#convertFrom(Object, Class)}). Record-to-class conversion works; use a factory
+ * instantiation like {@link Conversions#convertFrom(Object, Class)}). Record-to-class conversion works, use a factory
  * or {@link #to(InstanceFunction)} until record destinations are supported.
  * <p>
  * TODO: support conversion to record types via the canonical constructor and component mapping.
  * <p>
- * For the getter methods the converter uses the 'is' convention for both <code>boolean</code> and {@link Boolean}
- * types.
+ * For the getter methods the converter uses the 'is' convention for both {@code boolean} and {@link Boolean} types.
  *
  * <pre>
  * A src = new A();
@@ -127,7 +126,7 @@ public class Converter<S> {
 	}
 
 	/**
-	 * Destination specifier method. Does not support {@code record} destination types yet; see class javadoc.
+	 * Destination specifier method. Does not support {@code record} destination types yet, see class JavaDoc.
 	 *
 	 * @param <D> destination type
 	 *

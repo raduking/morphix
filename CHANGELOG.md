@@ -16,6 +16,7 @@
 - Changed `StackedContextHolder.changeElement(T)` to do nothing when no context is active.
 - Changed `Configuration.getGenericTypesMap` to return an unmodifiable view.
 - Changed `Configuration.putGenericType` to throw when called on the default configuration instance.
+- Changed `Fields.Safe.getByPaths(Object, String)` to trim path segments after splitting on comma and ignore empty segments.
 - Changed `Accumulator.getInformationList` to return an unmodifiable snapshot for safe concurrent iteration.
 - Added protected `Accumulator.getLock` for synchronizing compound operations in derived accumulators.
 - Added `Synchronized.with` for blocking lock-protected execution.

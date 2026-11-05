@@ -39,7 +39,7 @@ import org.morphix.convert.strategy.FieldFinderStrategy;
  * TODO: don't build a new configuration object for default configurations
  * <p>
  * TODO: add {@code copyWith} helpers for strategies, field handlers, excluded fields, and expandable fields (similar to
- * {@link #copyWith(java.lang.reflect.ParameterizedType, Configuration)})
+ * {@link #copyWith(ParameterizedType, Configuration)})
  *
  * @author Radu Sebastian LAZIN
  */

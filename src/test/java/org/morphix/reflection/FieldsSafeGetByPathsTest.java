@@ -15,11 +15,12 @@ package org.morphix.reflection;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields.Safe#getByPath(Object, String)}.
+ * Test class for {@link Fields.Safe#getByPaths(Object, String...)} and {@link Fields.Safe#getByPaths(Object, String)}.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -43,6 +44,30 @@ class FieldsSafeGetByPathsTest {
 		b.a = a;
 
 		String x = Fields.Safe.getByPaths(b, "x.y,a.x");
+
+		assertThat(x, equalTo(TEST_STRING));
+	}
+
+	@Test
+	void shouldGetFieldByPathsWhenCommaSeparatedPathsHaveWhitespace() {
+		A a = new A();
+		a.x = TEST_STRING;
+		B b = new B();
+		b.a = a;
+
+		String x = Fields.Safe.getByPaths(b, "x.y , a.x");
+
+		assertThat(x, equalTo(TEST_STRING));
+	}
+
+	@Test
+	void shouldGetFieldByPathsWithVarargs() {
+		A a = new A();
+		a.x = TEST_STRING;
+		B b = new B();
+		b.a = a;
+
+		String x = Fields.Safe.getByPaths(b, "x.y", "a.x");
 
 		assertThat(x, equalTo(TEST_STRING));
 	}
@@ -72,6 +97,13 @@ class FieldsSafeGetByPathsTest {
 	}
 
 	@Test
+	void shouldThrowWhenCommaSeparatedPathsAreNull() {
+		B b = new B();
+
+		assertThrows(NullPointerException.class, () -> Fields.Safe.getByPaths(b, (String) null));
+	}
+
+	@Test
 	void shouldReturnNullForEmptySearch() {
 		A a = new A();
 		a.x = TEST_STRING;
@@ -83,6 +115,10 @@ class FieldsSafeGetByPathsTest {
 		assertThat(result, nullValue());
 
 		result = Fields.Safe.getByPaths(b, new String[] { });
+
+		assertThat(result, nullValue());
+
+		result = Fields.Safe.getByPaths(b, " , , ");
 
 		assertThat(result, nullValue());
 	}

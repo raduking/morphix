@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
  * Test class for
  * <ul>
  * <li>{@link Fields.IgnoreAccess#getByPaths(Object, String)}</li>
- * <li>{@link Fields.IgnoreAccess#getByPaths(Object, String[])}</li>
+ * <li>{@link Fields.IgnoreAccess#getByPaths(Object, String...)}</li>
  * <li>{@link Fields.IgnoreAccess#getByPath(Object, String)}</li>
  * </ul>
  *
