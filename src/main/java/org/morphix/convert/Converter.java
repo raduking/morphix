@@ -29,12 +29,21 @@ import org.morphix.reflection.GenericType;
 import org.morphix.reflection.InstanceCreator;
 
 /**
- * Converted object from source. Encapsulates all converter functionality with a simpler syntax.
+ * Fluent conversion from a single source object to a destination type. For converting {@link java.lang.Iterable
+ * iterables} or {@link java.util.Map maps}, use {@link IterableConversions} and {@link MapConversions} (and
+ * {@link Conversions} for other static entry points).
+ * <p>
+ * TODO: implement the same fluent functionality for {@link java.lang.Iterable Iterables} and {@link java.util.Map
+ * Maps}.
+ * <p>
+ * Converting to a {@code record} destination type is not supported yet ({@link #to(Class)} uses reflective
+ * instantiation like {@link Conversions#convertFrom(Object, Class)}). Record-to-class conversion works; use a factory
+ * or {@link #to(InstanceFunction)} until record destinations are supported.
+ * <p>
+ * TODO: support conversion to record types via the canonical constructor and component mapping.
  * <p>
  * For the getter methods the converter uses the 'is' convention for both <code>boolean</code> and {@link Boolean}
  * types.
- * <p>
- * TODO: implement the same functionality for Iterables and Maps
  *
  * <pre>
  * A src = new A();
@@ -118,7 +127,7 @@ public class Converter<S> {
 	}
 
 	/**
-	 * Destination specifier method.
+	 * Destination specifier method. Does not support {@code record} destination types yet; see class javadoc.
 	 *
 	 * @param <D> destination type
 	 *

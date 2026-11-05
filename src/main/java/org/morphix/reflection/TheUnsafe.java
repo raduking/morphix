@@ -18,6 +18,10 @@ import sun.misc.Unsafe; // NOSONAR used for low-level operations when no other o
 
 /**
  * {@link Unsafe} wrapper class.
+ * <p>
+ * Advanced API: depends on JDK internals and strong encapsulation may block access on some JDK/module configurations.
+ * <p>
+ * TODO: expand JavaDoc with module-system guidance and supported JDK expectations.
  *
  * @author Radu Sebastian LAZIN
  */

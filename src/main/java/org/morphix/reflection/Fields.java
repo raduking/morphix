@@ -698,6 +698,7 @@ public interface Fields {
 					}
 				}
 			} catch (Exception e) {
+				// TODO: do not swallow all exceptions; return null only for missing paths or offer a strict overload
 				return null;
 			}
 			return result;
@@ -716,6 +717,7 @@ public interface Fields {
 		 * @throws NullPointerException if the paths are null
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
+			// TODO: trim path segments after split and document comma escaping in paths
 			return getByPaths(obj, Objects.requireNonNull(paths, "paths").split(","));
 		}
 

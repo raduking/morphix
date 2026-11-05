@@ -32,6 +32,9 @@ import org.morphix.reflection.Annotations;
 
 /**
  * Converter class that will try to convert an object of type S (source) to an object of type D (destination).
+ * <p>
+ * TODO: reconsider implementing {@link org.morphix.lang.function.InstanceFunction}, {@link InstanceConvertFunction},
+ * {@link SimpleConverter}, and {@link ConvertFunction} on the same type (default {@link #instance()} throws).
  *
  * @param <S> Source type.
  * @param <D> Destination type.

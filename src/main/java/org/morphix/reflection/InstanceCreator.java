@@ -63,6 +63,8 @@ public class InstanceCreator {
 
 	/**
 	 * Sets the singleton instance.
+	 * <p>
+	 * TODO: replace with a documented SPI or test-only hook; avoid mutable global singleton in public API.
 	 *
 	 * @param instance instance to set
 	 */

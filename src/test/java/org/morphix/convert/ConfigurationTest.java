@@ -94,6 +94,13 @@ class ConfigurationTest {
 	}
 
 	@Test
+	void shouldRejectPutGenericTypeOnDefaultConfiguration() {
+		Configuration configuration = Configuration.defaults();
+
+		assertThrows(UnsupportedOperationException.class, () -> configuration.putGenericType("newType", Integer.class));
+	}
+
+	@Test
 	void shouldReturnUnmodifiableGenericTypesMapAndAllowUpdatesThroughConfiguration() {
 		Configuration configuration = Configuration.of(
 				Default.EXCLUDED_FIELDS,

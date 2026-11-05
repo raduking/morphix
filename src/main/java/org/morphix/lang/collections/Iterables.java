@@ -75,12 +75,12 @@ public interface Iterables {
 	}
 
 	/**
-	 * Return true if the given iterable is {@code null} or empty.
+	 * Return true if the given iterable is not {@code null} and has at least one element.
 	 *
 	 * @param <T> element type
 	 *
 	 * @param iterable an iterable
-	 * @return true if the given iterable is {@code null} or empty
+	 * @return false if the iterable is {@code null} or empty, {@code true} otherwise
 	 */
 	static <T> boolean isNotEmpty(final Iterable<T> iterable) {
 		return !isEmpty(iterable);
