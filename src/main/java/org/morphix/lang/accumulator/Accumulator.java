@@ -12,6 +12,7 @@
  */
 package org.morphix.lang.accumulator;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
@@ -108,12 +109,12 @@ public abstract class Accumulator<T> {
 	}
 
 	/**
-	 * Returns all the accumulated information.
+	 * Returns an unmodifiable view of all the accumulated information.
 	 *
 	 * @return all the accumulated information
 	 */
 	public List<T> getInformationList() {
-		return list;
+		return Collections.unmodifiableList(list);
 	}
 
 	/**
@@ -176,7 +177,7 @@ public abstract class Accumulator<T> {
 	 * @param information information to add
 	 */
 	public void addInformation(final T information) {
-		getInformationList().add(information);
+		list.add(information);
 	}
 
 	/**

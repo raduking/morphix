@@ -133,7 +133,7 @@ class CompositeAccumulatorTest {
 
 		@Override
 		public <U> U accumulate(final Supplier<U> supplier, final Supplier<U> defaultReturn) {
-			getInformationList().add(Boolean.TRUE);
+			addInformation(Boolean.TRUE);
 			return supplier.get();
 		}
 	}

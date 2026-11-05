@@ -15,6 +15,7 @@ package org.morphix.lang.accumulator;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.function.Supplier;
@@ -168,21 +169,33 @@ class AccumulatorTest {
 	void shouldNotAllowModificationOfInformationListForEmptyAccumulator() {
 		Accumulator<String> accumulator = Accumulator.empty();
 
-		accumulator.getInformationList().add(TEST_STRING);
+		accumulator.addInformation(TEST_STRING);
 
 		assertThat(accumulator.size(), equalTo(0));
 		assertThat(accumulator.getInformationList().size(), equalTo(0));
+	}
+
+	@Test
+	void shouldNotAllowModificationOfInformationList() {
+		Accumulator<String> accumulator = new Accumulator<>() {
+			@Override
+			public <U> U accumulate(final Supplier<U> supplier, final Supplier<U> defaultReturn) {
+				return supplier.get();
+			}
+		};
+
+		assertThrows(UnsupportedOperationException.class, () -> accumulator.getInformationList().add(TEST_STRING));
 	}
 
 	static class TestAccumulator extends Accumulator<Boolean> {
 
 		@Override
 		public <U> U accumulate(final Supplier<U> supplier, final Supplier<U> defaultReturn) {
-			getInformationList().add(Boolean.TRUE);
+			addInformation(Boolean.TRUE);
 			U result = supplier.get();
 
 			if (CHECK_STRING.equals(result)) {
-				getInformationList().add(Boolean.FALSE);
+				addInformation(Boolean.FALSE);
 				return defaultReturn.get();
 			}
 			return result;

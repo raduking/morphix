@@ -217,7 +217,7 @@ public class ExceptionsAccumulator extends Accumulator<Exception> {
 		if (!exceptionTypes.isEmpty() && !exceptionTypes.contains(e.getClass())) {
 			Unchecked.reThrow(e);
 		}
-		getExceptions().add(e);
+		addInformation(e);
 	}
 
 	/**
