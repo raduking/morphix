@@ -209,6 +209,17 @@ class StackedContextHolderTest {
 	}
 
 	@Test
+	void shouldClearManuallySetTenantId() {
+		DummyTenantContextHolder.INSTANCE.setElement(TENANT_ID);
+		try {
+			assertThat(DummyTenantContextHolder.getTenantId(), equalTo(TENANT_ID));
+		} finally {
+			DummyTenantContextHolder.INSTANCE.clearElement();
+		}
+		assertThat(DummyTenantContextHolder.getTenantId(), equalTo(null));
+	}
+
+	@Test
 	void shouldPropagateCurrentTenantToCompletedFuture() {
 		String result = TenantContextHolder.onTenant(TENANT_ID, () -> {
 			CompletableFuture<String> future =

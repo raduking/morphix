@@ -12,9 +12,9 @@
  */
 package org.morphix.lang.thread;
 
-import java.util.Objects;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -237,7 +237,7 @@ public abstract class StackedContextHolder<T> {
 	 * @return statements result
 	 */
 	public static <E, U, V extends StackedContextHolder<E>> U on(final E element, final V contextHolder, final Supplier<U> statements) {
-		return on(element, contextHolder::setElement, contextHolder::clearElement, statements);
+		return on(element, contextHolder::setElement, contextHolder::removeElement, statements);
 	}
 
 	/**
@@ -324,7 +324,7 @@ public abstract class StackedContextHolder<T> {
 	 */
 	public static <E, U, R, V extends StackedContextHolder<E>> R on(final E element, final V contextHolder, final Function<U, R> function,
 			final U arg) {
-		return on(element, contextHolder::setElement, contextHolder::clearElement, function, arg);
+		return on(element, contextHolder::setElement, contextHolder::removeElement, function, arg);
 	}
 
 	/**
@@ -352,7 +352,7 @@ public abstract class StackedContextHolder<T> {
 	 * @param runnable runnable to run
 	 */
 	public static <E, V extends StackedContextHolder<E>> void on(final E element, final V contextHolder, final Runnable runnable) {
-		on(element, contextHolder::setElement, contextHolder::clearElement, runnable);
+		on(element, contextHolder::setElement, contextHolder::removeElement, runnable);
 	}
 
 	/**
@@ -402,11 +402,16 @@ public abstract class StackedContextHolder<T> {
 	}
 
 	/**
-	 * Clears the current direction from the stack.
+	 * Removes the element associated with an {@code on(...)} call from the stack.
+	 * <p>
+	 * This method is intended for the {@code finally} callback used by the {@code on(...)} methods. The supplied element
+	 * may be invalid because cleanup can run after an exception. The stack's top element is removed only when it matches
+	 * the internally tracked current element; otherwise the stack is left intact. The previous context is restored when an
+	 * element is removed.
 	 *
-	 * @param element element that is being cleared (might be invalid because this method is called in finally).
+	 * @param element element associated with the {@code on(...)} call, used for cleanup logging
 	 */
-	protected void clearElement(final T element) {
+	protected void removeElement(final T element) {
 		List<T> currentStack = getStack();
 		// the element might be different than the stack peek element if the stack was changed by a changeElement() call, so we
 		// need to check if the current element is the same as the stack peek element before popping it.
@@ -424,6 +429,16 @@ public abstract class StackedContextHolder<T> {
 			}
 		}
 		debug("[END:on{}:{}]", getElementName(), peekElement);
+	}
+
+	/**
+	 * Clears the current element from the stack.
+	 * <p>
+	 * This method is the counterpart to {@link #setElement(Object)} for callers that manage the context manually. Contexts
+	 * managed by one of the {@code on(...)} methods are cleared automatically.
+	 */
+	public void clearElement() {
+		removeElement(getElement());
 	}
 
 	/**
