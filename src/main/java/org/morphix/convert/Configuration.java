@@ -183,7 +183,7 @@ public final class Configuration {
 	}
 
 	/**
-	 * Returns the field handlers list from the configuration.
+	 * Returns the unmodifiable field handlers list from the configuration.
 	 *
 	 * @return the field handlers list from the configuration
 	 */
@@ -192,7 +192,7 @@ public final class Configuration {
 	}
 
 	/**
-	 * Returns the strategies list.
+	 * Returns the unmodifiable strategies list.
 	 *
 	 * @return the strategies list
 	 */

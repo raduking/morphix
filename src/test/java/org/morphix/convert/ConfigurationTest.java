@@ -15,6 +15,7 @@ package org.morphix.convert;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
@@ -82,6 +83,14 @@ class ConfigurationTest {
 
 		assertThat(configuration.getGenericTypesMap(), equalTo(Configuration.defaults().getGenericTypesMap()));
 		assertTrue(configuration.isDefault());
+	}
+
+	@Test
+	void shouldReturnUnmodifiableFieldHandlersAndStrategies() {
+		Configuration configuration = Configuration.defaults();
+
+		assertThrows(UnsupportedOperationException.class, () -> configuration.getFieldHandlers().clear());
+		assertThrows(UnsupportedOperationException.class, () -> configuration.getStrategies().clear());
 	}
 
 	@Test

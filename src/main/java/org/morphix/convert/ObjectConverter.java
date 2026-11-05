@@ -72,7 +72,7 @@ public class ObjectConverter<S, D> implements
 	}
 
 	/**
-	 * Return all the field handlers.
+	 * Returns all the field handlers in an unmodifiable list.
 	 *
 	 * @return a list of field handlers
 	 */
@@ -81,7 +81,7 @@ public class ObjectConverter<S, D> implements
 	}
 
 	/**
-	 * Returns a list of strategies with which to find the fields in the source.
+	 * Returns the strategies with which to find the fields in the source in an unmodifiable list.
 	 *
 	 * @return a list of strategies with which to find the fields in the source
 	 */
