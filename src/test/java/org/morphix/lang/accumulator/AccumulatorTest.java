@@ -18,6 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
@@ -184,7 +190,38 @@ class AccumulatorTest {
 			}
 		};
 
-		assertThrows(UnsupportedOperationException.class, () -> accumulator.getInformationList().add(TEST_STRING));
+		List<String> informationList = accumulator.getInformationList();
+		assertThrows(UnsupportedOperationException.class, () -> informationList.add(TEST_STRING));
+	}
+
+	@Test
+	void shouldAccumulateInformationSafelyFromMultipleThreads() throws Exception {
+		Accumulator<Integer> accumulator = new Accumulator<>() {
+			@Override
+			public <U> U accumulate(final Supplier<U> supplier, final Supplier<U> defaultReturn) {
+				return supplier.get();
+			}
+		};
+		@SuppressWarnings("resource")
+		ExecutorService executor = Executors.newFixedThreadPool(4);
+		try {
+			List<Callable<Void>> tasks = new ArrayList<>();
+			for (int i = 0; i < 4; ++i) {
+				tasks.add(() -> {
+					for (int j = 0; j < 1_000; ++j) {
+						accumulator.addInformation(j);
+					}
+					return null;
+				});
+			}
+			for (Future<Void> future : executor.invokeAll(tasks)) {
+				future.get();
+			}
+		} finally {
+			executor.shutdown();
+		}
+
+		assertThat(accumulator.size(), equalTo(4_000));
 	}
 
 	static class TestAccumulator extends Accumulator<Boolean> {

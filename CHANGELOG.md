@@ -15,7 +15,10 @@
 - Changed `StackedContextHolder.onCurrent(V, Runnable)` to propagate a valid `null` context element.
 - Changed `StackedContextHolder.changeElement(T)` to do nothing when no context is active.
 - Changed `Configuration.getGenericTypesMap()` to return an unmodifiable view.
-- Changed `Accumulator.getInformationList()` to return an unmodifiable view.
+- Changed `Accumulator.getInformationList()` to return an unmodifiable snapshot for safe concurrent iteration.
+- Added protected `Accumulator.getLock()` for synchronizing compound operations in derived accumulators.
+- Added `Synchronized.with` for blocking lock-protected execution.
+- Added `Synchronized.tryWith` for timeout-based lock-protected execution with fallback behavior.
 - Changed `ResourceLeakReference.getAllocationSite()` to return an unmodifiable list.
 
 ---
