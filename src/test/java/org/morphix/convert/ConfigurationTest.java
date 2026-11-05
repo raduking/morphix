@@ -94,6 +94,21 @@ class ConfigurationTest {
 	}
 
 	@Test
+	void shouldReturnUnmodifiableGenericTypesMapAndAllowUpdatesThroughConfiguration() {
+		Configuration configuration = Configuration.of(
+				Default.EXCLUDED_FIELDS,
+				Default.EXPANDABLE_FIELDS,
+				Default.SIMPLE_CONVERTERS,
+				String.class);
+
+		assertThrows(UnsupportedOperationException.class,
+				() -> configuration.getGenericTypesMap().put("newType", Integer.class));
+
+		configuration.putGenericType("newType", Integer.class);
+		assertThat(configuration.getGenericTypesMap().get("newType"), equalTo(Integer.class));
+	}
+
+	@Test
 	void shouldReturnFalseOnEqualsWithNull() {
 		Configuration configuration = Configuration.defaults();
 

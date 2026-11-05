@@ -399,12 +399,13 @@ public final class Configuration {
 	}
 
 	/**
-	 * Returns the generic types map.
+	 * Returns an unmodifiable view of the generic types map. Use {@link #putGenericType(String, Type)} to add a generic
+	 * type.
 	 *
 	 * @return the generic types map
 	 */
 	public Map<String, Type> getGenericTypesMap() {
-		return genericTypesMap;
+		return Collections.unmodifiableMap(genericTypesMap);
 	}
 
 	/**
