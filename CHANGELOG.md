@@ -4,6 +4,8 @@
 
 - Added `Iterables.isEmpty(Collection)` to check if a `Collection` is empty or `null`.
 - Added `Iterables.isNotEmpty(Collection)` to check if a `Collection` is not empty.
+- Added `NormalizedKeyLinkedHashMap` as a reusable base for maps with normalized string-key lookup.
+- Changed `CaseInsensitiveLinkedHashMap` to use `NormalizedKeyLinkedHashMap` for normalized-key map behavior.
 - Added `StackedContextHolder.isNotInitialized` to check if a thread stack was not initialized.
 - Added `StackedContextHolder.isNotEmpty` to check if a thread stack is not empty.
 - Changed `StackedContextHolder.getThreadStack` to protected `ThreadLocal<List>` storage; overrides can still use `Stack`.
