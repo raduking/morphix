@@ -123,6 +123,12 @@ public abstract class KeyNormalizingLinkedHashMap<V> implements Map<String, V>, 
 	}
 
 	/**
+	 * Associates the key with the value. If another key with the same normalized form is already present, its mapping is
+	 * replaced and the newly supplied key becomes the stored key spelling.
+	 *
+	 * @param key key whose normalized form is used for lookup
+	 * @param value value to associate with the key
+	 * @return the previously associated value, or {@code null} if there was no mapping
 	 * @see Map#put(Object, Object)
 	 */
 	@Override
