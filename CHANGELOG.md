@@ -1,5 +1,33 @@
 ## Release Notes
 
+`1.1.0`
+
+- Added `Iterables.isEmpty(Collection)` to check if a `Collection` is empty or `null`.
+- Added `Iterables.isNotEmpty(Collection)` to check if a `Collection` is not empty.
+- Added `NormalizedKeyLinkedHashMap` as a reusable base for maps with normalized string-key lookup.
+- Changed `CaseInsensitiveLinkedHashMap` to use `NormalizedKeyLinkedHashMap` for normalized-key map behavior.
+- Added `StackedContextHolder.isNotInitialized` to check if a thread stack was not initialized.
+- Added `StackedContextHolder.isNotEmpty` to check if a thread stack is not empty.
+- Changed `StackedContextHolder.getThreadStack` to protected `ThreadLocal<List>` storage; overrides can still use `Stack`.
+- Changed `StackedContextHolder.getStack` to use `List` instead of `Stack`.
+- Changed `StackedContextHolder.newStack` to return an `ArrayList` instead of a `Stack`.
+- Added `StackedContextHolder.clearElement` to clear a manually set context.
+- Changed `StackedContextHolder.clearElement(T)` to protected `removeElement(T)` for internal cleanup callbacks.
+- Changed `StackedContextHolder.onCurrent(V, Supplier)` to propagate a valid `null` context element.
+- Changed `StackedContextHolder.onCurrent(V, Runnable)` to propagate a valid `null` context element.
+- Changed `StackedContextHolder.changeElement(T)` to do nothing when no context is active.
+- Changed `Configuration.getGenericTypesMap` to return an unmodifiable view.
+- Changed `Configuration.putGenericType` to throw when called on the default configuration instance.
+- Changed `Fields.Safe.getByPaths(Object, String)` to trim path segments after splitting on comma and ignore empty segments.
+- Changed `Accumulator.getInformationList` to return an unmodifiable snapshot for safe concurrent iteration.
+- Added protected `Accumulator.getLock` for synchronizing compound operations in derived accumulators.
+- Added `Synchronized.with` for blocking lock-protected execution.
+- Added `Synchronized.tryWith` for timeout-based lock-protected execution with fallback behavior.
+- Changed `ResourceLeakReference.getAllocationSite` to return an unmodifiable list.
+- Added `SerializableHolder` for serializable output-parameter values.
+
+---
+
 `1.0.48`
 
 - Added `CaseInsensitiveLinkedHashMap` as a linked hash map with case-insensitive string keys that preserve insertion order and original key casing.

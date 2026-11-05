@@ -37,6 +37,9 @@ import org.morphix.convert.strategy.FieldFinderStrategy;
  * fallback to the defaults
  * <p>
  * TODO: don't build a new configuration object for default configurations
+ * <p>
+ * TODO: add {@code copyWith} helpers for strategies, field handlers, excluded fields, and expandable fields (similar to
+ * {@link #copyWith(ParameterizedType, Configuration)})
  *
  * @author Radu Sebastian LAZIN
  */
@@ -183,7 +186,7 @@ public final class Configuration {
 	}
 
 	/**
-	 * Returns the field handlers list from the configuration.
+	 * Returns the unmodifiable field handlers list from the configuration.
 	 *
 	 * @return the field handlers list from the configuration
 	 */
@@ -192,7 +195,7 @@ public final class Configuration {
 	}
 
 	/**
-	 * Returns the strategies list.
+	 * Returns the unmodifiable strategies list.
 	 *
 	 * @return the strategies list
 	 */
@@ -388,23 +391,29 @@ public final class Configuration {
 	}
 
 	/**
-	 * Returns the generic type corresponding to the given type name.
+	 * Associates a generic type with the given type name in this configuration.
 	 *
 	 * @param typeName type name
 	 * @param type type
-	 * @return the generic type
+	 * @return the previous type associated with {@code typeName}, or {@code null} if there was none
+	 * @throws UnsupportedOperationException if this configuration is the default instance ({@link #isDefault()})
 	 */
 	public Type putGenericType(final String typeName, final Type type) {
+		if (isDefault()) {
+			throw new UnsupportedOperationException("Cannot modify the default configuration; use Configuration.copyWith"
+					+ " or Configuration.of(...) to obtain a mutable configuration.");
+		}
 		return genericTypesMap.put(typeName, type);
 	}
 
 	/**
-	 * Returns the generic types map.
+	 * Returns an unmodifiable view of the generic types map. Use {@link #putGenericType(String, Type)} to add a generic
+	 * type on a non-default configuration.
 	 *
 	 * @return the generic types map
 	 */
 	public Map<String, Type> getGenericTypesMap() {
-		return genericTypesMap;
+		return Collections.unmodifiableMap(genericTypesMap);
 	}
 
 	/**

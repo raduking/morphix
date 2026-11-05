@@ -22,8 +22,12 @@ package org.morphix.lang.leak;
  * extensive details.</li>
  * </ul>
  *
- * The current leak detection level can be determined by setting the system property
- * {@code morphix.leak.detection.level}.
+ * The current leak detection level is read from the system property {@code morphix.leak.detection.level}
+ * ({@link #PROPERTY}). When the property is not set, is empty, or is invalid, {@link #current()} returns
+ * {@link #DISABLED} so leak detection is opt-in.
+ * <p>
+ * Enable a level explicitly in test or development environments (for example
+ * {@code -Dmorphix.leak.detection.level=SIMPLE}) rather than relying on a production default.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -58,7 +62,7 @@ public enum LeakDetectionLevel {
 
 	/**
 	 * The system property key used to determine the current leak detection level, it should be set to any of the enum
-	 * names. If the property is not set or is invalid, the default level will be {@link #SIMPLE}.
+	 * names. If the property is not set, is empty, or is invalid, {@link #current()} returns {@link #DISABLED}.
 	 */
 	public static final String PROPERTY = "morphix.leak.detection.level";
 

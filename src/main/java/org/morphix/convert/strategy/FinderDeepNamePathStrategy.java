@@ -15,7 +15,7 @@ package org.morphix.convert.strategy;
 /**
  * Deep name path strategy.
  * <p>
- * TODO: implement this
+ * TODO: implement deep name path field finding (not part of {@link org.morphix.convert.DefaultStrategies} chain yet).
  *
  * @author Radu Sebastian LAZIN
  */

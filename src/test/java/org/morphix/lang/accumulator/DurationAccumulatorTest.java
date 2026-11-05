@@ -96,9 +96,9 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldReturnCorrectAverageForAccumulatedDurations() {
-		accumulator.getInformationList().add(Duration.ofMillis(10));
-		accumulator.getInformationList().add(Duration.ofMillis(20));
-		accumulator.getInformationList().add(Duration.ofMillis(30));
+		accumulator.addInformation(Duration.ofMillis(10));
+		accumulator.addInformation(Duration.ofMillis(20));
+		accumulator.addInformation(Duration.ofMillis(30));
 
 		double avg = accumulator.average();
 		assertThat(avg, equalTo(0.02));
@@ -112,9 +112,9 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldReturnCorrectMaxForAccumulatedDurations() {
-		accumulator.getInformationList().add(Duration.ofMillis(10));
-		accumulator.getInformationList().add(Duration.ofMillis(25));
-		accumulator.getInformationList().add(Duration.ofMillis(15));
+		accumulator.addInformation(Duration.ofMillis(10));
+		accumulator.addInformation(Duration.ofMillis(25));
+		accumulator.addInformation(Duration.ofMillis(15));
 
 		double max = accumulator.max();
 		assertThat(max, equalTo(0.025));
@@ -128,9 +128,9 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldReturnCorrectMinForAccumulatedDurations() {
-		accumulator.getInformationList().add(Duration.ofMillis(15));
-		accumulator.getInformationList().add(Duration.ofMillis(35));
-		accumulator.getInformationList().add(Duration.ofMillis(25));
+		accumulator.addInformation(Duration.ofMillis(15));
+		accumulator.addInformation(Duration.ofMillis(35));
+		accumulator.addInformation(Duration.ofMillis(25));
 
 		double min = accumulator.min();
 		assertThat(min, equalTo(0.015));
@@ -169,10 +169,10 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldReturnCorrectPercentileFromAccumulatedDurations() {
-		accumulator.getInformationList().add(Duration.ofMillis(10));
-		accumulator.getInformationList().add(Duration.ofMillis(20));
-		accumulator.getInformationList().add(Duration.ofMillis(30));
-		accumulator.getInformationList().add(Duration.ofMillis(40));
+		accumulator.addInformation(Duration.ofMillis(10));
+		accumulator.addInformation(Duration.ofMillis(20));
+		accumulator.addInformation(Duration.ofMillis(30));
+		accumulator.addInformation(Duration.ofMillis(40));
 
 		double p25 = accumulator.percentile(25.0);
 		double p50 = accumulator.percentile(50.0);
@@ -193,10 +193,10 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldReturnCorrectMedianForAccumulatedDurations() {
-		accumulator.getInformationList().add(Duration.ofMillis(10));
-		accumulator.getInformationList().add(Duration.ofMillis(20));
-		accumulator.getInformationList().add(Duration.ofMillis(30));
-		accumulator.getInformationList().add(Duration.ofMillis(40));
+		accumulator.addInformation(Duration.ofMillis(10));
+		accumulator.addInformation(Duration.ofMillis(20));
+		accumulator.addInformation(Duration.ofMillis(30));
+		accumulator.addInformation(Duration.ofMillis(40));
 
 		double median = accumulator.median();
 		assertThat(median, equalTo(0.02));
@@ -204,9 +204,9 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldReturnCorrectMedianForOddNumberOfDurations() {
-		accumulator.getInformationList().add(Duration.ofMillis(50));
-		accumulator.getInformationList().add(Duration.ofMillis(60));
-		accumulator.getInformationList().add(Duration.ofMillis(70));
+		accumulator.addInformation(Duration.ofMillis(50));
+		accumulator.addInformation(Duration.ofMillis(60));
+		accumulator.addInformation(Duration.ofMillis(70));
 
 		double median = accumulator.median();
 		assertThat(median, equalTo(0.06));
@@ -223,9 +223,9 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldReturnCorrectPercentilesForOddNumberOfDurations() {
-		accumulator.getInformationList().add(Duration.ofMillis(10));
-		accumulator.getInformationList().add(Duration.ofMillis(20));
-		accumulator.getInformationList().add(Duration.ofMillis(30));
+		accumulator.addInformation(Duration.ofMillis(10));
+		accumulator.addInformation(Duration.ofMillis(20));
+		accumulator.addInformation(Duration.ofMillis(30));
 
 		double p50 = accumulator.percentile(50.0); // median
 		double p95 = accumulator.percentile(95.0);
@@ -236,10 +236,10 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldReturnCorrectPercentilesForEvenNumberOfDurations() {
-		accumulator.getInformationList().add(Duration.ofMillis(10));
-		accumulator.getInformationList().add(Duration.ofMillis(20));
-		accumulator.getInformationList().add(Duration.ofMillis(30));
-		accumulator.getInformationList().add(Duration.ofMillis(40));
+		accumulator.addInformation(Duration.ofMillis(10));
+		accumulator.addInformation(Duration.ofMillis(20));
+		accumulator.addInformation(Duration.ofMillis(30));
+		accumulator.addInformation(Duration.ofMillis(40));
 
 		double p50 = accumulator.percentile(50.0); // median
 		double p90 = accumulator.percentile(90.0);
@@ -250,8 +250,8 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldClampPercentileIndexAtEdges() {
-		accumulator.getInformationList().add(Duration.ofMillis(10));
-		accumulator.getInformationList().add(Duration.ofMillis(20));
+		accumulator.addInformation(Duration.ofMillis(10));
+		accumulator.addInformation(Duration.ofMillis(20));
 
 		double p0 = accumulator.percentile(0.0);
 		double p100 = accumulator.percentile(100.0);
@@ -262,10 +262,10 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldBuildCorrectStatistics() {
-		accumulator.getInformationList().add(Duration.ofMillis(10));
-		accumulator.getInformationList().add(Duration.ofMillis(20));
-		accumulator.getInformationList().add(Duration.ofMillis(30));
-		accumulator.getInformationList().add(Duration.ofMillis(40));
+		accumulator.addInformation(Duration.ofMillis(10));
+		accumulator.addInformation(Duration.ofMillis(20));
+		accumulator.addInformation(Duration.ofMillis(30));
+		accumulator.addInformation(Duration.ofMillis(40));
 
 		DurationAccumulator.Statistics stats = accumulator.buildStatistics();
 
@@ -280,8 +280,8 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldReturnFormattedDurationsOnStatisticsToString() {
-		accumulator.getInformationList().add(Duration.ofMillis(10));
-		accumulator.getInformationList().add(Duration.ofMillis(20));
+		accumulator.addInformation(Duration.ofMillis(10));
+		accumulator.addInformation(Duration.ofMillis(20));
 
 		DurationAccumulator.Statistics stats = accumulator.buildStatistics();
 		String output = stats.toString();
@@ -295,8 +295,8 @@ class DurationAccumulatorTest {
 
 	@Test
 	void shouldReturnFormattedDurationsOnAccumulatorToString() {
-		accumulator.getInformationList().add(Duration.ofMillis(10));
-		accumulator.getInformationList().add(Duration.ofMillis(20));
+		accumulator.addInformation(Duration.ofMillis(10));
+		accumulator.addInformation(Duration.ofMillis(20));
 
 		accumulator.buildStatistics();
 		String output = accumulator.toString();

@@ -12,7 +12,7 @@
  */
 package org.morphix.utils.lang.thread;
 
-import java.util.Stack;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -42,7 +42,7 @@ public class TenantContextHolder extends StackedContextHolder<String> {
 	 * Holds the current tenant ID. The {@link ThreadLocal#remove()} is handled correctly by {@link StackedContextHolder} so
 	 * no memory leak problems occur.
 	 */
-	private static final ThreadLocal<Stack<String>> tenantStack = new ThreadLocal<>();
+	private static final ThreadLocal<List<String>> tenantStack = new ThreadLocal<>();
 
 	/**
 	 * Set the name to {@code "Tenant"}.
@@ -57,7 +57,7 @@ public class TenantContextHolder extends StackedContextHolder<String> {
 	 * @return the thread local stack for tenant IDs
 	 */
 	@Override
-	public ThreadLocal<Stack<String>> getThreadStack() {
+	public ThreadLocal<List<String>> getThreadStack() {
 		return tenantStack;
 	}
 
@@ -126,25 +126,25 @@ public class TenantContextHolder extends StackedContextHolder<String> {
 	}
 
 	/**
-	 * Runs the given statements on the current tenant and returns the result from the statements.
+	 * Returns a supplier that runs the given statements with the current tenant as context. The current tenant is captured
+	 * when this method is called, and the captured context is cleared after the statements run. If no current tenant
+	 * exists, the original supplier is returned unchanged.
 	 *
 	 * @param <T> return type
 	 * @param statements statements to run
-	 * @return statements result
+	 * @return a supplier that runs the statements with the captured tenant context
 	 */
 	public static <T> Supplier<T> onCurrentTenant(final Supplier<T> statements) {
 		return onCurrent(instance(), statements::get);
 	}
 
 	/**
-	 * Runs the given function on the current tenant and returns its result.
+	 * Returns a runnable that runs the given runnable with the current tenant as context. The current tenant is captured
+	 * when this method is called, and the captured context is cleared after the runnable runs. If no current tenant exists,
+	 * the original runnable is returned unchanged.
 	 *
-	 * @param <T> function parameter type
-	 * @param <R> function return type
-	 *
-	 * @param function function to run
-	 * @param arg function argument
-	 * @return function result
+	 * @param runnable runnable to run
+	 * @return a runnable that runs the runnable with the captured tenant context
 	 */
 	public static Runnable onCurrentTenant(final Runnable runnable) {
 		return onCurrent(instance(), runnable);

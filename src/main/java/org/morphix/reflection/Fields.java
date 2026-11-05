@@ -698,6 +698,7 @@ public interface Fields {
 					}
 				}
 			} catch (Exception e) {
+				// TODO: do not swallow all exceptions; return null only for missing paths or offer a strict overload
 				return null;
 			}
 			return result;
@@ -705,7 +706,8 @@ public interface Fields {
 
 		/**
 		 * Variation of {@link Safe#getByPaths(Object, String...)} with paths given as a comma separated list of paths in a
-		 * single string.
+		 * single string. Each segment is {@linkplain String#trim() trimmed} after splitting on {@code ','}; empty segments are
+		 * ignored.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
@@ -716,7 +718,22 @@ public interface Fields {
 		 * @throws NullPointerException if the paths are null
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
-			return getByPaths(obj, Objects.requireNonNull(paths, "paths").split(","));
+			Objects.requireNonNull(paths, "paths");
+			if (paths.isEmpty()) {
+				return null;
+			}
+			String[] parts = paths.split(",", -1);
+			List<String> trimmedPaths = new ArrayList<>(parts.length);
+			for (String part : parts) {
+				String path = part.trim();
+				if (!path.isEmpty()) {
+					trimmedPaths.add(path);
+				}
+			}
+			if (trimmedPaths.isEmpty()) {
+				return null;
+			}
+			return getByPaths(obj, trimmedPaths.toArray(String[]::new));
 		}
 
 		/**

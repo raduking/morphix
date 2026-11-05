@@ -22,6 +22,9 @@ import org.morphix.reflection.TypedArguments;
 
 /**
  * Utility interface for initializing libraries based on their presence in the descriptors.
+ * <p>
+ * TODO: add an overload that accepts {@link java.util.List}{@code <? extends OptionalLibrary<? extends T>>}
+ * descriptors.
  *
  * @author Radu Sebastian LAZIN
  */

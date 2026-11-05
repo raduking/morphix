@@ -43,6 +43,11 @@ import org.morphix.reflection.InstanceCreator;
 
 /**
  * Utility interface for conversion static methods.
+ * <p>
+ * {@link #convertFrom(Object, Class)} and related overloads do not support a {@code record} destination type yet
+ * (record-to-class conversion is supported).
+ * <p>
+ * TODO: support record destinations via canonical constructor mapping.
  *
  * @author Radu Sebastian LAZIN
  */
