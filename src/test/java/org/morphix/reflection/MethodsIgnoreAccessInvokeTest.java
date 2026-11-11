@@ -136,4 +136,11 @@ class MethodsIgnoreAccessInvokeTest {
 		Method method = StaticB.class.getDeclaredMethod("foo", String.class);
 		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invoke(method, null, TEST_STRING));
 	}
+
+	@Test
+	void shouldThrowReflectionExceptionWhenMethodIsNull() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invoke(null, new A()));
+
+		assertThat(e.getMessage(), equalTo("Method cannot be null when invoking it"));
+	}
 }

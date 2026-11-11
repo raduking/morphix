@@ -109,4 +109,11 @@ class MethodsIgnoreAccessInvokeStaticTest {
 						cause.getMessage())));
 		assertThat(cause.getClass(), equalTo(IllegalArgumentException.class));
 	}
+
+	@Test
+	void shouldThrowReflectionExceptionWhenMethodIsNull() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeStatic(null, StaticA.class));
+
+		assertThat(e.getMessage(), equalTo("Static method cannot be null when invoking it on class: " + StaticA.class));
+	}
 }

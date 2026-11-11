@@ -119,4 +119,12 @@ class MethodsIgnoreAccessInvokeWithOriginalExceptionTest {
 		assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeWithOriginalException(method, null, TEST_STRING));
 	}
 
+	@Test
+	void shouldThrowReflectionExceptionWhenMethodIsNull() {
+		ReflectionException e = assertThrows(ReflectionException.class,
+				() -> Methods.IgnoreAccess.invokeWithOriginalException(null, new A()));
+
+		assertThat(e.getMessage(), equalTo("Method cannot be null when invoking it with original exception"));
+	}
+
 }
