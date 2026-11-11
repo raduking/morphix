@@ -57,19 +57,17 @@ class MethodsGetGenericReturnClassTest {
 	void shouldFailToCastFromParameterizedClass() throws Exception {
 		Method method = A.class.getMethod("getList2");
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnClass(method, 0));
-		assertThat(e.getMessage(), equalTo("Could not infer actual generic return type argument from "
-				+ method.getGenericReturnType()
-				+ " for method "
-				+ MethodsGetGenericReturnClassTest.A.class.getCanonicalName() + ".getList2"));
+		assertThat(e.getMessage(), equalTo("Cannot get generic return class for method "
+				+ MethodsGetGenericReturnClassTest.A.class.getCanonicalName() + ".getList2: type argument at index 0 is not a Class"));
 	}
 
 	@Test
 	void shouldFailForRawTypes() throws Exception {
 		Method method = A.class.getMethod("getList3");
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnClass(method, 0));
-		assertThat(e.getMessage(), equalTo(""
+		assertThat(e.getMessage(), equalTo("Return type "
 				+ method.getGenericReturnType().getTypeName()
-				+ " is a raw return type for method "
+				+ " is not parameterized for method "
 				+ MethodsGetGenericReturnClassTest.A.class.getCanonicalName() + ".getList3"));
 	}
 
@@ -77,9 +75,9 @@ class MethodsGetGenericReturnClassTest {
 	void shouldFailForInvalidIndex() throws Exception {
 		Method method = A.class.getMethod("getList1");
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnClass(method, 1));
-		assertThat(e.getMessage(), equalTo("Could not find generic argument at index 1 for generic return type "
-				+ method.getGenericReturnType()
-				+ " with 1 generic argument(s) for method "
+		assertThat(e.getMessage(), equalTo("Cannot get generic argument at index 1 for return type "
+				+ method.getGenericReturnType().getTypeName()
+				+ " (1 arguments) of method "
 				+ MethodsGetGenericReturnClassTest.A.class.getCanonicalName() + ".getList1"));
 	}
 
@@ -102,7 +100,7 @@ class MethodsGetGenericReturnClassTest {
 	void shouldFailForNullMethod() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnClass(null, 0));
 
-		assertThat(e.getMessage(), equalTo("Method cannot be null when looking for the generic return class"));
+		assertThat(e.getMessage(), equalTo("Cannot get generic return class: method descriptor is null"));
 	}
 
 }

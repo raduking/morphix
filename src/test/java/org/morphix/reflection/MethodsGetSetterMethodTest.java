@@ -75,7 +75,7 @@ class MethodsGetSetterMethodTest {
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getSetterMethod(A.class, field));
 
-		assertThat(e.getMessage(), equalTo("Error finding method: "
+		assertThat(e.getMessage(), equalTo("Cannot find method "
 				+ "setT(" + field.getType().getCanonicalName() + ")"));
 	}
 
@@ -96,7 +96,7 @@ class MethodsGetSetterMethodTest {
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getSetterMethod(A.class, field));
 
-		assertThat(e.getMessage(), equalTo("Error finding method: "
+		assertThat(e.getMessage(), equalTo("Cannot find method "
 				+ "setI(" + field.getType().getCanonicalName() + ") or "
 				+ "setI(" + int.class.getCanonicalName() + ")"));
 	}

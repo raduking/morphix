@@ -65,7 +65,7 @@ class MethodsIgnoreAccessInvokeStaticTest {
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeStatic(method, StaticA.class));
 		assertThat(e.getMessage(),
-				equalTo(Messages.message("Method {} is not static on class: {}", method.getName(), StaticA.class)));
+				equalTo(Messages.message("Cannot invoke static method '{}' on class {}: method is not static", method.getName(), StaticA.class)));
 	}
 
 	public static class StaticB {
@@ -81,7 +81,7 @@ class MethodsIgnoreAccessInvokeStaticTest {
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeStatic(method, StaticB.class, TEST_STRING));
 		assertThat(e.getMessage(),
-				equalTo(Messages.message("Error invoking method {}.{}: {}.", StaticB.class.getCanonicalName(), method.getName(),
+				equalTo(Messages.message("Cannot invoke method {}.{}: {}", StaticB.class.getCanonicalName(), method.getName(),
 						e.getCause().getMessage())));
 	}
 
@@ -92,7 +92,7 @@ class MethodsIgnoreAccessInvokeStaticTest {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeStatic(method, null, TEST_STRING));
 		Throwable cause = e.getCause();
 		assertThat(e.getMessage(),
-				equalTo(Messages.message("Error invoking method {}.{}: {}.", StaticB.class.getCanonicalName(), method.getName(),
+				equalTo(Messages.message("Cannot invoke method {}.{}: {}", StaticB.class.getCanonicalName(), method.getName(),
 						cause.getMessage())));
 		assertThat(cause.getClass(), equalTo(InvocationTargetException.class));
 		assertThat(cause.getCause().getClass(), equalTo(NullPointerException.class));
@@ -105,7 +105,7 @@ class MethodsIgnoreAccessInvokeStaticTest {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeStatic(method, StaticB.class));
 		Throwable cause = e.getCause();
 		assertThat(e.getMessage(),
-				equalTo(Messages.message("Error invoking method {}.{}: {}.", StaticB.class.getCanonicalName(), method.getName(),
+				equalTo(Messages.message("Cannot invoke method {}.{}: {}", StaticB.class.getCanonicalName(), method.getName(),
 						cause.getMessage())));
 		assertThat(cause.getClass(), equalTo(IllegalArgumentException.class));
 	}
@@ -114,6 +114,6 @@ class MethodsIgnoreAccessInvokeStaticTest {
 	void shouldThrowReflectionExceptionWhenMethodIsNull() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invokeStatic(null, StaticA.class));
 
-		assertThat(e.getMessage(), equalTo("Static method cannot be null when invoking it on class: " + StaticA.class));
+		assertThat(e.getMessage(), equalTo("Cannot invoke static method on class " + StaticA.class + ": method descriptor is null"));
 	}
 }

@@ -65,7 +65,7 @@ class MethodsIgnoreAccessInvokeTest {
 		Method method = A.class.getDeclaredMethod("foo", String.class);
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invoke(method, obj, obj));
 		assertThat(e.getMessage(),
-				equalTo("Error invoking method " + A.class.getCanonicalName() + "." + method.getName() + ": " + e.getCause().getMessage() + "."));
+				equalTo("Cannot invoke method " + A.class.getCanonicalName() + "." + method.getName() + ": " + e.getCause().getMessage()));
 	}
 
 	@Test
@@ -141,6 +141,6 @@ class MethodsIgnoreAccessInvokeTest {
 	void shouldThrowReflectionExceptionWhenMethodIsNull() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.IgnoreAccess.invoke(null, new A()));
 
-		assertThat(e.getMessage(), equalTo("Method cannot be null when invoking it"));
+		assertThat(e.getMessage(), equalTo("Cannot invoke method: method descriptor is null"));
 	}
 }

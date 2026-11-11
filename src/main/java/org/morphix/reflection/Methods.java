@@ -207,17 +207,17 @@ public interface Methods {
 	 *     cannot be found at the given index
 	 */
 	static <T extends Type> T getGenericReturnType(final Method method, final int index) {
-		Reflection.requireNotNull(method, "Method cannot be null when looking for the generic return type");
+		Reflection.requireNotNull(method, "Cannot get generic return type: method descriptor is null");
 		Type type = method.getGenericReturnType();
 		if (!(type instanceof ParameterizedType parameterizedType)) {
 			throw new ReflectionException(
-					"{} is a raw return type for method {}.{}",
+					"Return type {} is not parameterized for method {}.{}",
 					type.getTypeName(), method.getDeclaringClass().getCanonicalName(), method.getName());
 		}
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 		if (index < 0 || index >= actualTypeArguments.length) {
 			throw new ReflectionException(
-					"Could not find generic argument at index {} for generic return type {} with {} generic argument(s) for method {}.{}",
+					"Cannot get generic argument at index {} for return type {} ({} arguments) of method {}.{}",
 					index, parameterizedType.getTypeName(), actualTypeArguments.length,
 					method.getDeclaringClass().getCanonicalName(), method.getName());
 		}
@@ -246,13 +246,13 @@ public interface Methods {
 	 * @throws ReflectionException if the method is {@code null} or if the generic return type cannot be cast to a Class
 	 */
 	static <T> Class<T> getGenericReturnClass(final Method method, final int index) {
-		Reflection.requireNotNull(method, "Method cannot be null when looking for the generic return class");
+		Reflection.requireNotNull(method, "Cannot get generic return class: method descriptor is null");
 		try {
 			return getGenericReturnType(method, index);
 		} catch (ClassCastException e) {
-			throw new ReflectionException(
-					"Could not infer actual generic return type argument from {} for method {}.{}",
-					method.getGenericReturnType().getTypeName(), method.getDeclaringClass().getCanonicalName(), method.getName());
+			throw new ReflectionException(e,
+					"Cannot get generic return class for method {}.{}: type argument at index {} is not a Class",
+					method.getDeclaringClass().getCanonicalName(), method.getName(), index);
 		}
 	}
 
@@ -406,17 +406,17 @@ public interface Methods {
 	 * @throws ReflectionException if the class is {@code null} or if it is not a functional interface
 	 */
 	static <T> Method getFunctionalInterfaceMethod(final Class<T> cls) {
-		Reflection.requireNotNull(cls, "Class cannot be null when looking for the functional interface method");
+		Reflection.requireNotNull(cls, "Cannot find functional interface method: class is null");
 		Method singleAbstractMethod = null;
 		for (Method method : cls.getMethods()) {
 			if (JavaModifier.ABSTRACT.isPresentOn(method)) {
 				if (null != singleAbstractMethod) {
-					throw new ReflectionException("{} is not a functional interface because it has more than one abstract method", cls);
+					throw new ReflectionException("Cannot find functional interface method in {}: multiple abstract methods found", cls);
 				}
 				singleAbstractMethod = method;
 			}
 		}
-		return Reflection.requireNotNull(singleAbstractMethod, "{} is not a functional interface because it has no abstract method", cls);
+		return Reflection.requireNotNull(singleAbstractMethod, "Cannot find functional interface method in {}: no abstract method found", cls);
 	}
 
 	/**
@@ -455,12 +455,12 @@ public interface Methods {
 		/**
 		 * Error invoking method message.
 		 */
-		public static final String ERROR_INVOKING_METHOD = "Error invoking method {}.{}: {}.";
+		public static final String ERROR_INVOKING_METHOD = "Cannot invoke method {}.{}: {}";
 
 		/**
 		 * Error finding method message.
 		 */
-		public static final String ERROR_FINDING_METHOD = "Error finding method: {}({})";
+		public static final String ERROR_FINDING_METHOD = "Cannot find method {}({})";
 
 		/**
 		 * Error finding method or method message. This is used when trying to find a method with two different parameter types.
@@ -495,7 +495,7 @@ public interface Methods {
 		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
-			Reflection.requireNotNull(method, "Method cannot be null when invoking it");
+			Reflection.requireNotNull(method, "Cannot invoke method: method descriptor is null");
 			return Unchecked.invoke(method, obj, args);
 		}
 
@@ -542,7 +542,7 @@ public interface Methods {
 		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invokeWithOriginalException(final Method method, final T obj, final Object... args) {
-			Reflection.requireNotNull(method, "Method cannot be null when invoking it with original exception");
+			Reflection.requireNotNull(method, "Cannot invoke method with original exception: method descriptor is null");
 			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
 				return JavaObjects.cast(method.invoke(obj, args));
 			} catch (InvocationTargetException e) {
@@ -568,9 +568,9 @@ public interface Methods {
 		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invokeStatic(final Method method, final Class<T> cls, final Object... args) {
-			Reflection.requireNotNull(method, "Static method cannot be null when invoking it on class: {}", cls);
+			Reflection.requireNotNull(method, "Cannot invoke static method on class {}: method descriptor is null", cls);
 			if (JavaModifier.STATIC.isNotPresentOn(method)) {
-				throw new ReflectionException("Method {} is not static on class: {}", method.getName(), cls);
+				throw new ReflectionException("Cannot invoke static method '{}' on class {}: method is not static", method.getName(), cls);
 			}
 			return Unchecked.invokeStatic(method, args);
 		}
@@ -703,7 +703,7 @@ public interface Methods {
 		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
 		 * interfaces.
 		 * <p>
-		 * Note: the excluded set is also used to avoid cyclic dependencies in the class hierarchy. A class in that set,
+		 * Note: the excluded set is mutated to track visited types and avoid duplicate traversal. A class in that set,
 		 * including {@link Object}, is left out of the walk together with everything above it.
 		 * <p>
 		 * Note: a {@code null} class short-circuits the walk and returns an empty list, so in that case the excluded set is
@@ -717,15 +717,17 @@ public interface Methods {
 		 * @throws ReflectionException if the excluded set is {@code null} or unmodifiable
 		 */
 		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Set<Class<?>> excluded) {
+			if (null == cls) {
+				return new LinkedList<>();
+			}
+			Reflection.requireNotNull(excluded, "Cannot traverse method hierarchy for class {}: excluded set is null", cls);
+			if (excluded.contains(cls)) {
+				return new LinkedList<>();
+			}
 			try {
-				if (null == cls || excluded.contains(cls)) {
-					return new LinkedList<>();
-				}
 				excluded.add(cls);
 			} catch (UnsupportedOperationException e) {
-				throw new ReflectionException("The excluded set is unmodifiable. Please provide a non null modifiable set.", e);
-			} catch (NullPointerException e) {
-				throw new ReflectionException("The excluded set is null. Please provide a non null modifiable set.", e);
+				throw new ReflectionException(e, "Cannot traverse method hierarchy for class {}: excluded set is unmodifiable", cls);
 			}
 			List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), excluded);
 			for (Class<?> iface : cls.getInterfaces()) {

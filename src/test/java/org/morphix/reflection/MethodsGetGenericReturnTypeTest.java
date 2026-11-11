@@ -70,7 +70,7 @@ class MethodsGetGenericReturnTypeTest {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnType(method, 0));
 
 		assertThat(e.getMessage(),
-				equalTo(method.getGenericReturnType().getTypeName() + " is a raw return type for method "
+				equalTo("Return type " + method.getGenericReturnType().getTypeName() + " is not parameterized for method "
 						+ method.getDeclaringClass().getCanonicalName()
 						+ "." + method.getName()));
 	}
@@ -88,7 +88,7 @@ class MethodsGetGenericReturnTypeTest {
 	void shouldFailForNullMethod() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getGenericReturnType(null, 0));
 
-		assertThat(e.getMessage(), equalTo("Method cannot be null when looking for the generic return type"));
+		assertThat(e.getMessage(), equalTo("Cannot get generic return type: method descriptor is null"));
 	}
 
 }

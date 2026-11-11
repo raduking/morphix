@@ -124,7 +124,7 @@ class MethodsIgnoreAccessInvokeWithOriginalExceptionTest {
 		ReflectionException e = assertThrows(ReflectionException.class,
 				() -> Methods.IgnoreAccess.invokeWithOriginalException(null, new A()));
 
-		assertThat(e.getMessage(), equalTo("Method cannot be null when invoking it with original exception"));
+		assertThat(e.getMessage(), equalTo("Cannot invoke method with original exception: method descriptor is null"));
 	}
 
 }
