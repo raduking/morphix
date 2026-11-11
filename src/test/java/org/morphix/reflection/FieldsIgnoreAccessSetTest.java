@@ -12,6 +12,7 @@
  */
 package org.morphix.reflection;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -115,6 +116,27 @@ class FieldsIgnoreAccessSetTest {
 	}
 
 	@Test
+	void shouldSetNullOnReferenceFieldWithUnsafe() throws Exception {
+		D object = new D();
+		Field field = D.class.getDeclaredField(FIELD_NAME);
+
+		Fields.Unsafe.set(object, field, null);
+
+		assertThat(Fields.IgnoreAccess.get(object, field), equalTo(null));
+	}
+
+	@Test
+	void shouldThrowExceptionIfValueIsNotAssignableWithUnsafe() throws Exception {
+		D object = new D();
+		Field field = D.class.getDeclaredField(FIELD_NAME);
+
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Fields.Unsafe.set(object, field, new Object()));
+
+		assertThat(e.getMessage(), equalTo("Can not set java.lang.String field to java.lang.Object"));
+		assertThat(Fields.IgnoreAccess.get(object, field), equalTo(VALUE));
+	}
+
+	@Test
 	void shouldSetIgnoreAccessOnStaticFinalField() {
 		Fields.IgnoreAccess.setStatic(D.class, "FIELD", VALUE);
 
@@ -181,6 +203,18 @@ class FieldsIgnoreAccessSetTest {
 		Field field = E.class.getDeclaredField("STATIC_INT");
 		Fields.IgnoreAccess.setStatic(E.class, field, 2);
 		assertThat(Fields.IgnoreAccess.getStatic(E.class, field), equalTo(2));
+	}
+
+	@Test
+	void shouldThrowExceptionIfBadValueIsSetOnStaticFinalField() {
+		Integer before = Fields.IgnoreAccess.getStatic(E.class, "STATIC_INT");
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.setStatic(E.class, "STATIC_INT", "nope"));
+
+		assertThat(e.getMessage(), equalTo("Cannot set field value for STATIC_INT"));
+		assertThat(e.getCause(), instanceOf(IllegalArgumentException.class));
+		assertThat(e.getCause().getMessage(), equalTo("Can not set int field to java.lang.String"));
+		assertThat(Fields.IgnoreAccess.getStatic(E.class, "STATIC_INT"), equalTo(before));
 	}
 
 	@Test

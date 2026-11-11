@@ -210,6 +210,13 @@ class FieldsGetAllDeclaredInHierarchyTest {
 	}
 
 	@Test
+	void shouldReturnEmptyListWithNullPredicateOnClass() {
+		List<Field> annotatedFields = Fields.getAllDeclaredInHierarchy(D.class, null);
+
+		assertThat(annotatedFields, hasSize(0));
+	}
+
+	@Test
 	void shouldReturnAllFieldsIncludingTheOnesWithTheSameName() {
 		List<Field> result = Fields.getAllDeclaredInHierarchy(F.class);
 

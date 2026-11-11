@@ -210,6 +210,9 @@ public class TypeCoercion {
 		if (isFloat(value)) {
 			return value instanceof Character character ? character : ((Number) value).doubleValue();
 		}
+		if (value instanceof Double doubleValue) {
+			return doubleValue;
+		}
 		throw incompatible(double.class, value);
 	}
 

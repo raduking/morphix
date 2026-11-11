@@ -15,6 +15,7 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.utils.Tests;
@@ -40,5 +41,12 @@ class TheUnsafeTest {
 		Unsafe unsafe = TheUnsafe.getStaticFromUnsafe("someField");
 
 		assertNull(unsafe);
+	}
+
+	@Test
+	void shouldThrowWhenPrimitiveTypeIsNotSupported() {
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> TheUnsafe.putPrimitive(null, 0L, void.class, null));
+
+		assertThat(e.getMessage(), equalTo("Can not set void field to null"));
 	}
 }

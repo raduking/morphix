@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.morphix.utils.Tests;
 
 /**
@@ -98,6 +99,98 @@ class TypeCoercionTest {
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> TypeCoercion.toInt(1L));
 
 		assertThat(e.getMessage(), equalTo("Can not set int field to java.lang.Long"));
+	}
+
+	@Test
+	void shouldRejectNullTargetForAValue() {
+		assertFalse(TypeCoercion.isApplicable(null, "value"));
+	}
+
+	@Test
+	void shouldAcceptExactPrimitiveAndWrapper() {
+		assertTrue(TypeCoercion.isApplicable(boolean.class, Boolean.TRUE));
+		assertTrue(TypeCoercion.isApplicable(byte.class, (byte) 1));
+		assertTrue(TypeCoercion.isApplicable(short.class, (short) 1));
+		assertTrue(TypeCoercion.isApplicable(double.class, 1d));
+
+		assertTrue(TypeCoercion.isApplicable(boolean.class, boolean.class));
+		assertTrue(TypeCoercion.isApplicable(byte.class, byte.class));
+		assertTrue(TypeCoercion.isApplicable(byte.class, Byte.class));
+		assertTrue(TypeCoercion.isApplicable(int.class, Integer.class));
+		assertTrue(TypeCoercion.isApplicable(void.class, void.class));
+	}
+
+	@Test
+	void shouldAcceptEveryWideningTarget() {
+		assertTrue(TypeCoercion.isApplicable(short.class, byte.class));
+		assertTrue(TypeCoercion.isApplicable(int.class, byte.class));
+		assertTrue(TypeCoercion.isApplicable(long.class, byte.class));
+		assertTrue(TypeCoercion.isApplicable(float.class, byte.class));
+
+		assertTrue(TypeCoercion.isApplicable(int.class, short.class));
+		assertTrue(TypeCoercion.isApplicable(long.class, short.class));
+		assertTrue(TypeCoercion.isApplicable(float.class, short.class));
+		assertTrue(TypeCoercion.isApplicable(double.class, short.class));
+
+		assertTrue(TypeCoercion.isApplicable(long.class, char.class));
+		assertTrue(TypeCoercion.isApplicable(float.class, char.class));
+		assertTrue(TypeCoercion.isApplicable(double.class, char.class));
+
+		assertTrue(TypeCoercion.isApplicable(float.class, int.class));
+		assertTrue(TypeCoercion.isApplicable(double.class, int.class));
+
+		assertTrue(TypeCoercion.isApplicable(float.class, long.class));
+		assertTrue(TypeCoercion.isApplicable(double.class, long.class));
+
+		assertTrue(TypeCoercion.isApplicable(double.class, float.class));
+	}
+
+	@Test
+	void shouldRejectPrimitiveSourcesThatDoNotWiden() {
+		assertFalse(TypeCoercion.isApplicable(byte.class, (short) 1));
+		assertFalse(TypeCoercion.isApplicable(char.class, byte.class));
+		assertFalse(TypeCoercion.isApplicable(char.class, short.class));
+		assertFalse(TypeCoercion.isApplicable(byte.class, int.class));
+		assertFalse(TypeCoercion.isApplicable(int.class, float.class));
+		assertFalse(TypeCoercion.isApplicable(double.class, boolean.class));
+		assertFalse(TypeCoercion.isApplicable(int.class, String.class));
+		assertFalse(TypeCoercion.isApplicable(void.class, 1));
+		assertFalse(TypeCoercion.isApplicable(double.class, "1"));
+	}
+
+	@Test
+	void shouldUnboxEveryAcceptedSource() {
+		assertThat(TypeCoercion.toShort((short) 4), equalTo((short) 4));
+		assertThat(TypeCoercion.toInt((short) 4), equalTo(4));
+		assertThat(TypeCoercion.toInt(Integer.valueOf(4)), equalTo(4));
+
+		assertThat(TypeCoercion.toLong((byte) 4), equalTo(4L));
+		assertThat(TypeCoercion.toLong((short) 4), equalTo(4L));
+		assertThat(TypeCoercion.toLong(4L), equalTo(4L));
+		assertThat(TypeCoercion.toLong('A'), equalTo((long) 'A'));
+
+		assertThat(TypeCoercion.toFloat('A'), equalTo((float) 'A'));
+		assertThat(TypeCoercion.toFloat(4f), equalTo(4f));
+
+		assertThat(TypeCoercion.toDouble('A'), equalTo((double) 'A'));
+		assertThat(TypeCoercion.toDouble(4d), equalTo(4d));
+	}
+
+	@Test
+	void shouldThrowWhenTheValueCannotBeUnboxed() {
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> TypeCoercion.toBoolean(null));
+		assertThat(e.getMessage(), equalTo("Can not set boolean field to null"));
+
+		assertThat(thrownBy(() -> TypeCoercion.toByte((short) 1)).getMessage(), equalTo("Can not set byte field to java.lang.Short"));
+		assertThat(thrownBy(() -> TypeCoercion.toChar((byte) 1)).getMessage(), equalTo("Can not set char field to java.lang.Byte"));
+		assertThat(thrownBy(() -> TypeCoercion.toShort(1)).getMessage(), equalTo("Can not set short field to java.lang.Integer"));
+		assertThat(thrownBy(() -> TypeCoercion.toLong(1f)).getMessage(), equalTo("Can not set long field to java.lang.Float"));
+		assertThat(thrownBy(() -> TypeCoercion.toFloat(1d)).getMessage(), equalTo("Can not set float field to java.lang.Double"));
+		assertThat(thrownBy(() -> TypeCoercion.toDouble("1")).getMessage(), equalTo("Can not set double field to java.lang.String"));
+	}
+
+	private static IllegalArgumentException thrownBy(final Executable executable) {
+		return assertThrows(IllegalArgumentException.class, executable);
 	}
 
 }

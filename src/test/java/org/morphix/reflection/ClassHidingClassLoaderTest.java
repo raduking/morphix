@@ -54,6 +54,11 @@ class ClassHidingClassLoaderTest {
 	}
 
 	@Test
+	void shouldUseSystemClassLoaderWhenOwningClassLoaderIsBootstrap() {
+		assertSame(ClassLoader.getSystemClassLoader(), ClassHidingClassLoader.Builder.defaultParent(null));
+	}
+
+	@Test
 	void shouldUseGivenParent() {
 		ClassLoader parent = ClassHidingClassLoaderTest.class.getClassLoader();
 

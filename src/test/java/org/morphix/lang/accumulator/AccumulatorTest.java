@@ -15,6 +15,7 @@ package org.morphix.lang.accumulator;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -24,6 +25,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
@@ -222,6 +224,22 @@ class AccumulatorTest {
 		}
 
 		assertThat(accumulator.size(), equalTo(4_000));
+	}
+
+	@Test
+	void shouldReturnLockUsedToProtectAccumulatedInformation() {
+		TestAccumulator accumulator = new TestAccumulator();
+		ReentrantLock lock = accumulator.getLock();
+
+		assertSame(lock, accumulator.getLock());
+
+		lock.lock();
+		try {
+			accumulator.addInformation(Boolean.TRUE);
+			assertThat(accumulator.size(), equalTo(1));
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	static class TestAccumulator extends Accumulator<Boolean> {
