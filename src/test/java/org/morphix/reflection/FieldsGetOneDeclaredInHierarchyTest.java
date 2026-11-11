@@ -67,6 +67,13 @@ class FieldsGetOneDeclaredInHierarchyTest {
 	}
 
 	@Test
+	void shouldReturnNullIfFieldNameIsNull() {
+		Field field = Fields.getOneDeclaredInHierarchy(A.class, null);
+
+		assertThat(field, equalTo(null));
+	}
+
+	@Test
 	void shouldReturnNullIfClassIsNull() {
 		Field field = Fields.getOneDeclaredInHierarchy(null, "x");
 

@@ -79,7 +79,7 @@ class FieldsIgnoreAccessGetStaticTest {
 		Field field = Fields.getOneDeclared(A.class, GOOD_NAME);
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, field));
 		assertThat(e.getMessage(),
-				equalTo("Could not find static field with name: " + GOOD_NAME + " in class: " + A.class));
+				equalTo("Field must be static, name: " + GOOD_NAME + " in class: " + A.class));
 	}
 
 	private static class A {

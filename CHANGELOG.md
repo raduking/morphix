@@ -2,6 +2,19 @@
 
 `1.1.0`
 
+- Added `Reflection.requireNotNull(Object)` to throw `ReflectionException` when the reference is `null`.
+- Added `Reflection.requireNotNull(Object, String)` to throw `ReflectionException` with the given message when the reference is `null`.
+- Changed `Fields.Safe.getByPaths(Object, String)` to trim path segments after splitting on comma and ignore empty segments.
+- Changed `Fields.Safe.getByPaths(Object, String...)` and `Fields.Safe.getByPath(Object, String)` to throw `ReflectionException` for a `null` path instead of returning `null`.
+- Changed `Fields.Unsafe.set` to write final primitive fields with the same value conversions as non-final fields, and to reject a value that is not assignable to the field.
+- Changed `Fields.IgnoreAccess.get(Object, Field)` and `Fields.IgnoreAccess.set(Object, Field)` to throw `ReflectionException` when the field is `null`.
+- Added `TheUnsafe.putPrimitive(Object, long, Class, Object)` to write a primitive value with the same widening conversions as `Field.set`.
+- Changed `Accumulator.getInformationList` to return an unmodifiable snapshot for safe concurrent iteration.
+- Added protected `Accumulator.getLock` for synchronizing compound operations in derived accumulators.
+- Added `Synchronized.with` for blocking lock-protected execution.
+- Added `Synchronized.tryWith` for timeout-based lock-protected execution with fallback behavior.
+- Changed `ResourceLeakReference.getAllocationSite` to return an unmodifiable list.
+- Added `SerializableHolder` for serializable output-parameter values.
 - Added `Iterables.isEmpty(Collection)` to check if a `Collection` is empty or `null`.
 - Added `Iterables.isNotEmpty(Collection)` to check if a `Collection` is not empty.
 - Added `NormalizedKeyLinkedHashMap` as a reusable base for maps with normalized string-key lookup.
@@ -18,13 +31,6 @@
 - Changed `StackedContextHolder.changeElement(T)` to do nothing when no context is active.
 - Changed `Configuration.getGenericTypesMap` to return an unmodifiable view.
 - Changed `Configuration.putGenericType` to throw when called on the default configuration instance.
-- Changed `Fields.Safe.getByPaths(Object, String)` to trim path segments after splitting on comma and ignore empty segments.
-- Changed `Accumulator.getInformationList` to return an unmodifiable snapshot for safe concurrent iteration.
-- Added protected `Accumulator.getLock` for synchronizing compound operations in derived accumulators.
-- Added `Synchronized.with` for blocking lock-protected execution.
-- Added `Synchronized.tryWith` for timeout-based lock-protected execution with fallback behavior.
-- Changed `ResourceLeakReference.getAllocationSite` to return an unmodifiable list.
-- Added `SerializableHolder` for serializable output-parameter values.
 
 ---
 
@@ -68,10 +74,10 @@
 - Fixed `ExtendedFields.findAllNonStatic` returning `static` getters as instance properties.
 - Added `Annotations.getInHierarchy(Method, Class)` to read an annotation from the nearest declaration of a method, in its class and interface hierarchy.
 - Added `Interfaces.getAll(Class)` to return all the interfaces implemented directly or indirectly by a class.
-- Added `Classes.getCanonicalName(Class)` to return the canonical name of a class, `null` if the class is null.
+- Added `Classes.getCanonicalName(Class)` to return the canonical name of a class, `null` if the class is `null`.
 - Added `Classes.getCanonicalName(Object)` to return the canonical name of the object's class, or of the object itself when it is a `Class`.
 - Added `Classes.getCanonicalName(Method, Object)` to return the class name used in error messages when invoking a method.
-- Added `Classes.Safe.getCanonicalName(Class)` to return the canonical name of a class, `null` if the class is null.
+- Added `Classes.Safe.getCanonicalName(Class)` to return the canonical name of a class, `null` if the class is `null`.
 - Added `Classes.Safe.getCanonicalName(Object)` to return the canonical name of the object's class, or of the object itself when it is a `Class`.
 - Added `Classes.Safe.getCanonicalName(Method, Object)` to return the class name used in error messages when invoking a method.
 - Fixed `Fields.Safe.getByPath` throwing a `ReflectionException` instead of returning `null` for a missing single segment path.
@@ -486,7 +492,7 @@
 
 `1.0.16`
 
-- Added `GenericClass.of` method without parameters to allow instantiation without a type set (null type).
+- Added `GenericClass.of` method without parameters to allow instantiation without a type set (`null` type).
 
 ---
 

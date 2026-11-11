@@ -178,6 +178,13 @@ class FieldsIgnoreAccessGetTest {
 	}
 
 	@Test
+	void shouldThrowExceptionIfFieldIsNull() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.get(new Object(), (Field) null));
+
+		assertThat(e.getMessage(), equalTo("Field cannot be null when trying to get field value"));
+	}
+
+	@Test
 	void shouldReturnClassClassloaderField() {
 		Class<?> clazz = Class.class;
 

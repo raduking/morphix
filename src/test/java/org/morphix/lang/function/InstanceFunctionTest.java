@@ -63,6 +63,11 @@ class InstanceFunctionTest {
 		static int x = SOME_INT;
 	}
 
+	static class D {
+		final int x = Integer.valueOf(SOME_INT);
+		final String s = new String(STRING_X);
+	}
+
 	@Test
 	void shouldSetAllMembersToNullWhenCallingEmpty() {
 		A a = toEmpty(A::new).instance();
@@ -79,6 +84,11 @@ class InstanceFunctionTest {
 		assertThat(b.x6, equalTo((double) 0));
 		assertThat(b.b, equalTo(false));
 		assertThat(b.c, equalTo((char) 0));
+
+		D d = toEmpty(D::new).instance();
+
+		assertThat(d.x, equalTo(0));
+		assertThat(d.s, equalTo(null));
 	}
 
 	@Test

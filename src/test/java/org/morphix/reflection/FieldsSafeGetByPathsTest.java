@@ -100,7 +100,8 @@ class FieldsSafeGetByPathsTest {
 	void shouldThrowWhenCommaSeparatedPathsAreNull() {
 		B b = new B();
 
-		assertThrows(NullPointerException.class, () -> Fields.Safe.getByPaths(b, (String) null));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, (String) null));
+		assertThat(e.getMessage(), equalTo("paths"));
 	}
 
 	@Test
@@ -124,15 +125,22 @@ class FieldsSafeGetByPathsTest {
 	}
 
 	@Test
-	void shouldReturnNullIfAPathIsNull() {
+	void shouldThrowWhenAPathIsNull() {
 		A a = new A();
 		a.x = TEST_STRING;
 		B b = new B();
 		b.a = a;
 
-		String x = Fields.Safe.getByPaths(b, new String[] { null });
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, new String[] { null }));
+		assertThat(e.getMessage(), equalTo("path"));
+	}
 
-		assertThat(x, nullValue());
+	@Test
+	void shouldThrowWhenPathsArrayIsNull() {
+		B b = new B();
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, (String[]) null));
+		assertThat(e.getMessage(), equalTo("paths"));
 	}
 
 }
