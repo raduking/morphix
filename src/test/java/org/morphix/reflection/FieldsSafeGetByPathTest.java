@@ -118,6 +118,6 @@ class FieldsSafeGetByPathTest {
 	@Test
 	void shouldThrowWhenPathIsNull() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPath(new WithNestedField(), null));
-		assertThat(e.getMessage(), equalTo("path"));
+		assertThat(e.getMessage(), equalTo("Cannot resolve field path: path is null"));
 	}
 }

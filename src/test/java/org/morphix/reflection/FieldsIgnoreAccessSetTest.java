@@ -59,7 +59,7 @@ class FieldsIgnoreAccessSetTest {
 	void shouldThrowExceptionForFieldThatDoesNotExist() {
 		A object = new A();
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.set(object, MISSING_FIELD_NAME, VALUE));
-		assertThat(e.getMessage(), equalTo("Could not find field '" + MISSING_FIELD_NAME + "' on object of type " + object.getClass()));
+		assertThat(e.getMessage(), equalTo("Cannot set field '" + MISSING_FIELD_NAME + "' in class " + object.getClass() + ": field not found"));
 	}
 
 	@Test
@@ -67,7 +67,7 @@ class FieldsIgnoreAccessSetTest {
 		A object = new A();
 		Object other = new Object();
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.set(object, FIELD_NAME, other));
-		assertThat(e.getMessage(), equalTo("Could not set field " + FIELD_NAME));
+		assertThat(e.getMessage(), equalTo("Cannot set field value for " + FIELD_NAME));
 	}
 
 	static class B extends A {
@@ -125,7 +125,7 @@ class FieldsIgnoreAccessSetTest {
 	void shouldThrowExceptionIfFieldIsNull() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.set(new D(), (Field) null, VALUE));
 
-		assertThat(e.getMessage(), equalTo("Field cannot be null when trying to set field value"));
+		assertThat(e.getMessage(), equalTo("Cannot set field value: field descriptor is null"));
 	}
 
 	@Test
@@ -134,7 +134,7 @@ class FieldsIgnoreAccessSetTest {
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.set(object, FIELD_NAME, new Object()));
 
-		assertThat(e.getMessage(), equalTo("Could not set field " + FIELD_NAME));
+		assertThat(e.getMessage(), equalTo("Cannot set field value for " + FIELD_NAME));
 		assertThat(object.getField(), equalTo(VALUE));
 	}
 

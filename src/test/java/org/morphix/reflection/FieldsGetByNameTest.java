@@ -57,14 +57,14 @@ class FieldsGetByNameTest {
 	void shouldThrowExceptionIfFieldIsNotFound() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.get(new D(), NON_EXISTENT_FIELD));
 
-		assertThat(e.getMessage(), equalTo("Object does not contain a field named: " + NON_EXISTENT_FIELD));
+		assertThat(e.getMessage(), equalTo("Cannot get field '" + NON_EXISTENT_FIELD + "': field not found"));
 	}
 
 	@Test
 	void shouldThrowExceptionIfFieldIsNotFoundInHierarchy() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.get(new E(), NON_EXISTENT_FIELD));
 
-		assertThat(e.getMessage(), equalTo("Object does not contain a field named: " + NON_EXISTENT_FIELD));
+		assertThat(e.getMessage(), equalTo("Cannot get field '" + NON_EXISTENT_FIELD + "': field not found"));
 	}
 
 	@Test

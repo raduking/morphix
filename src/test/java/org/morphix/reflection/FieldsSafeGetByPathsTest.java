@@ -101,7 +101,7 @@ class FieldsSafeGetByPathsTest {
 		B b = new B();
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, (String) null));
-		assertThat(e.getMessage(), equalTo("paths"));
+		assertThat(e.getMessage(), equalTo("Cannot resolve field paths: paths are null"));
 	}
 
 	@Test
@@ -132,7 +132,7 @@ class FieldsSafeGetByPathsTest {
 		b.a = a;
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, new String[] { null }));
-		assertThat(e.getMessage(), equalTo("path"));
+		assertThat(e.getMessage(), equalTo("Cannot resolve field path: path is null"));
 	}
 
 	@Test
@@ -140,7 +140,7 @@ class FieldsSafeGetByPathsTest {
 		B b = new B();
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, (String[]) null));
-		assertThat(e.getMessage(), equalTo("paths"));
+		assertThat(e.getMessage(), equalTo("Cannot resolve field paths: paths are null"));
 	}
 
 }

@@ -74,6 +74,6 @@ class FieldsSetTest {
 	void shouldThrowExceptionIfFieldDoesNotExist() {
 		A a = new A();
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.set(a, "z", 3));
-		assertThat(e.getMessage(), equalTo("Object does not contain a field named: z"));
+		assertThat(e.getMessage(), equalTo("Cannot set field 'z': field not found"));
 	}
 }

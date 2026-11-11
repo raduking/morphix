@@ -197,8 +197,7 @@ public class TheUnsafe {
 	}
 
 	/**
-	 * Writes a primitive value at the given offset. Accepted source types match
-	 * {@link java.lang.reflect.Field#set(Object, Object)}.
+	 * Writes a primitive value at the given offset. Accepted source types are defined by {@link TypeCoercion}.
 	 *
 	 * @param obj object containing the field, or the static field base
 	 * @param offset field offset
@@ -207,109 +206,17 @@ public class TheUnsafe {
 	 * @throws IllegalArgumentException if {@code value} cannot be stored in a field of {@code type}
 	 */
 	public static void putPrimitive(final Object obj, final long offset, final Class<?> type, final Object value) {
-		if (boolean.class == type && value instanceof Boolean booleanValue) {
-			putBoolean(obj, offset, booleanValue);
-		} else if (byte.class == type && value instanceof Byte byteValue) {
-			putByte(obj, offset, byteValue);
-		} else if (char.class == type && value instanceof Character charValue) {
-			putChar(obj, offset, charValue);
-		} else if (short.class == type && (value instanceof Byte || value instanceof Short)) {
-			putShort(obj, offset, ((Number) value).shortValue());
-		} else if (int.class == type && isIntCompatible(value)) {
-			putInt(obj, offset, toInt(value));
-		} else if (long.class == type && isLongCompatible(value)) {
-			putLong(obj, offset, toLong(value));
-		} else if (float.class == type && isFloatCompatible(value)) {
-			putFloat(obj, offset, toFloat(value));
-		} else if (double.class == type && isDoubleCompatible(value)) {
-			putDouble(obj, offset, toDouble(value));
-		} else {
-			throw incompatibleValue(type, value);
+		switch (type) {
+			case Class<?> c when c == boolean.class -> putBoolean(obj, offset, TypeCoercion.toBoolean(value));
+			case Class<?> c when c == byte.class -> putByte(obj, offset, TypeCoercion.toByte(value));
+			case Class<?> c when c == char.class -> putChar(obj, offset, TypeCoercion.toChar(value));
+			case Class<?> c when c == short.class -> putShort(obj, offset, TypeCoercion.toShort(value));
+			case Class<?> c when c == int.class -> putInt(obj, offset, TypeCoercion.toInt(value));
+			case Class<?> c when c == long.class -> putLong(obj, offset, TypeCoercion.toLong(value));
+			case Class<?> c when c == float.class -> putFloat(obj, offset, TypeCoercion.toFloat(value));
+			case Class<?> c when c == double.class -> putDouble(obj, offset, TypeCoercion.toDouble(value));
+			default -> throw incompatibleValue(type, value);
 		}
-	}
-
-	/**
-	 * Returns true when {@code value} can be widened to {@code int} the same way
-	 * {@link java.lang.reflect.Field#set(Object, Object)} does.
-	 *
-	 * @param value value to test
-	 * @return true when the value can be stored in an {@code int} field
-	 */
-	private static boolean isIntCompatible(final Object value) {
-		return value instanceof Byte || value instanceof Short || value instanceof Character || value instanceof Integer;
-	}
-
-	/**
-	 * Returns true when {@code value} can be widened to {@code long} the same way
-	 * {@link java.lang.reflect.Field#set(Object, Object)} does.
-	 *
-	 * @param value value to test
-	 * @return true when the value can be stored in a {@code long} field
-	 */
-	private static boolean isLongCompatible(final Object value) {
-		return isIntCompatible(value) || value instanceof Long;
-	}
-
-	/**
-	 * Returns true when {@code value} can be widened to {@code float} the same way
-	 * {@link java.lang.reflect.Field#set(Object, Object)} does.
-	 *
-	 * @param value value to test
-	 * @return true when the value can be stored in a {@code float} field
-	 */
-	private static boolean isFloatCompatible(final Object value) {
-		return isLongCompatible(value) || value instanceof Float;
-	}
-
-	/**
-	 * Returns true when {@code value} can be widened to {@code double} the same way
-	 * {@link java.lang.reflect.Field#set(Object, Object)} does.
-	 *
-	 * @param value value to test
-	 * @return true when the value can be stored in a {@code double} field
-	 */
-	private static boolean isDoubleCompatible(final Object value) {
-		return isFloatCompatible(value) || value instanceof Double;
-	}
-
-	/**
-	 * Converts a value accepted for an {@code int} field.
-	 *
-	 * @param value value to convert
-	 * @return int value
-	 */
-	private static int toInt(final Object value) {
-		return value instanceof Character character ? character : ((Number) value).intValue();
-	}
-
-	/**
-	 * Converts a value accepted for a {@code long} field.
-	 *
-	 * @param value value to convert
-	 * @return long value
-	 */
-	private static long toLong(final Object value) {
-		return value instanceof Character character ? character : ((Number) value).longValue();
-	}
-
-	/**
-	 * Converts a value accepted for a {@code float} field.
-	 *
-	 * @param value value to convert
-	 * @return float value
-	 */
-	private static float toFloat(final Object value) {
-		return value instanceof Character character ? character : ((Number) value).floatValue();
-	}
-
-	/**
-	 * Converts a value accepted for a {@code double} field.
-	 *
-	 * @param value value to convert
-	 * @return double value
-	 */
-	private static double toDouble(final Object value) {
-		return value instanceof Character character ? character : ((Number) value).doubleValue();
 	}
 
 	/**

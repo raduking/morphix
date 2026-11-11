@@ -258,7 +258,7 @@ public interface Fields {
 		try {
 			return JavaObjects.cast(field.get(obj));
 		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new ReflectionException(e, "Could not get field {}", field.getName());
+			throw new ReflectionException(e, "Cannot get field value for {}", field.getName());
 		}
 	}
 
@@ -276,7 +276,7 @@ public interface Fields {
 		try {
 			field.set(obj, value); // NOSONAR this is a reflection enhancement method
 		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new ReflectionException(e, "Could not set field {}", field.getName());
+			throw new ReflectionException(e, "Cannot set field value for {}", field.getName());
 		}
 	}
 
@@ -296,7 +296,7 @@ public interface Fields {
 	static <T> T get(final Object obj, final String fieldName) {
 		Class<?> cls = Classes.getFrom(obj);
 		Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-		Reflection.requireNotNull(field, "Object does not contain a field named: {}", fieldName);
+		Reflection.requireNotNull(field, "Cannot get field '{}': field not found", fieldName);
 		return Reflection.getFieldValue(obj, field);
 	}
 
@@ -316,7 +316,7 @@ public interface Fields {
 	static <T> void set(final Object obj, final String fieldName, final T value) {
 		Class<?> cls = Classes.getFrom(obj);
 		Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-		Reflection.requireNotNull(field, "Object does not contain a field named: {}", fieldName);
+		Reflection.requireNotNull(field, "Cannot set field '{}': field not found", fieldName);
 		Reflection.setFieldValue(obj, field, value);
 	}
 
@@ -326,7 +326,6 @@ public interface Fields {
 	 * @author Radu Sebastian LAZIN
 	 */
 	interface IgnoreAccess {
-
 		/**
 		 * Returns the value of the given field from the given object ignoring field access modifiers.
 		 *
@@ -338,7 +337,7 @@ public interface Fields {
 		 * @throws ReflectionException if the field value cannot be returned
 		 */
 		static <T> T get(final Object obj, final Field field) {
-			Reflection.requireNotNull(field, "Field cannot be null when trying to get field value");
+			Reflection.requireNotNull(field, "Cannot get field value: field descriptor is null");
 			return Unchecked.get(obj, field);
 		}
 
@@ -355,7 +354,7 @@ public interface Fields {
 		static <T> T get(final Object obj, final String fieldName) {
 			Class<?> cls = Classes.getFrom(obj);
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			Reflection.requireNotNull(field, "Could not find field '{}' on object of type {}", fieldName, cls);
+			Reflection.requireNotNull(field, "Cannot get field '{}' from class {}: field not found", fieldName, cls);
 			return Unchecked.get(obj, field);
 		}
 
@@ -370,7 +369,7 @@ public interface Fields {
 		 * @throws ReflectionException if the field value cannot be set
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
-			Reflection.requireNotNull(field, "Field cannot be null when trying to set field value");
+			Reflection.requireNotNull(field, "Cannot set field value: field descriptor is null");
 			Unchecked.set(obj, field, value);
 		}
 
@@ -387,7 +386,7 @@ public interface Fields {
 		static <T> void set(final Object obj, final String fieldName, final T value) {
 			Class<?> cls = Classes.getFrom(obj);
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			Reflection.requireNotNull(field, "Could not find field '{}' on object of type {}", fieldName, cls);
+			Reflection.requireNotNull(field, "Cannot set field '{}' in class {}: field not found", fieldName, cls);
 			Unchecked.set(obj, field, value);
 		}
 
@@ -405,7 +404,7 @@ public interface Fields {
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
-				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
+				throw new ReflectionException("Cannot get static field '{}' from class {}: field not found or not static", fieldName, cls);
 			}
 			return Unchecked.get(null, field);
 		}
@@ -422,9 +421,9 @@ public interface Fields {
 		 * @throws ReflectionException if the field is not static
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final Field field) {
-			Reflection.requireNotNull(field, "Field cannot be null when trying to get static field value from class: {}", cls);
+			Reflection.requireNotNull(field, "Cannot get static field value from class {}: field descriptor is null", cls);
 			if (JavaModifier.STATIC.isNotPresentOn(field)) {
-				throw new ReflectionException("Field must be static, name: {} in class: {}", field.getName(), cls);
+				throw new ReflectionException("Cannot get static field '{}' from class {}: field is not static", field.getName(), cls);
 			}
 			return Unchecked.get(null, field);
 		}
@@ -443,7 +442,7 @@ public interface Fields {
 		static <T, U> void setStatic(final Class<T> cls, final String fieldName, final U value) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
-				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
+				throw new ReflectionException("Cannot set static field '{}' in class {}: field not found or not static", fieldName, cls);
 			}
 			Unchecked.set(null, field, value);
 		}
@@ -460,9 +459,9 @@ public interface Fields {
 		 * @throws ReflectionException if the field is not found
 		 */
 		static <T, U> void setStatic(final Class<T> cls, final Field field, final U value) {
-			Reflection.requireNotNull(field, "Field cannot be null when trying to set static field value from class: {}", cls);
+			Reflection.requireNotNull(field, "Cannot set static field value in class {}: field descriptor is null", cls);
 			if (JavaModifier.STATIC.isNotPresentOn(field)) {
-				throw new ReflectionException("Could not find static field with name: {} in class: {}", field.getName(), cls);
+				throw new ReflectionException("Cannot set static field '{}' in class {}: field is not static", field.getName(), cls);
 			}
 			Unchecked.set(null, field, value);
 		}
@@ -677,7 +676,7 @@ public interface Fields {
 		 * @throws ReflectionException if {@code paths} is null or a path is null
 		 */
 		static <T, U> U getByPaths(final T obj, final String... paths) {
-			Reflection.requireNotNull(paths, "paths");
+			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
 			U result = null;
 			for (String path : paths) {
 				result = getByPath(obj, path);
@@ -702,7 +701,7 @@ public interface Fields {
 		 * @throws ReflectionException if the paths are null
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
-			Reflection.requireNotNull(paths, "paths");
+			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
 			if (paths.isEmpty()) {
 				return null;
 			}
@@ -733,7 +732,7 @@ public interface Fields {
 		 * @throws ReflectionException if {@code path} is null
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
-			Reflection.requireNotNull(path, "path");
+			Reflection.requireNotNull(path, "Cannot resolve field path: path is null");
 			U result = null;
 			String[] fieldNames = path.split("\\.");
 			if (fieldNames.length == 1) {
@@ -760,7 +759,6 @@ public interface Fields {
 	 * @author Radu Sebastian LAZIN
 	 */
 	interface Unsafe {
-
 		/**
 		 * Sets the field value using the {@link TheUnsafe} utility.
 		 * <p>
@@ -835,7 +833,7 @@ public interface Fields {
 					// only final fields will reach this code
 					Unsafe.set(obj, field, value);
 				} catch (IllegalArgumentException typeMismatch) {
-					throw new ReflectionException(typeMismatch, "Could not set field {}", field.getName());
+					throw new ReflectionException(typeMismatch, "Cannot set field value for {}", field.getName());
 				}
 			});
 		}

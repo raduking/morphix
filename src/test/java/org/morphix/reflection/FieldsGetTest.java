@@ -48,7 +48,7 @@ class FieldsGetTest {
 		Field field = A.class.getDeclaredField(A.FieldName.FIELD);
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.get(a, field));
 
-		assertThat(e.getMessage(), equalTo("Could not get field " + A.FieldName.FIELD));
+		assertThat(e.getMessage(), equalTo("Cannot get field value for " + A.FieldName.FIELD));
 		assertThat(e.getCause(), instanceOf(IllegalAccessException.class));
 	}
 
@@ -58,7 +58,7 @@ class FieldsGetTest {
 		B b = new B();
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.get(b, field));
 
-		assertThat(e.getMessage(), equalTo("Could not get field " + A.FieldName.FIELD));
+		assertThat(e.getMessage(), equalTo("Cannot get field value for " + A.FieldName.FIELD));
 		assertThat(e.getCause(), instanceOf(IllegalAccessException.class));
 	}
 
@@ -68,7 +68,7 @@ class FieldsGetTest {
 		B b = new B();
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.get(b, field));
 
-		assertThat(e.getMessage(), equalTo("Could not get field " + A.FieldName.B));
+		assertThat(e.getMessage(), equalTo("Cannot get field value for " + A.FieldName.B));
 		assertThat(e.getCause(), instanceOf(IllegalArgumentException.class));
 	}
 }
