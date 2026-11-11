@@ -115,6 +115,26 @@ public class MemberPredicates {
 	}
 
 	/**
+	 * Returns a predicate that rejects members declared by any of the given classes.
+	 *
+	 * @param <T> member type, can be Field, Method, etc
+	 *
+	 * @param classes declaring classes to exclude
+	 * @return a predicate that rejects members declared by the given classes
+	 */
+	public static <T extends Member> Predicate<T> notDeclaredIn(final Class<?>... classes) {
+		return member -> {
+			Class<?> declaringClass = member.getDeclaringClass();
+			for (Class<?> cls : classes) {
+				if (cls == declaringClass) {
+					return false;
+				}
+			}
+			return true;
+		};
+	}
+
+	/**
 	 * Returns a predicate that verifies if a member is static.
 	 *
 	 * @param <T> member type, can be Field, Method, etc

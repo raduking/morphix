@@ -100,9 +100,9 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a method in the class given as parameter, also searching in all its super classes. This method does not
-	 * return methods from interfaces or from {@link Object} class because most of the time only the class hierarchy is
-	 * needed.
+	 * Returns a method in the class given as parameter, also searching in all its super classes, including {@link Object}.
+	 * This method does not return methods from super interfaces. Use {@link Complete#getAllDeclaredInHierarchy(Class)} for
+	 * the full interface hierarchy.
 	 * <p>
 	 * The method returns null if no method is found. The philosophy of this method is to return the method or null and not
 	 * to throw exceptions because most of the time the method may not be present and the caller just needs to check for
@@ -120,9 +120,9 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes. This
-	 * method does not return methods from interfaces or from {@link Object} class. This is a simpler version of
-	 * {@link Complete#getAllDeclaredInHierarchy(Class)} because most of the time only the class hierarchy is needed.
+	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes,
+	 * including {@link Object}. This method does not return methods from super interfaces. This is a simpler version of
+	 * {@link Complete#getAllDeclaredInHierarchy(Class)}, which also walks interfaces and can exclude specific classes.
 	 * <p>
 	 * Note: if the class given as parameter is an interface then the methods declared by that interface are returned, but
 	 * not the ones declared by its super interfaces, since those are interfaces as well. Use
@@ -145,15 +145,11 @@ public interface Methods {
 	 */
 	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
 		if (null == cls) {
-			return new LinkedList<>();
+			return List.of();
 		}
 		// an interface has no super class, but it does declare methods of its own
 		Class<?> superClass = cls.getSuperclass();
 		List<Method> methods = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass);
-		if (Object.class == cls) {
-			// the methods declared by Object itself are never included
-			return methods;
-		}
 		Method[] declared = cls.getDeclaredMethods();
 		for (int i = declared.length - 1; i >= 0; --i) {
 			methods.addFirst(declared[i]);
@@ -162,9 +158,9 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes that
-	 * verify the given method predicate. This method does not return methods from interfaces or from {@link Object} class
-	 * because most of the time only the class hierarchy is needed.
+	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes,
+	 * including {@link Object}, that verify the given method predicate. This method does not return methods from super
+	 * interfaces.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -174,15 +170,11 @@ public interface Methods {
 	 */
 	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
 		if (null == cls || null == predicate) {
-			return new LinkedList<>();
+			return List.of();
 		}
 		// an interface has no super class, but it does declare methods of its own
 		Class<?> superClass = cls.getSuperclass();
 		List<Method> methods = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass, predicate);
-		if (Object.class == cls) {
-			// the methods declared by Object itself are never included
-			return methods;
-		}
 		Method[] declared = cls.getDeclaredMethods();
 		for (int i = declared.length - 1; i >= 0; --i) {
 			if (predicate.test(declared[i])) {
@@ -701,10 +693,8 @@ public interface Methods {
 
 		/**
 		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
-		 * interfaces.
-		 * <p>
-		 * Note: unlike the simpler {@link Methods#getAllDeclaredInHierarchy(Class)}, this method does include the methods
-		 * declared by {@link Object}, since the whole hierarchy is walked up to and including it.
+		 * interfaces. Pass classes in the excluded set of {@link #getAllDeclaredInHierarchy(Class, Set)} to leave a specific
+		 * class out of the walk.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -719,10 +709,8 @@ public interface Methods {
 		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
 		 * interfaces.
 		 * <p>
-		 * Note: the excluded set is also used to avoid cyclic dependencies in the class hierarchy.
-		 * <p>
-		 * Note: unlike the simpler {@link Methods#getAllDeclaredInHierarchy(Class, Predicate)}, this method does include the
-		 * methods declared by {@link Object}, since the whole hierarchy is walked up to and including it.
+		 * Note: the excluded set is also used to avoid cyclic dependencies in the class hierarchy. A class in that set,
+		 * including {@link Object}, is left out of the walk together with everything above it.
 		 * <p>
 		 * Note: a null class short-circuits the walk and returns an empty list, so in that case the excluded set is never
 		 * validated and no exception is thrown for it.

@@ -65,8 +65,9 @@ class MethodsGetAllDeclaredInHierarchyTest {
 
 		int sizeB = B.class.getDeclaredMethods().length;
 		int sizeA = A.class.getDeclaredMethods().length;
+		int sizeObject = Object.class.getDeclaredMethods().length;
 
-		assertThat(methods, hasSize(sizeA + sizeB));
+		assertThat(methods, hasSize(sizeA + sizeB + sizeObject));
 	}
 
 	@Test
@@ -74,8 +75,9 @@ class MethodsGetAllDeclaredInHierarchyTest {
 		List<Method> methods = Methods.getAllDeclaredInHierarchy(C.class);
 
 		int size = C.class.getDeclaredMethods().length;
+		int sizeObject = Object.class.getDeclaredMethods().length;
 
-		assertThat(methods, hasSize(size));
+		assertThat(methods, hasSize(size + sizeObject));
 	}
 
 	@Test
@@ -84,8 +86,9 @@ class MethodsGetAllDeclaredInHierarchyTest {
 
 		int sizeEnum = Enum.class.getDeclaredMethods().length;
 		int sizeE = E.class.getDeclaredMethods().length;
+		int sizeObject = Object.class.getDeclaredMethods().length;
 
-		assertThat(methods, hasSize(sizeEnum + sizeE));
+		assertThat(methods, hasSize(sizeEnum + sizeE + sizeObject));
 	}
 
 	@Test
@@ -126,10 +129,11 @@ class MethodsGetAllDeclaredInHierarchyTest {
 	}
 
 	@Test
-	void shouldStillReturnNoMethodsForObjectItself() {
-		List<Method> methods = Methods.getAllDeclaredInHierarchy(Object.class);
+	void shouldReturnMethodsDeclaredByObject() {
+		int sizeObject = Object.class.getDeclaredMethods().length;
 
-		assertThat(methods, empty());
+		assertThat(Methods.getAllDeclaredInHierarchy(Object.class), hasSize(sizeObject));
+		assertThat(Methods.getAllDeclaredInHierarchy(Object.class, method -> true), hasSize(sizeObject));
 	}
 
 }

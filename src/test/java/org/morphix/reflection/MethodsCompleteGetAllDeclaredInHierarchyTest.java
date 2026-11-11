@@ -129,10 +129,10 @@ class MethodsCompleteGetAllDeclaredInHierarchyTest {
 	}
 
 	@Test
-	void shouldNotIncludeObjectMethodsInTheSimplerVariant() {
+	void shouldIncludeObjectMethodsInTheSimplerVariant() {
 		List<Method> methods = Methods.getAllDeclaredInHierarchy(C.class);
 
-		assertThat(methods.stream().anyMatch(method -> Object.class.equals(method.getDeclaringClass())), is(false));
+		assertThat(methods.stream().anyMatch(method -> Object.class.equals(method.getDeclaringClass())), is(true));
 	}
 
 	@Test
