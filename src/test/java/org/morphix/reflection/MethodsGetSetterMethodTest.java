@@ -91,6 +91,22 @@ class MethodsGetSetterMethodTest {
 	}
 
 	@Test
+	void shouldThrowExceptionWhenClassIsNull() throws Exception {
+		Field field = A.class.getDeclaredField("s");
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getSetterMethod(null, field));
+
+		assertThat(e.getMessage(), equalTo("Cannot find setter method: class is null"));
+	}
+
+	@Test
+	void shouldThrowExceptionWhenFieldIsNull() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getSetterMethod(A.class, null));
+
+		assertThat(e.getMessage(), equalTo("Cannot find setter method in class " + A.class + ": field descriptor is null"));
+	}
+
+	@Test
 	void shouldThrowExceptionWhenSetterMethodWithPrimitiveNotFound() throws Exception {
 		Field field = A.class.getDeclaredField("i");
 

@@ -361,7 +361,9 @@ public interface Methods {
 		StackWalker walker = StackWalker.getInstance();
 		return walker.walk(frames -> frames
 				.skip(skipFrames) // skip frames
-				.filter(frame -> frame.getClassName().startsWith(packageName))
+				.filter(frame -> packageName.isEmpty()
+						? !frame.getClassName().contains(".")
+						: frame.getClassName().startsWith(packageName + '.'))
 				.findFirst())
 				.map(frame -> nameFunction.apply(frame.getClassName(), frame.getMethodName()));
 	}
@@ -377,6 +379,8 @@ public interface Methods {
 	 * @throws ReflectionException if no setter method is found
 	 */
 	static <T> Method getSetterMethod(final Class<T> cls, final Field field) {
+		Reflection.requireNotNull(cls, "Cannot find setter method: class is null");
+		Reflection.requireNotNull(field, "Cannot find setter method in class {}: field descriptor is null", cls);
 		String methodName = MethodType.SETTER.getMethodName(field);
 		Method method = Methods.getOneDeclaredInHierarchy(methodName, cls, field.getType());
 		if (null != method) {
