@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.1.1`
+
+---
+
 `1.1.0`
 
 - Added `Reflection.requireNotNull(Object)` to throw `ReflectionException` when the reference is `null`.
