@@ -15,6 +15,7 @@ package org.morphix.lang.thread;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -23,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,6 +54,43 @@ class StackedContextHolderTest {
 	@BeforeAll
 	static void beforeAll() throws Exception {
 		Tests.configureLogging("src/test/resources/test-logging.properties");
+	}
+
+	@Nested
+	class StackStateChecksTest {
+
+		@Test
+		void shouldDetectInitializedStack() {
+			List<String> stack = new ArrayList<>();
+
+			assertTrue(DummyTenantContextHolder.INSTANCE.isInitialized(stack));
+			assertFalse(DummyTenantContextHolder.INSTANCE.isNotInitialized(stack));
+		}
+
+		@Test
+		void shouldDetectUninitializedStack() {
+			assertFalse(DummyTenantContextHolder.INSTANCE.isInitialized(null));
+			assertTrue(DummyTenantContextHolder.INSTANCE.isNotInitialized(null));
+		}
+
+		@Test
+		void shouldDetectEmptyStack() {
+			List<String> emptyStack = new ArrayList<>();
+
+			assertTrue(DummyTenantContextHolder.INSTANCE.isEmpty(emptyStack));
+			assertFalse(DummyTenantContextHolder.INSTANCE.isNotEmpty(emptyStack));
+			assertTrue(DummyTenantContextHolder.INSTANCE.isEmpty(null));
+			assertFalse(DummyTenantContextHolder.INSTANCE.isNotEmpty(null));
+		}
+
+		@Test
+		void shouldDetectNonEmptyStack() {
+			List<String> stack = new ArrayList<>();
+			stack.add(TENANT_ID);
+
+			assertFalse(DummyTenantContextHolder.INSTANCE.isEmpty(stack));
+			assertTrue(DummyTenantContextHolder.INSTANCE.isNotEmpty(stack));
+		}
 	}
 
 	@Test
@@ -165,9 +203,37 @@ class StackedContextHolderTest {
 	@Test
 	void shouldNotChangeTenantIdWhenStackIsEmpty() {
 		assertDoesNotThrow(() -> DummyTenantContextHolder.changeTenantId(TENANT_ID));
+		assertDoesNotThrow(() -> DummyTenantContextHolder.changeTenantId(" "));
 		assertThat(DummyTenantContextHolder.getTenantId(), equalTo(null));
 		assertDoesNotThrow(() -> TenantContextHolder.changeTenantId(TENANT_ID));
 		assertThat(TenantContextHolder.getTenantId(), equalTo(null));
+	}
+
+	@Test
+	void shouldClearManuallySetTenantId() {
+		DummyTenantContextHolder.INSTANCE.setElement(TENANT_ID);
+		try {
+			assertThat(DummyTenantContextHolder.getTenantId(), equalTo(TENANT_ID));
+		} finally {
+			DummyTenantContextHolder.INSTANCE.clearElement();
+		}
+		assertThat(DummyTenantContextHolder.getTenantId(), equalTo(null));
+	}
+
+	@Test
+	void shouldPropagateNullCurrentElement() {
+		NullableContextHolder contextHolder = new NullableContextHolder();
+		contextHolder.setElement(null);
+		try {
+			Supplier<Void> supplier = StackedContextHolder.onCurrent(contextHolder, () -> {
+				contextHolder.changeElement(TEST_STRING);
+				return null;
+			});
+			supplier.get();
+			assertThat(contextHolder.getElement(), equalTo(null));
+		} finally {
+			contextHolder.clearElement();
+		}
 	}
 
 	@Test
@@ -270,39 +336,39 @@ class StackedContextHolderTest {
 	 */
 	static class DummyTenantContextHolder extends TenantContextHolder {
 
-		private static final DummyThreadLocal<Stack<String>> stack = new DummyThreadLocal<>();
+		private static final DummyThreadLocal<List<String>> stack = new DummyThreadLocal<>();
 
 		private static final DummyTenantContextHolder INSTANCE = new DummyTenantContextHolder();
 
 		private Map<String, DummyStack<String>> dummyStackMap = new HashMap<>();
 
-		public static <T> T onTenant(final String tenantId, final Supplier<T> statements) {
+		public static <T> T onTenant(final String tenantId, final Supplier<T> statements) { // NOSONAR
 			return on(tenantId, INSTANCE, statements::get);
 		}
 
-		public static void onTenant(final String tenantId, final Runnable statements) {
+		public static void onTenant(final String tenantId, final Runnable statements) { // NOSONAR
 			on(tenantId, INSTANCE, statements::run);
 		}
 
-		public static <T> Supplier<T> onCurrentTenant(final Supplier<T> statements) {
+		public static <T> Supplier<T> onCurrentTenant(final Supplier<T> statements) { // NOSONAR
 			return onCurrent(INSTANCE, statements::get);
 		}
 
-		public static void changeTenantId(final String tenantId) {
+		public static void changeTenantId(final String tenantId) { // NOSONAR
 			INSTANCE.changeElement(tenantId);
 		}
 
-		public static String getTenantId() {
+		public static String getTenantId() { // NOSONAR
 			return INSTANCE.getElement();
 		}
 
 		@Override
-		public ThreadLocal<Stack<String>> getThreadStack() {
+		public ThreadLocal<List<String>> getThreadStack() {
 			return stack;
 		}
 
 		@Override
-		protected Stack<String> newStack() {
+		protected List<String> newStack() {
 			DummyStack<String> newStack = new DummyStack<>();
 			this.dummyStackMap.put(Thread.currentThread().getName(), newStack);
 			return newStack;
@@ -310,6 +376,20 @@ class StackedContextHolderTest {
 
 		public DummyStack<String> getDummyStack() {
 			return this.dummyStackMap.get(Thread.currentThread().getName());
+		}
+	}
+
+	private static class NullableContextHolder extends StackedContextHolder<String> {
+
+		private final ThreadLocal<List<String>> stack = new ThreadLocal<>();
+
+		NullableContextHolder() {
+			super("Nullable", value -> true);
+		}
+
+		@Override
+		protected ThreadLocal<List<String>> getThreadStack() {
+			return stack;
 		}
 	}
 
@@ -338,28 +418,32 @@ class StackedContextHolderTest {
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
-	private static class DummyStack<T> extends Stack<T> {
+	private static class DummyStack<T> extends ArrayList<T> {
 
 		private static final long serialVersionUID = 5387964986959157681L;
 
 		private List<String> operations = new ArrayList<>();
 
 		@Override
-		public T push(final T item) {
+		public boolean add(final T item) {
 			operations.add("push: " + item);
-			return super.push(item);
+			return super.add(item);
 		}
 
 		@Override
-		public synchronized T pop() {
+		public T remove(final int index) {
 			operations.add("pop: " + peek());
-			return super.pop();
+			return super.remove(index);
 		}
 
 		@Override
-		public synchronized T set(final int index, final T element) {
+		public T set(final int index, final T element) {
 			operations.add("change: " + element);
 			return super.set(index, element);
+		}
+
+		private T peek() {
+			return get(size() - 1);
 		}
 	}
 }

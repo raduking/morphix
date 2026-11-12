@@ -49,14 +49,14 @@ class FieldsIgnoreAccessGetStaticTest {
 	void shouldThrowExceptionIfFieldNotFound() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, WRONG_NAME));
 		assertThat(e.getMessage(),
-				equalTo("Could not find static field with name: " + WRONG_NAME + " in class: " + A.class));
+				equalTo("Cannot get static field '" + WRONG_NAME + "' from class " + A.class + ": field not found or not static"));
 	}
 
 	@Test
 	void shouldThrowExceptionIfFieldFoundIsNotStatic() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, GOOD_NAME));
 		assertThat(e.getMessage(),
-				equalTo("Could not find static field with name: " + GOOD_NAME + " in class: " + A.class));
+				equalTo("Cannot get static field '" + GOOD_NAME + "' from class " + A.class + ": field not found or not static"));
 	}
 
 	@Test
@@ -71,7 +71,7 @@ class FieldsIgnoreAccessGetStaticTest {
 	void shouldThrowExceptionIfFieldIsNull() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, (Field) null));
 		assertThat(e.getMessage(),
-				equalTo("Field cannot be null when trying to get static field value from class: " + A.class));
+				equalTo("Cannot get static field value from class " + A.class + ": field descriptor is null"));
 	}
 
 	@Test
@@ -79,7 +79,7 @@ class FieldsIgnoreAccessGetStaticTest {
 		Field field = Fields.getOneDeclared(A.class, GOOD_NAME);
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, field));
 		assertThat(e.getMessage(),
-				equalTo("Could not find static field with name: " + GOOD_NAME + " in class: " + A.class));
+				equalTo("Cannot get static field '" + GOOD_NAME + "' from class " + A.class + ": field is not static"));
 	}
 
 	private static class A {

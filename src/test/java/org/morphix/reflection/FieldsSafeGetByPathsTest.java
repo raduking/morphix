@@ -15,11 +15,12 @@ package org.morphix.reflection;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields.Safe#getByPath(Object, String)}.
+ * Test class for {@link Fields.Safe#getByPaths(Object, String...)} and {@link Fields.Safe#getByPaths(Object, String)}.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -43,6 +44,30 @@ class FieldsSafeGetByPathsTest {
 		b.a = a;
 
 		String x = Fields.Safe.getByPaths(b, "x.y,a.x");
+
+		assertThat(x, equalTo(TEST_STRING));
+	}
+
+	@Test
+	void shouldGetFieldByPathsWhenCommaSeparatedPathsHaveWhitespace() {
+		A a = new A();
+		a.x = TEST_STRING;
+		B b = new B();
+		b.a = a;
+
+		String x = Fields.Safe.getByPaths(b, "x.y , a.x");
+
+		assertThat(x, equalTo(TEST_STRING));
+	}
+
+	@Test
+	void shouldGetFieldByPathsWithVarargs() {
+		A a = new A();
+		a.x = TEST_STRING;
+		B b = new B();
+		b.a = a;
+
+		String x = Fields.Safe.getByPaths(b, "x.y", "a.x");
 
 		assertThat(x, equalTo(TEST_STRING));
 	}
@@ -72,6 +97,14 @@ class FieldsSafeGetByPathsTest {
 	}
 
 	@Test
+	void shouldThrowWhenCommaSeparatedPathsAreNull() {
+		B b = new B();
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, (String) null));
+		assertThat(e.getMessage(), equalTo("Cannot resolve field paths: paths are null"));
+	}
+
+	@Test
 	void shouldReturnNullForEmptySearch() {
 		A a = new A();
 		a.x = TEST_STRING;
@@ -85,18 +118,29 @@ class FieldsSafeGetByPathsTest {
 		result = Fields.Safe.getByPaths(b, new String[] { });
 
 		assertThat(result, nullValue());
+
+		result = Fields.Safe.getByPaths(b, " , , ");
+
+		assertThat(result, nullValue());
 	}
 
 	@Test
-	void shouldReturnNullIfAPathIsNull() {
+	void shouldThrowWhenAPathIsNull() {
 		A a = new A();
 		a.x = TEST_STRING;
 		B b = new B();
 		b.a = a;
 
-		String x = Fields.Safe.getByPaths(b, new String[] { null });
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, new String[] { null }));
+		assertThat(e.getMessage(), equalTo("Cannot resolve field path: path is null"));
+	}
 
-		assertThat(x, nullValue());
+	@Test
+	void shouldThrowWhenPathsArrayIsNull() {
+		B b = new B();
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, (String[]) null));
+		assertThat(e.getMessage(), equalTo("Cannot resolve field paths: paths are null"));
 	}
 
 }

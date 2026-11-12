@@ -46,6 +46,10 @@ class MethodsSafeGetOneDeclaredInHierarchyTest {
 		// empty class
 	}
 
+	public interface I {
+		void fooI();
+	}
+
 	@Test
 	void shouldReturnDeclaredMethodInHierarchy() throws Exception {
 		Method expected = A.class.getDeclaredMethod("fooA");
@@ -77,6 +81,21 @@ class MethodsSafeGetOneDeclaredInHierarchyTest {
 		Method method = Methods.Safe.getOneDeclaredInHierarchy(null, A.class);
 
 		assertThat(method, equalTo(null));
+	}
+
+	@Test
+	void shouldReturnNullWhenTheInterfaceDoesNotDeclareTheMethod() {
+		Method method = Methods.Safe.getOneDeclaredInHierarchy("missing", I.class);
+
+		assertThat(method, equalTo(null));
+	}
+
+	@Test
+	void shouldReturnMethodsDeclaredOnObject() throws Exception {
+		assertThat(Methods.getOneDeclaredInHierarchy("toString", C.class), equalTo(Object.class.getDeclaredMethod("toString")));
+		assertThat(Methods.Safe.getOneDeclaredInHierarchy("equals", C.class, Object.class),
+				equalTo(Object.class.getDeclaredMethod("equals", Object.class)));
+		assertThat(Methods.getOneDeclaredInHierarchy("hashCode", Object.class), equalTo(Object.class.getDeclaredMethod("hashCode")));
 	}
 
 }

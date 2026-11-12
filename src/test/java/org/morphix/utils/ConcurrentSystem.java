@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.morphix.lang.thread.Synchronized;
+
 /**
  * Utility class for concurrent access to system properties. This class provides thread-safe methods for setting and
  * getting system properties by using a lock for each property key. This ensures that concurrent threads do not
@@ -33,22 +35,12 @@ public class ConcurrentSystem {
 			return getAndClearProperty(key);
 		}
 		ReentrantLock keyLock = getLockForKey(key);
-		keyLock.lock();
-		try {
-			return System.setProperty(key, value);
-		} finally {
-			keyLock.unlock();
-		}
+		return Synchronized.with(keyLock, () -> System.setProperty(key, value));
 	}
 
 	public static String getAndClearProperty(final String key) {
 		ReentrantLock keyLock = getLockForKey(key);
-		keyLock.lock();
-		try {
-			return System.clearProperty(key);
-		} finally {
-			keyLock.unlock();
-		}
+		return Synchronized.with(keyLock, () -> System.clearProperty(key));
 	}
 
 	public static void withProperty(final String key, final String value, final AutoCloseable action) throws Exception {

@@ -12,15 +12,18 @@
  */
 package org.morphix.lang.accumulator;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.morphix.lang.collections.AlwaysEmptyList;
 import org.morphix.lang.collections.Lists;
 import org.morphix.lang.function.Runnables;
 import org.morphix.lang.function.Suppliers;
 import org.morphix.lang.retry.Retry;
+import org.morphix.lang.thread.Synchronized;
 
 /**
  * Information accumulator abstract class.<br/>
@@ -43,10 +46,15 @@ public abstract class Accumulator<T> {
 	private final List<T> list;
 
 	/**
+	 * Lock used to protect the accumulated information.
+	 */
+	private final ReentrantLock lock = new ReentrantLock();
+
+	/**
 	 * Hidden constructor.
 	 */
 	protected Accumulator() {
-		this(new CopyOnWriteArrayList<>());
+		this(new ArrayList<>());
 	}
 
 	/**
@@ -56,6 +64,16 @@ public abstract class Accumulator<T> {
 	 */
 	private Accumulator(final List<T> list) {
 		this.list = list;
+	}
+
+	/**
+	 * Returns the lock used to protect the accumulated information. Derived classes can use this lock to make compound
+	 * operations on the accumulator thread-safe.
+	 *
+	 * @return the accumulator lock
+	 */
+	protected final ReentrantLock getLock() {
+		return lock;
 	}
 
 	/**
@@ -104,16 +122,16 @@ public abstract class Accumulator<T> {
 	 * Clears all the accumulated information.
 	 */
 	public void clear() {
-		list.clear();
+		Synchronized.with(lock, list::clear);
 	}
 
 	/**
-	 * Returns all the accumulated information.
+	 * Returns an unmodifiable snapshot of all the accumulated information.
 	 *
 	 * @return all the accumulated information
 	 */
 	public List<T> getInformationList() {
-		return list;
+		return Synchronized.with(lock, () -> Collections.unmodifiableList(new ArrayList<>(list)));
 	}
 
 	/**
@@ -122,7 +140,7 @@ public abstract class Accumulator<T> {
 	 * @return the last accumulated information.
 	 */
 	public T firstInformation() {
-		return Lists.first(list);
+		return Synchronized.with(lock, () -> Lists.first(list));
 	}
 
 	/**
@@ -131,7 +149,7 @@ public abstract class Accumulator<T> {
 	 * @return the last accumulated information.
 	 */
 	public T lastInformation() {
-		return Lists.last(list);
+		return Synchronized.with(lock, () -> Lists.last(list));
 	}
 
 	/**
@@ -140,7 +158,7 @@ public abstract class Accumulator<T> {
 	 * @return true if the information accumulated is empty
 	 */
 	public boolean isEmpty() {
-		return list.isEmpty();
+		return Synchronized.with(lock, list::isEmpty);
 	}
 
 	/**
@@ -167,7 +185,7 @@ public abstract class Accumulator<T> {
 	 * @return the size of this accumulator meaning how much information it accumulated
 	 */
 	public int size() {
-		return list.size();
+		return Synchronized.with(lock, list::size);
 	}
 
 	/**
@@ -176,7 +194,7 @@ public abstract class Accumulator<T> {
 	 * @param information information to add
 	 */
 	public void addInformation(final T information) {
-		getInformationList().add(information);
+		Synchronized.with(lock, () -> list.add(information));
 	}
 
 	/**

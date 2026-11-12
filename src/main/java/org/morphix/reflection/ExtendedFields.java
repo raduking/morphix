@@ -101,7 +101,8 @@ public interface ExtendedFields {
 	 * only. Synthetic methods, such as the bridge methods generated for covariant return types or for implementations of
 	 * generic methods, would otherwise shadow the real getter declaration, making the result depend on the unspecified
 	 * order in which {@link Class#getDeclaredMethods()} returns them. Static getters are excluded as well, for the same
-	 * reason the static fields are.
+	 * reason the static fields are. Getters declared by {@link Object}, such as {@code getClass()}, are excluded because
+	 * they belong to every instance and are not properties of the class.
 	 *
 	 * @return predicate selecting the getter methods to be considered
 	 */
@@ -109,6 +110,7 @@ public interface ExtendedFields {
 		return Predicates.allOf(
 				MethodType.GETTER.predicate(),
 				MemberPredicates.isNotStatic(),
-				MethodPredicates.isNotSynthetic());
+				MethodPredicates.isNotSynthetic(),
+				MemberPredicates.notDeclaredIn(Object.class));
 	}
 }

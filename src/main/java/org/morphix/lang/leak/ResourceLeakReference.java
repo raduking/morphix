@@ -14,7 +14,6 @@ package org.morphix.lang.leak;
 
 import java.lang.StackWalker.Option;
 import java.lang.StackWalker.StackFrame;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -136,7 +135,7 @@ public final class ResourceLeakReference implements AutoCloseable {
 			case PARANOID -> STACK_WALKER.walk(stream -> stream
 					.dropWhile(frame -> IGNORED_CLASS_NAMES.contains(frame.getClassName()))
 					.toList());
-			default -> Collections.emptyList();
+			default -> List.of();
 		};
 	}
 
@@ -191,8 +190,8 @@ public final class ResourceLeakReference implements AutoCloseable {
 	}
 
 	/**
-	 * Retrieves the stack frames captured at the allocation site of the resource. The amount of information captured about
-	 * the allocation site depends on the leak detection level.
+	 * Retrieves an unmodifiable list of the stack frames captured at the allocation site of the resource. The amount of
+	 * information captured about the allocation site depends on the leak detection level.
 	 *
 	 * @return a list of stack frames representing the allocation site of the resource
 	 */

@@ -140,4 +140,38 @@ public interface Reflection {
 	static boolean isClassPresent(final String className) {
 		return Classes.isPresent(className);
 	}
+
+	/**
+	 * Checks that the specified object reference is not {@code null}.
+	 *
+	 * @param <T> type of the reference
+	 *
+	 * @param object the object reference to check for {@code null}
+	 * @return {@code object} if not {@code null}
+	 * @throws ReflectionException if {@code object} is {@code null}
+	 */
+	static <T> T requireNotNull(final T object) {
+		return requireNotNull(object, "Object cannot be null");
+	}
+
+	/**
+	 * Checks that the specified object reference is not {@code null}. This is the reflection counterpart of
+	 * {@link java.util.Objects#requireNonNull(Object, String)} and throws a {@link ReflectionException} instead of a
+	 * {@link NullPointerException}.
+	 *
+	 * @param <T> type of the reference
+	 *
+	 * @param object the object reference to check for {@code null}
+	 * @param message message template used when {@code object} is {@code null} with {@code {}} placeholders are replaced by
+	 *     {@code messageArgs} in order
+	 * @param messageArgs arguments substituted into the placeholders of {@code message}
+	 * @return {@code object} if not {@code null}
+	 * @throws ReflectionException if {@code object} is {@code null}
+	 */
+	static <T> T requireNotNull(final T object, final String message, final Object... messageArgs) {
+		if (null == object) {
+			throw new ReflectionException(message, messageArgs);
+		}
+		return object;
+	}
 }

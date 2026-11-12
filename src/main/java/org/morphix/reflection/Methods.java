@@ -33,12 +33,12 @@ import org.morphix.reflection.predicates.MemberPredicates;
 /**
  * Utility reflection static methods for java methods. The philosophy of this class is to provide methods that cover
  * most of the use cases when dealing with methods through reflection and only throwing exceptions when something
- * unexpected happens (like invoking a method). For methods that return null instead of throwing exceptions, see
+ * unexpected happens (like invoking a method). For methods that return {@code null} instead of throwing exceptions, see
  * {@link Methods.Safe}.
  * <p>
- * Methods like {@link #getOneDeclaredInHierarchy(String, Class, Class[])} return null if the method is not found
- * because most of the time the caller just needs to check for null and not to handle exceptions (the implementation
- * actually delegates to {@link Methods.Safe}).
+ * Methods like {@link #getOneDeclaredInHierarchy(String, Class, Class[])} return {@code null} if the method is not
+ * found because most of the time the caller just needs to check for {@code null} and not to handle exceptions (the
+ * implementation actually delegates to {@link Methods.Safe}).
  *
  * @author Radu Sebastian LAZIN
  */
@@ -93,36 +93,37 @@ public interface Methods {
 	 * @param methodName the name of the method
 	 * @param cls class containing the method
 	 * @param parameterTypes parameter types
-	 * @return the method with the given name, null if it is not found or if the class or the method name is null
+	 * @return the method with the given name, {@code null} if it is not found or if the class or the method name is
+	 * {@code null}
 	 */
 	static <T> Method getOneDeclared(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
 		return Safe.getOneDeclared(methodName, cls, parameterTypes);
 	}
 
 	/**
-	 * Returns a method in the class given as parameter, also searching in all its super classes. This method does not
-	 * return methods from interfaces or from {@link Object} class because most of the time only the class hierarchy is
-	 * needed.
+	 * Returns a method in the class given as parameter, also searching in all its super classes, including {@link Object}.
+	 * This method does not return methods from super interfaces. Use {@link Complete#getAllDeclaredInHierarchy(Class)} for
+	 * the full interface hierarchy.
 	 * <p>
-	 * The method returns null if no method is found. The philosophy of this method is to return the method or null and not
-	 * to throw exceptions because most of the time the method may not be present and the caller just needs to check for
-	 * null.
+	 * The method returns {@code null} if no method is found. The philosophy of this method is to return the method or
+	 * {@code null} and not to throw exceptions because most of the time the method may not be present and the caller just
+	 * needs to check for {@code null}.
 	 *
 	 * @param <T> type to get the methods from
 	 *
 	 * @param methodName name of the method to find
 	 * @param cls class from where to start the search
 	 * @param parameterTypes types of the method parameters
-	 * @return found method,
+	 * @return found method
 	 */
 	static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
 		return Safe.getOneDeclaredInHierarchy(methodName, cls, parameterTypes);
 	}
 
 	/**
-	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes. This
-	 * method does not return methods from interfaces or from {@link Object} class. This is a simpler version of
-	 * {@link Complete#getAllDeclaredInHierarchy(Class)} because most of the time only the class hierarchy is needed.
+	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes,
+	 * including {@link Object}. This method does not return methods from super interfaces. This is a simpler version of
+	 * {@link Complete#getAllDeclaredInHierarchy(Class)}, which also walks interfaces and can exclude specific classes.
 	 * <p>
 	 * Note: if the class given as parameter is an interface then the methods declared by that interface are returned, but
 	 * not the ones declared by its super interfaces, since those are interfaces as well. Use
@@ -145,15 +146,11 @@ public interface Methods {
 	 */
 	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
 		if (null == cls) {
-			return new LinkedList<>();
+			return List.of();
 		}
 		// an interface has no super class, but it does declare methods of its own
 		Class<?> superClass = cls.getSuperclass();
 		List<Method> methods = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass);
-		if (Object.class == cls) {
-			// the methods declared by Object itself are never included
-			return methods;
-		}
 		Method[] declared = cls.getDeclaredMethods();
 		for (int i = declared.length - 1; i >= 0; --i) {
 			methods.addFirst(declared[i]);
@@ -162,9 +159,9 @@ public interface Methods {
 	}
 
 	/**
-	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes that
-	 * verify the given method predicate. This method does not return methods from interfaces or from {@link Object} class
-	 * because most of the time only the class hierarchy is needed.
+	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes,
+	 * including {@link Object}, that verify the given method predicate. This method does not return methods from super
+	 * interfaces.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -174,15 +171,11 @@ public interface Methods {
 	 */
 	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
 		if (null == cls || null == predicate) {
-			return new LinkedList<>();
+			return List.of();
 		}
 		// an interface has no super class, but it does declare methods of its own
 		Class<?> superClass = cls.getSuperclass();
 		List<Method> methods = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass, predicate);
-		if (Object.class == cls) {
-			// the methods declared by Object itself are never included
-			return methods;
-		}
 		Method[] declared = cls.getDeclaredMethods();
 		for (int i = declared.length - 1; i >= 0; --i) {
 			if (predicate.test(declared[i])) {
@@ -214,19 +207,17 @@ public interface Methods {
 	 *     cannot be found at the given index
 	 */
 	static <T extends Type> T getGenericReturnType(final Method method, final int index) {
-		if (null == method) {
-			throw new ReflectionException("Method cannot be null when looking for the generic return type");
-		}
+		Reflection.requireNotNull(method, "Cannot get generic return type: method descriptor is null");
 		Type type = method.getGenericReturnType();
 		if (!(type instanceof ParameterizedType parameterizedType)) {
 			throw new ReflectionException(
-					"{} is a raw return type for method {}.{}",
+					"Return type {} is not parameterized for method {}.{}",
 					type.getTypeName(), method.getDeclaringClass().getCanonicalName(), method.getName());
 		}
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 		if (index < 0 || index >= actualTypeArguments.length) {
 			throw new ReflectionException(
-					"Could not find generic argument at index {} for generic return type {} with {} generic argument(s) for method {}.{}",
+					"Cannot get generic argument at index {} for return type {} ({} arguments) of method {}.{}",
 					index, parameterizedType.getTypeName(), actualTypeArguments.length,
 					method.getDeclaringClass().getCanonicalName(), method.getName());
 		}
@@ -252,18 +243,16 @@ public interface Methods {
 	 * @param method method for which the generic return type is needed
 	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return class
-	 * @throws ReflectionException if the method is null or if the generic return type cannot be cast to a Class
+	 * @throws ReflectionException if the method is {@code null} or if the generic return type cannot be cast to a Class
 	 */
 	static <T> Class<T> getGenericReturnClass(final Method method, final int index) {
-		if (null == method) {
-			throw new ReflectionException("Method cannot be null when looking for the generic return class");
-		}
+		Reflection.requireNotNull(method, "Cannot get generic return class: method descriptor is null");
 		try {
 			return getGenericReturnType(method, index);
 		} catch (ClassCastException e) {
-			throw new ReflectionException(
-					"Could not infer actual generic return type argument from {} for method {}.{}",
-					method.getGenericReturnType().getTypeName(), method.getDeclaringClass().getCanonicalName(), method.getName());
+			throw new ReflectionException(e,
+					"Cannot get generic return class for method {}.{}: type argument at index {} is not a Class",
+					method.getDeclaringClass().getCanonicalName(), method.getName(), index);
 		}
 	}
 
@@ -294,7 +283,7 @@ public interface Methods {
 	/**
 	 * Returns the currently executing method name. The advantage of this method is that each {@link StackTraceElement} is
 	 * fetched lazily, so you don't construct the full stack trace before checking the first method. If the current method
-	 * name is not found, null is returned.
+	 * name is not found, {@code null} is returned.
 	 *
 	 * @param withClassName flag to prepend class name
 	 * @param depth the depth of the caller method, for the direct caller this should be 1
@@ -372,7 +361,9 @@ public interface Methods {
 		StackWalker walker = StackWalker.getInstance();
 		return walker.walk(frames -> frames
 				.skip(skipFrames) // skip frames
-				.filter(frame -> frame.getClassName().startsWith(packageName))
+				.filter(frame -> packageName.isEmpty()
+						? !frame.getClassName().contains(".")
+						: frame.getClassName().startsWith(packageName + '.'))
 				.findFirst())
 				.map(frame -> nameFunction.apply(frame.getClassName(), frame.getMethodName()));
 	}
@@ -388,21 +379,27 @@ public interface Methods {
 	 * @throws ReflectionException if no setter method is found
 	 */
 	static <T> Method getSetterMethod(final Class<T> cls, final Field field) {
+		Reflection.requireNotNull(cls, "Cannot find setter method: class is null");
+		Reflection.requireNotNull(field, "Cannot find setter method in class {}: field descriptor is null", cls);
 		String methodName = MethodType.SETTER.getMethodName(field);
-		Method method = Methods.getOneDeclaredInHierarchy(methodName, cls, field.getType());
+		Class<?> fieldType = field.getType();
+		Method method = Methods.getOneDeclaredInHierarchy(methodName, cls, fieldType);
 		if (null != method) {
 			return method;
 		}
-		Class<?> primitiveFieldType;
-		try {
-			primitiveFieldType = Primitives.toPrimitive(field.getType());
-		} catch (ReflectionException e) {
-			throw new ReflectionException(ErrorMessage.ERROR_FINDING_METHOD, methodName, field.getType().getCanonicalName());
+		Class<?> alternateType;
+		if (fieldType.isPrimitive()) {
+			alternateType = Primitives.fromPrimitive(fieldType);
+		} else if (Primitives.isUnboxable(fieldType)) {
+			alternateType = Primitives.toPrimitive(fieldType);
+		} else {
+			throw new ReflectionException("Cannot find setter method {}({}) in class {}", methodName, fieldType.getTypeName(), cls);
 		}
-		method = Methods.getOneDeclaredInHierarchy(methodName, cls, primitiveFieldType);
+		method = Methods.getOneDeclaredInHierarchy(methodName, cls, alternateType);
 		if (null == method) {
-			throw new ReflectionException(ErrorMessage.ERROR_FINDING_METHOD_OR,
-					methodName, field.getType().getCanonicalName(), methodName, primitiveFieldType.getCanonicalName());
+			throw new ReflectionException(
+					"Cannot find setter method {}({}) or {}({}) in class {}",
+					methodName, fieldType.getTypeName(), methodName, alternateType.getTypeName(), cls);
 		}
 		return method;
 	}
@@ -414,25 +411,20 @@ public interface Methods {
 	 *
 	 * @param cls functional interface class
 	 * @return the functional interface method if the given class is a functional interface
-	 * @throws ReflectionException if the class is null or if it is not a functional interface
+	 * @throws ReflectionException if the class is {@code null} or if it is not a functional interface
 	 */
 	static <T> Method getFunctionalInterfaceMethod(final Class<T> cls) {
-		if (null == cls) {
-			throw new ReflectionException("Class cannot be null when looking for the functional interface method");
-		}
+		Reflection.requireNotNull(cls, "Cannot find functional interface method: class is null");
 		Method singleAbstractMethod = null;
 		for (Method method : cls.getMethods()) {
 			if (JavaModifier.ABSTRACT.isPresentOn(method)) {
 				if (null != singleAbstractMethod) {
-					throw new ReflectionException("{} is not a functional interface because it has more than one abstract method", cls);
+					throw new ReflectionException("Cannot find functional interface method in {}: multiple abstract methods found", cls);
 				}
 				singleAbstractMethod = method;
 			}
 		}
-		if (null == singleAbstractMethod) {
-			throw new ReflectionException("{} is not a functional interface because it has no abstract method", cls);
-		}
-		return singleAbstractMethod;
+		return Reflection.requireNotNull(singleAbstractMethod, "Cannot find functional interface method in {}: no abstract method found", cls);
 	}
 
 	/**
@@ -453,41 +445,11 @@ public interface Methods {
 			// e is just a wrapper on the real exception, escalate the real one
 			Throwable cause = Reflection.unwrapInvocationTargetException(e);
 			String className = Classes.getCanonicalName(method, obj);
-			throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), cause.getMessage());
+			throw new ReflectionException(e, "Cannot invoke method {}.{}: {}", className, method.getName(), cause.getMessage());
 		} catch (Exception e) {
 			// escalate any exception invoking the method
 			String className = Classes.getCanonicalName(method, obj);
-			throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), e.getMessage());
-		}
-	}
-
-	/**
-	 * Namespace for error messages. These messages are used for exception messages.
-	 *
-	 * @author Radu Sebastian LAZIN
-	 */
-	final class ErrorMessage { // NOSONAR this is a namespace for error messages
-
-		/**
-		 * Error invoking method message.
-		 */
-		public static final String ERROR_INVOKING_METHOD = "Error invoking method {}.{}: {}.";
-
-		/**
-		 * Error finding method message.
-		 */
-		public static final String ERROR_FINDING_METHOD = "Error finding method: {}({})";
-
-		/**
-		 * Error finding method or method message. This is used when trying to find a method with two different parameter types.
-		 */
-		public static final String ERROR_FINDING_METHOD_OR = ERROR_FINDING_METHOD + " or {}({})";
-
-		/**
-		 * Private constructor to avoid instantiation.
-		 */
-		private ErrorMessage() {
-			throw Constructors.unsupportedOperationException();
+			throw new ReflectionException(e, "Cannot invoke method {}.{}: {}", className, method.getName(), e.getMessage());
 		}
 	}
 
@@ -511,8 +473,8 @@ public interface Methods {
 		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invoke(final Method method, final T obj, final Object... args) {
-			Object target = JavaModifier.STATIC.isPresentOn(method) ? null : obj;
-			return Unchecked.invoke(method, target, args);
+			Reflection.requireNotNull(method, "Cannot invoke method: method descriptor is null");
+			return Unchecked.invoke(method, obj, args);
 		}
 
 		/**
@@ -540,7 +502,7 @@ public interface Methods {
 			boolean instanceAvailable = obj != cls;
 			for (Method method : methods) {
 				if (instanceAvailable || JavaModifier.STATIC.isPresentOn(method)) {
-					IgnoreAccess.invoke(method, obj);
+					Unchecked.invoke(method, obj);
 				}
 			}
 		}
@@ -558,6 +520,7 @@ public interface Methods {
 		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invokeWithOriginalException(final Method method, final T obj, final Object... args) {
+			Reflection.requireNotNull(method, "Cannot invoke method with original exception: method descriptor is null");
 			try (MemberAccessor<Method> ignored = new MemberAccessor<>(obj, method)) {
 				return JavaObjects.cast(method.invoke(obj, args));
 			} catch (InvocationTargetException e) {
@@ -583,16 +546,17 @@ public interface Methods {
 		 * @throws ReflectionException if any error occurs during method invocation
 		 */
 		static <T, R> R invokeStatic(final Method method, final Class<T> cls, final Object... args) {
+			Reflection.requireNotNull(method, "Cannot invoke static method on class {}: method descriptor is null", cls);
 			if (JavaModifier.STATIC.isNotPresentOn(method)) {
-				throw new ReflectionException("Method {} is not static on class: {}", method.getName(), cls);
+				throw new ReflectionException("Cannot invoke static method '{}' on class {}: method is not static", method.getName(), cls);
 			}
 			return Unchecked.invokeStatic(method, args);
 		}
 	}
 
 	/**
-	 * Interface which groups all methods that return null and don't throw exceptions on expected errors. This functions as
-	 * a name space so that the method names inside keep the same name pattern.
+	 * Interface which groups all methods that return {@code null} and don't throw exceptions on expected errors. This
+	 * functions as a name space so that the method names inside keep the same name pattern.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
@@ -646,7 +610,7 @@ public interface Methods {
 		 * @param methodName name of the method to find
 		 * @param cls class from where to start the search
 		 * @param parameterTypes types of the method parameters
-		 * @return found method, null otherwise
+		 * @return found method, {@code null} otherwise
 		 */
 		static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
 			if (null == cls || null == methodName) {
@@ -663,7 +627,7 @@ public interface Methods {
 		}
 
 		/**
-		 * Returns the generic return type for a method or null if the method has no generic return type.
+		 * Returns the generic return type for a method or {@code null} if the method has no generic return type.
 		 * <p>
 		 * Note: this method can still throw a {@link ClassCastException} if the generic return type cannot be cast to the
 		 * desired.
@@ -701,10 +665,8 @@ public interface Methods {
 
 		/**
 		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
-		 * interfaces.
-		 * <p>
-		 * Note: unlike the simpler {@link Methods#getAllDeclaredInHierarchy(Class)}, this method does include the methods
-		 * declared by {@link Object}, since the whole hierarchy is walked up to and including it.
+		 * interfaces. Pass classes in the excluded set of {@link #getAllDeclaredInHierarchy(Class, Set)} to leave a specific
+		 * class out of the walk.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -719,31 +681,31 @@ public interface Methods {
 		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
 		 * interfaces.
 		 * <p>
-		 * Note: the excluded set is also used to avoid cyclic dependencies in the class hierarchy.
+		 * Note: the excluded set is mutated to track visited types and avoid duplicate traversal. A class in that set,
+		 * including {@link Object}, is left out of the walk together with everything above it.
 		 * <p>
-		 * Note: unlike the simpler {@link Methods#getAllDeclaredInHierarchy(Class, Predicate)}, this method does include the
-		 * methods declared by {@link Object}, since the whole hierarchy is walked up to and including it.
-		 * <p>
-		 * Note: a null class short-circuits the walk and returns an empty list, so in that case the excluded set is never
-		 * validated and no exception is thrown for it.
+		 * Note: a {@code null} class short-circuits the walk and returns an empty list, so in that case the excluded set is
+		 * never validated and no exception is thrown for it.
 		 *
 		 * @param <T> type to get the methods from
 		 *
 		 * @param cls class on which the methods are returned
-		 * @param excluded non-null mutable set of classes/interfaces/enums/records to be excluded
+		 * @param excluded non-{@code null} mutable set of classes/interfaces/enums/records to be excluded
 		 * @return list of methods
-		 * @throws ReflectionException if the excluded set is null or unmodifiable
+		 * @throws ReflectionException if the excluded set is {@code null} or unmodifiable
 		 */
 		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Set<Class<?>> excluded) {
+			if (null == cls) {
+				return new LinkedList<>();
+			}
+			Reflection.requireNotNull(excluded, "Cannot traverse method hierarchy for class {}: excluded set is null", cls);
+			if (excluded.contains(cls)) {
+				return new LinkedList<>();
+			}
 			try {
-				if (null == cls || excluded.contains(cls)) {
-					return new LinkedList<>();
-				}
 				excluded.add(cls);
 			} catch (UnsupportedOperationException e) {
-				throw new ReflectionException("The excluded set is unmodifiable. Please provide a non null modifiable set.", e);
-			} catch (NullPointerException e) {
-				throw new ReflectionException("The excluded set is null. Please provide a non null modifiable set.", e);
+				throw new ReflectionException(e, "Cannot traverse method hierarchy for class {}: excluded set is unmodifiable", cls);
 			}
 			List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), excluded);
 			for (Class<?> iface : cls.getInterfaces()) {

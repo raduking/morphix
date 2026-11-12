@@ -15,9 +15,14 @@ package org.morphix.lang.leak;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 /**
  * Test class for {@link ResourceLeakReference}.
@@ -62,5 +67,15 @@ class ResourceLeakReferenceTest {
 
 		assertDoesNotThrow(() -> ref.reportLeak(TEST));
 		assertNull(report);
+	}
+
+	@ParameterizedTest
+	@EnumSource(LeakDetectionLevel.class)
+	void shouldNotAllowModificationOfAllocationSite(final LeakDetectionLevel level) {
+		try (ResourceLeakReference reference = ResourceLeakReference.of(level, Object.class, null)) {
+			List<StackWalker.StackFrame> allocationSite = reference.getAllocationSite();
+
+			assertThrows(UnsupportedOperationException.class, allocationSite::clear);
+		}
 	}
 }

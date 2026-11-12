@@ -86,14 +86,14 @@ class FieldsIgnoreAccessGetTest {
 	void shouldThrowExceptionOnNonExistentField() {
 		Object o = new Object();
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.get(o, NON_EXISTENT_FIELD));
-		assertThat(e.getMessage(), equalTo("Could not find field '" + NON_EXISTENT_FIELD + "' on object of type " + o.getClass()));
+		assertThat(e.getMessage(), equalTo("Cannot get field '" + NON_EXISTENT_FIELD + "' from class " + o.getClass() + ": field not found"));
 	}
 
 	@Test
 	void shouldThrowExceptionOnNullObject() {
 		Object o = null;
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.get(o, NON_EXISTENT_FIELD));
-		assertThat(e.getMessage(), equalTo("Could not find field '" + NON_EXISTENT_FIELD + "' on object of type " + null));
+		assertThat(e.getMessage(), equalTo("Cannot get field '" + NON_EXISTENT_FIELD + "' from class null: field not found"));
 	}
 
 	@Test
@@ -175,6 +175,13 @@ class FieldsIgnoreAccessGetTest {
 		String value = Fields.IgnoreAccess.get(d, field);
 
 		assertThat(value, equalTo("field"));
+	}
+
+	@Test
+	void shouldThrowExceptionIfFieldIsNull() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.get(new Object(), (Field) null));
+
+		assertThat(e.getMessage(), equalTo("Cannot get field value: field descriptor is null"));
 	}
 
 	@Test

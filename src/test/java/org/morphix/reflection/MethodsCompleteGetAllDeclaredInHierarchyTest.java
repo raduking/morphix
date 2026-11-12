@@ -98,7 +98,7 @@ class MethodsCompleteGetAllDeclaredInHierarchyTest {
 	void shouldThrowExceptionForNullExcludedClasses() {
 		ReflectionException exception = assertThrows(ReflectionException.class, () -> Methods.Complete.getAllDeclaredInHierarchy(Object.class, null));
 
-		assertThat(exception.getMessage(), equalTo("The excluded set is null. Please provide a non null modifiable set."));
+		assertThat(exception.getMessage(), equalTo("Cannot traverse method hierarchy for class " + Object.class + ": excluded set is null"));
 	}
 
 	@Test
@@ -107,7 +107,8 @@ class MethodsCompleteGetAllDeclaredInHierarchyTest {
 		ReflectionException exception =
 				assertThrows(ReflectionException.class, () -> Methods.Complete.getAllDeclaredInHierarchy(Object.class, emptySet));
 
-		assertThat(exception.getMessage(), equalTo("The excluded set is unmodifiable. Please provide a non null modifiable set."));
+		assertThat(exception.getMessage(),
+				equalTo("Cannot traverse method hierarchy for class " + Object.class + ": excluded set is unmodifiable"));
 	}
 
 	@Test
@@ -129,10 +130,10 @@ class MethodsCompleteGetAllDeclaredInHierarchyTest {
 	}
 
 	@Test
-	void shouldNotIncludeObjectMethodsInTheSimplerVariant() {
+	void shouldIncludeObjectMethodsInTheSimplerVariant() {
 		List<Method> methods = Methods.getAllDeclaredInHierarchy(C.class);
 
-		assertThat(methods.stream().anyMatch(method -> Object.class.equals(method.getDeclaringClass())), is(false));
+		assertThat(methods.stream().anyMatch(method -> Object.class.equals(method.getDeclaringClass())), is(true));
 	}
 
 	@Test

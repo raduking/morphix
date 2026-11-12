@@ -18,6 +18,10 @@ import sun.misc.Unsafe; // NOSONAR used for low-level operations when no other o
 
 /**
  * {@link Unsafe} wrapper class.
+ * <p>
+ * Advanced API: depends on JDK internals and strong encapsulation may block access on some JDK/module configurations.
+ * <p>
+ * TODO: expand JavaDoc with module-system guidance and supported JDK expectations.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -102,6 +106,129 @@ public class TheUnsafe {
 	 */
 	public static void putObject(final Object obj, final long offset, final Object value) {
 		UNSAFE.putObject(obj, offset, value);
+	}
+
+	/**
+	 * Sets the boolean value at the given offset.
+	 *
+	 * @param obj object containing the field
+	 * @param offset field offset
+	 * @param value value to set
+	 */
+	public static void putBoolean(final Object obj, final long offset, final boolean value) {
+		UNSAFE.putBoolean(obj, offset, value);
+	}
+
+	/**
+	 * Sets the byte value at the given offset.
+	 *
+	 * @param obj object containing the field
+	 * @param offset field offset
+	 * @param value value to set
+	 */
+	public static void putByte(final Object obj, final long offset, final byte value) {
+		UNSAFE.putByte(obj, offset, value);
+	}
+
+	/**
+	 * Sets the char value at the given offset.
+	 *
+	 * @param obj object containing the field
+	 * @param offset field offset
+	 * @param value value to set
+	 */
+	public static void putChar(final Object obj, final long offset, final char value) {
+		UNSAFE.putChar(obj, offset, value);
+	}
+
+	/**
+	 * Sets the short value at the given offset.
+	 *
+	 * @param obj object containing the field
+	 * @param offset field offset
+	 * @param value value to set
+	 */
+	public static void putShort(final Object obj, final long offset, final short value) {
+		UNSAFE.putShort(obj, offset, value);
+	}
+
+	/**
+	 * Sets the int value at the given offset.
+	 *
+	 * @param obj object containing the field
+	 * @param offset field offset
+	 * @param value value to set
+	 */
+	public static void putInt(final Object obj, final long offset, final int value) {
+		UNSAFE.putInt(obj, offset, value);
+	}
+
+	/**
+	 * Sets the long value at the given offset.
+	 *
+	 * @param obj object containing the field
+	 * @param offset field offset
+	 * @param value value to set
+	 */
+	public static void putLong(final Object obj, final long offset, final long value) {
+		UNSAFE.putLong(obj, offset, value);
+	}
+
+	/**
+	 * Sets the float value at the given offset.
+	 *
+	 * @param obj object containing the field
+	 * @param offset field offset
+	 * @param value value to set
+	 */
+	public static void putFloat(final Object obj, final long offset, final float value) {
+		UNSAFE.putFloat(obj, offset, value);
+	}
+
+	/**
+	 * Sets the double value at the given offset.
+	 *
+	 * @param obj object containing the field
+	 * @param offset field offset
+	 * @param value value to set
+	 */
+	public static void putDouble(final Object obj, final long offset, final double value) {
+		UNSAFE.putDouble(obj, offset, value);
+	}
+
+	/**
+	 * Writes a primitive value at the given offset. Accepted source types are defined by {@link PrimitiveValues}.
+	 *
+	 * @param obj object containing the field, or the static field base
+	 * @param offset field offset
+	 * @param type primitive field type
+	 * @param value value to set
+	 * @throws IllegalArgumentException if {@code value} cannot be stored in a field of {@code type}
+	 */
+	public static void putPrimitive(final Object obj, final long offset, final Class<?> type, final Object value) {
+		switch (type) {
+			case Class<?> c when c == boolean.class -> putBoolean(obj, offset, PrimitiveValues.toBoolean(value));
+			case Class<?> c when c == byte.class -> putByte(obj, offset, PrimitiveValues.toByte(value));
+			case Class<?> c when c == char.class -> putChar(obj, offset, PrimitiveValues.toChar(value));
+			case Class<?> c when c == short.class -> putShort(obj, offset, PrimitiveValues.toShort(value));
+			case Class<?> c when c == int.class -> putInt(obj, offset, PrimitiveValues.toInt(value));
+			case Class<?> c when c == long.class -> putLong(obj, offset, PrimitiveValues.toLong(value));
+			case Class<?> c when c == float.class -> putFloat(obj, offset, PrimitiveValues.toFloat(value));
+			case Class<?> c when c == double.class -> putDouble(obj, offset, PrimitiveValues.toDouble(value));
+			default -> throw incompatibleValue(type, value);
+		}
+	}
+
+	/**
+	 * Returns the exception thrown when a value cannot be stored in a field of the given type.
+	 *
+	 * @param type field type
+	 * @param value rejected value
+	 * @return type mismatch exception
+	 */
+	static IllegalArgumentException incompatibleValue(final Class<?> type, final Object value) {
+		String actual = null == value ? "null" : value.getClass().getName();
+		return new IllegalArgumentException("Can not set " + type.getName() + " field to " + actual);
 	}
 
 	/**

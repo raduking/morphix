@@ -16,7 +16,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.morphix.lang.JavaObjects;
@@ -213,7 +212,7 @@ public interface Fields {
 	 * @return list of fields
 	 */
 	static List<Field> getAllDeclaredInHierarchy(final Object obj, final Predicate<Field> predicate) {
-		if (null == obj) {
+		if (null == obj || null == predicate) {
 			return List.of();
 		}
 		Class<?> cls = Classes.getFrom(obj);
@@ -259,7 +258,7 @@ public interface Fields {
 		try {
 			return JavaObjects.cast(field.get(obj));
 		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new ReflectionException(e, "Could not get field {}", field.getName());
+			throw new ReflectionException(e, "Cannot get field value for {}", field.getName());
 		}
 	}
 
@@ -277,7 +276,7 @@ public interface Fields {
 		try {
 			field.set(obj, value); // NOSONAR this is a reflection enhancement method
 		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new ReflectionException(e, "Could not set field {}", field.getName());
+			throw new ReflectionException(e, "Cannot set field value for {}", field.getName());
 		}
 	}
 
@@ -297,9 +296,7 @@ public interface Fields {
 	static <T> T get(final Object obj, final String fieldName) {
 		Class<?> cls = Classes.getFrom(obj);
 		Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-		if (null == field) {
-			throw new ReflectionException("Object does not contain a field named: {}", fieldName);
-		}
+		Reflection.requireNotNull(field, "Cannot get field '{}': field not found", fieldName);
 		return Reflection.getFieldValue(obj, field);
 	}
 
@@ -312,16 +309,14 @@ public interface Fields {
 	 * @param <T> field value type
 	 *
 	 * @param fieldName field to query
-	 * @param obj object containing the field (null for static fields)
+	 * @param obj object containing the field, or the {@link Class} declaring it when the field is static
 	 * @param value value to set
 	 * @throws ReflectionException if the field does not exist or the value type is not compatible with the field type
 	 */
 	static <T> void set(final Object obj, final String fieldName, final T value) {
 		Class<?> cls = Classes.getFrom(obj);
 		Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-		if (null == field) {
-			throw new ReflectionException("Object does not contain a field named: {}", fieldName);
-		}
+		Reflection.requireNotNull(field, "Cannot set field '{}': field not found", fieldName);
 		Reflection.setFieldValue(obj, field, value);
 	}
 
@@ -331,7 +326,6 @@ public interface Fields {
 	 * @author Radu Sebastian LAZIN
 	 */
 	interface IgnoreAccess {
-
 		/**
 		 * Returns the value of the given field from the given object ignoring field access modifiers.
 		 *
@@ -343,8 +337,8 @@ public interface Fields {
 		 * @throws ReflectionException if the field value cannot be returned
 		 */
 		static <T> T get(final Object obj, final Field field) {
-			Object target = JavaModifier.STATIC.isPresentOn(field) ? null : obj;
-			return Unchecked.get(target, field);
+			Reflection.requireNotNull(field, "Cannot get field value: field descriptor is null");
+			return Unchecked.get(obj, field);
 		}
 
 		/**
@@ -352,7 +346,7 @@ public interface Fields {
 		 *
 		 * @param <T> field value type
 		 *
-		 * @param obj object containing the field (null for static fields)
+		 * @param obj object containing the field, or the {@link Class} declaring it when the field is static
 		 * @param fieldName field name to query
 		 * @return field value
 		 * @throws ReflectionException if the field is not found
@@ -360,10 +354,8 @@ public interface Fields {
 		static <T> T get(final Object obj, final String fieldName) {
 			Class<?> cls = Classes.getFrom(obj);
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field) {
-				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, cls);
-			}
-			return IgnoreAccess.get(obj, field);
+			Reflection.requireNotNull(field, "Cannot get field '{}' from class {}: field not found", fieldName, cls);
+			return Unchecked.get(obj, field);
 		}
 
 		/**
@@ -377,8 +369,8 @@ public interface Fields {
 		 * @throws ReflectionException if the field value cannot be set
 		 */
 		static <T> void set(final Object obj, final Field field, final T value) {
-			Object target = JavaModifier.STATIC.isPresentOn(field) ? null : obj;
-			Unchecked.set(target, field, value);
+			Reflection.requireNotNull(field, "Cannot set field value: field descriptor is null");
+			Unchecked.set(obj, field, value);
 		}
 
 		/**
@@ -387,17 +379,15 @@ public interface Fields {
 		 * @param <T> field value type
 		 *
 		 * @param fieldName field to query
-		 * @param obj object containing the field (null for static fields)
+		 * @param obj object containing the field, or the {@link Class} declaring it when the field is static
 		 * @param value value to set
 		 * @throws ReflectionException if the field is not found
 		 */
 		static <T> void set(final Object obj, final String fieldName, final T value) {
 			Class<?> cls = Classes.getFrom(obj);
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field) {
-				throw new ReflectionException("Could not find field '{}' on object of type {}", fieldName, cls);
-			}
-			IgnoreAccess.set(obj, field, value);
+			Reflection.requireNotNull(field, "Cannot set field '{}' in class {}: field not found", fieldName, cls);
+			Unchecked.set(obj, field, value);
 		}
 
 		/**
@@ -414,7 +404,7 @@ public interface Fields {
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
-				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
+				throw new ReflectionException("Cannot get static field '{}' from class {}: field not found or not static", fieldName, cls);
 			}
 			return Unchecked.get(null, field);
 		}
@@ -431,11 +421,9 @@ public interface Fields {
 		 * @throws ReflectionException if the field is not static
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final Field field) {
-			if (null == field) {
-				throw new ReflectionException("Field cannot be null when trying to get static field value from class: {}", cls);
-			}
+			Reflection.requireNotNull(field, "Cannot get static field value from class {}: field descriptor is null", cls);
 			if (JavaModifier.STATIC.isNotPresentOn(field)) {
-				throw new ReflectionException("Could not find static field with name: {} in class: {}", field.getName(), cls);
+				throw new ReflectionException("Cannot get static field '{}' from class {}: field is not static", field.getName(), cls);
 			}
 			return Unchecked.get(null, field);
 		}
@@ -454,9 +442,9 @@ public interface Fields {
 		static <T, U> void setStatic(final Class<T> cls, final String fieldName, final U value) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
 			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
-				throw new ReflectionException("Could not find static field with name: {} in class: {}", fieldName, cls);
+				throw new ReflectionException("Cannot set static field '{}' in class {}: field not found or not static", fieldName, cls);
 			}
-			Unchecked.set(cls, field, value);
+			Unchecked.set(null, field, value);
 		}
 
 		/**
@@ -471,11 +459,9 @@ public interface Fields {
 		 * @throws ReflectionException if the field is not found
 		 */
 		static <T, U> void setStatic(final Class<T> cls, final Field field, final U value) {
-			if (null == field) {
-				throw new ReflectionException("Field cannot be null when trying to set static field value from class: {}", cls);
-			}
+			Reflection.requireNotNull(field, "Cannot set static field value in class {}: field descriptor is null", cls);
 			if (JavaModifier.STATIC.isNotPresentOn(field)) {
-				throw new ReflectionException("Could not find static field with name: {} in class: {}", field.getName(), cls);
+				throw new ReflectionException("Cannot set static field '{}' in class {}: field is not static", field.getName(), cls);
 			}
 			Unchecked.set(null, field, value);
 		}
@@ -581,7 +567,7 @@ public interface Fields {
 		 * @return existing field, null otherwise
 		 */
 		static <T> Field getOneDeclaredInHierarchy(final Class<T> cls, final String fieldName) {
-			if (null == cls) {
+			if (null == cls || null == fieldName) {
 				return null;
 			}
 			Field field = Safe.getOneDeclared(cls, fieldName);
@@ -609,7 +595,7 @@ public interface Fields {
 
 		/**
 		 * Returns the value of the given field from the given object ignoring field access modifiers or {@code null} if the
-		 * field value cannot be returned.
+		 * field is {@code null} or the field value cannot be returned.
 		 *
 		 * @param <T> field value type
 		 *
@@ -687,25 +673,24 @@ public interface Fields {
 		 * @param obj object to search the field in
 		 * @param paths possible paths to the field
 		 * @return field value or null if the field is not found in none of the given paths
+		 * @throws ReflectionException if {@code paths} is null or a path is null
 		 */
 		static <T, U> U getByPaths(final T obj, final String... paths) {
+			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
 			U result = null;
-			try {
-				for (String path : paths) {
-					result = getByPath(obj, path);
-					if (null != result) {
-						break;
-					}
+			for (String path : paths) {
+				result = getByPath(obj, path);
+				if (null != result) {
+					break;
 				}
-			} catch (Exception e) {
-				return null;
 			}
 			return result;
 		}
 
 		/**
 		 * Variation of {@link Safe#getByPaths(Object, String...)} with paths given as a comma separated list of paths in a
-		 * single string.
+		 * single string. Each segment is {@linkplain String#trim() trimmed} after splitting on {@code ','}; empty segments are
+		 * ignored.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
@@ -713,10 +698,25 @@ public interface Fields {
 		 * @param obj object to search the field in
 		 * @param paths comma separated possible paths to the field
 		 * @return field value or null if the field is not found in none of the given paths
-		 * @throws NullPointerException if the paths are null
+		 * @throws ReflectionException if the paths are null
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
-			return getByPaths(obj, Objects.requireNonNull(paths, "paths").split(","));
+			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
+			if (paths.isEmpty()) {
+				return null;
+			}
+			String[] parts = paths.split(",", -1);
+			List<String> trimmedPaths = new ArrayList<>(parts.length);
+			for (String part : parts) {
+				String path = part.trim();
+				if (!path.isEmpty()) {
+					trimmedPaths.add(path);
+				}
+			}
+			if (trimmedPaths.isEmpty()) {
+				return null;
+			}
+			return getByPaths(obj, trimmedPaths.toArray(String[]::new));
 		}
 
 		/**
@@ -729,8 +729,10 @@ public interface Fields {
 		 * @param obj object to get the field from
 		 * @param path qualified path to the field
 		 * @return field value or null if the field is not found or if the object is null
+		 * @throws ReflectionException if {@code path} is null
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
+			Reflection.requireNotNull(path, "Cannot resolve field path: path is null");
 			U result = null;
 			String[] fieldNames = path.split("\\.");
 			if (fieldNames.length == 1) {
@@ -757,24 +759,30 @@ public interface Fields {
 	 * @author Radu Sebastian LAZIN
 	 */
 	interface Unsafe {
-
 		/**
 		 * Sets the field value using the {@link TheUnsafe} utility.
+		 * <p>
+		 * Primitive fields accept the same widening conversions as {@link Field#set(Object, Object)}. A reference field accepts
+		 * {@code null} or a value that is an instance of the field type. This is the path used for {@code final} fields, so
+		 * those fields accept the same values as non-final fields.
 		 *
 		 * @param obj object on which the represented field's value is to be set
 		 * @param field field on which to set the value
 		 * @param value value to be set on the field
+		 * @throws IllegalArgumentException if {@code value} is not assignable to the field
 		 */
 		static void set(final Object obj, final Field field, final Object value) {
 			boolean isStatic = JavaModifier.STATIC.isPresentOn(field);
-			Object instance = obj;
-			if (isStatic) {
-				instance = TheUnsafe.staticFieldBase(field);
+			Object instance = isStatic ? TheUnsafe.staticFieldBase(field) : obj;
+			long offset = isStatic ? TheUnsafe.staticFieldOffset(field) : TheUnsafe.objectFieldOffset(field);
+			Class<?> type = field.getType();
+			if (type.isPrimitive()) {
+				TheUnsafe.putPrimitive(instance, offset, type, value);
+			} else if (null == value || type.isInstance(value)) {
+				TheUnsafe.putObject(instance, offset, value);
+			} else {
+				throw TheUnsafe.incompatibleValue(type, value);
 			}
-			long offset = isStatic
-					? TheUnsafe.staticFieldOffset(field)
-					: TheUnsafe.objectFieldOffset(field);
-			TheUnsafe.putObject(instance, offset, value);
 		}
 	}
 
@@ -796,7 +804,7 @@ public interface Fields {
 		 * @param <T> field value type
 		 *
 		 * @param field field to query
-		 * @param obj object containing the field (null for static fields)
+		 * @param obj object containing the field (can/should be {@code null} for static fields)
 		 * @return field value
 		 * @throws ReflectionException if the field value cannot be returned
 		 * @see IgnoreAccess#get(Object, Field)
@@ -821,8 +829,12 @@ public interface Fields {
 				if (Throwables.hasDirectCause(e, IllegalArgumentException.class)) {
 					throw e;
 				}
-				// only final fields will reach this code
-				Unsafe.set(obj, field, value);
+				try {
+					// only final fields will reach this code
+					Unsafe.set(obj, field, value);
+				} catch (IllegalArgumentException typeMismatch) {
+					throw new ReflectionException(typeMismatch, "Cannot set field value for {}", field.getName());
+				}
 			});
 		}
 	}

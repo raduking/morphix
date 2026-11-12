@@ -19,6 +19,8 @@ import org.morphix.reflection.jvm.ConstantPoolAccessorOracleJDK;
 
 /**
  * Accesses the java constant pool.
+ * <p>
+ * TODO: when no JDK implementation is usable, fail fast on {@link ConstantPool} use instead of empty iteration.
  *
  * @author Radu Sebastian LAZIN
  */

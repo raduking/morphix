@@ -60,5 +60,4 @@ class ReflectionSetFieldValueTest {
 
 		assertThat(a.b, equalTo(null));
 	}
-
 }

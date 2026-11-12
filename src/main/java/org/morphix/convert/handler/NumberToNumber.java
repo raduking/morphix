@@ -25,6 +25,7 @@ import org.morphix.convert.FieldHandlerContext;
 import org.morphix.convert.FieldHandlerResult;
 import org.morphix.convert.function.SimpleConverter;
 import org.morphix.reflection.ExtendedField;
+import org.morphix.reflection.PrimitiveValues;
 
 /**
  * Handles number conversions for number classes covering type coercion for non-primitive number types.
@@ -124,37 +125,38 @@ public class NumberToNumber extends FieldHandler {
 
 		/**
 		 * Array of converters for all primitive boxed classes. The first index is the source type and the second index is the
-		 * destination type. The value is a converter from the source type to the destination type. The array is sparse and only
-		 * contains converters for valid coercions.
+		 * destination type. The value is a converter from the source type to the destination type.
+		 * <p>
+		 * The array is sparse and only contains converters for valid coercions.
 		 */
 		@SuppressWarnings("unchecked")
 		private static final SimpleConverter<Object, Object>[][] CONVERTERS = new SimpleConverter[7][7];
 		static {
 			// Byte -> Short -> Integer -> Float -> Double
-			CONVERTERS[0][2] = n -> ((Byte) n).shortValue();
-			CONVERTERS[0][3] = n -> ((Byte) n).intValue();
-			CONVERTERS[0][4] = n -> ((Byte) n).longValue();
-			CONVERTERS[0][5] = n -> ((Byte) n).floatValue();
-			CONVERTERS[0][6] = n -> ((Byte) n).doubleValue();
+			CONVERTERS[0][2] = PrimitiveValues::toShort;
+			CONVERTERS[0][3] = PrimitiveValues::toInt;
+			CONVERTERS[0][4] = PrimitiveValues::toLong;
+			CONVERTERS[0][5] = PrimitiveValues::toFloat;
+			CONVERTERS[0][6] = PrimitiveValues::toDouble;
 			// Character -> Short -> Integer -> Float -> Double
-			CONVERTERS[1][3] = o -> (int) ((Character) o).charValue();
-			CONVERTERS[1][4] = o -> (long) ((Character) o).charValue();
-			CONVERTERS[1][5] = o -> (float) ((Character) o).charValue();
-			CONVERTERS[1][6] = o -> (double) ((Character) o).charValue();
+			CONVERTERS[1][3] = PrimitiveValues::toInt;
+			CONVERTERS[1][4] = PrimitiveValues::toLong;
+			CONVERTERS[1][5] = PrimitiveValues::toFloat;
+			CONVERTERS[1][6] = PrimitiveValues::toDouble;
 			// Short -> Integer -> Float -> Double
-			CONVERTERS[2][3] = o -> ((Short) o).intValue();
-			CONVERTERS[2][4] = o -> ((Short) o).longValue();
-			CONVERTERS[2][5] = o -> ((Short) o).floatValue();
-			CONVERTERS[2][6] = o -> ((Short) o).doubleValue();
+			CONVERTERS[2][3] = PrimitiveValues::toInt;
+			CONVERTERS[2][4] = PrimitiveValues::toLong;
+			CONVERTERS[2][5] = PrimitiveValues::toFloat;
+			CONVERTERS[2][6] = PrimitiveValues::toDouble;
 			// Integer -> Float -> Double
-			CONVERTERS[3][4] = o -> ((Integer) o).longValue();
-			CONVERTERS[3][5] = o -> ((Integer) o).floatValue();
-			CONVERTERS[3][6] = o -> ((Integer) o).doubleValue();
+			CONVERTERS[3][4] = PrimitiveValues::toLong;
+			CONVERTERS[3][5] = PrimitiveValues::toFloat;
+			CONVERTERS[3][6] = PrimitiveValues::toDouble;
 			// Long -> Float -> Double
-			CONVERTERS[4][5] = o -> ((Long) o).floatValue();
-			CONVERTERS[4][6] = o -> ((Long) o).doubleValue();
+			CONVERTERS[4][5] = PrimitiveValues::toFloat;
+			CONVERTERS[4][6] = PrimitiveValues::toDouble;
 			// Float -> Double
-			CONVERTERS[5][6] = o -> ((Float) o).doubleValue();
+			CONVERTERS[5][6] = PrimitiveValues::toDouble;
 		}
 	}
 }

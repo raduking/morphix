@@ -43,7 +43,6 @@ class TypesGetArrayClassTest {
 		public Type getOwnerType() {
 			return null;
 		}
-
 	}
 
 	public static class TypeImpl implements Type {
@@ -58,5 +57,4 @@ class TypesGetArrayClassTest {
 
 		assertThat(cls, nullValue());
 	}
-
 }

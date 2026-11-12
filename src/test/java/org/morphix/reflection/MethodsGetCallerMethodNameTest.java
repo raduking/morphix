@@ -17,11 +17,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.morphix.testdata.MethodName;
+import org.morphix.testdata.caller.PackageBoundary;
 
 /**
  * Test class for {@link Methods#getCallerMethodName(Supplier, BiFunction)}.
@@ -71,6 +73,34 @@ class MethodsGetCallerMethodNameTest {
 		String result = foo();
 
 		assertThat(result, equalTo(TEST_CLASS_NAME + METHOD_NAME_SEPARATOR + "shouldReturnCallerMethodNameForAGivenMethod"));
+	}
+
+	@Test
+	void shouldIgnoreAPackageThatOnlySharesThePrefix() {
+		String methodName = PackageBoundary.invokeThroughPrefix((className, name) -> className + "#" + name).orElseThrow();
+
+		assertThat(methodName, equalTo(PackageBoundary.class.getName() + "#invokeThroughPrefix"));
+	}
+
+	@Test
+	void shouldFindCallerInUnnamedPackage() throws Exception {
+		Class<?> callerClass = Class.forName("UnnamedPackageCaller");
+		Object caller = callerClass.getDeclaredConstructor().newInstance();
+		String result = (String) callerClass.getMethod("call").invoke(caller);
+
+		assertThat(result, equalTo("UnnamedPackageCaller" + MethodName.SEPARATOR + "call"));
+	}
+
+	@Test
+	void shouldReturnEmptyWhenSupplierIsInUnnamedPackageAndNoCallerInUnnamedPackage() throws Exception {
+		Class<?> supplierClass = Class.forName("UnnamedPackageCaller");
+		@SuppressWarnings("unchecked")
+		Supplier<String> supplier = (Supplier<String>) supplierClass.getDeclaredConstructor().newInstance();
+
+		Optional<String> methodName = Methods.getCallerMethodName(supplier, 0,
+				(className, name) -> className + METHOD_NAME_SEPARATOR + name);
+
+		assertThat(methodName, equalTo(Optional.empty()));
 	}
 
 	private static String foo() {

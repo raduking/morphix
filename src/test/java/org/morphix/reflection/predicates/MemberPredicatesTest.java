@@ -106,6 +106,22 @@ class MemberPredicatesTest {
 	}
 
 	@Test
+	void shouldExcludeMembersDeclaredByTheGivenClasses() {
+		Method foo = Methods.Safe.getOneDeclaredInHierarchy("foo", A.class);
+		Method toString = Methods.Safe.getOneDeclaredInHierarchy("toString", A.class);
+
+		assertTrue(MemberPredicates.notDeclaredIn(Object.class).test(foo));
+		assertFalse(MemberPredicates.notDeclaredIn(Object.class).test(toString));
+		assertFalse(MemberPredicates.notDeclaredIn(A.class, Object.class).test(foo));
+		assertFalse(MemberPredicates.notDeclaredIn(A.class, Object.class).test(toString));
+
+		List<Method> methods = Methods.getAllDeclaredInHierarchy(A.class, MemberPredicates.notDeclaredIn(Object.class));
+
+		assertTrue(methods.stream().anyMatch(method -> "foo".equals(method.getName())));
+		assertFalse(methods.stream().anyMatch(method -> Object.class.equals(method.getDeclaringClass())));
+	}
+
+	@Test
 	void shouldReturnTheCorrectPredicateForAbstractMethod() {
 		Method abstractMethod = Methods.Safe.getOneDeclaredInHierarchy("fooAbstract", B.class);
 

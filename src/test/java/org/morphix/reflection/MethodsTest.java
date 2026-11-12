@@ -12,12 +12,6 @@
  */
 package org.morphix.reflection;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-
-import org.junit.jupiter.api.Test;
-import org.morphix.utils.Tests;
-
 /**
  * Test class for {@link Methods}.
  *
@@ -25,10 +19,5 @@ import org.morphix.utils.Tests;
  */
 class MethodsTest {
 
-	@Test
-	void shouldThrowExceptionOnCallingErrorMessageConstructor() {
-		UnsupportedOperationException unsupportedOperationException = Tests.verifyDefaultConstructorThrows(Methods.ErrorMessage.class);
-
-		assertThat(unsupportedOperationException.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
-	}
+	// empty for now
 }

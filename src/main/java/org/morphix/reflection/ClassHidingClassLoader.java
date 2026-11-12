@@ -172,7 +172,17 @@ public class ClassHidingClassLoader extends ClassLoader {
 		 * @return the default parent class loader
 		 */
 		private static ClassLoader defaultParent() {
-			ClassLoader classLoader = ClassHidingClassLoader.class.getClassLoader();
+			return defaultParent(ClassHidingClassLoader.class.getClassLoader());
+		}
+
+		/**
+		 * Returns {@code classLoader} when it loaded the class, or the system class loader when {@code classLoader} is
+		 * {@code null} because the class was loaded by the bootstrap class loader.
+		 *
+		 * @param classLoader class loader that loaded the class, or {@code null} for the bootstrap class loader
+		 * @return the parent class loader to use
+		 */
+		static ClassLoader defaultParent(final ClassLoader classLoader) {
 			return null != classLoader ? classLoader : ClassLoader.getSystemClassLoader();
 		}
 

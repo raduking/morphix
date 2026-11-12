@@ -71,5 +71,4 @@ class AccessSetterTest {
 
 		assertTrue(result);
 	}
-
 }

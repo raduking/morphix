@@ -18,6 +18,8 @@ import java.util.function.Function;
  * An interface representing a cache. A cache is a data structure that stores a limited number of key-value pairs and
  * provides fast access to them. This interface defines the basic operations for retrieving and adding entries to the
  * cache, as well as methods for monitoring the size and capacity of the cache.
+ * <p>
+ * TODO: evaluate {@code remove}, {@code invalidate}, or {@code containsKey} for cache eviction and inspection.
  *
  * @param <K> the type of keys maintained by this cache
  * @param <V> the type of mapped values

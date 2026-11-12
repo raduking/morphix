@@ -24,9 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -83,21 +85,24 @@ class IterablesTest {
 
 		@Test
 		void shouldReturnTrueOnIsEmptyForNullIterable() {
-			boolean result = Iterables.isEmpty(null);
+			Iterable<String> iterable = null;
+			boolean result = Iterables.isEmpty(iterable);
 
 			assertTrue(result);
 		}
 
 		@Test
 		void shouldReturnTrueOnIsEmptyForEmptyCollection() {
-			boolean result = Iterables.isEmpty(List.of());
+			Iterable<String> iterable = List.of();
+			boolean result = Iterables.isEmpty(iterable);
 
 			assertTrue(result);
 		}
 
 		@Test
 		void shouldReturnFalseOnIsEmptyForNonEmptyCollection() {
-			boolean result = Iterables.isEmpty(List.of(1));
+			Iterable<Integer> iterable = List.of(1);
+			boolean result = Iterables.isEmpty(iterable);
 
 			assertFalse(result);
 		}
@@ -122,23 +127,81 @@ class IterablesTest {
 
 		@Test
 		void shouldReturnFalseOnIsNotEmptyForNullIterable() {
-			boolean result = Iterables.isNotEmpty(null);
+			Iterable<String> iterable = null;
+			boolean result = Iterables.isNotEmpty(iterable);
 
 			assertFalse(result);
 		}
 
 		@Test
 		void shouldReturnFalseOnIsNotEmptyForEmptyIterable() {
-			boolean result = Iterables.isNotEmpty(List.of());
+			Iterable<String> iterable = List.of();
+			boolean result = Iterables.isNotEmpty(iterable);
 
 			assertFalse(result);
 		}
 
 		@Test
 		void shouldReturnTrueOnIsNotEmptyForNonEmptyIterable() {
-			boolean result = Iterables.isNotEmpty(List.of(1));
+			Iterable<Integer> iterable = List.of(1);
+			boolean result = Iterables.isNotEmpty(iterable);
 
 			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnIsNotEmptyForNonEmptyNonCollectionIterable() {
+			Iterable<Integer> iterable = () -> List.of(1).iterator();
+
+			boolean result = Iterables.isNotEmpty(iterable);
+
+			assertTrue(result);
+		}
+	}
+
+	@Nested
+	class CollectionEmptyChecksTest {
+
+		@Test
+		void shouldReturnTrueOnIsEmptyForNullCollection() {
+			Collection<String> collection = null;
+
+			assertTrue(Iterables.isEmpty(collection));
+		}
+
+		@Test
+		void shouldReturnTrueOnIsEmptyForEmptyCollection() {
+			Collection<String> collection = new ArrayList<>();
+
+			assertTrue(Iterables.isEmpty(collection));
+		}
+
+		@Test
+		void shouldReturnFalseOnIsEmptyForNonEmptyCollection() {
+			Collection<Integer> collection = Set.of(1);
+
+			assertFalse(Iterables.isEmpty(collection));
+		}
+
+		@Test
+		void shouldReturnFalseOnIsNotEmptyForNullCollection() {
+			Collection<String> collection = null;
+
+			assertFalse(Iterables.isNotEmpty(collection));
+		}
+
+		@Test
+		void shouldReturnFalseOnIsNotEmptyForEmptyCollection() {
+			Collection<String> collection = new HashSet<>();
+
+			assertFalse(Iterables.isNotEmpty(collection));
+		}
+
+		@Test
+		void shouldReturnTrueOnIsNotEmptyForNonEmptyCollection() {
+			Collection<Integer> collection = Set.of(1);
+
+			assertTrue(Iterables.isNotEmpty(collection));
 		}
 	}
 

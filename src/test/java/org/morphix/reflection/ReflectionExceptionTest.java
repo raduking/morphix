@@ -72,5 +72,4 @@ class ReflectionExceptionTest {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> ReflectionException.wrapThrowing(supplier, TEST_MESSAGE));
 		assertThat(e.getMessage(), equalTo(TEST_MESSAGE));
 	}
-
 }

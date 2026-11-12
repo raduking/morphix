@@ -40,6 +40,12 @@ class MethodsGetSetterMethodTest {
 		@SuppressWarnings("unused")
 		private Integer i;
 
+		@SuppressWarnings("unused")
+		private int n;
+
+		@SuppressWarnings("unused")
+		private boolean p;
+
 		public String getS() {
 			return s;
 		}
@@ -56,6 +62,9 @@ class MethodsGetSetterMethodTest {
 			this.b = b;
 		}
 
+		public void setN(final Integer n) {
+			this.n = n;
+		}
 	}
 
 	@Test
@@ -75,8 +84,8 @@ class MethodsGetSetterMethodTest {
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getSetterMethod(A.class, field));
 
-		assertThat(e.getMessage(), equalTo("Error finding method: "
-				+ "setT(" + field.getType().getCanonicalName() + ")"));
+		assertThat(e.getMessage(), equalTo("Cannot find setter method "
+				+ "setT(" + field.getType().getTypeName() + ") in class " + A.class));
 	}
 
 	@Test
@@ -91,14 +100,52 @@ class MethodsGetSetterMethodTest {
 	}
 
 	@Test
+	void shouldThrowExceptionWhenClassIsNull() throws Exception {
+		Field field = A.class.getDeclaredField("s");
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getSetterMethod(null, field));
+
+		assertThat(e.getMessage(), equalTo("Cannot find setter method: class is null"));
+	}
+
+	@Test
+	void shouldThrowExceptionWhenFieldIsNull() {
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getSetterMethod(A.class, null));
+
+		assertThat(e.getMessage(), equalTo("Cannot find setter method in class " + A.class + ": field descriptor is null"));
+	}
+
+	@Test
 	void shouldThrowExceptionWhenSetterMethodWithPrimitiveNotFound() throws Exception {
 		Field field = A.class.getDeclaredField("i");
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getSetterMethod(A.class, field));
 
-		assertThat(e.getMessage(), equalTo("Error finding method: "
-				+ "setI(" + field.getType().getCanonicalName() + ") or "
-				+ "setI(" + int.class.getCanonicalName() + ")"));
+		assertThat(e.getMessage(), equalTo("Cannot find setter method "
+				+ "setI(" + field.getType().getTypeName() + ") or "
+				+ "setI(" + int.class.getTypeName() + ") in class " + A.class));
+	}
+
+	@Test
+	void shouldReturnSetterMethodWhenFieldIsPrimitiveAndSetterTakesWrapper() throws Exception {
+		Field field = A.class.getDeclaredField("n");
+
+		Method expected = A.class.getDeclaredMethod("setN", Integer.class);
+
+		Method result = Methods.getSetterMethod(A.class, field);
+
+		assertThat(result, equalTo(expected));
+	}
+
+	@Test
+	void shouldThrowExceptionWhenPrimitiveAndWrapperSettersAreNotFound() throws Exception {
+		Field field = A.class.getDeclaredField("p");
+
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getSetterMethod(A.class, field));
+
+		assertThat(e.getMessage(), equalTo("Cannot find setter method "
+				+ "setP(" + field.getType().getTypeName() + ") or "
+				+ "setP(" + Boolean.class.getTypeName() + ") in class " + A.class));
 	}
 
 }

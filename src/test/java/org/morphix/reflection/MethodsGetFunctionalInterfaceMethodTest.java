@@ -59,7 +59,7 @@ class MethodsGetFunctionalInterfaceMethodTest {
 	void shouldThrowExceptionIfTheClassIsNotAFunctionalInterfaceHasMoreThanOneAbstractMethod() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getFunctionalInterfaceMethod(C.class));
 
-		assertThat(e.getMessage(), equalTo(C.class + " is not a functional interface because it has more than one abstract method"));
+		assertThat(e.getMessage(), equalTo("Cannot find functional interface method in " + C.class + ": multiple abstract methods found"));
 	}
 
 	public static class D {
@@ -70,14 +70,14 @@ class MethodsGetFunctionalInterfaceMethodTest {
 	void shouldThrowExceptionIfTheClassIsNotAFunctionalInterfaceHasNoAbstractMethods() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getFunctionalInterfaceMethod(D.class));
 
-		assertThat(e.getMessage(), equalTo(D.class + " is not a functional interface because it has no abstract method"));
+		assertThat(e.getMessage(), equalTo("Cannot find functional interface method in " + D.class + ": no abstract method found"));
 	}
 
 	@Test
 	void shouldThrowExceptionIfTheClassIsNull() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Methods.getFunctionalInterfaceMethod(null));
 
-		assertThat(e.getMessage(), equalTo("Class cannot be null when looking for the functional interface method"));
+		assertThat(e.getMessage(), equalTo("Cannot find functional interface method: class is null"));
 	}
 
 }

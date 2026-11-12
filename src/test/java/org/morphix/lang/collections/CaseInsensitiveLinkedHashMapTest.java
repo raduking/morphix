@@ -453,6 +453,33 @@ class CaseInsensitiveLinkedHashMapTest {
 		}
 
 		@Test
+		void shouldCompareKeySetWithItsDelegateSemantics() {
+			CaseInsensitiveLinkedHashMap<Integer> map = new CaseInsensitiveLinkedHashMap<>();
+			map.put("Header", 42);
+
+			Set<String> keySet = map.keySet();
+
+			assertThat(keySet.equals(keySet), is(true));
+			assertThat(keySet.equals(Set.of("Header")), is(true));
+			assertThat(keySet.equals(Set.of("Other")), is(false));
+			assertThat(keySet.hashCode(), is(Set.of("Header").hashCode()));
+		}
+
+		@Test
+		void shouldCompareEntrySetWithItsDelegateSemantics() {
+			CaseInsensitiveLinkedHashMap<Integer> map = new CaseInsensitiveLinkedHashMap<>();
+			map.put("Header", 42);
+
+			Set<Map.Entry<String, Integer>> entrySet = map.entrySet();
+			Set<Map.Entry<String, Integer>> expected = Set.of(Map.entry("Header", 42));
+
+			assertThat(entrySet.equals(entrySet), is(true));
+			assertThat(entrySet.equals(expected), is(true));
+			assertThat(entrySet.equals(Set.of(Map.entry("Other", 42))), is(false));
+			assertThat(entrySet.hashCode(), is(expected.hashCode()));
+		}
+
+		@Test
 		void shouldClearBothMapsThroughCollectionViews() {
 			CaseInsensitiveLinkedHashMap<Integer> map = new CaseInsensitiveLinkedHashMap<>();
 
@@ -1154,6 +1181,7 @@ class CaseInsensitiveLinkedHashMapTest {
 		}
 
 		@Test
+		@SuppressWarnings("unlikely-arg-type")
 		void shouldNotEqualUnrelatedObject() {
 			CaseInsensitiveLinkedHashMap<Integer> map = new CaseInsensitiveLinkedHashMap<>();
 
