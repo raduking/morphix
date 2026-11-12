@@ -9,8 +9,8 @@
 - Changed `Fields.Unsafe.set` to write final primitive fields with the same value conversions as non-final fields, and to reject a value that is not assignable to the field.
 - Changed `Fields.IgnoreAccess.get(Object, Field)` and `Fields.IgnoreAccess.set(Object, Field)` to throw `ReflectionException` when the field is `null`.
 - Added `MemberPredicates.notDeclaredIn(Class...)` to reject members declared by the given classes.
-- Added `TypeCoercion` for the primitive widening conversions accepted by `Field.set`.
-- Added `TheUnsafe.putPrimitive(Object, long, Class, Object)` to write a primitive value with the same widening conversions as `Field.set`.
+- Added `PrimitiveValues` for exact conversions between primitive types and their wrappers.
+- Added `TheUnsafe.putPrimitive(Object, long, Class, Object)` to write a primitive value using the exact conversions of `PrimitiveValues`.
 - Changed `Accumulator.getInformationList` to return an unmodifiable snapshot for safe concurrent iteration.
 - Added protected `Accumulator.getLock` for synchronizing compound operations in derived accumulators.
 - Added `Synchronized.with` for blocking lock-protected execution.

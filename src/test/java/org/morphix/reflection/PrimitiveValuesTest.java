@@ -28,7 +28,7 @@ import org.morphix.utils.Tests;
  *
  * @author Radu Sebastian LAZIN
  */
-class TypeConversionsTest {
+class PrimitiveValuesTest {
 
 	private static final int NOT_EXACT_IN_FLOAT = (1 << 24) + 1;
 
