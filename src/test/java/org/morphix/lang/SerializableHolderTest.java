@@ -13,6 +13,8 @@
 package org.morphix.lang;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.ByteArrayInputStream;
@@ -55,6 +57,43 @@ class SerializableHolderTest {
 		assertThat(holder.get(), equalTo(VALUE));
 		assertThat(holder, equalTo(SerializableHolder.of(VALUE)));
 		assertThat(holder.hashCode(), equalTo(SerializableHolder.of(VALUE).hashCode()));
+	}
+
+	@Test
+	void shouldConstructWithoutAValue() {
+		SerializableHolder<String> holder = new SerializableHolder<>();
+
+		assertThat(holder.getValue(), nullValue());
+		assertThat(holder.get(), nullValue());
+	}
+
+	@Test
+	void shouldEqualSameInstance() {
+		SerializableHolder<String> holder = SerializableHolder.of(VALUE);
+
+		assertThat(holder, equalTo(holder));
+	}
+
+	@Test
+	void shouldEqualWhenBothValuesAreNull() {
+		assertThat(SerializableHolder.empty(), equalTo(new SerializableHolder<>()));
+	}
+
+	@Test
+	void shouldNotEqualWhenOnlyOneValueIsNull() {
+		assertThat(SerializableHolder.empty(), not(equalTo(SerializableHolder.of(VALUE))));
+	}
+
+	@Test
+	void shouldNotEqualWhenValuesDiffer() {
+		assertThat(SerializableHolder.of(VALUE), not(equalTo(SerializableHolder.of("other"))));
+	}
+
+	@Test
+	void shouldNotEqualWhenOtherIsNotASerializableHolder() {
+		SerializableHolder<String> holder = SerializableHolder.of(VALUE);
+
+		assertThat(holder, not(equalTo(VALUE)));
 	}
 
 }
