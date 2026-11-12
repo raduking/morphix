@@ -28,7 +28,7 @@ import java.util.Set;
  *
  * @author Radu Sebastian LAZIN
  */
-public class TypeConversions {
+public class PrimitiveValues {
 
 	/**
 	 * Maps each primitive source type to the primitive target types it converts to without loss of information. Used by
@@ -334,7 +334,7 @@ public class TypeConversions {
 	 *
 	 * @throws UnsupportedOperationException if called
 	 */
-	private TypeConversions() {
+	private PrimitiveValues() {
 		throw Constructors.unsupportedOperationException();
 	}
 }

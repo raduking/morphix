@@ -197,7 +197,7 @@ public class TheUnsafe {
 	}
 
 	/**
-	 * Writes a primitive value at the given offset. Accepted source types are defined by {@link TypeConversions}.
+	 * Writes a primitive value at the given offset. Accepted source types are defined by {@link PrimitiveValues}.
 	 *
 	 * @param obj object containing the field, or the static field base
 	 * @param offset field offset
@@ -207,14 +207,14 @@ public class TheUnsafe {
 	 */
 	public static void putPrimitive(final Object obj, final long offset, final Class<?> type, final Object value) {
 		switch (type) {
-			case Class<?> c when c == boolean.class -> putBoolean(obj, offset, TypeConversions.toBoolean(value));
-			case Class<?> c when c == byte.class -> putByte(obj, offset, TypeConversions.toByte(value));
-			case Class<?> c when c == char.class -> putChar(obj, offset, TypeConversions.toChar(value));
-			case Class<?> c when c == short.class -> putShort(obj, offset, TypeConversions.toShort(value));
-			case Class<?> c when c == int.class -> putInt(obj, offset, TypeConversions.toInt(value));
-			case Class<?> c when c == long.class -> putLong(obj, offset, TypeConversions.toLong(value));
-			case Class<?> c when c == float.class -> putFloat(obj, offset, TypeConversions.toFloat(value));
-			case Class<?> c when c == double.class -> putDouble(obj, offset, TypeConversions.toDouble(value));
+			case Class<?> c when c == boolean.class -> putBoolean(obj, offset, PrimitiveValues.toBoolean(value));
+			case Class<?> c when c == byte.class -> putByte(obj, offset, PrimitiveValues.toByte(value));
+			case Class<?> c when c == char.class -> putChar(obj, offset, PrimitiveValues.toChar(value));
+			case Class<?> c when c == short.class -> putShort(obj, offset, PrimitiveValues.toShort(value));
+			case Class<?> c when c == int.class -> putInt(obj, offset, PrimitiveValues.toInt(value));
+			case Class<?> c when c == long.class -> putLong(obj, offset, PrimitiveValues.toLong(value));
+			case Class<?> c when c == float.class -> putFloat(obj, offset, PrimitiveValues.toFloat(value));
+			case Class<?> c when c == double.class -> putDouble(obj, offset, PrimitiveValues.toDouble(value));
 			default -> throw incompatibleValue(type, value);
 		}
 	}
