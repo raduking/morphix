@@ -39,5 +39,4 @@ class ReflectionIsClassPresentTest {
 		boolean present = Reflection.isClassPresent("org.morphix.reflection.ReflectionIsClassPresentTest$Str");
 		assertFalse(present);
 	}
-
 }

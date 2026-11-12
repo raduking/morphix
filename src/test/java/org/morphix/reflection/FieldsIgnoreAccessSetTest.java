@@ -213,7 +213,7 @@ class FieldsIgnoreAccessSetTest {
 
 		assertThat(e.getMessage(), equalTo("Cannot set field value for STATIC_INT"));
 		assertThat(e.getCause(), instanceOf(IllegalArgumentException.class));
-		assertThat(e.getCause().getMessage(), equalTo("Can not set int field to java.lang.String"));
+		assertThat(e.getCause().getMessage(), equalTo("Cannot convert java.lang.String to int"));
 		assertThat(Fields.IgnoreAccess.getStatic(E.class, "STATIC_INT"), equalTo(before));
 	}
 

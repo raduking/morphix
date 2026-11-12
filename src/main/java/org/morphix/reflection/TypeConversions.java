@@ -12,96 +12,112 @@
  */
 package org.morphix.reflection;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
- * Conversions accepted by {@link java.lang.reflect.Field#set(Object, Object)}.
- * <p>
- * A primitive target accepts its wrapper and the widening primitive conversions:
+ * Exact conversions between primitive types and their wrappers, and reference assignment compatibility:
  * <ul>
- * <li>{@code byte} to {@code short}, {@code int}, {@code long}, {@code float}, or {@code double}</li>
- * <li>{@code short} or {@code char} to {@code int}, {@code long}, {@code float}, or {@code double}</li>
- * <li>{@code int} to {@code long}, {@code float}, or {@code double}</li>
- * <li>{@code long} to {@code float} or {@code double}</li>
- * <li>{@code float} to {@code double}</li>
- * <li>{@code boolean} accepts only {@code Boolean}</li>
- * <li>narrowing {@code byte} or {@code short} to {@code char} are rejected</li>
+ * <li>numeric conversions preserve the represented value, including the sign of floating-point zero</li>
+ * <li>NaN and infinities can be converted between floating-point types</li>
+ * <li>NaN payloads are not guaranteed to be preserved</li>
+ * <li>unsupported source types cause {@link IllegalArgumentException}</li>
+ * <li>loss of information causes {@link ArithmeticException}</li>
  * </ul>
- * <p>
- * {@link Classes#isAssignableFrom(Class, Class)} treats a primitive and its wrapper as the same type and does not apply
- * these widening conversions.
- * <p>
- * The {@code toBoolean}, {@code toByte}, and other primitive methods unbox in place and do not allocate.
+ * Only the standard primitive wrappers are supported as numeric sources.
  *
  * @author Radu Sebastian LAZIN
  */
 public class TypeConversions {
 
 	/**
-	 * Returns true when {@code value} can be stored in a field of type {@code target}. A {@code null} value is accepted for
-	 * a reference target and rejected for a primitive target. A {@code null} target returns false.
-	 *
-	 * @param target field type
-	 * @param value value to store
-	 * @return true when {@link java.lang.reflect.Field#set(Object, Object)} would accept the value
+	 * Maps each primitive source type to the primitive target types it converts to without loss of information. Used by
+	 * {@link #isAlwaysConvertible(Class, Class)}. Boolean and void have no entries because they convert to no other type.
 	 */
-	public static boolean isApplicable(final Class<?> target, final Object value) {
+	private static final Map<Class<?>, Set<Class<?>>> LOSSLESS_TARGETS = Map.of(
+			byte.class, Set.of(short.class, int.class, long.class, float.class, double.class),
+			short.class, Set.of(int.class, long.class, float.class, double.class),
+			char.class, Set.of(int.class, long.class, float.class, double.class),
+			int.class, Set.of(long.class, double.class),
+			float.class, Set.of(double.class));
+
+	/**
+	 * Returns whether the value can be converted exactly to the target type. Primitive wrapper targets support the same
+	 * conversions as their primitives. Null is accepted only for references. {@code void} is not a target type.
+	 *
+	 * @param target target type
+	 * @param value source value
+	 * @return whether the conversion is possible
+	 */
+	public static boolean isConvertible(final Class<?> target, final Object value) {
 		if (null == target) {
 			return false;
 		}
-		if (!target.isPrimitive()) {
-			return null == value || target.isInstance(value);
+		if (null == value) {
+			return !target.isPrimitive();
 		}
-		if (boolean.class == target) {
-			return value instanceof Boolean;
+		if (value instanceof Class<?> cls) {
+			return isAlwaysConvertible(target, cls);
 		}
-		if (byte.class == target) {
-			return value instanceof Byte;
+		if (target.isInstance(value)) {
+			return true;
 		}
-		if (char.class == target) {
-			return value instanceof Character;
-		}
-		if (short.class == target) {
-			return value instanceof Byte || value instanceof Short;
-		}
-		if (int.class == target) {
-			return isInt(value);
-		}
-		if (long.class == target) {
-			return isLong(value);
-		}
-		if (float.class == target) {
-			return isFloat(value);
-		}
-		if (double.class == target) {
-			return isDouble(value);
-		}
-		return false;
-	}
-
-	/**
-	 * Returns true when a value of type {@code source} can be stored in a field of type {@code target}. A {@code null}
-	 * source represents a null reference: it is accepted for a reference target and rejected for a primitive target. A
-	 * {@code null} target returns false.
-	 *
-	 * @param target field type
-	 * @param source value type, or {@code null} for a null reference
-	 * @return true when {@link java.lang.reflect.Field#set(Object, Object)} would accept a value of {@code source}
-	 */
-	public static boolean isApplicable(final Class<?> target, final Class<?> source) {
-		if (null == target) {
+		Class<?> primitive = Primitives.primitiveOf(target);
+		try {
+			switch (primitive) {
+				case Class<?> c when c == boolean.class -> toBoolean(value);
+				case Class<?> c when c == byte.class -> toByte(value);
+				case Class<?> c when c == char.class -> toChar(value);
+				case Class<?> c when c == short.class -> toShort(value);
+				case Class<?> c when c == int.class -> toInt(value);
+				case Class<?> c when c == long.class -> toLong(value);
+				case Class<?> c when c == float.class -> toFloat(value);
+				case Class<?> c when c == double.class -> toDouble(value);
+				case null, default -> {
+					return false;
+				}
+			}
+			return true;
+		} catch (IllegalArgumentException | ArithmeticException e) {
 			return false;
 		}
-		if (!target.isPrimitive()) {
-			return null == source || target.isAssignableFrom(source);
-		}
-		Class<?> sourcePrimitive = primitiveOf(source);
-		return null != sourcePrimitive && widens(target, sourcePrimitive);
 	}
 
 	/**
-	 * Returns the boolean stored in {@code value}.
+	 * Returns whether every non-null value of the source type can be converted exactly to the target type. Primitive source
+	 * types are treated as their boxed values for reference assignment.
 	 *
-	 * @param value value to unbox
-	 * @return boolean value
+	 * @param target target type
+	 * @param source source type
+	 * @return whether all source values are convertible
+	 */
+	public static boolean isAlwaysConvertible(final Class<?> target, final Class<?> source) {
+		if (null == target || null == source) {
+			return false;
+		}
+		if (void.class == target || void.class == source) {
+			return false;
+		}
+		Class<?> boxedSource = source.isPrimitive() ? Primitives.boxedOf(source) : source;
+		if (target.isAssignableFrom(boxedSource)) {
+			return true;
+		}
+		Class<?> dst = Primitives.primitiveOf(target);
+		Class<?> src = Primitives.primitiveOf(source);
+		if (null == dst || null == src) {
+			return false;
+		}
+		if (dst == src) {
+			return true;
+		}
+		return LOSSLESS_TARGETS.getOrDefault(src, Set.of()).contains(dst);
+	}
+
+	/**
+	 * Returns the boolean value, without numeric coercion.
+	 *
+	 * @param value source value
+	 * @return the boolean value
 	 * @throws IllegalArgumentException if {@code value} is not a {@link Boolean}
 	 */
 	public static boolean toBoolean(final Object value) {
@@ -112,212 +128,187 @@ public class TypeConversions {
 	}
 
 	/**
-	 * Returns the byte stored in {@code value}.
+	 * Returns the exact byte representation of the value.
 	 *
-	 * @param value value to unbox
-	 * @return byte value
-	 * @throws IllegalArgumentException if {@code value} is not a {@link Byte}
+	 * @param value source value
+	 * @return the exact byte value
+	 * @throws IllegalArgumentException if {@code value} is not a supported numeric wrapper
+	 * @throws ArithmeticException if {@code value} cannot be represented exactly as a {@code byte}
 	 */
 	public static byte toByte(final Object value) {
-		if (value instanceof Byte byteValue) {
-			return byteValue;
+		long number = toIntegral(value, byte.class);
+		if (number < Byte.MIN_VALUE || number > Byte.MAX_VALUE) {
+			throw inexact(byte.class, value);
 		}
-		throw incompatible(byte.class, value);
+		return (byte) number;
 	}
 
 	/**
-	 * Returns the char stored in {@code value}.
+	 * Returns the exact unsigned 16-bit character representation of the value.
 	 *
-	 * @param value value to unbox
-	 * @return char value
-	 * @throws IllegalArgumentException if {@code value} is not a {@link Character}
+	 * @param value source value
+	 * @return the exact character value
+	 * @throws IllegalArgumentException if {@code value} is not a supported numeric wrapper
+	 * @throws ArithmeticException if {@code value} cannot be represented exactly as a {@code char}
 	 */
 	public static char toChar(final Object value) {
-		if (value instanceof Character charValue) {
-			return charValue;
+		long number = toIntegral(value, char.class);
+		if (number < Character.MIN_VALUE || number > Character.MAX_VALUE) {
+			throw inexact(char.class, value);
 		}
-		throw incompatible(char.class, value);
+		return (char) number;
 	}
 
 	/**
-	 * Returns {@code value} widened to a short.
+	 * Returns the exact short representation of the value.
 	 *
-	 * @param value value to convert
-	 * @return short value
-	 * @throws IllegalArgumentException if {@code value} cannot be widened to {@code short}
+	 * @param value source value
+	 * @return the exact short value
+	 * @throws IllegalArgumentException if {@code value} is not a supported numeric wrapper
+	 * @throws ArithmeticException if {@code value} cannot be represented exactly as a {@code short}
 	 */
 	public static short toShort(final Object value) {
-		if (value instanceof Byte || value instanceof Short) {
-			return ((Number) value).shortValue();
+		long number = toIntegral(value, short.class);
+		if (number < Short.MIN_VALUE || number > Short.MAX_VALUE) {
+			throw inexact(short.class, value);
 		}
-		throw incompatible(short.class, value);
+		return (short) number;
 	}
 
 	/**
-	 * Returns {@code value} widened to an int.
+	 * Returns the exact int representation of the value.
 	 *
-	 * @param value value to convert
-	 * @return int value
-	 * @throws IllegalArgumentException if {@code value} cannot be widened to {@code int}
+	 * @param value source value
+	 * @return the exact int value
+	 * @throws IllegalArgumentException if {@code value} is not a supported numeric wrapper
+	 * @throws ArithmeticException if {@code value} cannot be represented exactly as an {@code int}
 	 */
 	public static int toInt(final Object value) {
-		if (value instanceof Byte || value instanceof Short || value instanceof Integer) {
-			return ((Number) value).intValue();
-		}
-		if (value instanceof Character character) {
-			return character;
-		}
-		throw incompatible(int.class, value);
+		return Math.toIntExact(toIntegral(value, int.class));
 	}
 
 	/**
-	 * Returns {@code value} widened to a long.
+	 * Returns the exact long representation of the value.
 	 *
-	 * @param value value to convert
-	 * @return long value
-	 * @throws IllegalArgumentException if {@code value} cannot be widened to {@code long}
+	 * @param value source value
+	 * @return the exact long value
+	 * @throws IllegalArgumentException if {@code value} is not a supported numeric wrapper
+	 * @throws ArithmeticException if {@code value} cannot be represented exactly as a {@code long}
 	 */
 	public static long toLong(final Object value) {
-		if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long) {
-			return ((Number) value).longValue();
-		}
-		if (value instanceof Character character) {
-			return character;
-		}
-		throw incompatible(long.class, value);
+		return toIntegral(value, long.class);
 	}
 
 	/**
-	 * Returns {@code value} widened to a float.
+	 * Returns the exact float representation of the value.
 	 *
-	 * @param value value to convert
-	 * @return float value
-	 * @throws IllegalArgumentException if {@code value} cannot be widened to {@code float}
+	 * @param value source value
+	 * @return the exact float value
+	 * @throws IllegalArgumentException if {@code value} is not a supported numeric wrapper
+	 * @throws ArithmeticException if {@code value} cannot be represented exactly as a {@code float}
 	 */
 	public static float toFloat(final Object value) {
-		if (isLong(value)) {
-			return value instanceof Character character ? character : ((Number) value).floatValue();
+		if (value instanceof Float floatValue) {
+			return floatValue;
+		}
+		if (value instanceof Double doubleValue) {
+			double number = doubleValue;
+			float result = (float) number;
+			if (Double.compare(number, result) != 0) {
+				throw inexact(float.class, value);
+			}
+			return result;
+		}
+		long number = toIntegral(value, float.class);
+		float result = number;
+		if (result >= 0x1.0p63 || (long) result != number) {
+			throw inexact(float.class, value);
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the exact double representation of the value.
+	 *
+	 * @param value source value
+	 * @return the exact double value
+	 * @throws IllegalArgumentException if {@code value} is not a supported numeric wrapper
+	 * @throws ArithmeticException if {@code value} cannot be represented exactly as a {@code double}
+	 */
+	public static double toDouble(final Object value) {
+		if (value instanceof Double doubleValue) {
+			return doubleValue;
 		}
 		if (value instanceof Float floatValue) {
 			return floatValue;
 		}
-		throw incompatible(float.class, value);
+		long number = toIntegral(value, double.class);
+		double result = number;
+		if (result >= 0x1.0p63 || (long) result != number) {
+			throw inexact(double.class, value);
+		}
+		return result;
 	}
 
 	/**
-	 * Returns {@code value} widened to a double.
+	 * Converts a numeric wrapper to an exact integral value. The upper bound is exclusive because {@link Long#MAX_VALUE}
+	 * rounds to 2^63 when represented as a double. Negative zero cannot be represented by an integral type.
 	 *
-	 * @param value value to convert
-	 * @return double value
-	 * @throws IllegalArgumentException if {@code value} cannot be widened to {@code double}
+	 * @param value source value
+	 * @param target target primitive type, used only for the exception message
+	 * @return the exact integral value
+	 * @throws IllegalArgumentException if {@code value} is not a supported numeric wrapper
+	 * @throws ArithmeticException if {@code value} cannot be represented exactly as a {@code long}
 	 */
-	public static double toDouble(final Object value) {
-		if (isFloat(value)) {
-			return value instanceof Character character ? character : ((Number) value).doubleValue();
+	private static long toIntegral(final Object value, final Class<?> target) {
+		if (value instanceof Character character) {
+			return character;
 		}
-		if (value instanceof Double doubleValue) {
-			return doubleValue;
+		if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long) {
+			return ((Number) value).longValue();
 		}
-		throw incompatible(double.class, value);
+		if (value instanceof Float || value instanceof Double) {
+			double number = ((Number) value).doubleValue();
+			if (!Double.isFinite(number) || number < -0x1.0p63 || number >= 0x1.0p63
+					|| Double.doubleToRawLongBits(number) == Long.MIN_VALUE) {
+				throw inexact(target, value);
+			}
+			long result = (long) number;
+			if (number != result) {
+				throw inexact(target, value);
+			}
+			return result;
+		}
+		throw incompatible(target, value);
 	}
 
 	/**
-	 * Returns true when {@code value} can be widened to {@code int}.
+	 * Builds the exception thrown when the value is not a supported source for the target type.
 	 *
-	 * @param value value to test
-	 * @return true when the value can be stored in an {@code int}
-	 */
-	private static boolean isInt(final Object value) {
-		return value instanceof Byte || value instanceof Short || value instanceof Character || value instanceof Integer;
-	}
-
-	/**
-	 * Returns true when {@code value} can be widened to {@code long}.
-	 *
-	 * @param value value to test
-	 * @return true when the value can be stored in a {@code long}
-	 */
-	private static boolean isLong(final Object value) {
-		return isInt(value) || value instanceof Long;
-	}
-
-	/**
-	 * Returns true when {@code value} can be widened to {@code float}.
-	 *
-	 * @param value value to test
-	 * @return true when the value can be stored in a {@code float}
-	 */
-	private static boolean isFloat(final Object value) {
-		return isLong(value) || value instanceof Float;
-	}
-
-	/**
-	 * Returns true when {@code value} can be widened to {@code double}.
-	 *
-	 * @param value value to test
-	 * @return true when the value can be stored in a {@code double}
-	 */
-	private static boolean isDouble(final Object value) {
-		return isFloat(value) || value instanceof Double;
-	}
-
-	/**
-	 * Returns the primitive type represented by {@code type}, or {@code null} when {@code type} is null or not a primitive
-	 * or wrapper.
-	 *
-	 * @param type primitive or wrapper type
-	 * @return primitive type, or {@code null}
-	 */
-	private static Class<?> primitiveOf(final Class<?> type) {
-		if (null == type) {
-			return null;
-		}
-		if (type.isPrimitive()) {
-			return type;
-		}
-		return Primitives.isUnboxable(type) ? Primitives.toPrimitive(type) : null;
-	}
-
-	/**
-	 * Returns true when {@code source} widens to {@code target}. Both arguments are primitive types.
-	 *
-	 * @param target primitive target
-	 * @param source primitive source
-	 * @return true when the source widens to the target
-	 */
-	private static boolean widens(final Class<?> target, final Class<?> source) {
-		if (target == source) {
-			return true;
-		}
-		if (byte.class == source) {
-			return short.class == target || int.class == target || long.class == target || float.class == target || double.class == target;
-		}
-		if (short.class == source || char.class == source) {
-			return int.class == target || long.class == target || float.class == target || double.class == target;
-		}
-		if (int.class == source) {
-			return long.class == target || float.class == target || double.class == target;
-		}
-		if (long.class == source) {
-			return float.class == target || double.class == target;
-		}
-		return float.class == source && double.class == target;
-	}
-
-	/**
-	 * Returns the exception thrown when {@code value} cannot be stored in {@code target}.
-	 *
-	 * @param target field type
-	 * @param value rejected value
-	 * @return type mismatch exception
+	 * @param target target type
+	 * @param value source value
+	 * @return the exception
 	 */
 	private static IllegalArgumentException incompatible(final Class<?> target, final Object value) {
 		String actual = null == value ? "null" : value.getClass().getName();
-		return new IllegalArgumentException("Can not set " + target.getName() + " field to " + actual);
+		return new IllegalArgumentException("Cannot convert " + actual + " to " + target.getName());
 	}
 
 	/**
-	 * Private constructor that throws exception if called.
+	 * Builds the exception thrown when the value cannot be represented exactly by the target type.
+	 *
+	 * @param target target type
+	 * @param value source value
+	 * @return the exception
+	 */
+	private static ArithmeticException inexact(final Class<?> target, final Object value) {
+		return new ArithmeticException("Cannot convert " + value + " exactly to " + target.getName());
+	}
+
+	/**
+	 * Hide constructor.
+	 *
+	 * @throws UnsupportedOperationException if called
 	 */
 	private TypeConversions() {
 		throw Constructors.unsupportedOperationException();

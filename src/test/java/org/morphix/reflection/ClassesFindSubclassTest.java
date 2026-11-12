@@ -48,5 +48,4 @@ class ClassesFindSubclassTest {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Classes.findSubclass(String.class, A.class));
 		assertThat(e.getMessage(), equalTo("The parent of " + A.class.getCanonicalName() + " is not a " + String.class.getCanonicalName()));
 	}
-
 }

@@ -56,10 +56,11 @@ public class Primitives {
 	 * @return primitive type
 	 */
 	public static <T> Class<T> toPrimitive(final Class<?> cls) {
-		if (!isUnboxable(cls)) {
+		Class<?> primitive = getUnboxedClass(cls);
+		if (null == primitive) {
 			throw new ReflectionException("Class {} cannot be transformed to primitive type", cls.getCanonicalName());
 		}
-		return JavaObjects.cast(CLASS_TO_PRIMITIVE_MAP.get(cls));
+		return JavaObjects.cast(primitive);
 	}
 
 	/**
@@ -71,10 +72,21 @@ public class Primitives {
 	 * @return the boxed class
 	 */
 	public static <T> Class<T> fromPrimitive(final Class<?> cls) {
-		if (!PRIMITIVE_TO_CLASS_MAP.containsKey(cls)) {
+		Class<?> boxed = getBoxedClass(cls);
+		if (null == boxed) {
 			throw new ReflectionException("Class {} cannot be transformed to boxed type", cls.getCanonicalName());
 		}
-		return JavaObjects.cast(PRIMITIVE_TO_CLASS_MAP.get(cls));
+		return JavaObjects.cast(boxed);
+	}
+
+	/**
+	 * Returns the primitive class for a given boxed class.
+	 *
+	 * @param clsBoxed boxed class
+	 * @return the primitive class for a given boxed class
+	 */
+	public static Class<?> getUnboxedClass(final Class<?> clsBoxed) {
+		return CLASS_TO_PRIMITIVE_MAP.get(clsBoxed);
 	}
 
 	/**
@@ -95,6 +107,71 @@ public class Primitives {
 	 */
 	public static boolean isUnboxable(final Class<?> clsBoxed) {
 		return CLASS_TO_PRIMITIVE_MAP.containsKey(clsBoxed);
+	}
+
+	/**
+	 * Returns true if the given class cannot be unboxed to its primitive counterpart.
+	 *
+	 * @param clsBoxed boxed class
+	 * @return true if the given class cannot be unboxed to its primitive counterpart
+	 */
+	public static boolean isNotUnboxable(final Class<?> clsBoxed) {
+		return !isUnboxable(clsBoxed);
+	}
+
+	/**
+	 * Returns true if the given primitive class can be boxed to its counterpart.
+	 *
+	 * @param clsPrimitive primitive class
+	 * @return true if the given primitive class can be boxed to its counterpart
+	 */
+	public static boolean isBoxable(final Class<?> clsPrimitive) {
+		return PRIMITIVE_TO_CLASS_MAP.containsKey(clsPrimitive);
+	}
+
+	/**
+	 * Returns true if the given primitive class cannot be boxed to its counterpart.
+	 *
+	 * @param clsPrimitive primitive class
+	 * @return true if the given primitive class cannot be boxed to its counterpart
+	 */
+	public static boolean isNotBoxable(final Class<?> clsPrimitive) {
+		return !isBoxable(clsPrimitive);
+	}
+
+	/**
+	 * Returns the primitive representation of the given class.
+	 * <p>
+	 * If the class is already primitive, it is returned unchanged. If the class is a boxed primitive, its primitive
+	 * counterpart is returned. Otherwise, {@code null} is returned.
+	 *
+	 * @param cls source class
+	 * @return primitive representation or {@code null}
+	 */
+	public static Class<?> primitiveOf(final Class<?> cls) {
+		if (null == cls) {
+			return null;
+		}
+		return cls.isPrimitive() ? cls : getUnboxedClass(cls);
+	}
+
+	/**
+	 * Returns the boxed representation of the given class.
+	 * <p>
+	 * If the class is already a boxed primitive, it is returned unchanged. If the class is primitive, its boxed counterpart
+	 * is returned. Otherwise, {@code null} is returned.
+	 *
+	 * @param cls source class
+	 * @return boxed representation or {@code null}
+	 */
+	public static Class<?> boxedOf(final Class<?> cls) {
+		if (null == cls) {
+			return null;
+		}
+		if (cls.isPrimitive()) {
+			return getBoxedClass(cls);
+		}
+		return isUnboxable(cls) ? cls : null;
 	}
 
 	/**

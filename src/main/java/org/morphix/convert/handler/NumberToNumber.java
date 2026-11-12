@@ -124,8 +124,9 @@ public class NumberToNumber extends FieldHandler {
 
 		/**
 		 * Array of converters for all primitive boxed classes. The first index is the source type and the second index is the
-		 * destination type. The value is a converter from the source type to the destination type. The array is sparse and only
-		 * contains converters for valid coercions.
+		 * destination type. The value is a converter from the source type to the destination type.
+		 * <p>
+		 * The array is sparse and only contains converters for valid coercions.
 		 */
 		@SuppressWarnings("unchecked")
 		private static final SimpleConverter<Object, Object>[][] CONVERTERS = new SimpleConverter[7][7];

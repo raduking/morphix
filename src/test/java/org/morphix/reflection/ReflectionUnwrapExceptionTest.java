@@ -77,5 +77,4 @@ class ReflectionUnwrapExceptionTest {
 
 		assertThat(result, equalTo(expected));
 	}
-
 }

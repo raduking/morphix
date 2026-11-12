@@ -14,11 +14,10 @@ package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.morphix.reflection.Primitives.fromPrimitive;
-import static org.morphix.reflection.Primitives.isUnboxable;
-import static org.morphix.reflection.Primitives.toPrimitive;
 
 import java.util.stream.Stream;
 
@@ -38,23 +37,23 @@ class PrimitivesTest {
 	@ParameterizedTest
 	@MethodSource("providePrimitivesAndBoxedClasses")
 	void shouldTransformToAllPrimitives(final Class<?> primitiveClass, final Class<?> boxedClass) {
-		assertThat(toPrimitive(boxedClass), equalTo(primitiveClass));
+		assertThat(Primitives.toPrimitive(boxedClass), equalTo(primitiveClass));
 	}
 
 	@Test
 	void shouldThrowExceptionIfClassCannotBeTransformedToPrimitive() {
-		assertThrows(ReflectionException.class, () -> toPrimitive(String.class));
+		assertThrows(ReflectionException.class, () -> Primitives.toPrimitive(String.class));
 	}
 
 	@ParameterizedTest
 	@MethodSource("providePrimitivesAndBoxedClasses")
 	void shouldTransformFromAllPrimitives(final Class<?> primitiveClass, final Class<?> boxedClass) {
-		assertThat(fromPrimitive(primitiveClass), equalTo(boxedClass));
+		assertThat(Primitives.fromPrimitive(primitiveClass), equalTo(boxedClass));
 	}
 
 	@Test
 	void shouldThrowExceptionIfParameterIsNotPrimitive() {
-		assertThrows(ReflectionException.class, () -> fromPrimitive(String.class));
+		assertThrows(ReflectionException.class, () -> Primitives.fromPrimitive(String.class));
 	}
 
 	@Test
@@ -67,7 +66,51 @@ class PrimitivesTest {
 	@ParameterizedTest
 	@MethodSource("providePrimitivesAndBoxedClasses")
 	void shouldReturnTrueIfTheClassIsUnboxable(@SuppressWarnings("unused") final Class<?> primitiveClass, final Class<?> boxedClass) {
-		assertTrue(isUnboxable(boxedClass));
+		assertTrue(Primitives.isUnboxable(boxedClass));
+	}
+
+	@Test
+	void shouldReportWhetherAClassIsUnboxable() {
+		assertFalse(Primitives.isUnboxable(String.class));
+		assertFalse(Primitives.isUnboxable(int.class));
+		assertFalse(Primitives.isNotUnboxable(Integer.class));
+		assertTrue(Primitives.isNotUnboxable(String.class));
+	}
+
+	@Test
+	void shouldReportWhetherAClassIsBoxable() {
+		assertTrue(Primitives.isBoxable(int.class));
+		assertFalse(Primitives.isBoxable(Integer.class));
+		assertFalse(Primitives.isBoxable(void.class));
+		assertFalse(Primitives.isNotBoxable(int.class));
+		assertTrue(Primitives.isNotBoxable(Integer.class));
+		assertTrue(Primitives.isNotBoxable(void.class));
+	}
+
+	@Test
+	void shouldReturnThePrimitiveRepresentation() {
+		assertThat(Primitives.primitiveOf(null), nullValue());
+		assertThat(Primitives.primitiveOf(int.class), equalTo(int.class));
+		assertThat(Primitives.primitiveOf(void.class), equalTo(void.class));
+		assertThat(Primitives.primitiveOf(Integer.class), equalTo(int.class));
+		assertThat(Primitives.primitiveOf(String.class), nullValue());
+	}
+
+	@Test
+	void shouldReturnTheBoxedRepresentation() {
+		assertThat(Primitives.boxedOf(null), nullValue());
+		assertThat(Primitives.boxedOf(int.class), equalTo(Integer.class));
+		assertThat(Primitives.boxedOf(void.class), nullValue());
+		assertThat(Primitives.boxedOf(Integer.class), equalTo(Integer.class));
+		assertThat(Primitives.boxedOf(String.class), nullValue());
+	}
+
+	@Test
+	void shouldReturnNullWhenTheClassHasNoCounterpart() {
+		assertThat(Primitives.getUnboxedClass(String.class), nullValue());
+		assertThat(Primitives.getUnboxedClass(void.class), nullValue());
+		assertThat(Primitives.getBoxedClass(String.class), nullValue());
+		assertThat(Primitives.getBoxedClass(void.class), nullValue());
 	}
 
 	private static Stream<Arguments> providePrimitivesAndBoxedClasses() {
@@ -81,5 +124,4 @@ class PrimitivesTest {
 				Arguments.of(float.class, Float.class),
 				Arguments.of(double.class, Double.class));
 	}
-
 }
