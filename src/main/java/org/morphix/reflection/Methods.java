@@ -382,20 +382,24 @@ public interface Methods {
 		Reflection.requireNotNull(cls, "Cannot find setter method: class is null");
 		Reflection.requireNotNull(field, "Cannot find setter method in class {}: field descriptor is null", cls);
 		String methodName = MethodType.SETTER.getMethodName(field);
-		Method method = Methods.getOneDeclaredInHierarchy(methodName, cls, field.getType());
+		Class<?> fieldType = field.getType();
+		Method method = Methods.getOneDeclaredInHierarchy(methodName, cls, fieldType);
 		if (null != method) {
 			return method;
 		}
-		Class<?> primitiveFieldType;
-		try {
-			primitiveFieldType = Primitives.toPrimitive(field.getType());
-		} catch (ReflectionException e) {
-			throw new ReflectionException(ErrorMessage.ERROR_FINDING_METHOD, methodName, field.getType().getCanonicalName());
+		Class<?> alternateType;
+		if (fieldType.isPrimitive()) {
+			alternateType = Primitives.fromPrimitive(fieldType);
+		} else if (Primitives.isUnboxable(fieldType)) {
+			alternateType = Primitives.toPrimitive(fieldType);
+		} else {
+			throw new ReflectionException("Cannot find setter method {}({}) in class {}", methodName, fieldType.getTypeName(), cls);
 		}
-		method = Methods.getOneDeclaredInHierarchy(methodName, cls, primitiveFieldType);
+		method = Methods.getOneDeclaredInHierarchy(methodName, cls, alternateType);
 		if (null == method) {
-			throw new ReflectionException(ErrorMessage.ERROR_FINDING_METHOD_OR,
-					methodName, field.getType().getCanonicalName(), methodName, primitiveFieldType.getCanonicalName());
+			throw new ReflectionException(
+					"Cannot find setter method {}({}) or {}({}) in class {}",
+					methodName, fieldType.getTypeName(), methodName, alternateType.getTypeName(), cls);
 		}
 		return method;
 	}
@@ -441,41 +445,11 @@ public interface Methods {
 			// e is just a wrapper on the real exception, escalate the real one
 			Throwable cause = Reflection.unwrapInvocationTargetException(e);
 			String className = Classes.getCanonicalName(method, obj);
-			throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), cause.getMessage());
+			throw new ReflectionException(e, "Cannot invoke method {}.{}: {}", className, method.getName(), cause.getMessage());
 		} catch (Exception e) {
 			// escalate any exception invoking the method
 			String className = Classes.getCanonicalName(method, obj);
-			throw new ReflectionException(e, ErrorMessage.ERROR_INVOKING_METHOD, className, method.getName(), e.getMessage());
-		}
-	}
-
-	/**
-	 * Namespace for error messages. These messages are used for exception messages.
-	 *
-	 * @author Radu Sebastian LAZIN
-	 */
-	final class ErrorMessage { // NOSONAR this is a namespace for error messages
-
-		/**
-		 * Error invoking method message.
-		 */
-		public static final String ERROR_INVOKING_METHOD = "Cannot invoke method {}.{}: {}";
-
-		/**
-		 * Error finding method message.
-		 */
-		public static final String ERROR_FINDING_METHOD = "Cannot find method {}({})";
-
-		/**
-		 * Error finding method or method message. This is used when trying to find a method with two different parameter types.
-		 */
-		public static final String ERROR_FINDING_METHOD_OR = ERROR_FINDING_METHOD + " or {}({})";
-
-		/**
-		 * Private constructor to avoid instantiation.
-		 */
-		private ErrorMessage() {
-			throw Constructors.unsupportedOperationException();
+			throw new ReflectionException(e, "Cannot invoke method {}.{}: {}", className, method.getName(), e.getMessage());
 		}
 	}
 
