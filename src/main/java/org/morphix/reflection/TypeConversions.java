@@ -15,11 +15,16 @@ package org.morphix.reflection;
 /**
  * Conversions accepted by {@link java.lang.reflect.Field#set(Object, Object)}.
  * <p>
- * A primitive target accepts its wrapper and the widening primitive conversions: {@code byte} to {@code short},
- * {@code int}, {@code long}, {@code float}, or {@code double}; {@code short} or {@code char} to {@code int},
- * {@code long}, {@code float}, or {@code double}; {@code int} to {@code long}, {@code float}, or {@code double};
- * {@code long} to {@code float} or {@code double}; {@code float} to {@code double}. {@code boolean} accepts only
- * {@code Boolean}. Narrowing, and {@code byte} or {@code short} to {@code char}, are rejected.
+ * A primitive target accepts its wrapper and the widening primitive conversions:
+ * <ul>
+ * <li>{@code byte} to {@code short}, {@code int}, {@code long}, {@code float}, or {@code double}</li>
+ * <li>{@code short} or {@code char} to {@code int}, {@code long}, {@code float}, or {@code double}</li>
+ * <li>{@code int} to {@code long}, {@code float}, or {@code double}</li>
+ * <li>{@code long} to {@code float} or {@code double}</li>
+ * <li>{@code float} to {@code double}</li>
+ * <li>{@code boolean} accepts only {@code Boolean}</li>
+ * <li>narrowing {@code byte} or {@code short} to {@code char} are rejected</li>
+ * </ul>
  * <p>
  * {@link Classes#isAssignableFrom(Class, Class)} treats a primitive and its wrapper as the same type and does not apply
  * these widening conversions.
@@ -28,7 +33,7 @@ package org.morphix.reflection;
  *
  * @author Radu Sebastian LAZIN
  */
-public class TypeCoercion {
+public class TypeConversions {
 
 	/**
 	 * Returns true when {@code value} can be stored in a field of type {@code target}. A {@code null} value is accepted for
@@ -314,7 +319,7 @@ public class TypeCoercion {
 	/**
 	 * Private constructor that throws exception if called.
 	 */
-	private TypeCoercion() {
+	private TypeConversions() {
 		throw Constructors.unsupportedOperationException();
 	}
 }
