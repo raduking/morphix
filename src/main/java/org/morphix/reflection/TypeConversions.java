@@ -33,13 +33,37 @@ public class TypeConversions {
 	/**
 	 * Maps each primitive source type to the primitive target types it converts to without loss of information. Used by
 	 * {@link #isAlwaysConvertible(Class, Class)}. Boolean and void have no entries because they convert to no other type.
+	 * <ul>
+	 * <li>byte -> (short, int, long, float, double)</li>
+	 * <li>short -> (int, long, float, double)</li>
+	 * <li>char -> (int, long, float, double)</li>
+	 * <li>int -> (long, float, double)</li>
+	 * <li>long -> (float, double)</li>
+	 * <li>float -> (double)</li>
+	 * </ul>
 	 */
 	private static final Map<Class<?>, Set<Class<?>>> LOSSLESS_TARGETS = Map.of(
-			byte.class, Set.of(short.class, int.class, long.class, float.class, double.class),
-			short.class, Set.of(int.class, long.class, float.class, double.class),
-			char.class, Set.of(int.class, long.class, float.class, double.class),
-			int.class, Set.of(long.class, double.class),
-			float.class, Set.of(double.class));
+			byte.class, Set.of(
+					short.class,
+					int.class,
+					long.class,
+					float.class,
+					double.class),
+			short.class, Set.of(
+					int.class,
+					long.class,
+					float.class,
+					double.class),
+			char.class, Set.of(
+					int.class,
+					long.class,
+					float.class,
+					double.class),
+			int.class, Set.of(
+					long.class,
+					double.class),
+			float.class, Set.of(
+					double.class));
 
 	/**
 	 * Returns whether the value can be converted exactly to the target type. Primitive wrapper targets support the same
