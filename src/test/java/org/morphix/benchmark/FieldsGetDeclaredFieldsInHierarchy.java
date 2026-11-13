@@ -41,6 +41,12 @@ import org.openjdk.jmh.infra.Blackhole;
  * mvn jmh:benchmark -Pbenchmark -Djmh.benchmarks=org.morphix.benchmark.FieldsGetDeclaredFieldsInHierarchy
  * </pre>
  *
+ * Or run specific methods with:
+ *
+ * <pre>
+ * mvn jmh:benchmark -Pbenchmark -Djmh.benchmarks='org.morphix.benchmark.FieldsGetDeclaredFieldsInHierarchy.testConstructionWith.*'
+ * </pre>
+ *
  * @author Radu Sebastian LAZIN
  */
 @BenchmarkMode(Mode.AverageTime)
@@ -94,6 +100,11 @@ public class FieldsGetDeclaredFieldsInHierarchy {
 			linkedList = getDeclaredFieldsLinkedList(D.class);
 			arrayList = new ArrayList<>(linkedList);
 		}
+	}
+
+	@Benchmark
+	public List<Field> testConstructionWithCurrentImplementation() {
+		return Fields.getAllDeclaredInHierarchy(D.class);
 	}
 
 	@Benchmark
