@@ -2,6 +2,12 @@
 
 `1.1.1`
 
+- Added `Fields.Unchecked.getOneDeclared(Class, String)` for direct field lookup without parameter validation.
+- Added `Fields.Unchecked.getOneDeclaredInHierarchy(Class, String)` for direct field lookup throughout a class hierarchy.
+- Added `Fields.Unchecked.getAllDeclared(Class)` for direct retrieval of a class's declared fields.
+- Added `Fields.Unchecked.getAllDeclared(Class, Predicate)` for direct retrieval and filtering of declared fields.
+- Added `Fields.Unchecked.filter(List, Predicate)` for direct filtering of a field list without parameter validation.
+
 ---
 
 `1.1.0`
