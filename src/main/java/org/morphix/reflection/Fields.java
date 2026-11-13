@@ -317,6 +317,7 @@ public interface Fields {
 	 * @author Radu Sebastian LAZIN
 	 */
 	interface IgnoreAccess {
+
 		/**
 		 * Returns the value of the given field from the given object ignoring field access modifiers.
 		 *
@@ -569,7 +570,7 @@ public interface Fields {
 		 * @return existing field, null otherwise
 		 */
 		static Field getOneDeclaredInHierarchy(final Object obj, final String fieldName) {
-			if (null == obj) {
+			if (null == obj || null == fieldName) {
 				return null;
 			}
 			Class<?> cls = Classes.getFrom(obj);
@@ -587,8 +588,11 @@ public interface Fields {
 		 * @return field value or null if the field value cannot be returned
 		 */
 		static <T> T get(final Object obj, final Field field) {
+			if (null == field) {
+				return null;
+			}
 			try {
-				return Fields.IgnoreAccess.get(obj, field);
+				return Unchecked.get(obj, field);
 			} catch (ReflectionException e) {
 				return null;
 			}
@@ -605,11 +609,11 @@ public interface Fields {
 		 * @return field value, null if the field is not found
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
-			Class<?> cls = Classes.getFrom(obj);
-			Field field = Safe.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field) {
+			if (null == obj || null == fieldName) {
 				return null;
 			}
+			Class<?> cls = Classes.getFrom(obj);
+			Field field = Safe.getOneDeclaredInHierarchy(cls, fieldName);
 			return Safe.get(obj, field);
 		}
 
@@ -624,10 +628,10 @@ public interface Fields {
 		 * @return the value of the static field with the given name, null if the field is not found or is not static
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
-			Field field = Safe.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field) {
+			if (null == cls || null == fieldName) {
 				return null;
 			}
+			Field field = Safe.getOneDeclaredInHierarchy(cls, fieldName);
 			return Safe.getStatic(field);
 		}
 
