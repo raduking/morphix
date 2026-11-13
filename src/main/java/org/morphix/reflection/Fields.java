@@ -14,7 +14,6 @@ package org.morphix.reflection;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -144,13 +143,6 @@ public interface Fields {
 	 * Note: if the class given as parameter is an interface then the fields declared by that interface are returned, but
 	 * not the ones declared by its super interfaces, since those are interfaces as well.
 	 * <p>
-	 * {@link LinkedList} is used because:
-	 * <ul>
-	 * <li>it is more efficient in terms of memory consumption</li>
-	 * <li>accessing the first and last has O(1) complexity</li>
-	 * <li>more often than not no random access is needed</li>
-	 * <li>profiling: ~50% times faster than using {@link ArrayList}</li>
-	 * </ul>
 	 * The returned order of the fields are: class -> super class -> ... -> base class and all fields in each class are
 	 * returned in the declared order.
 	 *
@@ -163,11 +155,10 @@ public interface Fields {
 		if (null == cls) {
 			return List.of();
 		}
-		// an interface has no super class, but it does declare fields of its own
-		Class<?> superClass = cls.getSuperclass();
-		List<Field> fields = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass);
-		// Object declares no fields, so no special case is needed for it here
-		fields.addAll(0, getAllDeclared(cls));
+		List<Field> fields = new ArrayList<>();
+		for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
+			fields.addAll(getAllDeclared(type));
+		}
 		return fields;
 	}
 
