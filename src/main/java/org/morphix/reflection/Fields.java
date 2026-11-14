@@ -194,7 +194,7 @@ public interface Fields {
 		if (null == cls || null == predicate) {
 			return List.of();
 		}
-		return filter(getAllDeclaredInHierarchy(cls), predicate);
+		return Unchecked.getAllDeclaredInHierarchy(cls, predicate);
 	}
 
 	/**
@@ -873,6 +873,33 @@ public interface Fields {
 			List<Field> fields = new ArrayList<>();
 			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
 				fields.addAll(Unchecked.getAllDeclared(type));
+			}
+			return fields;
+		}
+
+		/**
+		 * Returns all fields declared by the given class and its super classes that match the given predicate.
+		 * <p>
+		 * Fields are returned in hierarchy order, starting from the given class. Within each class, fields are returned in the
+		 * order provided by {@link Class#getDeclaredFields()}. Superinterfaces are not walked; only the class superclass chain
+		 * is included.
+		 * <p>
+		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
+		 * handle exceptions.
+		 *
+		 * @param <T> type to get the fields from
+		 *
+		 * @param cls class on which the fields are returned
+		 * @param predicate predicate for fields
+		 * @return list of fields
+		 */
+		static <T> List<Field> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<Field> predicate) {
+			if (null == cls.getSuperclass()) {
+				return Unchecked.getAllDeclared(cls, predicate);
+			}
+			List<Field> fields = new ArrayList<>();
+			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
+				fields.addAll(Unchecked.getAllDeclared(type, predicate));
 			}
 			return fields;
 		}

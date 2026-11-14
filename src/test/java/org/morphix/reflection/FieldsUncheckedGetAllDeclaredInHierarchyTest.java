@@ -16,8 +16,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.morphix.reflection.predicates.MemberPredicates.withAnnotation;
 
 import java.lang.reflect.Field;
+import java.util.function.Predicate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -25,7 +27,12 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Fields.Unchecked#getAllDeclaredInHierarchy(Class)}.
+ * Test class for:
+ *
+ * <ul>
+ * <li>{@link Fields.Unchecked#getAllDeclaredInHierarchy(Class)}</li>
+ * <li>{@link Fields.Unchecked#getAllDeclaredInHierarchy(Class, Predicate)}</li>
+ * </ul>
  *
  * @author Radu Sebastian LAZIN
  */
@@ -45,6 +52,13 @@ class FieldsUncheckedGetAllDeclaredInHierarchyTest {
 
 	public static class C {
 		// empty class
+	}
+
+	public static class D {
+		@Deprecated
+		int x;
+
+		int y;
 	}
 
 	public static class F extends B {
@@ -145,6 +159,55 @@ class FieldsUncheckedGetAllDeclaredInHierarchyTest {
 		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(WithConstant.class),
 				equalTo(Fields.getAllDeclaredInHierarchy(WithConstant.class)));
 		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(Object.class), equalTo(Fields.getAllDeclaredInHierarchy(Object.class)));
+	}
+
+	@Test
+	void shouldReturnFieldsWithAnnotation() throws Exception {
+		Field fx = D.class.getDeclaredField("x");
+
+		List<Field> annotatedFields = Fields.Unchecked.getAllDeclaredInHierarchy(D.class, withAnnotation(Deprecated.class));
+		assertThat(annotatedFields, hasSize(1));
+		assertThat(annotatedFields.get(0), equalTo(fx));
+	}
+
+	@Test
+	void shouldReturnTheOwnFieldsOfAnInterfaceWithPredicate() {
+		List<Field> fields = Fields.Unchecked.getAllDeclaredInHierarchy(WithConstant.class, field -> true);
+
+		assertThat(fields, hasSize(WithConstant.class.getDeclaredFields().length));
+		assertThat(fields.get(0).getName(), equalTo("CONSTANT"));
+	}
+
+	@Test
+	void shouldThrowNullPointerExceptionForNullPredicate() {
+		assertThrows(NullPointerException.class, () -> Fields.Unchecked.getAllDeclaredInHierarchy(D.class, null));
+	}
+
+	@Test
+	void shouldThrowNullPointerExceptionForNullClassWithPredicate() {
+		assertThrows(NullPointerException.class, () -> Fields.Unchecked.getAllDeclaredInHierarchy((Class<?>) null, field -> true));
+	}
+
+	@Test
+	void shouldApplyPredicateWhenTheClassHasNoSuperclass() {
+		List<Field> all = Fields.Unchecked.getAllDeclaredInHierarchy(WithConstant.class);
+		List<Field> none = Fields.Unchecked.getAllDeclaredInHierarchy(WithConstant.class, field -> false);
+
+		assertThat(none, hasSize(0));
+		assertThat(all, hasSize(WithConstant.class.getDeclaredFields().length));
+	}
+
+	@Test
+	void shouldMatchFieldsGetAllDeclaredInHierarchyWithPredicate() {
+		Predicate<Field> predicate = withAnnotation(Deprecated.class);
+		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(D.class, predicate),
+				equalTo(Fields.getAllDeclaredInHierarchy(D.class, predicate)));
+		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(B.class, field -> true),
+				equalTo(Fields.getAllDeclaredInHierarchy(B.class, field -> true)));
+		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(WithConstant.class, field -> true),
+				equalTo(Fields.getAllDeclaredInHierarchy(WithConstant.class, field -> true)));
+		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(Object.class, field -> true),
+				equalTo(Fields.getAllDeclaredInHierarchy(Object.class, field -> true)));
 	}
 
 }
