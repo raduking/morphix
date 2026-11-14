@@ -251,7 +251,7 @@ public interface Classes {
 	 * @return true if the class is present in the classpath, false otherwise
 	 */
 	static boolean isPresent(final String className) {
-		return null != Classes.Safe.getOne(className);
+		return null != Safe.getOne(className);
 	}
 
 	/**

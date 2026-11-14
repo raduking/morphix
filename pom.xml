@@ -182,7 +182,22 @@
 					<release>${maven.compiler.release}</release>
 					<proc>none</proc>
 				</configuration>
-			</plugin>
+				<executions>
+					<execution>
+						<id>default-testCompile</id>
+						<configuration>
+							<proc>full</proc>
+							<annotationProcessorPaths>
+								<path>
+									<groupId>org.openjdk.jmh</groupId>
+									<artifactId>jmh-generator-annprocess</artifactId>
+									<version>${jmh.version}</version>
+								</path>
+							</annotationProcessorPaths>
+						</configuration>
+					</execution>
+				</executions>
+    		</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

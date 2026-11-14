@@ -17,10 +17,14 @@ import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
@@ -396,6 +400,78 @@ class FastArrayListTest {
 			OutOfMemoryError e = assertThrows(OutOfMemoryError.class, () -> list.add("a"));
 			assertThat(e.getMessage(), equalTo("Required array length exceeds maximum array size"));
 		}
+
+		@Test
+		void shouldRespectSubclassToArrayWhenAddingAll() {
+			FastArrayList<String> source = new FastArrayList<>() {
+				@Override
+				public Object[] toArray() {
+					return new Object[] { "x", "y" };
+				}
+			};
+			source.add("a");
+			source.add("b");
+
+			FastArrayList<String> list = new FastArrayList<>();
+			list.add("initial");
+
+			assertThat(list.addAll(source), equalTo(true));
+			assertThat(list, equalTo(List.of("initial", "x", "y")));
+		}
+
+		@Test
+		void shouldRespectSubclassToArrayWhenInsertingAll() {
+			FastArrayList<String> source = new FastArrayList<>() {
+				@Override
+				public Object[] toArray() {
+					return new Object[] { "x", "y" };
+				}
+			};
+			source.add("a");
+			source.add("b");
+
+			FastArrayList<String> list = new FastArrayList<>(new String[] { "first", "last" });
+
+			assertThat(list.addAll(1, source), equalTo(true));
+			assertThat(list, equalTo(List.of("first", "x", "y", "last")));
+		}
+
+		@Test
+		void shouldReplaceWrappedStorageWhenAddingIncompatibleArrayElement() {
+			Integer[][] array = {
+					{ 1, 2 },
+					{ 3, 4 }
+			};
+			FastArrayList<Number[]> list = FastArrayList.wrap(array);
+
+			list.remove(1);
+
+			Number[] element = { 5.5, 6L };
+
+			assertThat(list.add(element), equalTo(true));
+			assertThat(list, hasSize(2));
+			assertSame(element, list.get(1));
+			assertArrayEquals(new Integer[] { 1, 2 }, array[0]);
+			assertNull(array[1]);
+		}
+
+		@Test
+		void shouldPreserveWrappedStorageWhenAddingCompatibleArrayElement() {
+			Integer[][] array = {
+					{ 1, 2 },
+					{ 3, 4 }
+			};
+			FastArrayList<Number[]> list = FastArrayList.wrap(array);
+
+			list.remove(1);
+
+			Integer[] element = { 5, 6 };
+
+			assertThat(list.add(element), equalTo(true));
+			assertThat(list, hasSize(2));
+			assertSame(element, list.get(1));
+			assertSame(element, array[1]);
+		}
 	}
 
 	@Nested
@@ -498,6 +574,78 @@ class FastArrayListTest {
 			Fields.IgnoreAccess.set(list, "size", Integer.MAX_VALUE - 1);
 
 			assertThrows(OutOfMemoryError.class, () -> list.addAll(new String[] { "a", "b" }));
+		}
+
+		@Test
+		void shouldPreserveWrappedArrayWhenAddingCompatibleArray() {
+			String[] array = { "a", "b", "c", "d" };
+			FastArrayList<String> list = FastArrayList.wrap(array);
+
+			list.remove(3);
+
+			assertThat(list.addAll(new String[] { "e" }), equalTo(true));
+
+			assertThat(list, equalTo(List.of("a", "b", "c", "e")));
+			assertArrayEquals(new String[] { "a", "b", "c", "e" }, array);
+		}
+
+		@Test
+		void shouldPreserveWrappedArrayWhenAddingSubtypeArray() {
+			Number[] array = { 1, 2, 3, 4 };
+			FastArrayList<Number> list = FastArrayList.wrap(array);
+
+			list.remove(3);
+			list.remove(2);
+
+			assertThat(list.addAll(new Integer[] { 5, 6 }), equalTo(true));
+			assertThat(list, equalTo(List.of(1, 2, 5, 6)));
+			assertArrayEquals(new Number[] { 1, 2, 5, 6 }, array);
+		}
+
+		@Test
+		void shouldPreserveWrappedArrayWhenInsertingCompatibleArray() {
+			String[] array = { "a", "b", "c", "d", "e" };
+			FastArrayList<String> list = FastArrayList.wrap(array);
+
+			list.remove(4);
+			list.remove(3);
+
+			assertThat(list.addAll(1, new String[] { "x", "y" }), equalTo(true));
+			assertThat(list, equalTo(List.of("a", "x", "y", "b", "c")));
+			assertArrayEquals(new String[] { "a", "x", "y", "b", "c" }, array);
+		}
+
+		@Test
+		void shouldReplaceWrappedArrayWhenAddingIncompatibleArray() {
+			Integer[] array = { 1, 2, 3, 4 };
+			FastArrayList<Number> list = FastArrayList.wrap(array);
+
+			list.remove(3);
+			list.remove(2);
+
+			assertThat(list.addAll(new Number[] { 5.5, 6L }), equalTo(true));
+
+			assertThat(list, equalTo(List.of(1, 2, 5.5, 6L)));
+			assertArrayEquals(new Integer[] { 1, 2, null, null }, array);
+
+			list.set(0, 7);
+
+			assertThat(list.get(0), equalTo(7));
+			assertThat(array[0], equalTo(1));
+		}
+
+		@Test
+		void shouldPreserveWrappedArrayWhenInsertingOverlappingRange() {
+			String[] array = { "a", "b", "c", "d", "e", "f" };
+			FastArrayList<String> list = FastArrayList.wrap(array);
+
+			list.remove(5);
+			list.remove(4);
+
+			assertThat(list.addAll(0, array, 2, 2), equalTo(true));
+
+			assertThat(list, equalTo(List.of("c", "d", "a", "b", "c", "d")));
+			assertArrayEquals(new String[] { "c", "d", "a", "b", "c", "d" }, array);
 		}
 	}
 
@@ -1106,11 +1254,11 @@ class FastArrayListTest {
 		}
 
 		@Test
-		void shouldNotAllocateForSmallCapacityOnDefaultList() {
+		void shouldAllocateDefaultCapacityForSmallCapacityOnDefaultList() {
 			FastArrayList<String> list = new FastArrayList<>();
 			list.ensureCapacity(5);
 
-			assertThat(list.capacity(), equalTo(0));
+			assertThat(list.capacity(), equalTo(10));
 		}
 
 		@Test
