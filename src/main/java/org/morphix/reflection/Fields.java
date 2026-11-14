@@ -177,14 +177,7 @@ public interface Fields {
 		if (null == cls) {
 			return List.of();
 		}
-		if (null == cls.getSuperclass()) {
-			return Unchecked.getAllDeclared(cls);
-		}
-		List<Field> fields = new ArrayList<>();
-		for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
-			fields.addAll(Unchecked.getAllDeclared(type));
-		}
-		return fields;
+		return Unchecked.getAllDeclaredInHierarchy(cls);
 	}
 
 	/**
@@ -856,6 +849,32 @@ public interface Fields {
 		 */
 		static <T> List<Field> getAllDeclared(final Class<T> cls, final Predicate<Field> predicate) {
 			return Unchecked.filter(Unchecked.getAllDeclared(cls), predicate);
+		}
+
+		/**
+		 * Returns all fields declared by the given class and its super classes.
+		 * <p>
+		 * Fields are returned in hierarchy order, starting from the given class. Within each class, fields are returned in the
+		 * order provided by {@link Class#getDeclaredFields()}. Superinterfaces are not walked; only the class superclass chain
+		 * is included.
+		 * <p>
+		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
+		 * {@link Fields#getAllDeclaredInHierarchy(Class)} if you want an empty list when the class is {@code null}.
+		 *
+		 * @param <T> type to get the fields from
+		 *
+		 * @param cls class on which the fields are returned
+		 * @return list of fields
+		 */
+		static <T> List<Field> getAllDeclaredInHierarchy(final Class<T> cls) {
+			if (null == cls.getSuperclass()) {
+				return Unchecked.getAllDeclared(cls);
+			}
+			List<Field> fields = new ArrayList<>();
+			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
+				fields.addAll(Unchecked.getAllDeclared(type));
+			}
+			return fields;
 		}
 
 		/**
