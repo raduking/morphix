@@ -316,8 +316,16 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 		// bulk insertion requires storage compatible with every element type
 		ensureObjectStorage();
 
+		Object[] source = array;
+		int sourceOffset = offset;
+		// shifting the tail overwrites a source range of the backing array that starts after the insertion index
+		if (source == elements && offset > index) {
+			source = Arrays.copyOfRange(array, offset, offset + length);
+			sourceOffset = 0;
+		}
+
 		System.arraycopy(elements, index, elements, index + length, size - index);
-		System.arraycopy(array, offset, elements, index, length);
+		System.arraycopy(source, sourceOffset, elements, index, length);
 
 		size += length;
 		++modCount;
@@ -347,7 +355,6 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 		if (index < 0) {
 			return false;
 		}
-
 		removeAt(index);
 		return true;
 	}
@@ -424,7 +431,6 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 				}
 			}
 		}
-
 		return -1;
 	}
 
@@ -446,7 +452,6 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 				}
 			}
 		}
-
 		return -1;
 	}
 
@@ -494,13 +499,13 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 
 		int expectedModCount = modCount;
 		int length = size;
-		Object[] data = elements;
 
+		// the backing array is not cached because set can replace it during iteration
 		for (int i = 0; i < length && expectedModCount == modCount; ++i) {
-			action.accept(JavaObjects.cast(data[i]));
+			action.accept(elementAt(i));
 		}
 
-		checkForComodification(expectedModCount);
+		checkForConcurrentModification(expectedModCount);
 	}
 
 	/**
@@ -513,16 +518,16 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 		int expectedModCount = modCount;
 		int length = size;
 
-		for (int i = 0; i < length && expectedModCount == modCount; ++i) {
+		for (int i = 0; i < length; ++i) {
 			E value = operator.apply(elementAt(i));
 
-			checkForComodification(expectedModCount);
+			checkForConcurrentModification(expectedModCount);
 			ensureCompatibleStorage(value);
 
 			elements[i] = value;
 		}
 
-		checkForComodification(expectedModCount);
+		checkForConcurrentModification(expectedModCount);
 		++modCount;
 	}
 
@@ -536,7 +541,7 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 
 		Arrays.sort((E[]) elements, 0, size, comparator);
 
-		checkForComodification(expectedModCount);
+		checkForConcurrentModification(expectedModCount);
 		++modCount;
 	}
 
@@ -551,20 +556,20 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 		int length = size;
 		int first = 0;
 
-		// Skip the initial run of elements that are retained.
+		// skip the initial run of elements that are retained.
 		while (first < length && expectedModCount == modCount
 				&& !predicate.test(elementAt(first))) {
 			++first;
 		}
 
-		checkForComodification(expectedModCount);
+		checkForConcurrentModification(expectedModCount);
 
 		if (first == length) {
 			return false;
 		}
 
-		// Record matching elements before modifying the list.
-		// This leaves the list unchanged if the predicate throws.
+		// record matching elements before modifying the list
+		// this leaves the list unchanged if the predicate throws
 		int remaining = length - first;
 		long[] removed = new long[(int) ((remaining + 63L) >>> 6)];
 
@@ -577,7 +582,7 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 			}
 		}
 
-		checkForComodification(expectedModCount);
+		checkForConcurrentModification(expectedModCount);
 
 		int write = first;
 
@@ -644,11 +649,9 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 */
 	private void ensureCapacityFor(final int count) {
 		int minimumCapacity = size + count;
-
 		if (minimumCapacity < 0) {
 			throw new OutOfMemoryError("Required array length exceeds maximum array size");
 		}
-
 		if (minimumCapacity > elements.length) {
 			grow(minimumCapacity);
 		}
@@ -662,19 +665,16 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	private void grow(final int minimumCapacity) {
 		int oldCapacity = elements.length;
 		int newCapacity;
-
 		if (elements == DEFAULT_EMPTY) {
 			newCapacity = Math.max(Default.CAPACITY, minimumCapacity);
 		} else {
 			long preferredCapacity = (long) oldCapacity + (oldCapacity >> 1);
-
 			if (preferredCapacity <= SOFT_MAX_ARRAY_LENGTH) {
 				newCapacity = Math.max(minimumCapacity, (int) preferredCapacity);
 			} else {
 				newCapacity = Math.max(minimumCapacity, SOFT_MAX_ARRAY_LENGTH);
 			}
 		}
-
 		elements = Arrays.copyOf(elements, newCapacity, Object[].class);
 	}
 
@@ -727,7 +727,7 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 *
 	 * @param expectedModCount expected modification count
 	 */
-	private void checkForComodification(final int expectedModCount) {
+	private void checkForConcurrentModification(final int expectedModCount) {
 		if (expectedModCount != modCount) {
 			throw new ConcurrentModificationException();
 		}

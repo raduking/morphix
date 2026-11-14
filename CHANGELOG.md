@@ -17,6 +17,7 @@
 - Changed `JavaArrays.empty(Class)` to return `JavaArrays.EMPTY` for `Object.class` and to reject a primitive component type.
 - Changed `AlwaysEmptyList.toArray()` to return `JavaArrays.EMPTY`.
 - Changed `AlwaysEmptyList` to implement `equals` and `hashCode` consistent with other empty lists.
+- Added `FastArrayList` as a resizable array-backed list optimized for bulk operations on arrays.
 
 ---
 
