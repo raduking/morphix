@@ -885,7 +885,7 @@ public interface Fields {
 		 * Returns all fields declared by the given class and its super classes that match the given predicate.
 		 * <p>
 		 * Fields are returned in hierarchy order, starting from the given class. Within each class, fields are returned in the
-		 * order provided by {@link Class#getDeclaredFields()}. Superinterfaces are not walked; only the class superclass chain
+		 * order provided by {@link Class#getDeclaredFields()}. Super interfaces are not walked; only the class superclass chain
 		 * is included.
 		 * <p>
 		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to

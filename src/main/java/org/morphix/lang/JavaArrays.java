@@ -16,12 +16,19 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.stream.StreamSupport;
 
+import org.morphix.reflection.Classes;
+
 /**
  * Utility class for Java arrays. It is named JavaArrays to avoid confusion with {@link Arrays} class.
  *
  * @author Radu Sebastian LAZIN
  */
 public interface JavaArrays {
+
+	/**
+	 * An empty object array.
+	 */
+	Object[] EMPTY = { };
 
 	/**
 	 * Returns the provided array, or an empty array if the parameter is {@code null}.
@@ -59,33 +66,41 @@ public interface JavaArrays {
 	 * <li>If the value is neither an array nor an {@link Iterable}, a single-element Object array is returned containing
 	 * the value.</li>
 	 * </ul>
-	 * This method always returns a new Object array, ensuring that the returned array is a separate instance from the input
-	 * value.
+	 * Non-empty arrays returned by this method are always newly allocated. Empty arrays whose runtime component type is
+	 * {@link Object} are represented by the shared {@link #EMPTY} instance. Reference arrays with other component types
+	 * retain their runtime type and are always copied.
 	 *
 	 * @param value the array to convert
 	 * @return the converted Object array
 	 */
 	static Object[] toArray(final Object value) {
 		if (null == value) {
-			return new Object[0];
+			return EMPTY;
 		}
 		Class<?> type = value.getClass();
-
-		if (type.isArray()) {
-			if (!type.getComponentType().isPrimitive()) {
-				return ((Object[]) value).clone();
+		if (Classes.isNotArray(type)) {
+			if (value instanceof Iterable<?> iterable) {
+				Object[] array = StreamSupport.stream(iterable.spliterator(), false).toArray();
+				return 0 == array.length ? EMPTY : array;
 			}
+			return new Object[] { value };
+		}
+		if (type.getComponentType().isPrimitive()) {
 			int length = Array.getLength(value);
+			if (0 == length) {
+				return EMPTY;
+			}
 			Object[] array = new Object[length];
 			for (int i = 0; i < length; ++i) {
 				array[i] = Array.get(value, i);
 			}
 			return array;
 		}
-		if (value instanceof Iterable<?> iterable) {
-			return StreamSupport.stream(iterable.spliterator(), false).toArray();
+		Object[] array = (Object[]) value;
+		if (Object[].class == type && 0 == array.length) {
+			return EMPTY;
 		}
-		return new Object[] { value };
+		return array.clone();
 	}
 
 	/**
@@ -119,9 +134,15 @@ public interface JavaArrays {
 	 *
 	 * @param componentType the class type of the array elements
 	 * @return an empty array of the specified class type
+	 * @throws IllegalArgumentException if the component type is primitive
 	 */
-	@SuppressWarnings("unchecked")
 	static <T> T[] empty(final Class<T> componentType) {
-		return (T[]) Array.newInstance(componentType, 0);
+		if (Object.class == componentType) {
+			return JavaObjects.cast(EMPTY);
+		}
+		if (componentType.isPrimitive()) {
+			throw new IllegalArgumentException("Component type cannot be a primitive: " + componentType);
+		}
+		return JavaObjects.cast(Array.newInstance(componentType, 0));
 	}
 }
