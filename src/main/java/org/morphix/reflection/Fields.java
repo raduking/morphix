@@ -16,6 +16,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.morphix.lang.JavaObjects;
@@ -209,7 +210,7 @@ public interface Fields {
 			return List.of();
 		}
 		Class<?> cls = Classes.getFrom(obj);
-		return getAllDeclaredInHierarchy(cls);
+		return Unchecked.getAllDeclaredInHierarchy(cls);
 	}
 
 	/**
@@ -225,7 +226,7 @@ public interface Fields {
 			return List.of();
 		}
 		Class<?> cls = Classes.getFrom(obj);
-		return getAllDeclaredInHierarchy(cls, predicate);
+		return Unchecked.getAllDeclaredInHierarchy(cls, predicate);
 	}
 
 	/**
@@ -606,7 +607,7 @@ public interface Fields {
 				return null;
 			}
 			Class<?> cls = Classes.getFrom(obj);
-			Field field = Safe.getOneDeclaredInHierarchy(cls, fieldName);
+			Field field = Unchecked.getOneDeclaredInHierarchy(cls, fieldName);
 			return Safe.get(obj, field);
 		}
 
@@ -624,7 +625,7 @@ public interface Fields {
 			if (null == cls || null == fieldName) {
 				return null;
 			}
-			Field field = Safe.getOneDeclaredInHierarchy(cls, fieldName);
+			Field field = Unchecked.getOneDeclaredInHierarchy(cls, fieldName);
 			return Safe.getStatic(field);
 		}
 
@@ -848,14 +849,17 @@ public interface Fields {
 		 * @return list of fields
 		 */
 		static <T> List<Field> getAllDeclared(final Class<T> cls, final Predicate<Field> predicate) {
-			return Unchecked.filter(Unchecked.getAllDeclared(cls), predicate);
+			Field[] fields = cls.getDeclaredFields();
+			List<Field> result = new ArrayList<>(fields.length);
+			Unchecked.forEachMatching(fields, predicate, result::add);
+			return result;
 		}
 
 		/**
 		 * Returns all fields declared by the given class and its super classes.
 		 * <p>
 		 * Fields are returned in hierarchy order, starting from the given class. Within each class, fields are returned in the
-		 * order provided by {@link Class#getDeclaredFields()}. Superinterfaces are not walked; only the class superclass chain
+		 * order provided by {@link Class#getDeclaredFields()}. Super interfaces are not walked; only the class superclass chain
 		 * is included.
 		 * <p>
 		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
@@ -898,8 +902,9 @@ public interface Fields {
 				return Unchecked.getAllDeclared(cls, predicate);
 			}
 			List<Field> fields = new ArrayList<>();
+			Consumer<Field> action = fields::add;
 			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
-				fields.addAll(Unchecked.getAllDeclared(type, predicate));
+				Unchecked.forEachMatching(type.getDeclaredFields(), predicate, action);
 			}
 			return fields;
 		}
@@ -924,6 +929,28 @@ public interface Fields {
 				}
 			});
 			return fieldsMatchingPredicate;
+		}
+
+		/**
+		 * Applies the given predicate to each element of the given field array and passes the matching fields to
+		 * {@code fieldConsumer}.
+		 * <p>
+		 * Unlike {@link #filter(List, Predicate)}, this method does not allocate a result list. The caller collects matches by
+		 * supplying a consumer, for example {@code fields::add} on a single {@link ArrayList} while walking a class hierarchy.
+		 * <p>
+		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
+		 * handle exceptions.
+		 *
+		 * @param fields the fields to test
+		 * @param predicate predicate to filter with
+		 * @param action receives each field that matches the predicate
+		 */
+		static void forEachMatching(final Field[] fields, final Predicate<Field> predicate, final Consumer<Field> action) {
+			for (Field field : fields) {
+				if (predicate.test(field)) {
+					action.accept(field);
+				}
+			}
 		}
 
 		/**

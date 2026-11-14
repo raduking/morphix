@@ -33,6 +33,14 @@ class FieldsFilterTest {
 		private int field;
 	}
 
+	static class TwoFields {
+		@SuppressWarnings("unused")
+		private int a;
+
+		@SuppressWarnings("unused")
+		private int b;
+	}
+
 	@Test
 	void shouldReturnEmptyListForNullPredicate() {
 		List<Field> result = Fields.filter(Fields.getAllDeclared(A.class), null);
@@ -57,6 +65,13 @@ class FieldsFilterTest {
 	@Test
 	void shouldFilterFields() {
 		List<Field> result = Fields.filter(Fields.getAllDeclared(A.class), field -> field.getName().equals("field"));
+
+		assertThat(result, hasSize(1));
+	}
+
+	@Test
+	void shouldExcludeFieldsThatDoNotMatchPredicate() {
+		List<Field> result = Fields.filter(Fields.getAllDeclared(TwoFields.class), field -> field.getName().equals("a"));
 
 		assertThat(result, hasSize(1));
 	}
