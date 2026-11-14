@@ -88,6 +88,13 @@ class FieldsGetOneDeclaredInHierarchyTest {
 	}
 
 	@Test
+	void shouldReturnNullIfObjectFieldNameIsNull() {
+		Field field = Fields.Safe.getOneDeclaredInHierarchy(new A(), null);
+
+		assertThat(field, equalTo(null));
+	}
+
+	@Test
 	void shouldReturnFieldInHierarchyOnObject() throws Exception {
 		Object o = new B();
 

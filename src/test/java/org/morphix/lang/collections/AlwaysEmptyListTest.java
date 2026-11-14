@@ -18,12 +18,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
+import org.morphix.lang.JavaArrays;
 
 /**
  * Test class for {@link AlwaysEmptyList}.
@@ -94,7 +96,7 @@ class AlwaysEmptyListTest {
 		List<String> list = AlwaysEmptyList.of();
 
 		Object[] array = list.toArray();
-		assertThat(array.length, equalTo(0));
+		assertThat(array, sameInstance(JavaArrays.EMPTY));
 
 		String[] target = new String[] { "x" };
 		String[] result = list.toArray(target);
@@ -109,6 +111,24 @@ class AlwaysEmptyListTest {
 		target = null;
 		result = list.toArray(target);
 		assertThat(result, equalTo(null));
+	}
+
+	@Test
+	void shouldEqualOtherEmptyListsAndRejectNonEmptyOnes() {
+		List<String> list = AlwaysEmptyList.of();
+
+		assertThat(list.equals(list), equalTo(true));
+		assertThat(list.equals(List.of()), equalTo(true));
+		assertThat(list.equals(Collections.emptyList()), equalTo(true));
+		assertThat(list.equals(AlwaysEmptyList.of()), equalTo(true));
+		assertThat(list.equals(List.of("x")), equalTo(false));
+		assertThat(list.equals("not a list"), equalTo(false));
+		assertThat(list.equals(null), equalTo(false));
+	}
+
+	@Test
+	void shouldUseEmptyListHashCode() {
+		assertThat(AlwaysEmptyList.of().hashCode(), equalTo(1));
 	}
 
 	@Test

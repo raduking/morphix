@@ -23,9 +23,11 @@ public interface ConversionContext {
 
 	/**
 	 * Called when an object is being visited. Returns {@code true} if the object has already been visited, {@code false}
-	 * otherwise. The default implementation always returns {@code false}, meaning that by default, no object is considered
-	 * as visited. Implementations can override this method to provide custom logic for tracking visited objects, such as
-	 * using a set to store visited object references.
+	 * otherwise.
+	 * <p>
+	 * The default implementation always returns {@code false}, meaning that by default, no object is considered as visited.
+	 * Implementations can override this method to provide custom logic for tracking visited objects, such as using a set to
+	 * store visited object references.
 	 *
 	 * @param obj the object being visited
 	 * @return {@code true} if the object has already been visited, {@code false} otherwise

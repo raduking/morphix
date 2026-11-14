@@ -14,8 +14,9 @@ package org.morphix.reflection;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.morphix.lang.JavaObjects;
@@ -57,169 +58,6 @@ public interface Fields {
 	}
 
 	/**
-	 * Returns a list with all the fields in the class given as parameter. This is different from
-	 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array. If the class is null it returns
-	 * an empty list.
-	 *
-	 * @param <T> type to get the fields from
-	 *
-	 * @param cls class on which the fields are returned
-	 * @return list of fields
-	 */
-	static <T> List<Field> getAllDeclared(final Class<T> cls) {
-		if (null == cls) {
-			return List.of();
-		}
-		return List.of(cls.getDeclaredFields());
-	}
-
-	/**
-	 * Variation of {@link #getAllDeclared(Class)}. It will call the method with the class determined from the object
-	 * supplied as parameter.
-	 *
-	 * @param obj object on which the fields are needed
-	 * @return list of fields
-	 */
-	static List<Field> getAllDeclared(final Object obj) {
-		if (null == obj) {
-			return List.of();
-		}
-		Class<?> cls = Classes.getFrom(obj);
-		return getAllDeclared(cls);
-	}
-
-	/**
-	 * Returns a list with all the fields in the class, given as parameter and the field predicate.
-	 *
-	 * @param <T> type to get the fields from
-	 *
-	 * @param cls class on which the fields are returned
-	 * @param predicate predicate for fields
-	 * @return list of fields
-	 */
-	static <T> List<Field> getAllDeclared(final Class<T> cls, final Predicate<Field> predicate) {
-		if (null == cls || null == predicate) {
-			return List.of();
-		}
-		return filter(getAllDeclared(cls), predicate);
-	}
-
-	/**
-	 * Returns a list with all the fields in the class, given as parameter and the field predicate.
-	 *
-	 * @param obj object on which the fields are needed
-	 * @param predicate predicate for fields
-	 * @return list of fields
-	 */
-	static List<Field> getAllDeclared(final Object obj, final Predicate<Field> predicate) {
-		if (null == obj || null == predicate) {
-			return List.of();
-		}
-		Class<?> cls = Classes.getFrom(obj);
-		return getAllDeclared(cls, predicate);
-	}
-
-	/**
-	 * Filters the given field list with the given predicate. This method could have been implemented with the stream API
-	 * but the benchmarking shows that with the stream API is 50% slower. These methods are implemented with performance
-	 * considerations first.
-	 *
-	 * @param fields the fields to filter
-	 * @param predicate predicate to filter with
-	 * @return filtered list
-	 */
-	static List<Field> filter(final List<Field> fields, final Predicate<Field> predicate) {
-		List<Field> fieldsMatchingPredicate = new ArrayList<>(fields.size());
-		fields.forEach(field -> {
-			if (predicate.test(field)) {
-				fieldsMatchingPredicate.add(field);
-			}
-		});
-		return fieldsMatchingPredicate;
-	}
-
-	/**
-	 * Returns a list with all the fields in the class given as parameter including the ones in all it's super classes.
-	 * <p>
-	 * Note: if the class given as parameter is an interface then the fields declared by that interface are returned, but
-	 * not the ones declared by its super interfaces, since those are interfaces as well.
-	 * <p>
-	 * {@link LinkedList} is used because:
-	 * <ul>
-	 * <li>it is more efficient in terms of memory consumption</li>
-	 * <li>accessing the first and last has O(1) complexity</li>
-	 * <li>more often than not no random access is needed</li>
-	 * <li>profiling: ~50% times faster than using {@link ArrayList}</li>
-	 * </ul>
-	 * The returned order of the fields are: class -> super class -> ... -> base class and all fields in each class are
-	 * returned in the declared order.
-	 *
-	 * @param <T> type to get the fields from
-	 *
-	 * @param cls class on which the fields are returned
-	 * @return list of fields
-	 */
-	static <T> List<Field> getAllDeclaredInHierarchy(final Class<T> cls) {
-		if (null == cls) {
-			return List.of();
-		}
-		// an interface has no super class, but it does declare fields of its own
-		Class<?> superClass = cls.getSuperclass();
-		List<Field> fields = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass);
-		// Object declares no fields, so no special case is needed for it here
-		fields.addAll(0, getAllDeclared(cls));
-		return fields;
-	}
-
-	/**
-	 * Returns a list with all the fields in the class, given as parameter and the field predicate, including the ones in
-	 * all it's super classes. The returned order of the fields are: class -> super class -> ... -> base class
-	 *
-	 * @param <T> type to get the fields from
-	 *
-	 * @param cls class on which the fields are returned
-	 * @param predicate predicate for fields
-	 * @return list of fields
-	 */
-	static <T> List<Field> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<Field> predicate) {
-		if (null == cls || null == predicate) {
-			return List.of();
-		}
-		return filter(getAllDeclaredInHierarchy(cls), predicate);
-	}
-
-	/**
-	 * Variation of {@link #getAllDeclaredInHierarchy(Class)}. It will call the method with the class determined from the
-	 * object supplied as parameter.
-	 *
-	 * @param obj object on which the fields are needed
-	 * @return list of fields
-	 */
-	static List<Field> getAllDeclaredInHierarchy(final Object obj) {
-		if (null == obj) {
-			return List.of();
-		}
-		Class<?> cls = Classes.getFrom(obj);
-		return getAllDeclaredInHierarchy(cls);
-	}
-
-	/**
-	 * Variation of {@link #getAllDeclaredInHierarchy(Class, Predicate)}. It will call the method with the class determined
-	 * from the object supplied as parameter.
-	 *
-	 * @param obj object on which the fields are needed
-	 * @param predicate predicate for fields
-	 * @return list of fields
-	 */
-	static List<Field> getAllDeclaredInHierarchy(final Object obj, final Predicate<Field> predicate) {
-		if (null == obj || null == predicate) {
-			return List.of();
-		}
-		Class<?> cls = Classes.getFrom(obj);
-		return getAllDeclaredInHierarchy(cls, predicate);
-	}
-
-	/**
 	 * Returns a field in the class and in all super classes of the class given as parameter.
 	 *
 	 * @param <T> type to get the fields from
@@ -242,6 +80,153 @@ public interface Fields {
 	 */
 	static Field getOneDeclaredInHierarchy(final Object obj, final String fieldName) {
 		return Safe.getOneDeclaredInHierarchy(obj, fieldName);
+	}
+
+	/**
+	 * Returns a list with all the fields in the class given as parameter. This is different from
+	 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array. If the class is null it returns
+	 * an empty list.
+	 *
+	 * @param <T> type to get the fields from
+	 *
+	 * @param cls class on which the fields are returned
+	 * @return list of fields
+	 */
+	static <T> List<Field> getAllDeclared(final Class<T> cls) {
+		if (null == cls) {
+			return List.of();
+		}
+		return Unchecked.getAllDeclared(cls);
+	}
+
+	/**
+	 * Variation of {@link #getAllDeclared(Class)}. It will call the method with the class determined from the object
+	 * supplied as parameter.
+	 *
+	 * @param obj object on which the fields are needed
+	 * @return list of fields
+	 */
+	static List<Field> getAllDeclared(final Object obj) {
+		if (null == obj) {
+			return List.of();
+		}
+		Class<?> cls = Classes.getFrom(obj);
+		return Unchecked.getAllDeclared(cls);
+	}
+
+	/**
+	 * Returns a list with all the fields in the class, given as parameter and the field predicate.
+	 *
+	 * @param <T> type to get the fields from
+	 *
+	 * @param cls class on which the fields are returned
+	 * @param predicate predicate for fields
+	 * @return list of fields
+	 */
+	static <T> List<Field> getAllDeclared(final Class<T> cls, final Predicate<Field> predicate) {
+		if (null == cls || null == predicate) {
+			return List.of();
+		}
+		return Unchecked.getAllDeclared(cls, predicate);
+	}
+
+	/**
+	 * Returns a list with all the fields in the class, given as parameter and the field predicate.
+	 *
+	 * @param obj object on which the fields are needed
+	 * @param predicate predicate for fields
+	 * @return list of fields
+	 */
+	static List<Field> getAllDeclared(final Object obj, final Predicate<Field> predicate) {
+		if (null == obj || null == predicate) {
+			return List.of();
+		}
+		Class<?> cls = Classes.getFrom(obj);
+		return Unchecked.getAllDeclared(cls, predicate);
+	}
+
+	/**
+	 * Filters the given field list with the given predicate. This method could have been implemented with the stream API
+	 * but the benchmarking shows that with the stream API is 50% slower. These methods are implemented with performance
+	 * considerations first.
+	 *
+	 * @param fields the fields to filter
+	 * @param predicate predicate to filter with
+	 * @return filtered list
+	 */
+	static List<Field> filter(final List<Field> fields, final Predicate<Field> predicate) {
+		if (null == predicate || null == fields || fields.isEmpty()) {
+			return List.of();
+		}
+		return Unchecked.filter(fields, predicate);
+	}
+
+	/**
+	 * Returns all fields declared by the given class and its super classes.
+	 * <p>
+	 * Fields are returned in hierarchy order, starting with the given class. Within each class, fields are returned in the
+	 * order provided by {@link Class#getDeclaredFields()}.
+	 * <p>
+	 * The returned list must not be modified by the caller.
+	 *
+	 * @param <T> type to get the fields from
+	 *
+	 * @param cls class on which the fields are returned
+	 * @return list of fields
+	 */
+	static <T> List<Field> getAllDeclaredInHierarchy(final Class<T> cls) {
+		if (null == cls) {
+			return List.of();
+		}
+		return Unchecked.getAllDeclaredInHierarchy(cls);
+	}
+
+	/**
+	 * Returns a list with all the fields in the class, given as parameter and the field predicate, including the ones in
+	 * all it's super classes. The returned order of the fields are: class -> super class -> ... -> base class
+	 *
+	 * @param <T> type to get the fields from
+	 *
+	 * @param cls class on which the fields are returned
+	 * @param predicate predicate for fields
+	 * @return list of fields
+	 */
+	static <T> List<Field> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<Field> predicate) {
+		if (null == cls || null == predicate) {
+			return List.of();
+		}
+		return Unchecked.getAllDeclaredInHierarchy(cls, predicate);
+	}
+
+	/**
+	 * Variation of {@link #getAllDeclaredInHierarchy(Class)}. It will call the method with the class determined from the
+	 * object supplied as parameter.
+	 *
+	 * @param obj object on which the fields are needed
+	 * @return list of fields
+	 */
+	static List<Field> getAllDeclaredInHierarchy(final Object obj) {
+		if (null == obj) {
+			return List.of();
+		}
+		Class<?> cls = Classes.getFrom(obj);
+		return Unchecked.getAllDeclaredInHierarchy(cls);
+	}
+
+	/**
+	 * Variation of {@link #getAllDeclaredInHierarchy(Class, Predicate)}. It will call the method with the class determined
+	 * from the object supplied as parameter.
+	 *
+	 * @param obj object on which the fields are needed
+	 * @param predicate predicate for fields
+	 * @return list of fields
+	 */
+	static List<Field> getAllDeclaredInHierarchy(final Object obj, final Predicate<Field> predicate) {
+		if (null == obj || null == predicate) {
+			return List.of();
+		}
+		Class<?> cls = Classes.getFrom(obj);
+		return Unchecked.getAllDeclaredInHierarchy(cls, predicate);
 	}
 
 	/**
@@ -326,6 +311,7 @@ public interface Fields {
 	 * @author Radu Sebastian LAZIN
 	 */
 	interface IgnoreAccess {
+
 		/**
 		 * Returns the value of the given field from the given object ignoring field access modifiers.
 		 *
@@ -533,11 +519,7 @@ public interface Fields {
 			if (null == cls || null == fieldName) {
 				return null;
 			}
-			try {
-				return cls.getDeclaredField(fieldName);
-			} catch (NoSuchFieldException e) {
-				return null;
-			}
+			return Unchecked.getOneDeclared(cls, fieldName);
 		}
 
 		/**
@@ -550,11 +532,11 @@ public interface Fields {
 		 * @return the field with the given name or null if the field is not present in the class
 		 */
 		static Field getOneDeclared(final Object obj, final String fieldName) {
-			if (null == obj) {
+			if (null == obj || null == fieldName) {
 				return null;
 			}
 			Class<?> cls = Classes.getFrom(obj);
-			return Safe.getOneDeclared(cls, fieldName);
+			return Unchecked.getOneDeclared(cls, fieldName);
 		}
 
 		/**
@@ -570,11 +552,7 @@ public interface Fields {
 			if (null == cls || null == fieldName) {
 				return null;
 			}
-			Field field = Safe.getOneDeclared(cls, fieldName);
-			if (null != field) {
-				return field;
-			}
-			return Safe.getOneDeclaredInHierarchy(cls.getSuperclass(), fieldName);
+			return Unchecked.getOneDeclaredInHierarchy(cls, fieldName);
 		}
 
 		/**
@@ -586,11 +564,11 @@ public interface Fields {
 		 * @return existing field, null otherwise
 		 */
 		static Field getOneDeclaredInHierarchy(final Object obj, final String fieldName) {
-			if (null == obj) {
+			if (null == obj || null == fieldName) {
 				return null;
 			}
 			Class<?> cls = Classes.getFrom(obj);
-			return Safe.getOneDeclaredInHierarchy(cls, fieldName);
+			return Unchecked.getOneDeclaredInHierarchy(cls, fieldName);
 		}
 
 		/**
@@ -604,8 +582,11 @@ public interface Fields {
 		 * @return field value or null if the field value cannot be returned
 		 */
 		static <T> T get(final Object obj, final Field field) {
+			if (null == field) {
+				return null;
+			}
 			try {
-				return Fields.IgnoreAccess.get(obj, field);
+				return Unchecked.get(obj, field);
 			} catch (ReflectionException e) {
 				return null;
 			}
@@ -622,11 +603,11 @@ public interface Fields {
 		 * @return field value, null if the field is not found
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
-			Class<?> cls = Classes.getFrom(obj);
-			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field) {
+			if (null == obj || null == fieldName) {
 				return null;
 			}
+			Class<?> cls = Classes.getFrom(obj);
+			Field field = Unchecked.getOneDeclaredInHierarchy(cls, fieldName);
 			return Safe.get(obj, field);
 		}
 
@@ -641,10 +622,10 @@ public interface Fields {
 		 * @return the value of the static field with the given name, null if the field is not found or is not static
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
-			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field) {
+			if (null == cls || null == fieldName) {
 				return null;
 			}
+			Field field = Unchecked.getOneDeclaredInHierarchy(cls, fieldName);
 			return Safe.getStatic(field);
 		}
 
@@ -787,16 +768,190 @@ public interface Fields {
 	}
 
 	/**
-	 * Name space interface for methods that ignore field access modifiers, do not do validations and emphasize speed. The
-	 * caller is responsible to provide valid input and to handle exceptions.
+	 * Namespace interface for field operations that assume valid input.
 	 * <p>
-	 * Prefer using the methods in {@link IgnoreAccess} instead of the ones in this interface. The methods in this interface
-	 * are only for extreme performance cases where the caller is sure that the field exists and the field value can be
-	 * returned or set and the caller does not want to handle exceptions.
+	 * Methods in this interface do not perform explicit parameter validation. The caller is responsible for providing valid
+	 * input and handling exceptions.
+	 * <p>
+	 * These methods are also used internally by the other field utility methods to avoid redundant validation.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
 	interface Unchecked {
+
+		/**
+		 * Returns the field with the given name from the given class. This method does not search for fields in super classes,
+		 * use {@link #getOneDeclaredInHierarchy(Class, String)} for that.
+		 * <p>
+		 * This method does not check if the class or the field name is null and will throw a {@link NullPointerException} if
+		 * they are. Use {@link Fields#getOneDeclared(Class, String)} if you want to get null when the class or the field name
+		 * is {@code null}.
+		 *
+		 * @param <T> type to get the field from
+		 *
+		 * @param cls class containing the field
+		 * @param fieldName the name of the field
+		 * @return the field with the given name or null if the field is not present in the class
+		 */
+		static <T> Field getOneDeclared(final Class<T> cls, final String fieldName) {
+			try {
+				return cls.getDeclaredField(fieldName);
+			} catch (NoSuchFieldException e) {
+				return null;
+			}
+		}
+
+		/**
+		 * Returns a field in the class and in all super classes of the class given as parameter.
+		 *
+		 * @param <T> type to get the fields from
+		 *
+		 * @param cls class on which the fields are returned
+		 * @param fieldName the name of the fields to get
+		 * @return existing field, null otherwise
+		 */
+		static <T> Field getOneDeclaredInHierarchy(final Class<T> cls, final String fieldName) {
+			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
+				Field field = getOneDeclared(type, fieldName);
+				if (null != field) {
+					return field;
+				}
+			}
+			return null;
+		}
+
+		/**
+		 * Returns a list with all the fields in the class given as parameter. This is different from
+		 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array.
+		 * <p>
+		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
+		 * {@link Fields#getAllDeclared(Class)} if you want to get an empty list when the class is {@code null}.
+		 * <p>
+		 * This method uses {@link Arrays#asList(Object...)} because it is faster than using {@link List#of(Object...)}. The
+		 * speed difference is because it does not require copying the array when creating the list.
+		 *
+		 * @param <T> type to get the fields from
+		 *
+		 * @param cls class on which the fields are returned
+		 * @return list of fields
+		 */
+		static <T> List<Field> getAllDeclared(final Class<T> cls) {
+			return Arrays.asList(cls.getDeclaredFields());
+		}
+
+		/**
+		 * Returns a list with all the fields in the class, given as parameter and the field predicate.
+		 *
+		 * @param <T> type to get the fields from
+		 *
+		 * @param cls class on which the fields are returned
+		 * @param predicate predicate for fields
+		 * @return list of fields
+		 */
+		static <T> List<Field> getAllDeclared(final Class<T> cls, final Predicate<Field> predicate) {
+			Field[] fields = cls.getDeclaredFields();
+			List<Field> result = new ArrayList<>(fields.length);
+			Unchecked.forEachMatching(fields, predicate, result::add);
+			return result;
+		}
+
+		/**
+		 * Returns all fields declared by the given class and its super classes.
+		 * <p>
+		 * Fields are returned in hierarchy order, starting from the given class. Within each class, fields are returned in the
+		 * order provided by {@link Class#getDeclaredFields()}. Super interfaces are not walked; only the class superclass chain
+		 * is included.
+		 * <p>
+		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
+		 * {@link Fields#getAllDeclaredInHierarchy(Class)} if you want an empty list when the class is {@code null}.
+		 *
+		 * @param <T> type to get the fields from
+		 *
+		 * @param cls class on which the fields are returned
+		 * @return list of fields
+		 */
+		static <T> List<Field> getAllDeclaredInHierarchy(final Class<T> cls) {
+			if (null == cls.getSuperclass()) {
+				return Unchecked.getAllDeclared(cls);
+			}
+			List<Field> fields = new ArrayList<>();
+			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
+				fields.addAll(Unchecked.getAllDeclared(type));
+			}
+			return fields;
+		}
+
+		/**
+		 * Returns all fields declared by the given class and its super classes that match the given predicate.
+		 * <p>
+		 * Fields are returned in hierarchy order, starting from the given class. Within each class, fields are returned in the
+		 * order provided by {@link Class#getDeclaredFields()}. Super interfaces are not walked; only the class superclass chain
+		 * is included.
+		 * <p>
+		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
+		 * handle exceptions.
+		 *
+		 * @param <T> type to get the fields from
+		 *
+		 * @param cls class on which the fields are returned
+		 * @param predicate predicate for fields
+		 * @return list of fields
+		 */
+		static <T> List<Field> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<Field> predicate) {
+			if (null == cls.getSuperclass()) {
+				return Unchecked.getAllDeclared(cls, predicate);
+			}
+			List<Field> fields = new ArrayList<>();
+			Consumer<Field> action = fields::add;
+			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
+				Unchecked.forEachMatching(type.getDeclaredFields(), predicate, action);
+			}
+			return fields;
+		}
+
+		/**
+		 * Filters the given field list with the given predicate. This method could have been implemented with the stream API
+		 * but the benchmarking shows that with the stream API is 50% slower. These methods are implemented with performance
+		 * considerations first.
+		 * <p>
+		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
+		 * handle exceptions.
+		 *
+		 * @param fields the fields to filter
+		 * @param predicate predicate to filter with
+		 * @return filtered list
+		 */
+		static List<Field> filter(final List<Field> fields, final Predicate<Field> predicate) {
+			List<Field> fieldsMatchingPredicate = new ArrayList<>(fields.size());
+			fields.forEach(field -> {
+				if (predicate.test(field)) {
+					fieldsMatchingPredicate.add(field);
+				}
+			});
+			return fieldsMatchingPredicate;
+		}
+
+		/**
+		 * Applies the given predicate to each element of the given field array and passes the matching fields to
+		 * {@code fieldConsumer}.
+		 * <p>
+		 * Unlike {@link #filter(List, Predicate)}, this method does not allocate a result list. The caller collects matches by
+		 * supplying a consumer, for example {@code fields::add} on a single {@link ArrayList} while walking a class hierarchy.
+		 * <p>
+		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
+		 * handle exceptions.
+		 *
+		 * @param fields the fields to test
+		 * @param predicate predicate to filter with
+		 * @param action receives each field that matches the predicate
+		 */
+		static void forEachMatching(final Field[] fields, final Predicate<Field> predicate, final Consumer<Field> action) {
+			for (Field field : fields) {
+				if (predicate.test(field)) {
+					action.accept(field);
+				}
+			}
+		}
 
 		/**
 		 * Returns the value of the given field from the given object ignoring field access modifiers.

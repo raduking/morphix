@@ -1,5 +1,26 @@
 ## Release Notes
 
+`1.1.1`
+
+- Added `Fields.Unchecked.getOneDeclared(Class, String)` for direct field lookup without parameter validation.
+- Added `Fields.Unchecked.getOneDeclaredInHierarchy(Class, String)` for direct field lookup throughout a class hierarchy.
+- Added `Fields.Unchecked.getAllDeclared(Class)` for direct retrieval of a class's declared fields.
+- Added `Fields.Unchecked.getAllDeclared(Class, Predicate)` for direct retrieval and filtering of declared fields.
+- Added `Fields.Unchecked.filter(List, Predicate)` for direct filtering of a field list without parameter validation.
+- Added `Fields.Unchecked.getAllDeclaredInHierarchy(Class)` for direct hierarchy field retrieval without parameter validation.
+- Added `Fields.Unchecked.getAllDeclaredInHierarchy(Class, Predicate)` for direct filtered hierarchy field retrieval without parameter validation.
+- Added `Fields.Unchecked.forEachMatching(Field[], Predicate, Consumer)` to pass matching declared fields to a consumer without allocating a result list.
+- Added `Classes.isArray(Class)` to check whether a class represents an array type.
+- Added `Classes.isNotArray(Class)` to check whether a class does not represent an array type.
+- Added `JavaArrays.EMPTY` as the shared empty `Object[]` instance.
+- Changed `JavaArrays.toArray` to return `JavaArrays.EMPTY` for empty `Object[]` results and to copy reference arrays with a non-`Object` component type.
+- Changed `JavaArrays.empty(Class)` to return `JavaArrays.EMPTY` for `Object.class` and to reject a primitive component type.
+- Changed `AlwaysEmptyList.toArray()` to return `JavaArrays.EMPTY`.
+- Changed `AlwaysEmptyList` to implement `equals` and `hashCode` consistent with other empty lists.
+- Added `FastArrayList` as a resizable array-backed list optimized for bulk operations on arrays.
+
+---
+
 `1.1.0`
 
 - Added `Reflection.requireNotNull(Object)` to throw `ReflectionException` when the reference is `null`.

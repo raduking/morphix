@@ -255,6 +255,26 @@ public interface Classes {
 	}
 
 	/**
+	 * Checks whether the given class represents an array type.
+	 *
+	 * @param cls the class to check
+	 * @return true if the class represents an array type, false otherwise
+	 */
+	static boolean isArray(final Class<?> cls) {
+		return null != cls && cls.isArray();
+	}
+
+	/**
+	 * Checks whether the given class does not represent an array type.
+	 *
+	 * @param cls the class to check
+	 * @return true if the class does not represent an array type, false otherwise
+	 */
+	static boolean isNotArray(final Class<?> cls) {
+		return !isArray(cls);
+	}
+
+	/**
 	 * Returns the class of the given object.
 	 * <ul>
 	 * <li>If the object is null, it returns null.</li>

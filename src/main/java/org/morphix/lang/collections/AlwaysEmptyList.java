@@ -20,18 +20,19 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
+import org.morphix.lang.JavaArrays;
 import org.morphix.lang.JavaObjects;
 
 /**
  * A list that is always empty no matter what operations are called on it. This class is useful because
- * {@link Collections#emptyList()} returns an immutable collection which throws exceptions on most list operations and
- * this one doesn't. It is impervious to change since it doesn't have any state.
+ * {@link Collections#emptyList()} or {@link List#of()} returns an immutable collection which throws exceptions on most
+ * list operations but this one doesn't. It is impervious to change since it doesn't have any state.
  * <p>
- * WARNING: This class intentionally violates the standard List mutation and index contracts. All mutating operations
- * are no-ops and will not throw exceptions. This type is intended as a null-object or defensive list for integration
- * scenarios.
+ * WARNING: This class intentionally violates the standard {@link List} mutation and index contracts. All mutating
+ * operations are no-ops and will not throw exceptions. This type is intended as a {@code null}-object or defensive list
+ * for integration scenarios.
  * <p>
- * The class is intentionally null tolerant. All methods handle null parameters gracefully.
+ * The class is intentionally {@code null} tolerant. All methods handle {@code null} parameters gracefully.
  *
  * @param <E> element type
  *
@@ -90,7 +91,7 @@ public final class AlwaysEmptyList<E> implements List<E> {
 	 */
 	@Override
 	public Object[] toArray() {
-		return new Object[] { };
+		return JavaArrays.EMPTY;
 	}
 
 	/**
@@ -278,6 +279,27 @@ public final class AlwaysEmptyList<E> implements List<E> {
 	@Override
 	public List<E> subList(final int fromIndex, final int toIndex) {
 		return this;
+	}
+
+	/**
+	 * @see Object#equals(Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		return obj instanceof List<?> list && list.isEmpty();
+	}
+
+	/**
+	 * Returns the hash code. The hash code of an empty list is defined as {@code 1} in the {@link List} contract.
+	 *
+	 * @return 1
+	 */
+	@Override
+	public int hashCode() {
+		return 1;
 	}
 
 	/**
