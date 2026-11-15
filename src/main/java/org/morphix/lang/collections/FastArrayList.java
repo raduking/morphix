@@ -13,7 +13,6 @@
 package org.morphix.lang.collections;
 
 import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -40,9 +39,10 @@ import org.morphix.lang.JavaObjects;
  * <li>up to 2.36× speedup for the measured large bulk operations</li>
  * <li>approximately 50% less allocation for those operations</li>
  * <li>constant-time, 24-byte zero-copy wrapping</li>
- * <li>indexed access and iterator performance comparable to {@link ArrayList}</li>
+ * <li>indexed access and iterator performance comparable to {@link java.util.ArrayList}</li>
  * <li>equivalent allocation behavior for ordinary insertion and dynamic growth</li>
  * </ul>
+ * See the `doc/fastarraylist-performance.md`.
  *
  * @param <E> element type
  *
