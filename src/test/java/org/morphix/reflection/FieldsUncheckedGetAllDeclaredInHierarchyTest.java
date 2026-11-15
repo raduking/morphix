@@ -19,10 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.morphix.reflection.predicates.MemberPredicates.withAnnotation;
 
 import java.lang.reflect.Field;
-import java.util.function.Predicate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
@@ -210,4 +210,58 @@ class FieldsUncheckedGetAllDeclaredInHierarchyTest {
 				equalTo(Fields.getAllDeclaredInHierarchy(Object.class, field -> true)));
 	}
 
+	static class AA {
+
+		public int x;
+		public String s;
+		public Long l;
+		public char c;
+		public Boolean b;
+	}
+
+	static class BB extends AA {
+
+		public int x2;
+		public String s2;
+		public Long l2;
+		public char c2;
+		public Boolean b2;
+	}
+
+	static class CC extends BB {
+
+		public int x3;
+		public String s3;
+		public Long l3;
+		public char c3;
+		public Boolean b3;
+	}
+
+	static class DD extends CC {
+
+		public int x4;
+		public String s4;
+		public Long l4;
+		public char c4;
+		public Boolean b4;
+	}
+
+	@Test
+	void shouldCorrectlyTraverseABigHierarchy() {
+		List<Field> fields = Fields.Unchecked.getAllDeclaredInHierarchy(DD.class);
+
+		int sizeAA = AA.class.getDeclaredFields().length;
+		int sizeBB = BB.class.getDeclaredFields().length;
+		int sizeCC = CC.class.getDeclaredFields().length;
+		int sizeDD = DD.class.getDeclaredFields().length;
+
+		List<Field> expected = new ArrayList<>();
+		expected.addAll(Fields.Unchecked.getAllDeclared(DD.class));
+		expected.addAll(Fields.Unchecked.getAllDeclared(CC.class));
+		expected.addAll(Fields.Unchecked.getAllDeclared(BB.class));
+		expected.addAll(Fields.Unchecked.getAllDeclared(AA.class));
+
+		assertThat(fields, hasSize(sizeAA + sizeBB + sizeCC + sizeDD));
+		assertThat(fields, equalTo(expected));
+	}
 }

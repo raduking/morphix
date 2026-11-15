@@ -837,7 +837,7 @@ public interface Fields {
 		 * @return list of fields
 		 */
 		static <T> List<Field> getAllDeclared(final Class<T> cls) {
-			return Arrays.asList(cls.getDeclaredFields());
+			return FastArrayList.wrap(cls.getDeclaredFields());
 		}
 
 		/**
@@ -875,9 +875,16 @@ public interface Fields {
 			if (null == cls.getSuperclass()) {
 				return Unchecked.getAllDeclared(cls);
 			}
-			FastArrayList<Field> fields = new FastArrayList<>();
+			FastArrayList<Field[]> arrays = new FastArrayList<>(FastArrayList.Default.CAPACITY);
+			int total = 0;
 			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
-				fields.addAll(type.getDeclaredFields());
+				Field[] array = type.getDeclaredFields();
+				total += array.length;
+				arrays.add(array);
+			}
+			FastArrayList<Field> fields = new FastArrayList<>(total);
+			for (Field[] array : arrays) {
+				fields.addAll(array);
 			}
 			return fields;
 		}

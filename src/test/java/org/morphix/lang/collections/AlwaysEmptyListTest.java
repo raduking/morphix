@@ -114,6 +114,7 @@ class AlwaysEmptyListTest {
 	}
 
 	@Test
+	@SuppressWarnings("unlikely-arg-type")
 	void shouldEqualOtherEmptyListsAndRejectNonEmptyOnes() {
 		List<String> list = AlwaysEmptyList.of();
 
