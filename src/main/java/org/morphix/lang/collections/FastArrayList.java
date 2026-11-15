@@ -741,14 +741,12 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 *
 	 * @param index the index
 	 * @param length the upper-bound (exclusive) of the range
-	 * @return {@code index} if it is within bounds of the range
 	 * @throws IndexOutOfBoundsException if the {@code index} is out of bounds
 	 */
-	private static int checkIndex(final int index, final int length) {
+	private static void checkIndex(final int index, final int length) {
 		if (index < 0 || index >= length) {
 			throw new IndexOutOfBoundsException("Index: " + index + ", Length: " + length);
 		}
-		return index;
 	}
 
 	/**
@@ -760,14 +758,12 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 * @param fromIndex the lower-bound (inclusive) of the sub-interval
 	 * @param size the size of the sub-range
 	 * @param length the upper-bound (exclusive) of the range
-	 * @return {@code fromIndex} if the sub-range within bounds of the range
 	 * @throws IndexOutOfBoundsException if the sub-range is out of bounds
 	 */
-	private static int checkFromIndexSize(final int fromIndex, final int size, final int length) {
+	private static void checkFromIndexSize(final int fromIndex, final int size, final int length) {
 		if ((length | fromIndex | size) < 0 || size > length - fromIndex) {
 			throw new IndexOutOfBoundsException("From index: " + fromIndex + ", Size: " + size + ", Length: " + length);
 		}
-		return fromIndex;
 	}
 
 	/**
@@ -779,14 +775,12 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 * @param fromIndex the lower-bound (inclusive) of the sub-range
 	 * @param toIndex the upper-bound (exclusive) of the sub-range
 	 * @param length the upper-bound (exclusive) the range
-	 * @return {@code fromIndex} if the sub-range within bounds of the range
 	 * @throws IndexOutOfBoundsException if the sub-range is out of bounds
 	 */
-	private static int checkFromToIndex(final int fromIndex, final int toIndex, final int length) {
+	private static void checkFromToIndex(final int fromIndex, final int toIndex, final int length) {
 		if (fromIndex < 0 || fromIndex > toIndex || toIndex > length) {
 			throw new IndexOutOfBoundsException("From index: " + fromIndex + ", to index: " + toIndex + ", Length: " + length);
 		}
-		return fromIndex;
 	}
 
 	/**
