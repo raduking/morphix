@@ -206,7 +206,6 @@ Normalized bytes per operation are the clearest allocation measure; GC counts, t
 | Original | 204,566.567 | +0.0% |
 | No compatibility check | 205,932.046 | +0.7% |
 | Capacity equality (clean rerun) | 218,682.149 | +6.9% |
-| Separate size increment | 218,203.505 | +6.7% |
 | Cached size | 218,880.865 | +7.0% |
 | modCount first | 209,736.023 | +2.5% |
 | JDK-style helper | 218,886.925 | +7.0% |
@@ -219,7 +218,8 @@ None of the six experiments improved the original. The final reverted run measur
 public boolean add(final E element) {
     ensureCapacityFor(1);
     ensureCompatibleStorage(element);
-    elements[size++] = element;
+    elements[size] = element;
+    ++size;
     ++modCount;
     return true;
 }
@@ -231,7 +231,7 @@ JDK ArrayList.add (25 bytes) and its helper (23 bytes) were initially inlined. F
 
 ## Next benchmark: indexed bulk insertion
 
-Construct a destination of size n, reserve capacity 2n, insert n/2 elements from source offset n/4 at destination index n/2. Compare `ArrayList.addAll(index, arrayView.subList(offset, offset + length))` with `FastArrayList.addAll(index, array, offset, length)`. Both shift the same tail; FastArrayList can avoid the temporary source array. Destination construction and capacity allocation are included. No indexed insertion, removeIf, removeAll, retainAll or forEach results are available yet.
+Construct a destination of size n, reserve capacity 2n, insert n/2 elements from source offset n/4 at destination index n/2. Compare `ArrayList.addAll(index, arrayView.subList(offset, offset + length))` with `FastArrayList.addAll(index, array, offset, length)`. Both shift the same tail; FastArrayList can avoid the temporary source array. Destination construction and capacity allocation are included. No indexed `insert`, `removeIf`, `removeAll`, `retainAll` or `forEach` results are available yet.
 
 ## Reproducibility and limitations
 

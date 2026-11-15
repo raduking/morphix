@@ -226,11 +226,11 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 */
 	@Override
 	public boolean add(final E element) {
-		++modCount;
 		ensureCapacityFor(1);
 		ensureCompatibleStorage(element);
 		elements[size] = element;
 		++size;
+		++modCount;
 		return true;
 	}
 
