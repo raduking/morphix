@@ -2,16 +2,16 @@
 
 This project includes a few helper scripts for common maintenance tasks.
 
-## `../update-version.sh`
+## `update-version.sh`
 
 Updates the Maven project version and refreshes common version references.
 
 ### What it does
 
 1. Reads current version from Maven (`project.version`).
-2. Sets the new version in `../pom.xml` files via Maven Versions Plugin.
-3. Adds a new version header at the top of `../CHANGELOG.md`.
-4. Replaces old version references in `../README.md`.
+2. Sets the new version in `pom.xml` files via Maven Versions Plugin.
+3. Adds a new version header at the top of `CHANGELOG.md`.
+4. Replaces old version references in `README.md`.
 
 ### Usage
 
@@ -27,7 +27,7 @@ Example:
 
 ---
 
-## `../maven-deploy.sh`
+## `maven-deploy.sh`
 
 Runs Maven deploy with release profile enabled.
 
@@ -45,7 +45,7 @@ mvn deploy -Drelease=true
 
 ---
 
-## `../scripts/jacoco-class-coverage.py`
+## `scripts/jacoco-class-coverage.py`
 
 Prints per-class JaCoCo coverage from `jacoco.csv`.
 
