@@ -6,7 +6,7 @@
 
 Direct-array construction and bulk insertion are approximately 2.35–2.36× faster at 100,000 elements, with approximately half the allocation. Collection construction and traversal are comparable. Individual append is slower by about 0.47 ns per element in the original run. Retain the original append implementation and prioritize array-native bulk operations.
 
-![Speedup summary](fastarraylist_charts/speedup_summary.png)
+![Speedup summary](fastarraylist_charts/speedup_summary.svg)
 
 ## Methodology
 
@@ -42,7 +42,7 @@ Lower latency is better. Ratios above 1 favor FastArrayList. Wrap compares again
 
 Direct construction avoids the intermediate collection conversion and extra copy.
 
-![Array constructor](fastarraylist_charts/ConstructorFromArray.png)
+![Array constructor](fastarraylist_charts/ConstructorFromArray.svg)
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -56,7 +56,7 @@ Direct construction avoids the intermediate collection conversion and extra copy
 
 At 100K the reported error intervals overlap; performance is broadly comparable.
 
-![Collection constructor](fastarraylist_charts/ConstructorFromCollection.png)
+![Collection constructor](fastarraylist_charts/ConstructorFromCollection.svg)
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -70,7 +70,7 @@ At 100K the reported error intervals overlap; performance is broadly comparable.
 
 Direct insertion avoids a temporary source array.
 
-![Bulk add: array](fastarraylist_charts/AddAllArray.png)
+![Bulk add: array](fastarraylist_charts/AddAllArray.svg)
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -84,7 +84,7 @@ Direct insertion avoids a temporary source array.
 
 Exact-class FastArrayList insertion avoids a temporary source array.
 
-![Bulk add: same type](fastarraylist_charts/AddAllSameType.png)
+![Bulk add: same type](fastarraylist_charts/AddAllSameType.svg)
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -98,7 +98,7 @@ Exact-class FastArrayList insertion avoids a temporary source array.
 
 Both implementations use toArray() for the pre-existing collection view.
 
-![Bulk add: array view](fastarraylist_charts/AddAllArrayView.png)
+![Bulk add: array view](fastarraylist_charts/AddAllArrayView.svg)
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -112,7 +112,7 @@ Both implementations use toArray() for the pre-existing collection view.
 
 Both allocate essentially the same amount; FastArrayList is 29.6% slower at 100K.
 
-![Append: preallocated](fastarraylist_charts/AddPreallocated.png)
+![Append: preallocated](fastarraylist_charts/AddPreallocated.svg)
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -126,7 +126,7 @@ Both allocate essentially the same amount; FastArrayList is 29.6% slower at 100K
 
 FastArrayList is 28.7% slower at 100K; both complete loops are O(n).
 
-![Append: growth](fastarraylist_charts/AddWithGrowth.png)
+![Append: growth](fastarraylist_charts/AddWithGrowth.svg)
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -140,7 +140,7 @@ FastArrayList is 28.7% slower at 100K; both complete loops are O(n).
 
 Measures a full indexed traversal, not one random access.
 
-![Indexed traversal](fastarraylist_charts/Get.png)
+![Indexed traversal](fastarraylist_charts/Get.svg)
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -154,7 +154,7 @@ Measures a full indexed traversal, not one random access.
 
 Near-zero allocation is consistent with escape analysis, but does not prove it.
 
-![Iterator traversal](fastarraylist_charts/Iterator.png)
+![Iterator traversal](fastarraylist_charts/Iterator.svg)
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -168,7 +168,7 @@ Near-zero allocation is consistent with escape analysis, but does not prove it.
 
 Both allocate 24 B/op and have size-independent latency. Arrays.asList is fixed-size; FastArrayList.wrap permits structural changes and may detach from the original array.
 
-![Zero-copy wrap](fastarraylist_charts/Wrap.png)
+![Zero-copy wrap](fastarraylist_charts/Wrap.svg)
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -180,7 +180,7 @@ Both allocate 24 B/op and have size-independent latency. Arrays.asList is fixed-
 
 ## Allocation profile
 
-![Allocation at 100K](fastarraylist_charts/allocation_100k.png)
+![Allocation at 100K](fastarraylist_charts/allocation_100k.svg)
 
 | Operation | JDK B/op | FastArrayList B/op |
 |---|---:|---:|
@@ -199,7 +199,7 @@ Normalized bytes per operation are the clearest allocation measure; GC counts, t
 
 ## Append optimization experiments
 
-![Append experiments](fastarraylist_charts/append_experiments.png)
+![Append experiments](fastarraylist_charts/append_experiments.svg)
 
 | Variant | ns/op at 100K | vs original |
 |---|---:|---:|

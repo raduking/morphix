@@ -26,7 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
+import java.lang.reflect.Method;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
@@ -39,6 +40,7 @@ import java.util.RandomAccess;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.morphix.reflection.Fields;
+import org.morphix.reflection.Methods;
 
 /**
  * Test class for {@link FastArrayList}.
@@ -46,24 +48,6 @@ import org.morphix.reflection.Fields;
  * @author Radu Sebastian LAZIN
  */
 class FastArrayListTest {
-
-	private static FastArrayList<String> listOf(final String... elements) {
-		FastArrayList<String> list = new FastArrayList<>();
-		for (String element : elements) {
-			list.add(element);
-		}
-		return list;
-	}
-
-	/**
-	 * Returns a list holding {@code [1, 2]} backed by an {@link Integer} array of length 3, so it has spare capacity and a
-	 * storage component type more restrictive than {@link Object}.
-	 */
-	private static FastArrayList<Object> typedStorageWithSpareCapacity() {
-		FastArrayList<Object> list = FastArrayList.<Object>wrap(new Integer[] { 1, 2, 3 });
-		list.remove(2);
-		return list;
-	}
 
 	@Nested
 	class ConstructorTests {
@@ -108,6 +92,55 @@ class FastArrayListTest {
 			assertThat(list.isEmpty(), equalTo(false));
 			assertThat(list.size(), equalTo(3));
 			assertThat(list.capacity(), equalTo(3));
+		}
+
+		@Test
+		void shouldAdoptObjectArrayReturnedByCollection() {
+			Object[] backing = { "a", "b" };
+			FastArrayList<String> list = new FastArrayList<>(new AbstractCollection<>() {
+				@Override
+				public Iterator<String> iterator() {
+					return List.of("a", "b").iterator();
+				}
+
+				@Override
+				public int size() {
+					return 2;
+				}
+
+				@Override
+				public Object[] toArray() {
+					return backing;
+				}
+			});
+
+			assertThat(list, contains("a", "b"));
+			assertThat(list.capacity(), equalTo(2));
+			list.set(0, "z");
+			assertThat(backing[0], equalTo("z"));
+		}
+
+		@Test
+		void shouldCopyTypedArrayReturnedByCollection() {
+			FastArrayList<String> list = new FastArrayList<>(new AbstractCollection<>() {
+				@Override
+				public Iterator<String> iterator() {
+					return List.of("a").iterator();
+				}
+
+				@Override
+				public int size() {
+					return 1;
+				}
+
+				@Override
+				public Object[] toArray() {
+					return new String[] { "a" };
+				}
+			});
+
+			assertThat(list, contains("a"));
+			assertThat(list.capacity(), equalTo(1));
 		}
 
 		@Test
@@ -1295,6 +1328,36 @@ class FastArrayListTest {
 		}
 
 		@Test
+		void shouldExpandByHalfWhenGrowingThroughGrow() {
+			FastArrayList<String> list = new FastArrayList<>(10);
+			grow(list, 11);
+
+			assertThat(list.capacity(), equalTo(15));
+		}
+
+		@Test
+		void shouldPreferRequestedCapacityWhenItExceedsPreferredGrowthThroughGrow() {
+			FastArrayList<String> list = new FastArrayList<>(10);
+			grow(list, 20);
+
+			assertThat(list.capacity(), equalTo(20));
+		}
+
+		@Test
+		void shouldCapPreferredGrowthAtSoftMaxWhenComputingCapacity() {
+			final int softMax = Integer.MAX_VALUE - 8;
+
+			assertThat(computeCapacity(softMax - 1, softMax), equalTo(softMax));
+		}
+
+		@Test
+		void shouldPreferMinimumCapacityOverSoftMaxWhenComputingCapacity() {
+			final int softMax = Integer.MAX_VALUE - 8;
+
+			assertThat(computeCapacity(softMax - 1, softMax + 1), equalTo(softMax + 1));
+		}
+
+		@Test
 		void shouldTrimToSize() {
 			FastArrayList<String> list = new FastArrayList<>(10);
 			list.add("a");
@@ -1393,5 +1456,33 @@ class FastArrayListTest {
 
 			assertThat(list.iterator().next(), nullValue());
 		}
+	}
+
+	private static void grow(final FastArrayList<?> list, final int minimumCapacity) {
+		Method growMethod = Methods.getOneDeclared("grow", FastArrayList.class, int.class);
+		Methods.IgnoreAccess.invoke(growMethod, list, minimumCapacity);
+	}
+
+	private static int computeCapacity(final int oldCapacity, final int minimumCapacity) {
+		Method computeCapacityMethod = Methods.getOneDeclared("computeCapacity", FastArrayList.class, int.class, int.class);
+		return (int) Methods.IgnoreAccess.invoke(computeCapacityMethod, null, oldCapacity, minimumCapacity);
+	}
+
+	private static FastArrayList<String> listOf(final String... elements) {
+		FastArrayList<String> list = new FastArrayList<>();
+		for (String element : elements) {
+			list.add(element);
+		}
+		return list;
+	}
+
+	/**
+	 * Returns a list holding {@code [1, 2]} backed by an {@link Integer} array of length 3, so it has spare capacity and a
+	 * storage component type more restrictive than {@link Object}.
+	 */
+	private static FastArrayList<Object> typedStorageWithSpareCapacity() {
+		FastArrayList<Object> list = FastArrayList.<Object>wrap(new Integer[] { 1, 2, 3 });
+		list.remove(2);
+		return list;
 	}
 }

@@ -52,6 +52,8 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 
 	/**
 	 * Default values.
+	 *
+	 * @author Radu Sebastian LAZIN
 	 */
 	public static final class Default {
 
@@ -76,7 +78,7 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	/**
 	 * Maximum preferred array size.
 	 */
-	private static final int SOFT_MAX_ARRAY_LENGTH = Integer.MAX_VALUE - 8;
+	private static final int MAX_ARRAY_LENGTH = Integer.MAX_VALUE - 8;
 
 	/**
 	 * Backing array.
@@ -287,7 +289,6 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	public boolean addAll(final int index, final E[] array, final int offset, final int length) {
 		checkPositionIndex(index);
 		Objects.checkFromIndexSize(offset, length, array.length);
-
 		return insertAll(index, array, offset, length);
 	}
 
@@ -305,12 +306,10 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	@Override
 	public boolean addAll(final int index, final Collection<? extends E> collection) {
 		checkPositionIndex(index);
-
 		if (FastArrayList.class == collection.getClass()) {
 			FastArrayList<?> list = (FastArrayList<?>) collection;
 			return insertAll(index, list.elements, 0, list.size);
 		}
-
 		Object[] array = collection.toArray();
 		return insertAll(index, array, 0, array.length);
 	}
@@ -393,17 +392,13 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	@Override
 	protected void removeRange(final int fromIndex, final int toIndex) {
 		Objects.checkFromToIndex(fromIndex, toIndex, size);
-
 		int count = toIndex - fromIndex;
 		if (0 == count) {
 			return;
 		}
-
 		System.arraycopy(elements, toIndex, elements, fromIndex, size - toIndex);
-
 		int newSize = size - count;
 		Arrays.fill(elements, newSize, size, null);
-
 		size = newSize;
 		++modCount;
 	}
@@ -501,15 +496,12 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	@Override
 	public void forEach(final Consumer<? super E> action) {
 		Objects.requireNonNull(action);
-
 		int expectedModCount = modCount;
 		int length = size;
-
 		// the backing array is not cached because set can replace it during iteration
 		for (int i = 0; i < length && expectedModCount == modCount; ++i) {
 			action.accept(elementAt(i));
 		}
-
 		checkForConcurrentModification(expectedModCount);
 	}
 
@@ -519,19 +511,14 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	@Override
 	public void replaceAll(final UnaryOperator<E> operator) {
 		Objects.requireNonNull(operator);
-
 		int expectedModCount = modCount;
 		int length = size;
-
 		for (int i = 0; i < length; ++i) {
 			E value = operator.apply(elementAt(i));
-
 			checkForConcurrentModification(expectedModCount);
 			ensureCompatibleStorage(value);
-
 			elements[i] = value;
 		}
-
 		checkForConcurrentModification(expectedModCount);
 		++modCount;
 	}
@@ -558,13 +545,11 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 		int expectedModCount = modCount;
 		int length = size;
 		int first = 0;
-
 		// skip the initial run of elements that are retained.
 		while (first < length && expectedModCount == modCount && !predicate.test(elementAt(first))) {
 			++first;
 		}
 		checkForConcurrentModification(expectedModCount);
-
 		if (first == length) {
 			return false;
 		}
@@ -573,7 +558,6 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 		// no elements are removed until predicate evaluation completes
 		int remaining = length - first;
 		long[] removed = new long[(int) ((remaining + 63L) >>> 6)];
-
 		removed[0] = 1L;
 
 		for (int i = first + 1; i < length && expectedModCount == modCount; ++i) {
@@ -672,18 +656,25 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 */
 	private void grow(final int minimumCapacity) {
 		int oldCapacity = elements.length;
-		int newCapacity;
-		if (elements == Default.EMPTY) {
-			newCapacity = Math.max(Default.CAPACITY, minimumCapacity);
-		} else {
-			long preferredCapacity = (long) oldCapacity + (oldCapacity >> 1);
-			if (preferredCapacity <= SOFT_MAX_ARRAY_LENGTH) {
-				newCapacity = Math.max(minimumCapacity, (int) preferredCapacity);
-			} else {
-				newCapacity = Math.max(minimumCapacity, SOFT_MAX_ARRAY_LENGTH);
-			}
-		}
+		int newCapacity = elements == Default.EMPTY
+				? Math.max(Default.CAPACITY, minimumCapacity)
+				: computeCapacity(oldCapacity, minimumCapacity);
 		elements = Arrays.copyOf(elements, newCapacity, Object[].class);
+	}
+
+	/**
+	 * Returns the new capacity to use when growing from the given old capacity.
+	 *
+	 * @param oldCapacity current backing-array length
+	 * @param minimumCapacity minimum required capacity
+	 * @return new capacity
+	 */
+	private static int computeCapacity(final int oldCapacity, final int minimumCapacity) {
+		long preferredCapacity = (long) oldCapacity + (oldCapacity >> 1);
+		if (preferredCapacity <= MAX_ARRAY_LENGTH) {
+			return Math.max(minimumCapacity, (int) preferredCapacity);
+		}
+		return Math.max(minimumCapacity, MAX_ARRAY_LENGTH);
 	}
 
 	/**
