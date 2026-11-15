@@ -106,7 +106,11 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 		if (initialCapacity < 0) {
 			throw new IllegalArgumentException("Initial capacity cannot be negative: " + initialCapacity);
 		}
-		this.elements = 0 == initialCapacity ? JavaArrays.EMPTY : new Object[initialCapacity];
+		if (0 == initialCapacity) {
+			this.elements = JavaArrays.EMPTY;
+		} else {
+			this.elements = new Object[initialCapacity];
+		}
 	}
 
 	/**
@@ -307,7 +311,7 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	public boolean addAll(final int index, final Collection<? extends E> collection) {
 		checkPositionIndex(index);
 		if (FastArrayList.class == collection.getClass()) {
-			FastArrayList<?> list = (FastArrayList<?>) collection;
+			FastArrayList<?> list = JavaObjects.cast(collection);
 			return insertAll(index, list.elements, 0, list.size);
 		}
 		Object[] array = collection.toArray();
@@ -330,7 +334,6 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 		ensureCapacityFor(length);
 		// bulk insertion requires storage compatible with every element type
 		ensureCompatibleStorage(array);
-
 		Object[] source = array;
 		int sourceOffset = offset;
 		// shifting the tail overwrites a source range of the backing array that starts after the insertion index
@@ -340,7 +343,6 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 		}
 		System.arraycopy(elements, index, elements, index + length, size - index);
 		System.arraycopy(source, sourceOffset, elements, index, length);
-
 		size += length;
 		++modCount;
 		return true;
@@ -540,11 +542,9 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	@Override
 	public boolean removeIf(final Predicate<? super E> predicate) {
 		Objects.requireNonNull(predicate);
-
 		int expectedModCount = modCount;
 		int length = size;
 		int first = 0;
-		// skip the initial run of elements that are retained.
 		while (first < length && expectedModCount == modCount && !predicate.test(elementAt(first))) {
 			++first;
 		}
@@ -552,13 +552,10 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 		if (first == length) {
 			return false;
 		}
-
-		// record matching elements before modifying the list
-		// no elements are removed until predicate evaluation completes
+		// use a bitmap to record matching elements from the first found, more memory-efficient than boolean array
 		int remaining = length - first;
 		long[] removed = new long[(int) ((remaining + 63L) >>> 6)];
 		removed[0] = 1L;
-
 		for (int i = first + 1; i < length && expectedModCount == modCount; ++i) {
 			if (predicate.test(elementAt(i))) {
 				int bit = i - first;
@@ -566,19 +563,18 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 			}
 		}
 		checkForConcurrentModification(expectedModCount);
-
+		// now we write the elements which have the corresponding bit zero
 		int write = first;
 		for (int read = first + 1; read < length; ++read) {
 			int bit = read - first;
 			if (0 == (removed[bit >>> 6] & (1L << (bit & 63)))) {
-				elements[write++] = elements[read];
+				elements[write] = elements[read];
+				++write;
 			}
 		}
 		Arrays.fill(elements, write, length, null);
 		size = write;
-
 		++modCount;
-
 		return true;
 	}
 
@@ -800,7 +796,7 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 */
 	private void checkForConcurrentModification(final int expectedModCount) {
 		if (expectedModCount != modCount) {
-			throw new ConcurrentModificationException();
+			throw new ConcurrentModificationException("List was modified during loop operation");
 		}
 	}
 
