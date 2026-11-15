@@ -21,6 +21,7 @@ import java.util.function.Predicate;
 
 import org.morphix.lang.JavaObjects;
 import org.morphix.lang.Throwables;
+import org.morphix.lang.collections.FastArrayList;
 
 /**
  * Utility reflection methods for java fields.
@@ -874,9 +875,9 @@ public interface Fields {
 			if (null == cls.getSuperclass()) {
 				return Unchecked.getAllDeclared(cls);
 			}
-			List<Field> fields = new ArrayList<>();
+			FastArrayList<Field> fields = new FastArrayList<>();
 			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
-				fields.addAll(Unchecked.getAllDeclared(type));
+				fields.addAll(type.getDeclaredFields());
 			}
 			return fields;
 		}

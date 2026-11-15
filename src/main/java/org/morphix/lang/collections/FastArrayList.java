@@ -201,7 +201,7 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 */
 	@Override
 	public E get(final int index) {
-		checkIndex(index);
+		checkIndex(index, size);
 		return elementAt(index);
 	}
 
@@ -210,7 +210,7 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 */
 	@Override
 	public E set(final int index, final E element) {
-		checkIndex(index);
+		checkIndex(index, size);
 		E previous = elementAt(index);
 		ensureCompatibleStorage(element);
 		elements[index] = element;
@@ -288,7 +288,7 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 */
 	public boolean addAll(final int index, final E[] array, final int offset, final int length) {
 		checkPositionIndex(index);
-		Objects.checkFromIndexSize(offset, length, array.length);
+		checkFromIndexSize(offset, length, array.length);
 		return insertAll(index, array, offset, length);
 	}
 
@@ -343,7 +343,6 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 
 		size += length;
 		++modCount;
-
 		return true;
 	}
 
@@ -352,7 +351,7 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 */
 	@Override
 	public E remove(final int index) {
-		checkIndex(index);
+		checkIndex(index, size);
 		E previous = elementAt(index);
 		removeAt(index);
 		return previous;
@@ -391,7 +390,7 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 */
 	@Override
 	protected void removeRange(final int fromIndex, final int toIndex) {
-		Objects.checkFromToIndex(fromIndex, toIndex, size);
+		checkFromToIndex(fromIndex, toIndex, size);
 		int count = toIndex - fromIndex;
 		if (0 == count) {
 			return;
@@ -739,16 +738,59 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	}
 
 	/**
-	 * Validates the index is between bounds.
+	 * Checks if the {@code index} is within the bounds of the range from {@code 0} (inclusive) to {@code length}
+	 * (exclusive).
+	 * <p>
+	 * This is just a simplification of the {@link Objects#checkIndex(int, int)}.
 	 *
-	 * @param index the index to check
-	 * @return the index
+	 * @param index the index
+	 * @param length the upper-bound (exclusive) of the range
+	 * @return {@code index} if it is within bounds of the range
+	 * @throws IndexOutOfBoundsException if the {@code index} is out of bounds
 	 */
-	private int checkIndex(final int index) {
-		if (index < 0 || index >= size) {
-			throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+	private static int checkIndex(final int index, final int length) {
+		if (index < 0 || index >= length) {
+			throw new IndexOutOfBoundsException("Index: " + index + ", Length: " + length);
 		}
 		return index;
+	}
+
+	/**
+	 * Checks if the sub-range from {@code fromIndex} (inclusive) to {@code fromIndex + size} (exclusive) is within the
+	 * bounds of range from {@code 0} (inclusive) to {@code length} (exclusive).
+	 * <p>
+	 * This is just a simplification of the {@link Objects#checkFromIndexSize(int, int, int)}.
+	 *
+	 * @param fromIndex the lower-bound (inclusive) of the sub-interval
+	 * @param size the size of the sub-range
+	 * @param length the upper-bound (exclusive) of the range
+	 * @return {@code fromIndex} if the sub-range within bounds of the range
+	 * @throws IndexOutOfBoundsException if the sub-range is out of bounds
+	 */
+	private static int checkFromIndexSize(final int fromIndex, final int size, final int length) {
+		if ((length | fromIndex | size) < 0 || size > length - fromIndex) {
+			throw new IndexOutOfBoundsException("From index: " + fromIndex + ", Size: " + size + ", Length: " + length);
+		}
+		return fromIndex;
+	}
+
+	/**
+	 * Checks if the sub-range from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive) is within the bounds of
+	 * range from {@code 0} (inclusive) to {@code length} (exclusive).
+	 * <p>
+	 * This is just a simplification of the {@link Objects#checkFromToIndex(int, int, int)}.
+	 *
+	 * @param fromIndex the lower-bound (inclusive) of the sub-range
+	 * @param toIndex the upper-bound (exclusive) of the sub-range
+	 * @param length the upper-bound (exclusive) the range
+	 * @return {@code fromIndex} if the sub-range within bounds of the range
+	 * @throws IndexOutOfBoundsException if the sub-range is out of bounds
+	 */
+	private static int checkFromToIndex(final int fromIndex, final int toIndex, final int length) {
+		if (fromIndex < 0 || fromIndex > toIndex || toIndex > length) {
+			throw new IndexOutOfBoundsException("From index: " + fromIndex + ", to index: " + toIndex + ", Length: " + length);
+		}
+		return fromIndex;
 	}
 
 	/**
