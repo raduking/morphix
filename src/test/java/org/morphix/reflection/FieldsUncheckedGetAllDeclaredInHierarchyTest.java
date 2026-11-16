@@ -23,8 +23,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.morphix.lang.function.Predicates;
 
 /**
  * Test class for:
@@ -149,16 +154,21 @@ class FieldsUncheckedGetAllDeclaredInHierarchyTest {
 		assertThat(fields, hasSize(0));
 	}
 
-	@Test
-	void shouldMatchFieldsGetAllDeclaredInHierarchyForNonNullClass() {
-		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(B.class), equalTo(Fields.getAllDeclaredInHierarchy(B.class)));
-		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(C.class), equalTo(Fields.getAllDeclaredInHierarchy(C.class)));
-		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(E.class), equalTo(Fields.getAllDeclaredInHierarchy(E.class)));
-		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(R.class), equalTo(Fields.getAllDeclaredInHierarchy(R.class)));
-		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(F.class), equalTo(Fields.getAllDeclaredInHierarchy(F.class)));
-		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(WithConstant.class),
-				equalTo(Fields.getAllDeclaredInHierarchy(WithConstant.class)));
-		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(Object.class), equalTo(Fields.getAllDeclaredInHierarchy(Object.class)));
+	@ParameterizedTest
+	@MethodSource("provideClassesForCheckingNonNullClass")
+	void shouldMatchFieldsGetAllDeclaredInHierarchyForNonNullClass(final Class<?> cls) {
+		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(cls), equalTo(Fields.getAllDeclaredInHierarchy(cls)));
+	}
+
+	private static Stream<Arguments> provideClassesForCheckingNonNullClass() {
+		return Stream.of(
+				Arguments.of(B.class),
+				Arguments.of(C.class),
+				Arguments.of(E.class),
+				Arguments.of(R.class),
+				Arguments.of(F.class),
+				Arguments.of(WithConstant.class),
+				Arguments.of(Object.class));
 	}
 
 	@Test
@@ -200,14 +210,23 @@ class FieldsUncheckedGetAllDeclaredInHierarchyTest {
 	@Test
 	void shouldMatchFieldsGetAllDeclaredInHierarchyWithPredicate() {
 		Predicate<Field> predicate = withAnnotation(Deprecated.class);
+
 		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(D.class, predicate),
 				equalTo(Fields.getAllDeclaredInHierarchy(D.class, predicate)));
-		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(B.class, field -> true),
-				equalTo(Fields.getAllDeclaredInHierarchy(B.class, field -> true)));
-		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(WithConstant.class, field -> true),
-				equalTo(Fields.getAllDeclaredInHierarchy(WithConstant.class, field -> true)));
-		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(Object.class, field -> true),
-				equalTo(Fields.getAllDeclaredInHierarchy(Object.class, field -> true)));
+	}
+
+	@ParameterizedTest
+	@MethodSource("provideClassesForCheckingWithPredicate")
+	void shouldMatchFieldsGetAllDeclaredInHierarchyWithPredicate(final Class<?> cls) {
+		assertThat(Fields.Unchecked.getAllDeclaredInHierarchy(cls, Predicates.acceptAll()),
+				equalTo(Fields.getAllDeclaredInHierarchy(cls, Predicates.acceptAll())));
+	}
+
+	private static Stream<Arguments> provideClassesForCheckingWithPredicate() {
+		return Stream.of(
+				Arguments.of(B.class),
+				Arguments.of(WithConstant.class),
+				Arguments.of(Object.class));
 	}
 
 	static class AA {
