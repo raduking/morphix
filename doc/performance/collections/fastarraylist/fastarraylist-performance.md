@@ -229,6 +229,76 @@ public boolean add(final E element) {
 
 JDK ArrayList.add (25 bytes) and its helper (23 bytes) were initially inlined. FastArrayList.add (39 bytes) and ensureCompatibleStorage (36 bytes) were initially rejected as too large, then inlined when hot. Capacity helpers (27 and 16 bytes) and storage checks (8 and 15 bytes) also inlined. Persistent lack of hot-path inlining is therefore not a sufficient explanation. Diagnostic timings were extremely noisy and excluded; no assembly analysis was performed.
 
+## Follow-up: append performance and HotSpot compilation (16 November 2026)
+
+Additional JMH runs investigated the gap between `java.util.ArrayList` and
+`FastArrayList` for **100,000 preallocated calls to `add(E)` per benchmark
+operation**. A test-only `org.morphix.benchmark.JDKArrayList` was compiled from
+JDK `ArrayList` source to separate implementation differences from runtime
+compilation effects. Inspection with `javap -c -p` showed matching bytecode
+instructions and offsets for `add(E)` and its private `add` helper; the
+differences were constant-pool indices, not different instructions.
+
+### Compilation-configuration comparison
+
+All values are JMH average time in **ns/op**, with the reported error and
+`Cnt = 3`. Lower is better. Each operation performs 100,000 appends; these
+figures are **not** nanoseconds per individual append.
+
+| Configuration | JDK `ArrayList` | Locally compiled `JDKArrayList` | `FastArrayList` |
+|---|---:|---:|---:|
+| Default tiered compilation | 155,673.415 ± 16,934.023 | 225,493.167 ± 3,642.223 | 216,447.535 ± 4,712.080 |
+| `-XX:-TieredCompilation` | 226,010.738 ± 17,949.781 | 226,445.686 ± 23,373.545 | 216,600.168 ± 10,631.149 |
+| `-XX:TieredStopAtLevel=1` | 250,433.579 ± 4,157.949 | 243,967.505 ± 5,279.206 | 217,148.849 ± 5,002.846 |
+
+The default-tiered results were reproduced in another run:
+
+| Implementation | Earlier default-tiered run (ns/op) | Follow-up (ns/op) |
+|---|---:|---:|
+| JDK `ArrayList` | 155,560 | 155,673 |
+| Locally compiled `JDKArrayList` | 227,246 | 225,493 |
+| `FastArrayList` | 215,840 | 216,448 |
+
+Under default tiered compilation, JDK `ArrayList` was about **45% faster in
+throughput-equivalent terms** than the locally compiled copy (the copy took
+**44.9% more time** per operation). With tiered compilation disabled, the two
+implementations were effectively tied in these measurements. Under C1-only
+compilation, their timings were also broadly comparable; `FastArrayList` was
+the fastest of the three in that configuration.
+
+`-XX:-TieredCompilation` does **not** disable JIT compilation: it normally
+uses a non-tiered C2 strategy on a server VM. `-XX:TieredStopAtLevel=1`
+restricts tiered compilation to C1. Taken together, these observations
+associate the large JDK `ArrayList` advantage with the normal tiered
+compilation/profile collection path. They do **not** identify the exact
+optimization or establish that `ArrayList.add` has a dedicated intrinsic.
+
+### `transient` field experiment
+
+Marking the `FastArrayList` backing-array field `transient` did not produce a
+meaningful change in the default-configuration preallocated-append result:
+
+| Implementation | JMH ns/op ± error (`Cnt = 3`) |
+|---|---:|
+| JDK `ArrayList` | 158,838.521 ± 8,883.356 |
+| `FastArrayList`, `transient` elements | 216,524.346 ± 209.466 |
+
+`transient` controls Java serialization, not ordinary field reads or writes.
+Implementing `Cloneable` or `Serializable` is likewise not a supported
+performance optimization for append; those are marker interfaces.
+
+### Interpretation and limitations
+
+The copied-JDK comparison controls for the instructions in `add(E)` and its
+helper, but **not** for call-site behavior, class-specific profiling, inlining,
+or the generated machine code of the enclosing benchmark loop. The
+compilation-configuration runs have only three reported measurements each,
+with sizable errors in several cases. The findings are therefore evidence of
+a compilation-sensitive benchmark gap, not proof of a particular HotSpot
+mechanism. The results do not alter the bulk-operation advantages documented
+above or imply that `FastArrayList` universally outperforms JDK `ArrayList`.
+No further JVM investigation was performed.
+
 ## Next benchmark: indexed bulk insertion
 
 Construct a destination of size n, reserve capacity 2n, insert n/2 elements from source offset n/4 at destination index n/2. Compare `ArrayList.addAll(index, arrayView.subList(offset, offset + length))` with `FastArrayList.addAll(index, array, offset, length)`. Both shift the same tail; FastArrayList can avoid the temporary source array. Destination construction and capacity allocation are included. No indexed `insert`, `removeIf`, `removeAll`, `retainAll` or `forEach` results are available yet.
