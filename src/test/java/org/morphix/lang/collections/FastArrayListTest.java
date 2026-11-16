@@ -26,19 +26,25 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.lang.reflect.Method;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.RandomAccess;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.morphix.reflection.Fields;
 import org.morphix.reflection.Methods;
 
@@ -1396,16 +1402,8 @@ class FastArrayListTest {
 		}
 
 		@Test
-		void shouldBeEqualToOtherListsWithSameElements() {
-			FastArrayList<String> list = listOf("a", null);
-			List<String> other = new ArrayList<>();
-			other.add("a");
-			other.add(null);
-
-			assertThat(list, equalTo(other));
-			assertThat(other, equalTo(list));
-			assertThat(list.hashCode(), equalTo(other.hashCode()));
-			assertThat(list.toString(), equalTo("[a, null]"));
+		void shouldUseListToString() {
+			assertThat(listOf("a", null).toString(), equalTo("[a, null]"));
 		}
 
 		@Test
@@ -1455,6 +1453,60 @@ class FastArrayListTest {
 			FastArrayList<String> list = listOf((String) null);
 
 			assertThat(list.iterator().next(), nullValue());
+		}
+	}
+
+	@Nested
+	class EqualsAndHashCodeTests {
+
+		@ParameterizedTest
+		@MethodSource("equalLists")
+		void shouldBeEqualToOtherListsWithSameElements(final List<String> other) {
+			FastArrayList<String> list = listOf("a", null);
+
+			assertThat(list.equals(other), equalTo(true));
+			assertThat(other.equals(list), equalTo(true));
+			assertThat(list.hashCode(), equalTo(other.hashCode()));
+		}
+
+		private static Stream<List<String>> equalLists() {
+			return Stream.of(
+					listOf("a", null),
+					new ArrayList<>(Arrays.asList("a", null)),
+					new LinkedList<>(Arrays.asList("a", null)),
+					Arrays.asList("a", null));
+		}
+
+		@Test
+		void shouldEqualItself() {
+			FastArrayList<String> list = listOf("a", null);
+
+			assertThat(list.equals(list), equalTo(true));
+		}
+
+		@Test
+		void shouldRejectListsWithDifferentSizesOrElements() {
+			FastArrayList<String> list = listOf("a", "b");
+
+			assertThat(list.equals(listOf("a")), equalTo(false));
+			assertThat(list.equals(listOf("a", "c")), equalTo(false));
+			assertThat(list.equals(new LinkedList<>(List.of("a"))), equalTo(false));
+			assertThat(list.equals(new ArrayList<>(List.of("a", "b", "c"))), equalTo(false));
+			assertThat(list.equals(Arrays.asList("a", "c")), equalTo(false));
+		}
+
+		@Test
+		@SuppressWarnings("unlikely-arg-type")
+		void shouldRejectNullAndNonListObjects() {
+			FastArrayList<String> list = listOf("a");
+
+			assertThat(list.equals(null), equalTo(false));
+			assertThat(list.equals("a"), equalTo(false));
+		}
+
+		@Test
+		void shouldUseTheEmptyListHashCode() {
+			assertThat(new FastArrayList<>().hashCode(), equalTo(1));
 		}
 	}
 

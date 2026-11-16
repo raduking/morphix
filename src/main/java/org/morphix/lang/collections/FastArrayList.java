@@ -17,6 +17,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.function.Consumer;
@@ -189,6 +191,51 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	@Override
 	public boolean isEmpty() {
 		return 0 == size;
+	}
+
+	/**
+	 * Compares this list with the specified object for equality.
+	 *
+	 * @param object object to compare with this list
+	 * @return true if the specified object is equal to this list
+	 */
+	@Override
+	public boolean equals(final Object object) {
+		if (this == object) {
+			return true;
+		}
+		if (!(object instanceof List<?> other) || size != other.size()) {
+			return false;
+		}
+		if (other instanceof FastArrayList<?> list) {
+			for (int i = 0; i < size; ++i) {
+				if (!Objects.equals(elements[i], list.elements[i])) {
+					return false;
+				}
+			}
+		} else {
+			Iterator<?> iterator = other.iterator();
+			for (int i = 0; i < size; ++i) {
+				if (!Objects.equals(elements[i], iterator.next())) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Returns the hash code for this list.
+	 *
+	 * @return hash code for this list
+	 */
+	@Override
+	public int hashCode() {
+		int hash = 1;
+		for (int i = 0; i < size; ++i) {
+			hash = 31 * hash + Objects.hashCode(elements[i]);
+		}
+		return hash;
 	}
 
 	/**
