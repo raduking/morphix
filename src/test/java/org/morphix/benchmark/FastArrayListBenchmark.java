@@ -63,7 +63,7 @@ import org.openjdk.jmh.runner.RunnerException;
  * </pre>
  *
  * <pre>
- * mvn test-compile exec:exec \
+ * mvn -Pbenchmark clean test-compile exec:exec \
  *   -Dexec.executable=java \
  *   -Dexec.classpathScope=test \
  *   -Dexec.args="-cp %classpath org.morphix.benchmark.FastArrayListBenchmark"
@@ -72,7 +72,7 @@ import org.openjdk.jmh.runner.RunnerException;
  * Or with options:
  *
  * <pre>
- * mvn test-compile exec:exec \
+ * mvn -Pbenchmark clean test-compile exec:exec \
  *   -Dexec.executable=java \
  *   -Dexec.classpathScope=test \
  *   -Dexec.args="-cp %classpath org.openjdk.jmh.Main FastArrayListBenchmark -p size=1000,100000 -wi 3 -i 3 -f 2 -prof gc"
@@ -81,12 +81,12 @@ import org.openjdk.jmh.runner.RunnerException;
  * Or specific ones:
  *
  * <pre>
- * mvn test-compile exec:exec \
+ * mvn -Pbenchmark clean test-compile exec:exec \
  *   -Dexec.executable=java \
  *   -Dexec.classpathScope=test \
  *   -Dexec.args="-cp %classpath org.openjdk.jmh.Main .*AddPreallocated.* -prof gc"
  *
- * mvn test-compile exec:exec \
+ * mvn -Pbenchmark clean test-compile exec:exec \
  *   -Dexec.executable=java \
  *   -Dexec.classpathScope=test \
  *   -Dexec.args="-cp %classpath org.openjdk.jmh.Main .*AddWithGrowth.* -prof gc"

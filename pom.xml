@@ -182,21 +182,6 @@
 					<release>${maven.compiler.release}</release>
 					<proc>none</proc>
 				</configuration>
-				<executions>
-					<execution>
-						<id>default-testCompile</id>
-						<configuration>
-							<proc>full</proc>
-							<annotationProcessorPaths>
-								<path>
-									<groupId>org.openjdk.jmh</groupId>
-									<artifactId>jmh-generator-annprocess</artifactId>
-									<version>${jmh.version}</version>
-								</path>
-							</annotationProcessorPaths>
-						</configuration>
-					</execution>
-				</executions>
     		</plugin>
 
 			<plugin>
