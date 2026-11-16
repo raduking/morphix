@@ -1491,6 +1491,7 @@ class FastArrayListTest {
 			assertThat(list.equals(listOf("a")), equalTo(false));
 			assertThat(list.equals(listOf("a", "c")), equalTo(false));
 			assertThat(list.equals(new LinkedList<>(List.of("a"))), equalTo(false));
+			assertThat(list.equals(new LinkedList<>(List.of("a", "c"))), equalTo(false));
 			assertThat(list.equals(new ArrayList<>(List.of("a", "b", "c"))), equalTo(false));
 			assertThat(list.equals(Arrays.asList("a", "c")), equalTo(false));
 		}

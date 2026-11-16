@@ -204,7 +204,10 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 		if (this == object) {
 			return true;
 		}
-		if (!(object instanceof List<?> other) || size != other.size()) {
+		if (!(object instanceof List<?> other)) {
+			return false;
+		}
+		if (size != other.size()) {
 			return false;
 		}
 		if (other instanceof FastArrayList<?> list) {
@@ -213,12 +216,20 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 					return false;
 				}
 			}
-		} else {
-			Iterator<?> iterator = other.iterator();
+			return true;
+		}
+		if (other instanceof RandomAccess) {
 			for (int i = 0; i < size; ++i) {
-				if (!Objects.equals(elements[i], iterator.next())) {
+				if (!Objects.equals(elements[i], other.get(i))) {
 					return false;
 				}
+			}
+			return true;
+		}
+		Iterator<?> iterator = other.iterator();
+		for (int i = 0; i < size; ++i) {
+			if (!Objects.equals(elements[i], iterator.next())) {
+				return false;
 			}
 		}
 		return true;
