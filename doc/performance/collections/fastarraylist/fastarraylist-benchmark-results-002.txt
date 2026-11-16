@@ -1,0 +1,481 @@
+Benchmark                                                                         (size)  Mode  Cnt        Score       Error   Units
+FastArrayListBenchmark.arrayListAddAllArray                                           10  avgt   15        9.997 ±     0.121   ns/op
+FastArrayListBenchmark.arrayListAddAllArray:gc.alloc.rate                             10  avgt   15    12973.799 ±   154.330  MB/sec
+FastArrayListBenchmark.arrayListAddAllArray:gc.alloc.rate.norm                        10  avgt   15      136.000 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllArray:gc.count                                  10  avgt   15      489.000              counts
+FastArrayListBenchmark.arrayListAddAllArray:gc.time                                   10  avgt   15      200.000                  ms
+FastArrayListBenchmark.arrayListAddAllArray                                          100  avgt   15       25.369 ±     0.650   ns/op
+FastArrayListBenchmark.arrayListAddAllArray:gc.alloc.rate                            100  avgt   15    32190.885 ±   766.426  MB/sec
+FastArrayListBenchmark.arrayListAddAllArray:gc.alloc.rate.norm                       100  avgt   15      856.000 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllArray:gc.count                                 100  avgt   15      787.000              counts
+FastArrayListBenchmark.arrayListAddAllArray:gc.time                                  100  avgt   15      408.000                  ms
+FastArrayListBenchmark.arrayListAddAllArray                                         1000  avgt   15      249.767 ±    15.592   ns/op
+FastArrayListBenchmark.arrayListAddAllArray:gc.alloc.rate                           1000  avgt   15    30849.111 ±  1822.938  MB/sec
+FastArrayListBenchmark.arrayListAddAllArray:gc.alloc.rate.norm                      1000  avgt   15     8056.002 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllArray:gc.count                                1000  avgt   15      761.000              counts
+FastArrayListBenchmark.arrayListAddAllArray:gc.time                                 1000  avgt   15      431.000                  ms
+FastArrayListBenchmark.arrayListAddAllArray                                        10000  avgt   15     2465.549 ±    13.013   ns/op
+FastArrayListBenchmark.arrayListAddAllArray:gc.alloc.rate                          10000  avgt   15    30962.680 ±   163.511  MB/sec
+FastArrayListBenchmark.arrayListAddAllArray:gc.alloc.rate.norm                     10000  avgt   15    80056.017 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllArray:gc.count                               10000  avgt   15      741.000              counts
+FastArrayListBenchmark.arrayListAddAllArray:gc.time                                10000  avgt   15      433.000                  ms
+FastArrayListBenchmark.arrayListAddAllArray                                       100000  avgt   15    26717.881 ±    85.179   ns/op
+FastArrayListBenchmark.arrayListAddAllArray:gc.alloc.rate                         100000  avgt   15    28554.121 ±    90.815  MB/sec
+FastArrayListBenchmark.arrayListAddAllArray:gc.alloc.rate.norm                    100000  avgt   15   800056.185 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllArray:gc.count                              100000  avgt   15      802.000              counts
+FastArrayListBenchmark.arrayListAddAllArray:gc.time                               100000  avgt   15      485.000                  ms
+FastArrayListBenchmark.arrayListAddAllArrayView                                       10  avgt   15        9.991 ±     0.039   ns/op
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.alloc.rate                         10  avgt   15    12980.402 ±    50.564  MB/sec
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.alloc.rate.norm                    10  avgt   15      136.000 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.count                              10  avgt   15      555.000              counts
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.time                               10  avgt   15      209.000                  ms
+FastArrayListBenchmark.arrayListAddAllArrayView                                      100  avgt   15       24.940 ±     0.320   ns/op
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.alloc.rate                        100  avgt   15    32732.616 ±   408.155  MB/sec
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.alloc.rate.norm                   100  avgt   15      856.000 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.count                             100  avgt   15      837.000              counts
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.time                              100  avgt   15      422.000                  ms
+FastArrayListBenchmark.arrayListAddAllArrayView                                     1000  avgt   15      240.213 ±     1.206   ns/op
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.alloc.rate                       1000  avgt   15    31980.416 ±   159.879  MB/sec
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.alloc.rate.norm                  1000  avgt   15     8056.002 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.count                            1000  avgt   15      768.000              counts
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.time                             1000  avgt   15      435.000                  ms
+FastArrayListBenchmark.arrayListAddAllArrayView                                    10000  avgt   15     2521.956 ±    64.068   ns/op
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.alloc.rate                      10000  avgt   15    30285.182 ±   754.678  MB/sec
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.alloc.rate.norm                 10000  avgt   15    80056.017 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.count                           10000  avgt   15      724.000              counts
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.time                            10000  avgt   15      421.000                  ms
+FastArrayListBenchmark.arrayListAddAllArrayView                                   100000  avgt   15    26926.364 ±   325.355   ns/op
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.alloc.rate                     100000  avgt   15    28336.164 ±   339.919  MB/sec
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.alloc.rate.norm                100000  avgt   15   800056.186 ±     0.002    B/op
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.count                          100000  avgt   15      777.000              counts
+FastArrayListBenchmark.arrayListAddAllArrayView:gc.time                           100000  avgt   15      478.000                  ms
+FastArrayListBenchmark.arrayListAddAllSameType                                        10  avgt   15       10.609 ±     0.162   ns/op
+FastArrayListBenchmark.arrayListAddAllSameType:gc.alloc.rate                          10  avgt   15    12226.332 ±   183.353  MB/sec
+FastArrayListBenchmark.arrayListAddAllSameType:gc.alloc.rate.norm                     10  avgt   15      136.000 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllSameType:gc.count                               10  avgt   15      511.000              counts
+FastArrayListBenchmark.arrayListAddAllSameType:gc.time                                10  avgt   15      213.000                  ms
+FastArrayListBenchmark.arrayListAddAllSameType                                       100  avgt   15       26.472 ±     2.019   ns/op
+FastArrayListBenchmark.arrayListAddAllSameType:gc.alloc.rate                         100  avgt   15    30957.742 ±  1996.092  MB/sec
+FastArrayListBenchmark.arrayListAddAllSameType:gc.alloc.rate.norm                    100  avgt   15      856.000 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllSameType:gc.count                              100  avgt   15      757.000              counts
+FastArrayListBenchmark.arrayListAddAllSameType:gc.time                               100  avgt   15      421.000                  ms
+FastArrayListBenchmark.arrayListAddAllSameType                                      1000  avgt   15      247.473 ±     4.582   ns/op
+FastArrayListBenchmark.arrayListAddAllSameType:gc.alloc.rate                        1000  avgt   15    31049.852 ±   569.556  MB/sec
+FastArrayListBenchmark.arrayListAddAllSameType:gc.alloc.rate.norm                   1000  avgt   15     8056.002 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllSameType:gc.count                             1000  avgt   15      757.000              counts
+FastArrayListBenchmark.arrayListAddAllSameType:gc.time                              1000  avgt   15      438.000                  ms
+FastArrayListBenchmark.arrayListAddAllSameType                                     10000  avgt   15     2502.983 ±    30.352   ns/op
+FastArrayListBenchmark.arrayListAddAllSameType:gc.alloc.rate                       10000  avgt   15    30502.721 ±   366.446  MB/sec
+FastArrayListBenchmark.arrayListAddAllSameType:gc.alloc.rate.norm                  10000  avgt   15    80056.017 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllSameType:gc.count                            10000  avgt   15      715.000              counts
+FastArrayListBenchmark.arrayListAddAllSameType:gc.time                             10000  avgt   15      435.000                  ms
+FastArrayListBenchmark.arrayListAddAllSameType                                    100000  avgt   15    26841.093 ±   185.402   ns/op
+FastArrayListBenchmark.arrayListAddAllSameType:gc.alloc.rate                      100000  avgt   15    28423.715 ±   195.372  MB/sec
+FastArrayListBenchmark.arrayListAddAllSameType:gc.alloc.rate.norm                 100000  avgt   15   800056.185 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddAllSameType:gc.count                           100000  avgt   15      778.000              counts
+FastArrayListBenchmark.arrayListAddAllSameType:gc.time                            100000  avgt   15      477.000                  ms
+FastArrayListBenchmark.arrayListAddPreallocated                                       10  avgt   15       17.509 ±     0.229   ns/op
+FastArrayListBenchmark.arrayListAddPreallocated:gc.alloc.rate                         10  avgt   15     4357.398 ±    57.191  MB/sec
+FastArrayListBenchmark.arrayListAddPreallocated:gc.alloc.rate.norm                    10  avgt   15       80.000 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddPreallocated:gc.count                              10  avgt   15      298.000              counts
+FastArrayListBenchmark.arrayListAddPreallocated:gc.time                               10  avgt   15      109.000                  ms
+FastArrayListBenchmark.arrayListAddPreallocated                                      100  avgt   15      168.046 ±     0.134   ns/op
+FastArrayListBenchmark.arrayListAddPreallocated:gc.alloc.rate                        100  avgt   15     2496.750 ±     1.998  MB/sec
+FastArrayListBenchmark.arrayListAddPreallocated:gc.alloc.rate.norm                   100  avgt   15      440.001 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddPreallocated:gc.count                             100  avgt   15      207.000              counts
+FastArrayListBenchmark.arrayListAddPreallocated:gc.time                              100  avgt   15       76.000                  ms
+FastArrayListBenchmark.arrayListAddPreallocated                                     1000  avgt   15     1623.040 ±     6.301   ns/op
+FastArrayListBenchmark.arrayListAddPreallocated:gc.alloc.rate                       1000  avgt   15     2373.593 ±     9.176  MB/sec
+FastArrayListBenchmark.arrayListAddPreallocated:gc.alloc.rate.norm                  1000  avgt   15     4040.011 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddPreallocated:gc.count                            1000  avgt   15      195.000              counts
+FastArrayListBenchmark.arrayListAddPreallocated:gc.time                             1000  avgt   15       70.000                  ms
+FastArrayListBenchmark.arrayListAddPreallocated                                    10000  avgt   15    16382.652 ±  1532.340   ns/op
+FastArrayListBenchmark.arrayListAddPreallocated:gc.alloc.rate                      10000  avgt   15     2343.499 ±   169.525  MB/sec
+FastArrayListBenchmark.arrayListAddPreallocated:gc.alloc.rate.norm                 10000  avgt   15    40040.113 ±     0.011    B/op
+FastArrayListBenchmark.arrayListAddPreallocated:gc.count                           10000  avgt   15      194.000              counts
+FastArrayListBenchmark.arrayListAddPreallocated:gc.time                            10000  avgt   15       69.000                  ms
+FastArrayListBenchmark.arrayListAddPreallocated                                   100000  avgt   15   159626.421 ±   293.145   ns/op
+FastArrayListBenchmark.arrayListAddPreallocated:gc.alloc.rate                     100000  avgt   15     2389.717 ±     4.361  MB/sec
+FastArrayListBenchmark.arrayListAddPreallocated:gc.alloc.rate.norm                100000  avgt   15   400041.104 ±     0.002    B/op
+FastArrayListBenchmark.arrayListAddPreallocated:gc.count                          100000  avgt   15      252.000              counts
+FastArrayListBenchmark.arrayListAddPreallocated:gc.time                           100000  avgt   15       66.000                  ms
+FastArrayListBenchmark.arrayListAddWithGrowth                                         10  avgt   15       18.010 ±     0.211   ns/op
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.alloc.rate                           10  avgt   15     4236.161 ±    49.789  MB/sec
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.alloc.rate.norm                      10  avgt   15       80.000 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.count                                10  avgt   15      426.000              counts
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.time                                 10  avgt   15      107.000                  ms
+FastArrayListBenchmark.arrayListAddWithGrowth                                        100  avgt   15      201.208 ±     0.516   ns/op
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.alloc.rate                          100  avgt   15     6634.907 ±    17.030  MB/sec
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.alloc.rate.norm                     100  avgt   15     1400.001 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.count                               100  avgt   15      427.000              counts
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.time                                100  avgt   15      152.000                  ms
+FastArrayListBenchmark.arrayListAddWithGrowth                                       1000  avgt   15     1914.350 ±    88.400   ns/op
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.alloc.rate                         1000  avgt   15     7495.065 ±   302.502  MB/sec
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.alloc.rate.norm                    1000  avgt   15    15024.013 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.count                              1000  avgt   15      447.000              counts
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.time                               1000  avgt   15      166.000                  ms
+FastArrayListBenchmark.arrayListAddWithGrowth                                      10000  avgt   15    19481.682 ±   163.359   ns/op
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.alloc.rate                        10000  avgt   15     8270.919 ±    69.709  MB/sec
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.alloc.rate.norm                   10000  avgt   15   168968.135 ±     0.001    B/op
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.count                             10000  avgt   15      360.000              counts
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.time                              10000  avgt   15      154.000                  ms
+FastArrayListBenchmark.arrayListAddWithGrowth                                     100000  avgt   15   187711.867 ±  1413.833   ns/op
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.alloc.rate                       100000  avgt   15     6507.488 ±    49.286  MB/sec
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.alloc.rate.norm                  100000  avgt   15  1280953.297 ±     0.010    B/op
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.count                            100000  avgt   15      390.000              counts
+FastArrayListBenchmark.arrayListAddWithGrowth:gc.time                             100000  avgt   15      166.000                  ms
+FastArrayListBenchmark.arrayListConstructorFromArray                                  10  avgt   15        6.043 ±     0.044   ns/op
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.alloc.rate                    10  avgt   15    21462.721 ±   157.283  MB/sec
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.alloc.rate.norm               10  avgt   15      136.000 ±     0.001    B/op
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.count                         10  avgt   15      721.000              counts
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.time                          10  avgt   15      307.000                  ms
+FastArrayListBenchmark.arrayListConstructorFromArray                                 100  avgt   15       22.605 ±     0.312   ns/op
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.alloc.rate                   100  avgt   15    36115.403 ±   480.182  MB/sec
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.alloc.rate.norm              100  avgt   15      856.000 ±     0.001    B/op
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.count                        100  avgt   15      814.000              counts
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.time                         100  avgt   15      469.000                  ms
+FastArrayListBenchmark.arrayListConstructorFromArray                                1000  avgt   15      226.607 ±     1.848   ns/op
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.alloc.rate                  1000  avgt   15    33901.496 ±   274.173  MB/sec
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.alloc.rate.norm             1000  avgt   15     8056.002 ±     0.001    B/op
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.count                       1000  avgt   15      795.000              counts
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.time                        1000  avgt   15      454.000                  ms
+FastArrayListBenchmark.arrayListConstructorFromArray                               10000  avgt   15     2438.230 ±    54.063   ns/op
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.alloc.rate                 10000  avgt   15    31321.042 ±   671.736  MB/sec
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.alloc.rate.norm            10000  avgt   15    80056.017 ±     0.001    B/op
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.count                      10000  avgt   15      722.000              counts
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.time                       10000  avgt   15      438.000                  ms
+FastArrayListBenchmark.arrayListConstructorFromArray                              100000  avgt   15    29756.421 ±  8711.950   ns/op
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.alloc.rate                100000  avgt   15    26732.632 ±  4776.392  MB/sec
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.alloc.rate.norm           100000  avgt   15   800056.204 ±     0.058    B/op
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.count                     100000  avgt   15      695.000              counts
+FastArrayListBenchmark.arrayListConstructorFromArray:gc.time                      100000  avgt   15      510.000                  ms
+FastArrayListBenchmark.arrayListConstructorFromCollection                             10  avgt   15        4.034 ±     0.055   ns/op
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.alloc.rate               10  avgt   15    18915.540 ±   258.242  MB/sec
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.alloc.rate.norm          10  avgt   15       80.000 ±     0.001    B/op
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.count                    10  avgt   15      654.000              counts
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.time                     10  avgt   15      279.000                  ms
+FastArrayListBenchmark.arrayListConstructorFromCollection                            100  avgt   15       11.860 ±     0.334   ns/op
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.alloc.rate              100  avgt   15    35397.881 ±   951.271  MB/sec
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.alloc.rate.norm         100  avgt   15      440.000 ±     0.001    B/op
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.count                   100  avgt   15      798.000              counts
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.time                    100  avgt   15      461.000                  ms
+FastArrayListBenchmark.arrayListConstructorFromCollection                           1000  avgt   15      121.212 ±     5.063   ns/op
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.alloc.rate             1000  avgt   15    31825.546 ±  1273.458  MB/sec
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.alloc.rate.norm        1000  avgt   15     4040.001 ±     0.001    B/op
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.count                  1000  avgt   15      746.000              counts
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.time                   1000  avgt   15      443.000                  ms
+FastArrayListBenchmark.arrayListConstructorFromCollection                          10000  avgt   15     1037.150 ±     8.741   ns/op
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.alloc.rate            10000  avgt   15    36815.298 ±   308.170  MB/sec
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.alloc.rate.norm       10000  avgt   15    40040.007 ±     0.001    B/op
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.count                 10000  avgt   15      787.000              counts
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.time                  10000  avgt   15      488.000                  ms
+FastArrayListBenchmark.arrayListConstructorFromCollection                         100000  avgt   15    11445.851 ±   297.563   ns/op
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.alloc.rate           100000  avgt   15    33347.495 ±   931.043  MB/sec
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.alloc.rate.norm      100000  avgt   15   400040.079 ±     0.002    B/op
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.count                100000  avgt   15      808.000              counts
+FastArrayListBenchmark.arrayListConstructorFromCollection:gc.time                 100000  avgt   15      430.000                  ms
+FastArrayListBenchmark.arrayListGet                                                   10  avgt   15        4.217 ±     0.015   ns/op
+FastArrayListBenchmark.arrayListGet:gc.alloc.rate                                     10  avgt   15        0.006 ±     0.001  MB/sec
+FastArrayListBenchmark.arrayListGet:gc.alloc.rate.norm                                10  avgt   15       ≈ 10⁻⁵                B/op
+FastArrayListBenchmark.arrayListGet:gc.count                                          10  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.arrayListGet                                                  100  avgt   15       40.961 ±     0.034   ns/op
+FastArrayListBenchmark.arrayListGet:gc.alloc.rate                                    100  avgt   15        0.006 ±     0.001  MB/sec
+FastArrayListBenchmark.arrayListGet:gc.alloc.rate.norm                               100  avgt   15       ≈ 10⁻⁴                B/op
+FastArrayListBenchmark.arrayListGet:gc.count                                         100  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.arrayListGet                                                 1000  avgt   15      528.571 ±     2.966   ns/op
+FastArrayListBenchmark.arrayListGet:gc.alloc.rate                                   1000  avgt   15        0.006 ±     0.001  MB/sec
+FastArrayListBenchmark.arrayListGet:gc.alloc.rate.norm                              1000  avgt   15        0.004 ±     0.001    B/op
+FastArrayListBenchmark.arrayListGet:gc.count                                        1000  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.arrayListGet                                                10000  avgt   15     5444.639 ±    37.662   ns/op
+FastArrayListBenchmark.arrayListGet:gc.alloc.rate                                  10000  avgt   15        0.007 ±     0.001  MB/sec
+FastArrayListBenchmark.arrayListGet:gc.alloc.rate.norm                             10000  avgt   15        0.037 ±     0.001    B/op
+FastArrayListBenchmark.arrayListGet:gc.count                                       10000  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.arrayListGet                                               100000  avgt   15    54844.605 ±  1607.837   ns/op
+FastArrayListBenchmark.arrayListGet:gc.alloc.rate                                 100000  avgt   15        0.007 ±     0.001  MB/sec
+FastArrayListBenchmark.arrayListGet:gc.alloc.rate.norm                            100000  avgt   15        0.376 ±     0.011    B/op
+FastArrayListBenchmark.arrayListGet:gc.count                                      100000  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.arrayListIterator                                              10  avgt   15        5.035 ±     0.038   ns/op
+FastArrayListBenchmark.arrayListIterator:gc.alloc.rate                                10  avgt   15        0.006 ±     0.001  MB/sec
+FastArrayListBenchmark.arrayListIterator:gc.alloc.rate.norm                           10  avgt   15       ≈ 10⁻⁴                B/op
+FastArrayListBenchmark.arrayListIterator:gc.count                                     10  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.arrayListIterator                                             100  avgt   15       43.859 ±     0.090   ns/op
+FastArrayListBenchmark.arrayListIterator:gc.alloc.rate                               100  avgt   15        0.006 ±     0.001  MB/sec
+FastArrayListBenchmark.arrayListIterator:gc.alloc.rate.norm                          100  avgt   15       ≈ 10⁻⁴                B/op
+FastArrayListBenchmark.arrayListIterator:gc.count                                    100  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.arrayListIterator                                            1000  avgt   15      532.364 ±     1.248   ns/op
+FastArrayListBenchmark.arrayListIterator:gc.alloc.rate                              1000  avgt   15        0.006 ±     0.001  MB/sec
+FastArrayListBenchmark.arrayListIterator:gc.alloc.rate.norm                         1000  avgt   15        0.004 ±     0.001    B/op
+FastArrayListBenchmark.arrayListIterator:gc.count                                   1000  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.arrayListIterator                                           10000  avgt   15     5464.391 ±    50.059   ns/op
+FastArrayListBenchmark.arrayListIterator:gc.alloc.rate                             10000  avgt   15        0.007 ±     0.001  MB/sec
+FastArrayListBenchmark.arrayListIterator:gc.alloc.rate.norm                        10000  avgt   15        0.037 ±     0.001    B/op
+FastArrayListBenchmark.arrayListIterator:gc.count                                  10000  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.arrayListIterator                                          100000  avgt   15    54208.630 ±    56.665   ns/op
+FastArrayListBenchmark.arrayListIterator:gc.alloc.rate                            100000  avgt   15        0.007 ±     0.001  MB/sec
+FastArrayListBenchmark.arrayListIterator:gc.alloc.rate.norm                       100000  avgt   15        0.371 ±     0.003    B/op
+FastArrayListBenchmark.arrayListIterator:gc.count                                 100000  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.arraysAsList                                                   10  avgt   15        1.133 ±     0.013   ns/op
+FastArrayListBenchmark.arraysAsList:gc.alloc.rate                                     10  avgt   15    20193.854 ±   228.612  MB/sec
+FastArrayListBenchmark.arraysAsList:gc.alloc.rate.norm                                10  avgt   15       24.000 ±     0.001    B/op
+FastArrayListBenchmark.arraysAsList:gc.count                                          10  avgt   15      691.000              counts
+FastArrayListBenchmark.arraysAsList:gc.time                                           10  avgt   15      288.000                  ms
+FastArrayListBenchmark.arraysAsList                                                  100  avgt   15        1.119 ±     0.008   ns/op
+FastArrayListBenchmark.arraysAsList:gc.alloc.rate                                    100  avgt   15    20444.049 ±   151.749  MB/sec
+FastArrayListBenchmark.arraysAsList:gc.alloc.rate.norm                               100  avgt   15       24.000 ±     0.001    B/op
+FastArrayListBenchmark.arraysAsList:gc.count                                         100  avgt   15      683.000              counts
+FastArrayListBenchmark.arraysAsList:gc.time                                          100  avgt   15      287.000                  ms
+FastArrayListBenchmark.arraysAsList                                                 1000  avgt   15        1.118 ±     0.005   ns/op
+FastArrayListBenchmark.arraysAsList:gc.alloc.rate                                   1000  avgt   15    20479.690 ±    96.813  MB/sec
+FastArrayListBenchmark.arraysAsList:gc.alloc.rate.norm                              1000  avgt   15       24.000 ±     0.001    B/op
+FastArrayListBenchmark.arraysAsList:gc.count                                        1000  avgt   15      701.000              counts
+FastArrayListBenchmark.arraysAsList:gc.time                                         1000  avgt   15      293.000                  ms
+FastArrayListBenchmark.arraysAsList                                                10000  avgt   15        1.118 ±     0.005   ns/op
+FastArrayListBenchmark.arraysAsList:gc.alloc.rate                                  10000  avgt   15    20477.206 ±    90.959  MB/sec
+FastArrayListBenchmark.arraysAsList:gc.alloc.rate.norm                             10000  avgt   15       24.000 ±     0.001    B/op
+FastArrayListBenchmark.arraysAsList:gc.count                                       10000  avgt   15      660.000              counts
+FastArrayListBenchmark.arraysAsList:gc.time                                        10000  avgt   15      285.000                  ms
+FastArrayListBenchmark.arraysAsList                                               100000  avgt   15        1.125 ±     0.013   ns/op
+FastArrayListBenchmark.arraysAsList:gc.alloc.rate                                 100000  avgt   15    20349.459 ±   240.400  MB/sec
+FastArrayListBenchmark.arraysAsList:gc.alloc.rate.norm                            100000  avgt   15       24.000 ±     0.001    B/op
+FastArrayListBenchmark.arraysAsList:gc.count                                      100000  avgt   15      700.000              counts
+FastArrayListBenchmark.arraysAsList:gc.time                                       100000  avgt   15      295.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllArray                                       10  avgt   15        8.270 ±     0.183   ns/op
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.alloc.rate                         10  avgt   15     9227.909 ±   197.919  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.alloc.rate.norm                    10  avgt   15       80.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.count                              10  avgt   15      442.000              counts
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.time                               10  avgt   15      170.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllArray                                      100  avgt   15       16.572 ±     0.074   ns/op
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.alloc.rate                        100  avgt   15    25318.770 ±   112.733  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.alloc.rate.norm                   100  avgt   15      440.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.count                             100  avgt   15      718.000              counts
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.time                              100  avgt   15      344.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllArray                                     1000  avgt   15      187.155 ±     0.747   ns/op
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.alloc.rate                       1000  avgt   15    20584.465 ±    82.032  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.alloc.rate.norm                  1000  avgt   15     4040.001 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.count                            1000  avgt   15      598.000              counts
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.time                             1000  avgt   15      310.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllArray                                    10000  avgt   15     1104.449 ±     3.872   ns/op
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.alloc.rate                      10000  avgt   15    34570.674 ±   121.185  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.alloc.rate.norm                 10000  avgt   15    40040.008 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.count                           10000  avgt   15      762.000              counts
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.time                            10000  avgt   15      462.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllArray                                   100000  avgt   15    11427.564 ±    34.703   ns/op
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.alloc.rate                     100000  avgt   15    33382.030 ±   101.088  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.alloc.rate.norm                100000  avgt   15   400040.079 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.count                          100000  avgt   15      910.000              counts
+FastArrayListBenchmark.fastArrayListAddAllArray:gc.time                           100000  avgt   15      437.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllArrayView                                   10  avgt   15       11.109 ±     0.055   ns/op
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.alloc.rate                     10  avgt   15    11674.171 ±    57.722  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.alloc.rate.norm                10  avgt   15      136.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.count                          10  avgt   15      515.000              counts
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.time                           10  avgt   15      193.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllArrayView                                  100  avgt   15       25.942 ±     0.188   ns/op
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.alloc.rate                    100  avgt   15    31465.580 ±   226.587  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.alloc.rate.norm               100  avgt   15      856.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.count                         100  avgt   15      820.000              counts
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.time                          100  avgt   15      415.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllArrayView                                 1000  avgt   15      249.425 ±     4.564   ns/op
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.alloc.rate                   1000  avgt   15    30806.957 ±   547.428  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.alloc.rate.norm              1000  avgt   15     8056.002 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.count                        1000  avgt   15      752.000              counts
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.time                         1000  avgt   15      430.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllArrayView                                10000  avgt   15     2501.213 ±    23.840   ns/op
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.alloc.rate                  10000  avgt   15    30523.084 ±   288.269  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.alloc.rate.norm             10000  avgt   15    80056.017 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.count                       10000  avgt   15      726.000              counts
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.time                        10000  avgt   15      426.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllArrayView                               100000  avgt   15    26736.760 ±   141.229   ns/op
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.alloc.rate                 100000  avgt   15    28534.522 ±   150.035  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.alloc.rate.norm            100000  avgt   15   800056.184 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.count                      100000  avgt   15      784.000              counts
+FastArrayListBenchmark.fastArrayListAddAllArrayView:gc.time                       100000  avgt   15      472.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllSameType                                    10  avgt   15        8.448 ±     0.159   ns/op
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.alloc.rate                      10  avgt   15     9032.303 ±   169.742  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.alloc.rate.norm                 10  avgt   15       80.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.count                           10  avgt   15      438.000              counts
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.time                            10  avgt   15      162.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllSameType                                   100  avgt   15       16.533 ±     0.084   ns/op
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.alloc.rate                     100  avgt   15    25379.061 ±   128.401  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.alloc.rate.norm                100  avgt   15      440.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.count                          100  avgt   15      743.000              counts
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.time                           100  avgt   15      345.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllSameType                                  1000  avgt   15      190.502 ±     2.101   ns/op
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.alloc.rate                    1000  avgt   15    20224.559 ±   224.228  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.alloc.rate.norm               1000  avgt   15     4040.001 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.count                         1000  avgt   15      603.000              counts
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.time                          1000  avgt   15      309.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllSameType                                 10000  avgt   15     1113.438 ±     5.769   ns/op
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.alloc.rate                   10000  avgt   15    34291.905 ±   177.324  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.alloc.rate.norm              10000  avgt   15    40040.008 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.count                        10000  avgt   15      778.000              counts
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.time                         10000  avgt   15      463.000                  ms
+FastArrayListBenchmark.fastArrayListAddAllSameType                                100000  avgt   15    11276.852 ±   291.383   ns/op
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.alloc.rate                  100000  avgt   15    33846.587 ±   897.821  MB/sec
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.alloc.rate.norm             100000  avgt   15   400040.078 ±     0.002    B/op
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.count                       100000  avgt   15      929.000              counts
+FastArrayListBenchmark.fastArrayListAddAllSameType:gc.time                        100000  avgt   15      451.000                  ms
+FastArrayListBenchmark.fastArrayListAddPreallocated                                   10  avgt   15       18.320 ±     0.059   ns/op
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.alloc.rate                     10  avgt   15     4163.980 ±    13.422  MB/sec
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.alloc.rate.norm                10  avgt   15       80.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.count                          10  avgt   15      286.000              counts
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.time                           10  avgt   15      109.000                  ms
+FastArrayListBenchmark.fastArrayListAddPreallocated                                  100  avgt   15      216.646 ±     1.939   ns/op
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.alloc.rate                    100  avgt   15     1936.782 ±    16.981  MB/sec
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.alloc.rate.norm               100  avgt   15      440.001 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.count                         100  avgt   15      195.000              counts
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.time                          100  avgt   15       65.000                  ms
+FastArrayListBenchmark.fastArrayListAddPreallocated                                 1000  avgt   15     2263.449 ±    22.093   ns/op
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.alloc.rate                   1000  avgt   15     1702.121 ±    16.586  MB/sec
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.alloc.rate.norm              1000  avgt   15     4040.016 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.count                        1000  avgt   15      172.000              counts
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.time                         1000  avgt   15       57.000                  ms
+FastArrayListBenchmark.fastArrayListAddPreallocated                                10000  avgt   15    22375.592 ±  1793.812   ns/op
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.alloc.rate                  10000  avgt   15     1713.538 ±   110.034  MB/sec
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.alloc.rate.norm             10000  avgt   15    40040.153 ±     0.011    B/op
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.count                       10000  avgt   15      175.000              counts
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.time                        10000  avgt   15       82.000                  ms
+FastArrayListBenchmark.fastArrayListAddPreallocated                               100000  avgt   15   223197.887 ±  5264.864   ns/op
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.alloc.rate                 100000  avgt   15     1707.637 ±    43.796  MB/sec
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.alloc.rate.norm            100000  avgt   15   400041.533 ±     0.035    B/op
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.count                      100000  avgt   15      181.000              counts
+FastArrayListBenchmark.fastArrayListAddPreallocated:gc.time                       100000  avgt   15       54.000                  ms
+FastArrayListBenchmark.fastArrayListAddWithGrowth                                     10  avgt   15       24.469 ±     7.929   ns/op
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.alloc.rate                       10  avgt   15     3269.862 ±   585.830  MB/sec
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.alloc.rate.norm                  10  avgt   15       80.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.count                            10  avgt   15      224.000              counts
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.time                             10  avgt   15      214.000                  ms
+FastArrayListBenchmark.fastArrayListAddWithGrowth                                    100  avgt   15      266.712 ±    10.199   ns/op
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.alloc.rate                      100  avgt   15     5010.923 ±   178.236  MB/sec
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.alloc.rate.norm                 100  avgt   15     1400.002 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.count                           100  avgt   15      315.000              counts
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.time                            100  avgt   15      117.000                  ms
+FastArrayListBenchmark.fastArrayListAddWithGrowth                                   1000  avgt   15     2651.097 ±     8.163   ns/op
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.alloc.rate                     1000  avgt   15     5403.972 ±    16.526  MB/sec
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.alloc.rate.norm                1000  avgt   15    15024.018 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.count                          1000  avgt   15      305.000              counts
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.time                           1000  avgt   15      118.000                  ms
+FastArrayListBenchmark.fastArrayListAddWithGrowth                                  10000  avgt   15    26601.263 ±   124.384   ns/op
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.alloc.rate                    10000  avgt   15     6057.036 ±    28.088  MB/sec
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.alloc.rate.norm               10000  avgt   15   168968.184 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.count                         10000  avgt   15      317.000              counts
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.time                          10000  avgt   15      128.000                  ms
+FastArrayListBenchmark.fastArrayListAddWithGrowth                                 100000  avgt   15   259144.153 ±   687.751   ns/op
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.alloc.rate                   100000  avgt   15     4713.508 ±    12.530  MB/sec
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.alloc.rate.norm              100000  avgt   15  1280953.792 ±     0.006    B/op
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.count                        100000  avgt   15      363.000              counts
+FastArrayListBenchmark.fastArrayListAddWithGrowth:gc.time                         100000  avgt   15      139.000                  ms
+FastArrayListBenchmark.fastArrayListConstructorFromArray                              10  avgt   15        3.382 ±     0.029   ns/op
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.alloc.rate                10  avgt   15    22556.039 ±   190.606  MB/sec
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.alloc.rate.norm           10  avgt   15       80.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.count                     10  avgt   15      704.000              counts
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.time                      10  avgt   15      313.000                  ms
+FastArrayListBenchmark.fastArrayListConstructorFromArray                             100  avgt   15       11.773 ±     0.301   ns/op
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.alloc.rate               100  avgt   15    35656.364 ±   882.514  MB/sec
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.alloc.rate.norm          100  avgt   15      440.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.count                    100  avgt   15      800.000              counts
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.time                     100  avgt   15      463.000                  ms
+FastArrayListBenchmark.fastArrayListConstructorFromArray                            1000  avgt   15      118.939 ±     5.751   ns/op
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.alloc.rate              1000  avgt   15    32447.457 ±  1470.887  MB/sec
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.alloc.rate.norm         1000  avgt   15     4040.001 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.count                   1000  avgt   15      766.000              counts
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.time                    1000  avgt   15      444.000                  ms
+FastArrayListBenchmark.fastArrayListConstructorFromArray                           10000  avgt   15     1038.209 ±    19.697   ns/op
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.alloc.rate             10000  avgt   15    36786.061 ±   683.810  MB/sec
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.alloc.rate.norm        10000  avgt   15    40040.007 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.count                  10000  avgt   15      793.000              counts
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.time                   10000  avgt   15      484.000                  ms
+FastArrayListBenchmark.fastArrayListConstructorFromArray                          100000  avgt   15    11461.496 ±   142.605   ns/op
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.alloc.rate            100000  avgt   15    33286.711 ±   421.634  MB/sec
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.alloc.rate.norm       100000  avgt   15   400040.079 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.count                 100000  avgt   15      908.000              counts
+FastArrayListBenchmark.fastArrayListConstructorFromArray:gc.time                  100000  avgt   15      436.000                  ms
+FastArrayListBenchmark.fastArrayListConstructorFromCollection                         10  avgt   15        4.021 ±     0.042   ns/op
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.alloc.rate           10  avgt   15    18974.283 ±   196.606  MB/sec
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.alloc.rate.norm      10  avgt   15       80.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.count                10  avgt   15      676.000              counts
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.time                 10  avgt   15      280.000                  ms
+FastArrayListBenchmark.fastArrayListConstructorFromCollection                        100  avgt   15       12.620 ±     3.374   ns/op
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.alloc.rate          100  avgt   15    34338.041 ±  5017.486  MB/sec
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.alloc.rate.norm     100  avgt   15      440.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.count               100  avgt   15      709.000              counts
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.time                100  avgt   15      442.000                  ms
+FastArrayListBenchmark.fastArrayListConstructorFromCollection                       1000  avgt   15      116.032 ±     0.833   ns/op
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.alloc.rate         1000  avgt   15    33202.207 ±   236.164  MB/sec
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.alloc.rate.norm    1000  avgt   15     4040.001 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.count              1000  avgt   15      769.000              counts
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.time               1000  avgt   15      447.000                  ms
+FastArrayListBenchmark.fastArrayListConstructorFromCollection                      10000  avgt   15     1038.617 ±    21.735   ns/op
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.alloc.rate        10000  avgt   15    36772.393 ±   758.546  MB/sec
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.alloc.rate.norm   10000  avgt   15    40040.007 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.count             10000  avgt   15      764.000              counts
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.time              10000  avgt   15      486.000                  ms
+FastArrayListBenchmark.fastArrayListConstructorFromCollection                     100000  avgt   15    11364.729 ±   317.137   ns/op
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.alloc.rate       100000  avgt   15    33588.196 ±   991.847  MB/sec
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.alloc.rate.norm  100000  avgt   15   400040.078 ±     0.002    B/op
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.count            100000  avgt   15      910.000              counts
+FastArrayListBenchmark.fastArrayListConstructorFromCollection:gc.time             100000  avgt   15      451.000                  ms
+FastArrayListBenchmark.fastArrayListGet                                               10  avgt   15        4.693 ±     0.020   ns/op
+FastArrayListBenchmark.fastArrayListGet:gc.alloc.rate                                 10  avgt   15        0.006 ±     0.001  MB/sec
+FastArrayListBenchmark.fastArrayListGet:gc.alloc.rate.norm                            10  avgt   15       ≈ 10⁻⁴                B/op
+FastArrayListBenchmark.fastArrayListGet:gc.count                                      10  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.fastArrayListGet                                              100  avgt   15       41.704 ±     0.027   ns/op
+FastArrayListBenchmark.fastArrayListGet:gc.alloc.rate                                100  avgt   15        0.007 ±     0.001  MB/sec
+FastArrayListBenchmark.fastArrayListGet:gc.alloc.rate.norm                           100  avgt   15       ≈ 10⁻⁴                B/op
+FastArrayListBenchmark.fastArrayListGet:gc.count                                     100  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.fastArrayListGet                                             1000  avgt   15      532.665 ±     2.053   ns/op
+FastArrayListBenchmark.fastArrayListGet:gc.alloc.rate                               1000  avgt   15        0.006 ±     0.001  MB/sec
+FastArrayListBenchmark.fastArrayListGet:gc.alloc.rate.norm                          1000  avgt   15        0.004 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListGet:gc.count                                    1000  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.fastArrayListGet                                            10000  avgt   15     5470.477 ±    38.471   ns/op
+FastArrayListBenchmark.fastArrayListGet:gc.alloc.rate                              10000  avgt   15        0.007 ±     0.001  MB/sec
+FastArrayListBenchmark.fastArrayListGet:gc.alloc.rate.norm                         10000  avgt   15        0.037 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListGet:gc.count                                   10000  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.fastArrayListGet                                           100000  avgt   15    54240.093 ±    84.529   ns/op
+FastArrayListBenchmark.fastArrayListGet:gc.alloc.rate                             100000  avgt   15        0.007 ±     0.001  MB/sec
+FastArrayListBenchmark.fastArrayListGet:gc.alloc.rate.norm                        100000  avgt   15        0.371 ±     0.003    B/op
+FastArrayListBenchmark.fastArrayListGet:gc.count                                  100000  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.fastArrayListIterator                                          10  avgt   15        4.788 ±     0.195   ns/op
+FastArrayListBenchmark.fastArrayListIterator:gc.alloc.rate                            10  avgt   15        0.006 ±     0.001  MB/sec
+FastArrayListBenchmark.fastArrayListIterator:gc.alloc.rate.norm                       10  avgt   15       ≈ 10⁻⁴                B/op
+FastArrayListBenchmark.fastArrayListIterator:gc.count                                 10  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.fastArrayListIterator                                         100  avgt   15       44.119 ±     0.283   ns/op
+FastArrayListBenchmark.fastArrayListIterator:gc.alloc.rate                           100  avgt   15        0.006 ±     0.001  MB/sec
+FastArrayListBenchmark.fastArrayListIterator:gc.alloc.rate.norm                      100  avgt   15       ≈ 10⁻⁴                B/op
+FastArrayListBenchmark.fastArrayListIterator:gc.count                                100  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.fastArrayListIterator                                        1000  avgt   15      531.235 ±     1.191   ns/op
+FastArrayListBenchmark.fastArrayListIterator:gc.alloc.rate                          1000  avgt   15        0.006 ±     0.001  MB/sec
+FastArrayListBenchmark.fastArrayListIterator:gc.alloc.rate.norm                     1000  avgt   15        0.004 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListIterator:gc.count                               1000  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.fastArrayListIterator                                       10000  avgt   15     5425.124 ±     4.724   ns/op
+FastArrayListBenchmark.fastArrayListIterator:gc.alloc.rate                         10000  avgt   15        0.007 ±     0.001  MB/sec
+FastArrayListBenchmark.fastArrayListIterator:gc.alloc.rate.norm                    10000  avgt   15        0.037 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListIterator:gc.count                              10000  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.fastArrayListIterator                                      100000  avgt   15    66324.579 ± 42779.534   ns/op
+FastArrayListBenchmark.fastArrayListIterator:gc.alloc.rate                        100000  avgt   15        0.007 ±     0.001  MB/sec
+FastArrayListBenchmark.fastArrayListIterator:gc.alloc.rate.norm                   100000  avgt   15        0.453 ±     0.288    B/op
+FastArrayListBenchmark.fastArrayListIterator:gc.count                             100000  avgt   15          ≈ 0              counts
+FastArrayListBenchmark.fastArrayListWrap                                              10  avgt   15        1.255 ±     0.008   ns/op
+FastArrayListBenchmark.fastArrayListWrap:gc.alloc.rate                                10  avgt   15    18231.403 ±   121.026  MB/sec
+FastArrayListBenchmark.fastArrayListWrap:gc.alloc.rate.norm                           10  avgt   15       24.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListWrap:gc.count                                     10  avgt   15      654.000              counts
+FastArrayListBenchmark.fastArrayListWrap:gc.time                                      10  avgt   15      266.000                  ms
+FastArrayListBenchmark.fastArrayListWrap                                             100  avgt   15        1.255 ±     0.008   ns/op
+FastArrayListBenchmark.fastArrayListWrap:gc.alloc.rate                               100  avgt   15    18242.330 ±   120.224  MB/sec
+FastArrayListBenchmark.fastArrayListWrap:gc.alloc.rate.norm                          100  avgt   15       24.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListWrap:gc.count                                    100  avgt   15      640.000              counts
+FastArrayListBenchmark.fastArrayListWrap:gc.time                                     100  avgt   15      266.000                  ms
+FastArrayListBenchmark.fastArrayListWrap                                            1000  avgt   15        1.251 ±     0.001   ns/op
+FastArrayListBenchmark.fastArrayListWrap:gc.alloc.rate                              1000  avgt   15    18287.712 ±    18.722  MB/sec
+FastArrayListBenchmark.fastArrayListWrap:gc.alloc.rate.norm                         1000  avgt   15       24.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListWrap:gc.count                                   1000  avgt   15      641.000              counts
+FastArrayListBenchmark.fastArrayListWrap:gc.time                                    1000  avgt   15      262.000                  ms
+FastArrayListBenchmark.fastArrayListWrap                                           10000  avgt   15        1.271 ±     0.018   ns/op
+FastArrayListBenchmark.fastArrayListWrap:gc.alloc.rate                             10000  avgt   15    18005.636 ±   253.499  MB/sec
+FastArrayListBenchmark.fastArrayListWrap:gc.alloc.rate.norm                        10000  avgt   15       24.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListWrap:gc.count                                  10000  avgt   15      597.000              counts
+FastArrayListBenchmark.fastArrayListWrap:gc.time                                   10000  avgt   15      263.000                  ms
+FastArrayListBenchmark.fastArrayListWrap                                          100000  avgt   15        1.277 ±     0.021   ns/op
+FastArrayListBenchmark.fastArrayListWrap:gc.alloc.rate                            100000  avgt   15    17931.666 ±   291.337  MB/sec
+FastArrayListBenchmark.fastArrayListWrap:gc.alloc.rate.norm                       100000  avgt   15       24.000 ±     0.001    B/op
+FastArrayListBenchmark.fastArrayListWrap:gc.count                                 100000  avgt   15      733.000              counts
+FastArrayListBenchmark.fastArrayListWrap:gc.time                                  100000  avgt   15      292.000                  ms

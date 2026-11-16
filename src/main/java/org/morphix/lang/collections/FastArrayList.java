@@ -739,7 +739,10 @@ public class FastArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 * @param element element to store
 	 */
 	private void ensureCompatibleStorage(final E element) {
-		if (null == element || isObjectStorage()) {
+		if (isObjectStorage()) {
+			return;
+		}
+		if (null == element) {
 			return;
 		}
 		if (elements.getClass().getComponentType().isInstance(element)) {
