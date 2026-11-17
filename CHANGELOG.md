@@ -10,6 +10,23 @@
 - Added `Fields.Unchecked.getAllDeclaredInHierarchy(Class)` for direct hierarchy field retrieval without parameter validation.
 - Added `Fields.Unchecked.getAllDeclaredInHierarchy(Class, Predicate)` for direct filtered hierarchy field retrieval without parameter validation.
 - Added `Fields.Unchecked.forEachMatching(Field[], Predicate, Consumer)` to pass matching declared fields to a consumer without allocating a result list.
+- Added `Fields.Safe.getAllDeclared(Class)` for null-safe retrieval of a class's declared fields.
+- Added `Fields.Safe.getAllDeclared(Object)` for null-safe retrieval of declared fields from an object's class.
+- Added `Fields.Safe.getAllDeclared(Class, Predicate)` for null-safe retrieval and filtering of declared fields.
+- Added `Fields.Safe.getAllDeclared(Object, Predicate)` for null-safe retrieval and filtering of declared fields from an object's class.
+- Added `Fields.Safe.filter(List, Predicate)` for null-safe filtering of a field list.
+- Added `Fields.Safe.getAllDeclaredInHierarchy(Class)` for null-safe hierarchy field retrieval.
+- Added `Fields.Safe.getAllDeclaredInHierarchy(Class, Predicate)` for null-safe filtered hierarchy field retrieval.
+- Added `Fields.Safe.getAllDeclaredInHierarchy(Object)` for null-safe hierarchy field retrieval from an object's class.
+- Added `Fields.Safe.getAllDeclaredInHierarchy(Object, Predicate)` for null-safe filtered hierarchy field retrieval from an object's class.
+- Added `Methods.Unchecked.getOneDeclared(String, Class, Class...)` for direct method lookup without parameter validation.
+- Added `Methods.Unchecked.getOneDeclaredInHierarchy(String, Class, Class...)` for direct method lookup throughout a class hierarchy.
+- Added `Methods.Unchecked.getAllDeclared(Class)` for direct retrieval of a class's declared methods.
+- Added `Methods.Unchecked.getAllDeclared(Class, Predicate)` for direct retrieval and filtering of declared methods.
+- Added `Methods.Unchecked.forEachMatching(Method[], Predicate, Consumer)` to pass matching declared methods to a consumer without allocating a result list.
+- Added `Methods.Safe.getAllDeclared(Class)` for null-safe retrieval of a class's declared methods.
+- Added `Methods.Safe.getAllDeclared(Class, Predicate)` for null-safe retrieval and filtering of declared methods.
+- Changed `Methods.getAllDeclared(Class, Predicate)` to return matching methods in declaration order.
 - Added `Classes.isArray(Class)` to check whether a class represents an array type.
 - Added `Classes.isNotArray(Class)` to check whether a class does not represent an array type.
 - Added `JavaArrays.EMPTY` as the shared empty `Object[]` instance.

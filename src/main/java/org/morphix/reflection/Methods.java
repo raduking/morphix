@@ -18,16 +18,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.morphix.lang.JavaObjects;
+import org.morphix.lang.collections.FastArrayList;
 import org.morphix.reflection.predicates.MemberPredicates;
 
 /**
@@ -53,10 +56,7 @@ public interface Methods {
 	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclared(final Class<T> cls) {
-		if (null == cls) {
-			return List.of();
-		}
-		return List.of(cls.getDeclaredMethods());
+		return Safe.getAllDeclared(cls);
 	}
 
 	/**
@@ -69,20 +69,7 @@ public interface Methods {
 	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclared(final Class<T> cls, final Predicate<? super Method> predicate) {
-		if (null == cls || null == predicate) {
-			return List.of();
-		}
-		Method[] declared = cls.getDeclaredMethods();
-		if (declared.length == 0) {
-			return List.of();
-		}
-		List<Method> methods = new LinkedList<>();
-		for (int i = declared.length - 1; i >= 0; --i) {
-			if (predicate.test(declared[i])) {
-				methods.addFirst(declared[i]);
-			}
-		}
-		return methods;
+		return Safe.getAllDeclared(cls, predicate);
 	}
 
 	/**
@@ -563,6 +550,37 @@ public interface Methods {
 	interface Safe {
 
 		/**
+		 * Returns a list with all the methods declared in the class given as parameter.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclared(final Class<T> cls) {
+			if (null == cls) {
+				return List.of();
+			}
+			return Unchecked.getAllDeclared(cls);
+		}
+
+		/**
+		 * Returns a list with all the methods declared in the class given as parameter that verify the given method predicate.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @param predicate filter predicate for methods
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclared(final Class<T> cls, final Predicate<? super Method> predicate) {
+			if (null == cls || null == predicate) {
+				return List.of();
+			}
+			return Unchecked.getAllDeclared(cls, predicate);
+		}
+
+		/**
 		 * Returns the method with the given name and given parameter types from the given class. If the method is not present
 		 * in the class it returns {@code null}.
 		 *
@@ -577,11 +595,7 @@ public interface Methods {
 			if (null == cls || null == methodName) {
 				return null;
 			}
-			try {
-				return cls.getDeclaredMethod(methodName, parameterTypes);
-			} catch (NoSuchMethodException e) {
-				return null;
-			}
+			return Unchecked.getOneDeclared(methodName, cls, parameterTypes);
 		}
 
 		/**
@@ -616,14 +630,7 @@ public interface Methods {
 			if (null == cls || null == methodName) {
 				return null;
 			}
-			try {
-				return cls.getDeclaredMethod(methodName, parameterTypes);
-			} catch (NoSuchMethodException e) {
-				if (null == cls.getSuperclass()) {
-					return null;
-				}
-				return Safe.getOneDeclaredInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
-			}
+			return Unchecked.getOneDeclaredInHierarchy(methodName, cls, parameterTypes);
 		}
 
 		/**
@@ -729,6 +736,106 @@ public interface Methods {
 	 * @author Radu Sebastian LAZIN
 	 */
 	interface Unchecked {
+
+		/**
+		 * Returns a list with all the methods declared in the class given as parameter. This is different from
+		 * {@link Class#getDeclaredMethods()} as it returns a {@link List} instead of an array.
+		 * <p>
+		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
+		 * {@link Methods#getAllDeclared(Class)} if you want to get an empty list when the class is {@code null}.
+		 * <p>
+		 * This method uses {@link Arrays#asList(Object...)} because it is faster than using {@link List#of(Object...)}. The
+		 * speed difference is because it does not require copying the array when creating the list.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclared(final Class<T> cls) {
+			return FastArrayList.wrap(cls.getDeclaredMethods());
+		}
+
+		/**
+		 * Returns a list with all the methods declared in the class given as parameter that verify the given method predicate.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @param predicate filter predicate for methods
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclared(final Class<T> cls, final Predicate<? super Method> predicate) {
+			Method[] methods = cls.getDeclaredMethods();
+			List<Method> result = new FastArrayList<>(methods.length);
+			Unchecked.forEachMatching(methods, predicate, result::add);
+			return result;
+		}
+
+		/**
+		 * Returns the method with the given name and given parameter types from the given class. If the method is not present
+		 * in the class it returns {@code null}.
+		 *
+		 * @param <T> type to get the method from
+		 *
+		 * @param methodName the name of the method
+		 * @param cls class containing the method
+		 * @param parameterTypes parameter types
+		 * @return the method with the given name
+		 */
+		static <T> Method getOneDeclared(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
+			try {
+				return cls.getDeclaredMethod(methodName, parameterTypes);
+			} catch (NoSuchMethodException e) {
+				return null;
+			}
+		}
+
+		/**
+		 * Returns a method in the class given as parameter, also searching in all its super classes, and returns {@code null}
+		 * if method is not found.
+		 * <p>
+		 * This method does not validate input parameters, the caller is responsible to do it.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param methodName name of the method to find
+		 * @param cls class from where to start the search
+		 * @param parameterTypes types of the method parameters
+		 * @return found method, {@code null} otherwise
+		 */
+		static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
+			try {
+				return cls.getDeclaredMethod(methodName, parameterTypes);
+			} catch (NoSuchMethodException e) {
+				if (null == cls.getSuperclass()) {
+					return null;
+				}
+				return Unchecked.getOneDeclaredInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
+			}
+		}
+
+		/**
+		 * Invokes {@code action} for each declared method that matches {@code predicate}.
+		 * <p>
+		 * The caller collects matches by supplying a consumer, for example {@code methods::add} on a single {@link List} while
+		 * walking a class hierarchy.
+		 * <p>
+		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
+		 * handle exceptions.
+		 *
+		 * @param methods the methods to test
+		 * @param predicate predicate to filter with
+		 * @param action receives each method that matches the predicate
+		 */
+		static void forEachMatching(final Method[] methods, final Predicate<? super Method> predicate,
+				final Consumer<Method> action) {
+			for (Method method : methods) {
+				if (predicate.test(method)) {
+					action.accept(method);
+				}
+			}
+		}
 
 		/**
 		 * Invokes the given method on the given object with parameters, ignoring the access modifiers.
