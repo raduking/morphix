@@ -541,7 +541,6 @@ public interface Fields {
 			return Unchecked.getOneDeclaredInHierarchy(cls, fieldName);
 		}
 
-
 		/**
 		 * Returns a list with all the fields in the class given as parameter. This is different from
 		 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array. If the class is null it returns

@@ -23,9 +23,13 @@
 - Added `Methods.Unchecked.getOneDeclaredInHierarchy(String, Class, Class...)` for direct method lookup throughout a class hierarchy.
 - Added `Methods.Unchecked.getAllDeclared(Class)` for direct retrieval of a class's declared methods.
 - Added `Methods.Unchecked.getAllDeclared(Class, Predicate)` for direct retrieval and filtering of declared methods.
+- Added `Methods.Unchecked.getAllDeclaredInHierarchy(Class)` for direct superclass-chain method retrieval without parameter validation.
+- Added `Methods.Unchecked.getAllDeclaredInHierarchy(Class, Predicate)` for direct filtered superclass-chain method retrieval without parameter validation.
 - Added `Methods.Unchecked.forEachMatching(Method[], Predicate, Consumer)` to pass matching declared methods to a consumer without allocating a result list.
 - Added `Methods.Safe.getAllDeclared(Class)` for null-safe retrieval of a class's declared methods.
 - Added `Methods.Safe.getAllDeclared(Class, Predicate)` for null-safe retrieval and filtering of declared methods.
+- Added `Methods.Safe.getAllDeclaredInHierarchy(Class)` for null-safe superclass-chain method retrieval.
+- Added `Methods.Safe.getAllDeclaredInHierarchy(Class, Predicate)` for null-safe filtered superclass-chain method retrieval.
 - Changed `Methods.getAllDeclared(Class, Predicate)` to return matching methods in declaration order.
 - Added `Classes.isArray(Class)` to check whether a class represents an array type.
 - Added `Classes.isNotArray(Class)` to check whether a class does not represent an array type.
