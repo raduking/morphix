@@ -45,6 +45,29 @@ import org.openjdk.jmh.infra.Blackhole;
  *
  * <pre>
  * mvn jmh:benchmark -Pbenchmark -Djmh.benchmarks='org.morphix.benchmark.FieldsGetDeclaredFieldsInHierarchy.testConstructionWith.*'
+ * mvn jmh:benchmark -Pbenchmark -Djmh.benchmarks='org.morphix.benchmark.FieldsGetDeclaredFieldsInHierarchy.testFilterWith.*'
+ * </pre>
+ *
+ * Fast development:
+ *
+ * <pre>
+ * mvn jmh:benchmark -Pbenchmark -Djmh.benchmarks='org.morphix.benchmark.FieldsGetDeclaredFieldsInHierarchy.testConstructionWith.*' -Djmh.wi=2 -Djmh.i=3 -Djmh.w=500ms -Djmh.r=500ms
+ * mvn jmh:benchmark -Pbenchmark -Djmh.benchmarks='org.morphix.benchmark.FieldsGetDeclaredFieldsInHierarchy.testFilterWith.*' -Djmh.wi=2 -Djmh.i=3 -Djmh.w=500ms -Djmh.r=500ms
+ * </pre>
+ *
+ * <pre>
+ * Benchmark                                                                       Mode  Cnt    Score    Error  Units
+ * FieldsGetDeclaredFieldsInHierarchy.testConstructionWithCurrentImplementation    avgt    5  145.595 ±  3.769  ns/op
+ * FieldsGetDeclaredFieldsInHierarchy.testConstructionWithLinkedList               avgt    5  148.881 ±  1.949  ns/op
+ * FieldsGetDeclaredFieldsInHierarchy.testConstructionWithArrayListEnsureCapacity  avgt    5  153.183 ±  0.392  ns/op
+ * FieldsGetDeclaredFieldsInHierarchy.testConstructionWithArrayListLoop            avgt    5  165.334 ± 14.160  ns/op
+ * FieldsGetDeclaredFieldsInHierarchy.testConstructionWithArrayListAddAll          avgt    5  174.675 ±  0.734  ns/op
+ * </pre>
+ *
+ * <pre>
+ * Benchmark                                                               Mode  Cnt    Score   Error  Units
+ * FieldsGetDeclaredFieldsInHierarchy.testFilterWithCurrentImplementation  avgt    5  150.245 ± 2.719  ns/op
+ * FieldsGetDeclaredFieldsInHierarchy.testFilterWithArrayListInline        avgt    5  170.951 ± 1.758  ns/op
  * </pre>
  *
  * @author Radu Sebastian LAZIN
@@ -174,37 +197,14 @@ public class FieldsGetDeclaredFieldsInHierarchy {
 	}
 
 	@Benchmark
-	public List<Field> testFilterWithLinkedList() {
-		return Fields.filter(
-				getDeclaredFieldsLinkedList(D.class),
-				MemberPredicates.withModifiers(Modifier::isPublic));
-	}
-
-	@Benchmark
-	public List<Field> testFilterWithArrayListAddAll() {
-		return Fields.filter(
-				getDeclaredFieldsArrayListAddAll(D.class),
-				MemberPredicates.withModifiers(Modifier::isPublic));
-	}
-
-	@Benchmark
-	public List<Field> testFilterWithArrayListLoop() {
-		return Fields.filter(
-				getDeclaredFieldsArrayListLoop(D.class),
-				MemberPredicates.withModifiers(Modifier::isPublic));
-	}
-
-	@Benchmark
-	public List<Field> testFilterWithArrayListEnsureCapacity() {
-		return Fields.filter(
-				getDeclaredFieldsArrayListEnsureCapacity(D.class),
+	public List<Field> testFilterWithCurrentImplementation() {
+		return Fields.getAllDeclaredInHierarchy(D.class,
 				MemberPredicates.withModifiers(Modifier::isPublic));
 	}
 
 	@Benchmark
 	public List<Field> testFilterWithArrayListInline() {
-		return getDeclaredFieldsArrayListInlineFilter(
-				D.class,
+		return getDeclaredFieldsArrayListInlineFilter(D.class,
 				MemberPredicates.withModifiers(Modifier::isPublic));
 	}
 

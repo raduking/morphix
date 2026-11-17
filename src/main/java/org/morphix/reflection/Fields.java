@@ -851,7 +851,7 @@ public interface Fields {
 		 */
 		static <T> List<Field> getAllDeclared(final Class<T> cls, final Predicate<Field> predicate) {
 			Field[] fields = cls.getDeclaredFields();
-			List<Field> result = new ArrayList<>(fields.length);
+			List<Field> result = new FastArrayList<>(fields.length);
 			Unchecked.forEachMatching(fields, predicate, result::add);
 			return result;
 		}
@@ -875,7 +875,7 @@ public interface Fields {
 			if (null == cls.getSuperclass()) {
 				return Unchecked.getAllDeclared(cls);
 			}
-			FastArrayList<Field[]> arrays = new FastArrayList<>(FastArrayList.Default.CAPACITY);
+			List<Field[]> arrays = new FastArrayList<>(FastArrayList.Default.CAPACITY);
 			int total = 0;
 			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
 				Field[] array = type.getDeclaredFields();
@@ -909,10 +909,13 @@ public interface Fields {
 			if (null == cls.getSuperclass()) {
 				return Unchecked.getAllDeclared(cls, predicate);
 			}
-			List<Field> fields = new ArrayList<>();
-			Consumer<Field> action = fields::add;
+			List<Field> fields = new FastArrayList<>();
 			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
-				Unchecked.forEachMatching(type.getDeclaredFields(), predicate, action);
+				for (Field field : type.getDeclaredFields()) {
+					if (predicate.test(field)) {
+						fields.add(field);
+					}
+				}
 			}
 			return fields;
 		}
@@ -930,21 +933,21 @@ public interface Fields {
 		 * @return filtered list
 		 */
 		static List<Field> filter(final List<Field> fields, final Predicate<Field> predicate) {
-			List<Field> fieldsMatchingPredicate = new ArrayList<>(fields.size());
+			List<Field> matchingFields = new FastArrayList<>(fields.size());
 			fields.forEach(field -> {
 				if (predicate.test(field)) {
-					fieldsMatchingPredicate.add(field);
+					matchingFields.add(field);
 				}
 			});
-			return fieldsMatchingPredicate;
+			return matchingFields;
 		}
 
 		/**
-		 * Applies the given predicate to each element of the given field array and passes the matching fields to
-		 * {@code fieldConsumer}.
+		 * Applies the given predicate to each element of the given field array and passes the matching fields to an
+		 * {@code action}.
 		 * <p>
 		 * Unlike {@link #filter(List, Predicate)}, this method does not allocate a result list. The caller collects matches by
-		 * supplying a consumer, for example {@code fields::add} on a single {@link ArrayList} while walking a class hierarchy.
+		 * supplying a consumer, for example {@code fields::add} on a single {@link List} while walking a class hierarchy.
 		 * <p>
 		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
 		 * handle exceptions.
