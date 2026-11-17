@@ -832,34 +832,24 @@ public interface Methods {
 		 * @return found method, {@code null} otherwise
 		 */
 		static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
-			try {
-				return cls.getDeclaredMethod(methodName, parameterTypes);
-			} catch (NoSuchMethodException e) {
-				if (null == cls.getSuperclass()) {
-					return null;
+			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
+				Method method = Unchecked.getOneDeclared(methodName, type, parameterTypes);
+				if (null != method) {
+					return method;
 				}
-				return Unchecked.getOneDeclaredInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
 			}
+			return null;
 		}
 
 		/**
-		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes,
-		 * including {@link Object}. This method does not return methods from super interfaces. This is a simpler version of
-		 * {@link Complete#getAllDeclaredInHierarchy(Class)}, which also walks interfaces and can exclude specific classes.
+		 * Returns all methods declared by the given class and its super classes.
 		 * <p>
-		 * Note: if the class given as parameter is an interface then the methods declared by that interface are returned, but
-		 * not the ones declared by its super interfaces, since those are interfaces as well. Use
-		 * {@link Complete#getAllDeclaredInHierarchy(Class)} for the full interface hierarchy.
+		 * Methods are returned in hierarchy order, starting from the given class. Within each class, methods are returned in
+		 * the order provided by {@link Class#getDeclaredMethods()}. Super interfaces are not walked; only the class superclass
+		 * chain is included.
 		 * <p>
-		 * {@link LinkedList} is used because:
-		 * <ul>
-		 * <li>it is more efficient in terms of memory consumption</li>
-		 * <li>accessing the first and last has O(1) complexity</li>
-		 * <li>more often than not, no random access is needed</li>
-		 * <li>profiling: ~2 times faster than using {@link java.util.ArrayList}</li>
-		 * </ul>
-		 * The returned order of the methods are: class -> super class -> ... -> base class, and all methods in each class are
-		 * returned in the declared order.
+		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
+		 * {@link Methods#getAllDeclaredInHierarchy(Class)} if you want an empty list when the class is {@code null}.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -867,20 +857,32 @@ public interface Methods {
 		 * @return list of methods
 		 */
 		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
-			// an interface has no super class, but it does declare methods of its own
-			Class<?> superClass = cls.getSuperclass();
-			List<Method> methods = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass);
-			Method[] declared = cls.getDeclaredMethods();
-			for (int i = declared.length - 1; i >= 0; --i) {
-				methods.addFirst(declared[i]);
+			if (null == cls.getSuperclass()) {
+				return Unchecked.getAllDeclared(cls);
+			}
+			List<Method[]> arrays = new FastArrayList<>(FastArrayList.Default.CAPACITY);
+			int total = 0;
+			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
+				Method[] array = type.getDeclaredMethods();
+				total += array.length;
+				arrays.add(array);
+			}
+			FastArrayList<Method> methods = new FastArrayList<>(total);
+			for (Method[] array : arrays) {
+				methods.addAll(array);
 			}
 			return methods;
 		}
 
 		/**
-		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes,
-		 * including {@link Object}, that verify the given method predicate. This method does not return methods from super
-		 * interfaces.
+		 * Returns all methods declared by the given class and its super classes that match the given predicate.
+		 * <p>
+		 * Methods are returned in hierarchy order, starting from the given class. Within each class, methods are returned in
+		 * the order provided by {@link Class#getDeclaredMethods()}. Super interfaces are not walked; only the class superclass
+		 * chain is included.
+		 * <p>
+		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
+		 * handle exceptions.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -889,14 +891,13 @@ public interface Methods {
 		 * @return list of methods
 		 */
 		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
-			// an interface has no super class, but it does declare methods of its own
-			Class<?> superClass = cls.getSuperclass();
-			List<Method> methods = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass, predicate);
-			Method[] declared = cls.getDeclaredMethods();
-			for (int i = declared.length - 1; i >= 0; --i) {
-				if (predicate.test(declared[i])) {
-					methods.addFirst(declared[i]);
-				}
+			if (null == cls.getSuperclass()) {
+				return Unchecked.getAllDeclared(cls, predicate);
+			}
+			List<Method> methods = new FastArrayList<>();
+			Consumer<Method> action = methods::add;
+			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
+				Unchecked.forEachMatching(type.getDeclaredMethods(), predicate, action);
 			}
 			return methods;
 		}
