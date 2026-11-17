@@ -34,7 +34,7 @@ import org.morphix.lang.JavaObjects;
  * Unlike {@link java.util.ArrayList}, this class supports adding elements directly from arrays without creating
  * intermediate collections or copying the source array.
  * <p>
- * This class is not thread-safe.
+ * WARNING: Like {@link java.util.ArrayList} this class is not thread-safe.
  * <p>
  * After benchmarks this class already delivers
  * <ul>
@@ -44,7 +44,8 @@ import org.morphix.lang.JavaObjects;
  * <li>indexed access and iterator performance comparable to {@link java.util.ArrayList}</li>
  * <li>equivalent allocation behavior for ordinary insertion and dynamic growth</li>
  * </ul>
- * See the `doc/fastarraylist-performance.md`.
+ * See {@code org.morphix.benchmark.FastArrayListBenchmark} to reproduce the measurements and
+ * {@code doc/performance/collections/fastarraylist/fastarraylist-performance.md} for the performance report.
  *
  * @param <E> element type
  *
