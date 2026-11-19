@@ -164,4 +164,21 @@ class FieldsSafeGetByPathsTest {
 		assertThat(value, equalTo("commaKey"));
 	}
 
+	@Test
+	void shouldResolveFallbackAfterMalformedAlternative() {
+		B b = new B();
+		b.a = new A();
+		b.a.x = TEST_STRING;
+
+		assertThat(Fields.Safe.getByPaths(b, ".bad,keyed[],a.x"), equalTo(TEST_STRING));
+	}
+
+	@Test
+	void shouldResolveFallbackAfterEscapedBackslash() {
+		B b = new B();
+		b.a = new A();
+		b.a.x = TEST_STRING;
+
+		assertThat(Fields.Safe.getByPaths(b, "keyed['missing\\\\'].x,a.x"), equalTo(TEST_STRING));
+	}
 }
