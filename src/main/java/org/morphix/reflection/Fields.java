@@ -358,8 +358,11 @@ public interface Fields {
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
-				throw new ReflectionException("Cannot get static field '{}' from class {}: field not found or not static", fieldName, cls);
+			if (null == field) {
+				throw new ReflectionException("Cannot get static field '{}' from class {}: field not found", fieldName, cls);
+			}
+			if (JavaModifier.STATIC.isNotPresentOn(field)) {
+				throw new ReflectionException("Cannot get static field '{}' from class {}: field is not static", fieldName, cls);
 			}
 			return Unchecked.get(null, field);
 		}
@@ -396,8 +399,11 @@ public interface Fields {
 		 */
 		static <T, U> void setStatic(final Class<T> cls, final String fieldName, final U value) {
 			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
-			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
-				throw new ReflectionException("Cannot set static field '{}' in class {}: field not found or not static", fieldName, cls);
+			if (null == field) {
+				throw new ReflectionException("Cannot set static field '{}' in class {}: field not found", fieldName, cls);
+			}
+			if (JavaModifier.STATIC.isNotPresentOn(field)) {
+				throw new ReflectionException("Cannot set static field '{}' in class {}: field is not static", fieldName, cls);
 			}
 			Unchecked.set(null, field, value);
 		}

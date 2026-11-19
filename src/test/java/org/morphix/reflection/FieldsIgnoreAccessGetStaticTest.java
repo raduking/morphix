@@ -49,14 +49,14 @@ class FieldsIgnoreAccessGetStaticTest {
 	void shouldThrowExceptionIfFieldNotFound() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, WRONG_NAME));
 		assertThat(e.getMessage(),
-				equalTo("Cannot get static field '" + WRONG_NAME + "' from class " + A.class + ": field not found or not static"));
+				equalTo("Cannot get static field '" + WRONG_NAME + "' from class " + A.class + ": field not found"));
 	}
 
 	@Test
 	void shouldThrowExceptionIfFieldFoundIsNotStatic() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.getStatic(A.class, GOOD_NAME));
 		assertThat(e.getMessage(),
-				equalTo("Cannot get static field '" + GOOD_NAME + "' from class " + A.class + ": field not found or not static"));
+				equalTo("Cannot get static field '" + GOOD_NAME + "' from class " + A.class + ": field is not static"));
 	}
 
 	@Test

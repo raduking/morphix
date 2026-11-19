@@ -62,14 +62,14 @@ class FieldsIgnoreAccessSetStaticTest {
 	void shouldThrowExceptionForFieldThatDoesNotExistByName() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.setStatic(B.class, MISSING_FIELD_NAME, VALUE));
 		assertThat(e.getMessage(),
-				equalTo("Cannot set static field '" + MISSING_FIELD_NAME + "' in class " + B.class + ": field not found or not static"));
+				equalTo("Cannot set static field '" + MISSING_FIELD_NAME + "' in class " + B.class + ": field not found"));
 	}
 
 	@Test
 	void shouldThrowExceptionIfFieldIsNotStaticByName() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.IgnoreAccess.setStatic(B.class, NON_STATIC_FIELD_NAME, VALUE));
 		assertThat(e.getMessage(),
-				equalTo("Cannot set static field '" + NON_STATIC_FIELD_NAME + "' in class " + B.class + ": field not found or not static"));
+				equalTo("Cannot set static field '" + NON_STATIC_FIELD_NAME + "' in class " + B.class + ": field is not static"));
 	}
 
 	@Test
