@@ -14,17 +14,19 @@ config:
     height: 520
   themeVariables:
     xyChart:
-      plotColorPalette: '#0072B2, #D55E00'
+      plotColorPalette: '#D55E00, #0072B2, #808080, #444444'
 ---
 xychart-beta horizontal
     title "Speedup at 100,000 elements"
     x-axis ["Array constructor", "Collection constructor", "Bulk add: array", "Bulk add: same type", "Bulk add: array view", "Append: preallocated", "Append: growth", "Indexed traversal", "Iterator traversal", "Zero-copy wrap"]
     y-axis "JDK / FastArrayList (higher is better)" 0 --> 3
-    bar [2.35, 0.96, 2.35, 2.36, 1.01, 0.77, 0.78, 1, 1, 0.9]
+    bar [2.35, 0, 2.35, 2.36, 1.01, 0, 0, 0, 0, 0]
+    bar [0, 0.96, 0, 0, 0, 0.77, 0.78, 0, 0, 0.9]
+    bar [0, 0, 0, 0, 0, 0, 0, 1, 1, 0]
     line [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ```
 
-The orange line marks parity (1.0×); values above it favor FastArrayList.
+Orange = FastArrayList faster; blue = JDK faster; gray = parity. The dark gray line marks parity (1.0×).
 
 ## Methodology
 
@@ -386,14 +388,17 @@ config:
     height: 650
   themeVariables:
     xyChart:
-      plotColorPalette: '#0072B2'
+      plotColorPalette: '#0072B2, #D55E00'
 ---
 xychart-beta horizontal
     title "Allocation at 100,000 elements"
     x-axis ["Array constructor (JDK)", "Array constructor (Fast)", "Collection constructor (JDK)", "Collection constructor (Fast)", "Bulk add: array (JDK)", "Bulk add: array (Fast)", "Bulk add: same type (JDK)", "Bulk add: same type (Fast)", "Bulk add: array view (JDK)", "Bulk add: array view (Fast)", "Append: preallocated (JDK)", "Append: preallocated (Fast)", "Append: growth (JDK)", "Append: growth (Fast)"]
     y-axis "kB/op (decimal)" 0 --> 1400
-    bar [800.056186, 400.040079, 400.040076, 400.040079, 800.056185, 400.040079, 800.056185, 400.040078, 800.056186, 800.056185, 400.041087, 400.041415, 1280.953291, 1280.953668]
+    bar [800.056186, 0, 400.040076, 0, 800.056185, 0, 800.056185, 0, 800.056186, 0, 400.041087, 0, 1280.953291, 0]
+    bar [0, 400.040079, 0, 400.040079, 0, 400.040079, 0, 400.040078, 0, 800.056185, 0, 400.041415, 0, 1280.953668]
 ```
+
+Blue = JDK; orange = FastArrayList.
 
 Traversal and zero-copy wrapping allocations are too small to read at this scale; see the exact B/op values in the table.
 
@@ -422,14 +427,18 @@ config:
     height: 470
   themeVariables:
     xyChart:
-      plotColorPalette: '#0072B2'
+      plotColorPalette: '#D55E00, #808080, #0072B2'
 ---
 xychart-beta horizontal
     title "Append optimization experiments at 100,000 elements"
     x-axis ["Original", "No compatibility check", "Capacity equality (clean rerun)", "Separate increment (approx.)", "Cached size", "modCount first", "JDK-style helper", "Reverted", "JDK, final rerun"]
     y-axis "Microseconds/op" 0 --> 250
-    bar [204.566567, 205.932046, 218.682149, 218.2, 218.880865, 209.736023, 218.886925, 207.941241, 158.287666]
+    bar [204.566567, 0, 0, 0, 0, 0, 0, 207.941241, 0]
+    bar [0, 205.932046, 218.682149, 218.2, 218.880865, 209.736023, 218.886925, 0, 0]
+    bar [0, 0, 0, 0, 0, 0, 0, 0, 158.287666]
 ```
+
+Orange = FastArrayList baseline and reverted implementation; gray = experimental variants; blue = JDK reference.
 
 The separate-increment value (approximately 218.2 µs/op) is recovered from the original chart because the corresponding exact measurement is absent from the available data. The final JDK rerun is included as a reference.
 
