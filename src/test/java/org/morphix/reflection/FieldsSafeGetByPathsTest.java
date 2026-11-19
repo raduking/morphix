@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -66,7 +69,8 @@ class FieldsSafeGetByPathsTest {
 				"unknown , person.name",
 				".bad,attributes[],person.name",
 				"attributes['missing\\\\'].name,person.name",
-				"attributes[foo[bar]],person.name",
+
+		"attributes[foo[bar]],person.name",
 				"attributes[foo['a,b']],person.name",
 				"attributes[a'b'c],person.name",
 				"person.name] [skip],person.name",
@@ -76,6 +80,8 @@ class FieldsSafeGetByPathsTest {
 		var result = Fields.Safe.getByPaths(data, paths);
 
 		assertThat(result, equalTo("Alice"));
+
+		public Map<String, A> keyed = new LinkedHashMap<>();
 	}
 
 	@Test

@@ -13,8 +13,14 @@
 package org.morphix.convert.strategy;
 
 import java.util.List;
+import java.util.Map;
 
+import org.morphix.lang.collections.Lists;
+import org.morphix.reflection.Classes;
 import org.morphix.reflection.ExtendedField;
+import org.morphix.reflection.FieldPaths;
+import org.morphix.reflection.FieldPaths.Step;
+import org.morphix.reflection.FieldPaths.StepKind;
 import org.morphix.reflection.FieldPathParser;
 
 /**

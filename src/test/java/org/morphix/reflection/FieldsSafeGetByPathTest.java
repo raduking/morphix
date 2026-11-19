@@ -22,6 +22,10 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -53,6 +57,20 @@ class FieldsSafeGetByPathTest {
 	public static class WithNestedField {
 
 		public WithTransformingGetter inner = new WithTransformingGetter();
+	}
+
+	public static class WithIndexedContainers {
+
+		public String[] tags = { "alpha", "beta" };
+
+		public List<String> codes = new FastArrayList<>(new String[] { "x", "y" });
+
+		public Map<String, String> attributes = new LinkedHashMap<>();
+
+		public WithIndexedContainers() {
+			attributes.put("color", "blue");
+			attributes.put("size", "large");
+		}
 	}
 
 	@Test
@@ -225,5 +243,43 @@ class FieldsSafeGetByPathTest {
 		var result = Fields.Safe.getByPath(data, path);
 
 		assertNull(result);
+	}
+
+	@Test
+	void shouldGetValueByArrayIndexPath() {
+		WithIndexedContainers obj = new WithIndexedContainers();
+
+		assertThat(Fields.Safe.getByPath(obj, "tags[1]"), equalTo("beta"));
+		assertThat(Fields.Safe.getByPath(obj, "tags[0]"), equalTo("alpha"));
+	}
+
+	@Test
+	void shouldGetValueByListIndexPath() {
+		WithIndexedContainers obj = new WithIndexedContainers();
+
+		assertThat(Fields.Safe.getByPath(obj, "codes[1]"), equalTo("y"));
+	}
+
+	@Test
+	void shouldGetValueByMapKeyPath() {
+		WithIndexedContainers obj = new WithIndexedContainers();
+
+		assertThat(Fields.Safe.getByPath(obj, "attributes['color']"), equalTo("blue"));
+		assertThat(Fields.Safe.getByPath(obj, "attributes[size]"), equalTo("large"));
+	}
+
+	@Test
+	void shouldGetNestedValueAfterIndexPath() {
+		WithIndexedContainers obj = new WithIndexedContainers();
+		obj.tags = new String[] { "outer" };
+		Wrapper wrapper = new Wrapper();
+		wrapper.row = obj;
+
+		assertThat(Fields.Safe.getByPath(wrapper, "row.tags[0]"), equalTo("outer"));
+	}
+
+	public static class Wrapper {
+
+		public WithIndexedContainers row;
 	}
 }
