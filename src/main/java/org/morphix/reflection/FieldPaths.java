@@ -13,7 +13,6 @@
 package org.morphix.reflection;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
@@ -75,7 +74,7 @@ public interface FieldPaths {
 	}
 
 	/**
-	 * Reads a property, preferring declared fields over map keys.
+	 * Reads a property, treating maps as containers rather than reflective objects.
 	 *
 	 * @param obj owning object
 	 * @param name property name
@@ -85,8 +84,7 @@ public interface FieldPaths {
 		if (null == obj || null == name || name.isEmpty()) {
 			return null;
 		}
-		Field field = Fields.Unchecked.getOneDeclaredInHierarchy(Classes.getFrom(obj), name);
-		return null == field ? readMapKey(obj, name) : Fields.Safe.get(obj, field);
+		return obj instanceof Map<?, ?> map ? map.get(name) : Fields.Safe.get(obj, name);
 	}
 
 	/**

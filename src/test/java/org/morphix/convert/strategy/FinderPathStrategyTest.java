@@ -17,6 +17,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -103,6 +104,19 @@ class FinderPathStrategyTest {
 				source.items.get(0), "list");
 		assertField(FinderPathStrategy.getConverterFieldByPathInHierarchy(source, "entries[0],items[0].name"),
 				source.items.get(0), "list");
+	}
+
+	@Test
+	void shouldResolveMapKeysInsteadOfInternalFields() {
+		Map<String, Entry> map = new HashMap<>();
+		Entry entry = new Entry("map size");
+		map.put("size", entry);
+
+		assertField(FinderPathStrategy.getConverterFieldByPathInHierarchy(map, "size.name"), entry, "map size");
+		assertThat(FinderPathStrategy.getConverterFieldByPathInHierarchy(map, "size"),
+				sameInstance(ExtendedField.EMPTY));
+		assertThat(Fields.Safe.getByPath(map, "size.name"), equalTo("map size"));
+		assertThat(Fields.Safe.getByPath(map, "threshold"), nullValue());
 	}
 
 	private static void assertField(final ExtendedField field, final Entry owner, final String value) {

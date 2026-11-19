@@ -15,6 +15,7 @@ package org.morphix.reflection;
 import static org.morphix.reflection.JavaModifier.STATIC;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 
 /**
  * Cursor-based field path parser. Each selector is resolved as it is consumed, without allocating tokens or splitting
@@ -115,9 +116,12 @@ final class FieldPathParser {
 		if (!findField) {
 			return FieldPaths.readProperty(obj, name);
 		}
+		if (obj instanceof Map<?, ?> map) {
+			return atPathEnd() ? null : map.get(name);
+		}
 		Field field = Fields.Unchecked.getOneDeclaredInHierarchy(Classes.getFrom(obj), name);
 		if (null == field) {
-			return atPathEnd() ? null : FieldPaths.readMapKey(obj, name);
+			return null;
 		}
 		if (STATIC.isPresentOn(field)) {
 			return null;
