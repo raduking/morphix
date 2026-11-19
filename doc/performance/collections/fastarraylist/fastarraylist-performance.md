@@ -6,7 +6,25 @@
 
 Direct-array construction and bulk insertion are approximately 2.35–2.36× faster at 100,000 elements, with approximately half the allocation. Collection construction and traversal are comparable. Individual append is slower by about 0.47 ns per element in the original run. Retain the original append implementation and prioritize array-native bulk operations.
 
-![Speedup summary](fastarraylist_charts/speedup_summary.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 520
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2, #D55E00'
+---
+xychart-beta horizontal
+    title "Speedup at 100,000 elements"
+    x-axis ["Array constructor", "Collection constructor", "Bulk add: array", "Bulk add: same type", "Bulk add: array view", "Append: preallocated", "Append: growth", "Indexed traversal", "Iterator traversal", "Zero-copy wrap"]
+    y-axis "JDK / FastArrayList (higher is better)" 0 --> 3
+    bar [2.35, 0.96, 2.35, 2.36, 1.01, 0.77, 0.78, 1, 1, 0.9]
+    line [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+```
+
+The orange line marks parity (1.0×); values above it favor FastArrayList.
 
 ## Methodology
 
@@ -42,7 +60,25 @@ Lower latency is better. Ratios above 1 favor FastArrayList. Wrap compares again
 
 Direct construction avoids the intermediate collection conversion and extra copy.
 
-![Array constructor](fastarraylist_charts/ConstructorFromArray.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 340
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2, #D55E00'
+---
+xychart-beta
+    title "Array constructor"
+    x-axis ["10", "100", "1,000", "10,000", "100,000"]
+    y-axis "ns/element" 0 --> 0.8
+    line [0.6011, 0.6686, 0.226671, 0.241979, 0.269145]
+    line [0.3376, 0.11794, 0.120688, 0.103891, 0.114605]
+```
+
+Series: blue = `ArrayList`; orange = `FastArrayList`. Latency is divided by the number of elements; lower is better.
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -56,7 +92,25 @@ Direct construction avoids the intermediate collection conversion and extra copy
 
 At 100K the reported error intervals overlap; performance is broadly comparable.
 
-![Collection constructor](fastarraylist_charts/ConstructorFromCollection.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 340
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2, #D55E00'
+---
+xychart-beta
+    title "Collection constructor"
+    x-axis ["10", "100", "1,000", "10,000", "100,000"]
+    y-axis "ns/element" 0 --> 0.5
+    line [0.3957, 0.12115, 0.118984, 0.103504, 0.11017]
+    line [0.4036, 0.11835, 0.116035, 0.10328, 0.114646]
+```
+
+Series: blue = `ArrayList`; orange = `FastArrayList`. Latency is divided by the number of elements; lower is better.
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -70,7 +124,25 @@ At 100K the reported error intervals overlap; performance is broadly comparable.
 
 Direct insertion avoids a temporary source array.
 
-![Bulk add: array](fastarraylist_charts/AddAllArray.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 340
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2, #D55E00'
+---
+xychart-beta
+    title "Bulk add: array"
+    x-axis ["10", "100", "1,000", "10,000", "100,000"]
+    y-axis "ns/element" 0 --> 1.2
+    line [0.9978, 0.25259, 0.242504, 0.247906, 0.267751]
+    line [0.8295, 0.16596, 0.185699, 0.111398, 0.114147]
+```
+
+Series: blue = `ArrayList`; orange = `FastArrayList`. Latency is divided by the number of elements; lower is better.
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -84,7 +156,25 @@ Direct insertion avoids a temporary source array.
 
 Exact-class FastArrayList insertion avoids a temporary source array.
 
-![Bulk add: same type](fastarraylist_charts/AddAllSameType.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 340
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2, #D55E00'
+---
+xychart-beta
+    title "Bulk add: same type"
+    x-axis ["10", "100", "1,000", "10,000", "100,000"]
+    y-axis "ns/element" 0 --> 1.3
+    line [1.0484, 0.25639, 0.244144, 0.250482, 0.26762]
+    line [0.8502, 0.1662, 0.187165, 0.119163, 0.113462]
+```
+
+Series: blue = `ArrayList`; orange = `FastArrayList`. Latency is divided by the number of elements; lower is better.
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -98,7 +188,25 @@ Exact-class FastArrayList insertion avoids a temporary source array.
 
 Both implementations use toArray() for the pre-existing collection view.
 
-![Bulk add: array view](fastarraylist_charts/AddAllArrayView.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 340
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2, #D55E00'
+---
+xychart-beta
+    title "Bulk add: array view"
+    x-axis ["10", "100", "1,000", "10,000", "100,000"]
+    y-axis "ns/element" 0 --> 1.3
+    line [1.0127, 0.25082, 0.244025, 0.247137, 0.269564]
+    line [1.1015, 0.25681, 0.268568, 0.247814, 0.267498]
+```
+
+Series: blue = `ArrayList`; orange = `FastArrayList`. Latency is divided by the number of elements; lower is better.
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -112,7 +220,25 @@ Both implementations use toArray() for the pre-existing collection view.
 
 Both allocate essentially the same amount; FastArrayList is 29.6% slower at 100K.
 
-![Append: preallocated](fastarraylist_charts/AddPreallocated.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 340
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2, #D55E00'
+---
+xychart-beta
+    title "Append: preallocated"
+    x-axis ["10", "100", "1,000", "10,000", "100,000"]
+    y-axis "ns/element" 0 --> 2.4
+    line [1.757, 1.66697, 1.639477, 1.591247, 1.578244]
+    line [1.799, 2.062, 2.064087, 2.055422, 2.045666]
+```
+
+Series: blue = `ArrayList`; orange = `FastArrayList`. Latency is divided by the number of elements; lower is better.
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -126,7 +252,25 @@ Both allocate essentially the same amount; FastArrayList is 29.6% slower at 100K
 
 FastArrayList is 28.7% slower at 100K; both complete loops are O(n).
 
-![Append: growth](fastarraylist_charts/AddWithGrowth.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 340
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2, #D55E00'
+---
+xychart-beta
+    title "Append: growth"
+    x-axis ["10", "100", "1,000", "10,000", "100,000"]
+    y-axis "ns/element" 0 --> 2.9
+    line [1.8014, 2.00301, 1.89701, 1.964136, 1.875305]
+    line [2.0572, 2.39069, 2.469774, 2.468198, 2.413447]
+```
+
+Series: blue = `ArrayList`; orange = `FastArrayList`. Latency is divided by the number of elements; lower is better.
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -140,7 +284,25 @@ FastArrayList is 28.7% slower at 100K; both complete loops are O(n).
 
 Measures a full indexed traversal, not one random access.
 
-![Indexed traversal](fastarraylist_charts/Get.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 340
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2, #D55E00'
+---
+xychart-beta
+    title "Indexed traversal"
+    x-axis ["10", "100", "1,000", "10,000", "100,000"]
+    y-axis "ns/element" 0 --> 0.7
+    line [0.4221, 0.41062, 0.602823, 0.549429, 0.542684]
+    line [0.4689, 0.4174, 0.531891, 0.545252, 0.542624]
+```
+
+Series: blue = `ArrayList`; orange = `FastArrayList`. Latency is divided by the number of elements; lower is better.
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -154,7 +316,25 @@ Measures a full indexed traversal, not one random access.
 
 Near-zero allocation is consistent with escape analysis, but does not prove it.
 
-![Iterator traversal](fastarraylist_charts/Iterator.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 340
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2, #D55E00'
+---
+xychart-beta
+    title "Iterator traversal"
+    x-axis ["10", "100", "1,000", "10,000", "100,000"]
+    y-axis "ns/element" 0 --> 0.7
+    line [0.5053, 0.43859, 0.536535, 0.557871, 0.543503]
+    line [0.4781, 0.4398, 0.532449, 0.543555, 0.544773]
+```
+
+Series: blue = `ArrayList`; orange = `FastArrayList`. Latency is divided by the number of elements; lower is better.
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -168,7 +348,25 @@ Near-zero allocation is consistent with escape analysis, but does not prove it.
 
 Both allocate 24 B/op and have size-independent latency. Arrays.asList is fixed-size; FastArrayList.wrap permits structural changes and may detach from the original array.
 
-![Zero-copy wrap](fastarraylist_charts/Wrap.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 340
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2, #D55E00'
+---
+xychart-beta
+    title "Zero-copy wrap"
+    x-axis ["10", "100", "1,000", "10,000", "100,000"]
+    y-axis "ns/op" 0 --> 1.5
+    line [1.123, 1.129, 1.125, 1.123, 1.126]
+    line [1.253, 1.256, 1.254, 1.254, 1.256]
+```
+
+Series: blue = `Arrays.asList`; orange = `FastArrayList`. Lower is better.
 
 | Elements | JDK ns/op ± error | FastArrayList ns/op ± error | Speedup |
 |---:|---:|---:|---:|
@@ -180,7 +378,24 @@ Both allocate 24 B/op and have size-independent latency. Arrays.asList is fixed-
 
 ## Allocation profile
 
-![Allocation at 100K](fastarraylist_charts/allocation_100k.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 650
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2'
+---
+xychart-beta horizontal
+    title "Allocation at 100,000 elements"
+    x-axis ["Array constructor (JDK)", "Array constructor (Fast)", "Collection constructor (JDK)", "Collection constructor (Fast)", "Bulk add: array (JDK)", "Bulk add: array (Fast)", "Bulk add: same type (JDK)", "Bulk add: same type (Fast)", "Bulk add: array view (JDK)", "Bulk add: array view (Fast)", "Append: preallocated (JDK)", "Append: preallocated (Fast)", "Append: growth (JDK)", "Append: growth (Fast)"]
+    y-axis "kB/op (decimal)" 0 --> 1400
+    bar [800.056186, 400.040079, 400.040076, 400.040079, 800.056185, 400.040079, 800.056185, 400.040078, 800.056186, 800.056185, 400.041087, 400.041415, 1280.953291, 1280.953668]
+```
+
+Traversal and zero-copy wrapping allocations are too small to read at this scale; see the exact B/op values in the table.
 
 | Operation | JDK B/op | FastArrayList B/op |
 |---|---:|---:|
@@ -199,7 +414,24 @@ Normalized bytes per operation are the clearest allocation measure; GC counts, t
 
 ## Append optimization experiments
 
-![Append experiments](fastarraylist_charts/append_experiments.svg)
+```mermaid
+---
+config:
+  xyChart:
+    width: 850
+    height: 470
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2'
+---
+xychart-beta horizontal
+    title "Append optimization experiments at 100,000 elements"
+    x-axis ["Original", "No compatibility check", "Capacity equality (clean rerun)", "Separate increment (approx.)", "Cached size", "modCount first", "JDK-style helper", "Reverted", "JDK, final rerun"]
+    y-axis "Microseconds/op" 0 --> 250
+    bar [204.566567, 205.932046, 218.682149, 218.2, 218.880865, 209.736023, 218.886925, 207.941241, 158.287666]
+```
+
+The separate-increment value (approximately 218.2 µs/op) is recovered from the original chart because the corresponding exact measurement is absent from the available data. The final JDK rerun is included as a reference.
 
 | Variant | ns/op at 100K | vs original |
 |---|---:|---:|
@@ -305,7 +537,7 @@ Construct a destination of size n, reserve capacity 2n, insert n/2 elements from
 
 ## Reproducibility and limitations
 
-Use `mvn clean test-compile` to avoid stale bytecode. Record JDK version, VM flags, GC, hardware, OS and commit hash in future runs. These are not fully recorded in the supplied baseline. Results apply to tested workloads, not all JVMs or collection types. Charts use log-scale latency axes with error bars clipped to positive values where necessary.
+Use `mvn clean test-compile` to avoid stale bytecode. Record JDK version, VM flags, GC, hardware, OS and commit hash in future runs. These are not fully recorded in the supplied baseline. Results apply to tested workloads, not all JVMs or collection types. Mermaid charts use linear axes. For size-dependent workloads the latency chart shows ns/element (mean ns/op divided by the collection size), rounded to six decimal places; the size-independent wrap chart shows ns/op. Exact mean times and reported JMH errors remain in the tables, since Mermaid XY charts do not support error bars or logarithmic axes. The horizontal summary, allocation and append experiment charts retain their original units.
 
 ## Source data
 
