@@ -6,7 +6,13 @@
 
 Direct-array construction and bulk insertion are approximately 2.35–2.36× faster at 100,000 elements, with approximately half the allocation. Collection construction and traversal are comparable. Individual append is slower by about 0.47 ns per element in the original run. Retain the original append implementation and prioritize array-native bulk operations.
 
-![Execution time comparison at 100,000 elements](fastarraylist_charts/execution_time_summary.svg)
+![FastArrayList faster](fastarraylist_charts/fastarraylist_faster.svg)
+
+![Comparable performance (within 5%)](fastarraylist_charts/comparable_performance.svg)
+
+![JDK faster](fastarraylist_charts/jdk_faster.svg)
+
+Each chart uses its own horizontal scale. Comparable means the slower mean is at most 5% above the faster mean; this is not a statistical significance test.
 
 The wrap operation uses a separate ns/op scale and compares against `Arrays.asList`; all other operations use µs/op.
 
