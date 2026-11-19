@@ -100,6 +100,13 @@ class FieldsSafeGetByPathTest {
 	}
 
 	@Test
+	void shouldReturnNullForPathWithTrailingDot() {
+		Object result = Fields.Safe.getByPath(new WithNestedField(), "inner.");
+
+		assertThat(result, nullValue());
+	}
+
+	@Test
 	void shouldReadTheFieldAndNotTheGetterOnASingleSegmentPath() {
 		WithTransformingGetter obj = new WithTransformingGetter();
 

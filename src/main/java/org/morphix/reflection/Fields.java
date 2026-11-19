@@ -14,7 +14,6 @@ package org.morphix.reflection;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -309,7 +308,7 @@ public interface Fields {
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
 			Class<?> cls = Classes.getFrom(obj);
-			Field field = Fields.getOneDeclaredInHierarchy(cls, fieldName);
+			Field field = Safe.getOneDeclaredInHierarchy(cls, fieldName);
 			Reflection.requireNotNull(field, "Cannot get field '{}' from class {}: field not found", fieldName, cls);
 			return Unchecked.get(obj, field);
 		}
@@ -832,7 +831,7 @@ public interface Fields {
 		static <T, U> U getByPath(final T obj, final String path) {
 			Reflection.requireNotNull(path, "Cannot resolve field path: path is null");
 			U result = null;
-			String[] fieldNames = path.split("\\.");
+			String[] fieldNames = path.split("\\.", -1);
 			if (fieldNames.length == 1) {
 				result = Safe.get(obj, fieldNames[0]);
 			} else {
@@ -901,8 +900,8 @@ public interface Fields {
 		 * use {@link #getOneDeclaredInHierarchy(Class, String)} for that.
 		 * <p>
 		 * This method does not check if the class or the field name is null and will throw a {@link NullPointerException} if
-		 * they are. Use {@link Fields#getOneDeclared(Class, String)} if you want to get null when the class or the field name
-		 * is {@code null}.
+		 * they are. The caller must validate the inputs. Use {@link Fields#getOneDeclared(Class, String)} if you want to get
+		 * null when the class or the field name is {@code null}.
 		 *
 		 * @param <T> type to get the field from
 		 *
@@ -920,6 +919,9 @@ public interface Fields {
 
 		/**
 		 * Returns a field in the class and in all super classes of the class given as parameter.
+		 * <p>
+		 * The caller must validate the inputs. This method throws {@link NullPointerException} if the class or field name is
+		 * {@code null}.
 		 *
 		 * @param <T> type to get the fields from
 		 *
@@ -928,12 +930,14 @@ public interface Fields {
 		 * @return existing field, null otherwise
 		 */
 		static <T> Field getOneDeclaredInHierarchy(final Class<T> cls, final String fieldName) {
-			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
-				Field field = getOneDeclared(type, fieldName);
+			Class<?> type = cls;
+			do {
+				Field field = Unchecked.getOneDeclared(type, fieldName);
 				if (null != field) {
 					return field;
 				}
-			}
+				type = type.getSuperclass();
+			} while (null != type);
 			return null;
 		}
 
@@ -941,11 +945,11 @@ public interface Fields {
 		 * Returns a list with all the fields in the class given as parameter. This is different from
 		 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array.
 		 * <p>
-		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
+		 * The caller must validate the class. This method throws {@link NullPointerException} if it is null. Use
 		 * {@link Fields#getAllDeclared(Class)} if you want to get an empty list when the class is {@code null}.
 		 * <p>
-		 * This method uses {@link Arrays#asList(Object...)} because it is faster than using {@link List#of(Object...)}. The
-		 * speed difference is because it does not require copying the array when creating the list.
+		 * This method wraps the array returned by {@link Class#getDeclaredFields()} in a {@link FastArrayList} without copying
+		 * the array again.
 		 *
 		 * @param <T> type to get the fields from
 		 *
@@ -958,6 +962,8 @@ public interface Fields {
 
 		/**
 		 * Returns a list with all the fields in the class, given as parameter and the field predicate.
+		 * <p>
+		 * The caller must validate the class and predicate before calling this method.
 		 *
 		 * @param <T> type to get the fields from
 		 *
@@ -979,7 +985,7 @@ public interface Fields {
 		 * order provided by {@link Class#getDeclaredFields()}. Super interfaces are not walked; only the class superclass chain
 		 * is included.
 		 * <p>
-		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
+		 * The caller must validate the class. This method throws {@link NullPointerException} if it is null. Use
 		 * {@link Fields#getAllDeclaredInHierarchy(Class)} if you want an empty list when the class is {@code null}.
 		 *
 		 * @param <T> type to get the fields from
@@ -1012,8 +1018,8 @@ public interface Fields {
 		 * order provided by {@link Class#getDeclaredFields()}. Super interfaces are not walked; only the class superclass chain
 		 * is included.
 		 * <p>
-		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
-		 * handle exceptions.
+		 * No {@code null} checks are performed on the parameters. The caller must validate the class and predicate and handle
+		 * exceptions.
 		 *
 		 * @param <T> type to get the fields from
 		 *
@@ -1041,8 +1047,8 @@ public interface Fields {
 		 * but the benchmarking shows that with the stream API is 50% slower. These methods are implemented with performance
 		 * considerations first.
 		 * <p>
-		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
-		 * handle exceptions.
+		 * No {@code null} checks are performed on the parameters. The caller must validate the list and predicate and handle
+		 * exceptions.
 		 *
 		 * @param fields the fields to filter
 		 * @param predicate predicate to filter with
@@ -1065,7 +1071,7 @@ public interface Fields {
 		 * Unlike {@link #filter(List, Predicate)}, this method does not allocate a result list. The caller collects matches by
 		 * supplying a consumer, for example {@code fields::add} on a single {@link List} while walking a class hierarchy.
 		 * <p>
-		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
+		 * No {@code null} checks are performed on the parameters. The caller must validate the array, predicate, and action and
 		 * handle exceptions.
 		 *
 		 * @param fields the fields to test
@@ -1082,6 +1088,9 @@ public interface Fields {
 
 		/**
 		 * Returns the value of the given field from the given object ignoring field access modifiers.
+		 * <p>
+		 * The caller must validate the field and ensure the object is a valid target for it. The object may be {@code null} for
+		 * a static field.
 		 *
 		 * @param <T> field value type
 		 *
@@ -1097,6 +1106,9 @@ public interface Fields {
 
 		/**
 		 * Sets the value of the given field from the given object to the value supplied ignoring field access modifiers.
+		 * <p>
+		 * The caller must validate the field and target object and ensure the value is compatible with the field type. The
+		 * object may be {@code null} for a static field.
 		 *
 		 * @param <T> field value type
 		 *

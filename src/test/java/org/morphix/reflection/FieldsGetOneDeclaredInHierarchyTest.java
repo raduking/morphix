@@ -14,6 +14,7 @@ package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.Field;
 
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
  * <ul>
  * <li>{@link Fields#getOneDeclaredInHierarchy(Class, String)}</li>
  * <li>{@link Fields#getOneDeclaredInHierarchy(Object, String)}</li>
+ * <li>{@link Fields.Unchecked#getOneDeclaredInHierarchy(Class, String)}</li>
  * </ul>
  *
  * @author Radu Sebastian LAZIN
@@ -78,6 +80,11 @@ class FieldsGetOneDeclaredInHierarchyTest {
 		Field field = Fields.getOneDeclaredInHierarchy(null, "x");
 
 		assertThat(field, equalTo(null));
+	}
+
+	@Test
+	void shouldThrowIfUncheckedClassIsNull() {
+		assertThrows(NullPointerException.class, () -> Fields.Unchecked.getOneDeclaredInHierarchy(null, "x"));
 	}
 
 	@Test

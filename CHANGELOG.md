@@ -2,6 +2,9 @@
 
 `1.1.1`
 
+- Kept `Fields.IgnoreAccess.get(Object, String)` throwing `ReflectionException` for null input while using unchecked lookup for valid input.
+- Changed `Fields.Unchecked.getOneDeclaredInHierarchy(Class, String)` to throw `NullPointerException` for a null class.
+- Fixed `Fields.Safe.getByPath(Object, String)` returning a field value for paths ending in a dot.
 - Added `Fields.Unchecked.getOneDeclared(Class, String)` for direct field lookup without parameter validation.
 - Added `Fields.Unchecked.getOneDeclaredInHierarchy(Class, String)` for direct field lookup throughout a class hierarchy.
 - Added `Fields.Unchecked.getAllDeclared(Class)` for direct retrieval of a class's declared fields.
