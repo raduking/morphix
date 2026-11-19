@@ -12,20 +12,10 @@
  */
 package org.morphix.convert.strategy;
 
-import static org.morphix.reflection.ExtendedField.of;
-import static org.morphix.reflection.JavaModifier.STATIC;
-
-import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
 
-import org.morphix.lang.collections.Lists;
-import org.morphix.reflection.Classes;
 import org.morphix.reflection.ExtendedField;
 import org.morphix.reflection.FieldPaths;
-import org.morphix.reflection.FieldPaths.Step;
-import org.morphix.reflection.FieldPaths.StepKind;
-import org.morphix.reflection.Fields;
 
 /**
  * Finds the field in the source by path.
@@ -50,59 +40,15 @@ public class FinderPathStrategy implements FieldFinderStrategy {
 	}
 
 	/**
-	 * Returns the field and the object it corresponds to given its path.
+	 * Returns the first field and its owning object from comma-separated alternative paths.
 	 *
 	 * @param <T> object type
 	 *
 	 * @param obj object on which to search
-	 * @param path path to the wanted field (object)
+	 * @param path alternative paths to the wanted field
 	 * @return field object pair
 	 */
 	public static <T> ExtendedField getConverterFieldByPathInHierarchy(final T obj, final String path) {
-		List<Step> steps = FieldPaths.parse(path);
-		if (Lists.isEmpty(steps)) {
-			return ExtendedField.EMPTY;
-		}
-		Field resultField = null;
-		Object resultObject = obj;
-		Class<?> currentClass = resultObject.getClass();
-		for (Step step : steps) {
-			if (StepKind.PROPERTY == step.kind()) {
-				if (null != resultField && null != resultObject) {
-					resultObject = Fields.IgnoreAccess.get(resultObject, resultField);
-				}
-				if (null == resultObject) {
-					return ExtendedField.EMPTY;
-				}
-				currentClass = Classes.getFrom(resultObject);
-				resultField = Fields.getOneDeclaredInHierarchy(currentClass, step.selector());
-				if (null != resultField && STATIC.isPresentOn(resultField)) {
-					return ExtendedField.EMPTY;
-				}
-				if (null == resultField && resultObject instanceof Map<?, ?> map) {
-					if (!map.containsKey(step.selector())) {
-						return ExtendedField.EMPTY;
-					}
-					resultObject = map.get(step.selector());
-					continue;
-				}
-				if (null == resultField) {
-					return ExtendedField.EMPTY;
-				}
-			} else {
-				if (null != resultField && null != resultObject) {
-					resultObject = Fields.IgnoreAccess.get(resultObject, resultField);
-				}
-				resultObject = FieldPaths.navigate(resultObject, step);
-				resultField = null;
-				if (null == resultObject) {
-					return ExtendedField.EMPTY;
-				}
-			}
-		}
-		if (null == resultObject || null == resultField) {
-			return ExtendedField.EMPTY;
-		}
-		return of(resultField, resultObject);
+		return FieldPaths.resolveField(obj, path);
 	}
 }

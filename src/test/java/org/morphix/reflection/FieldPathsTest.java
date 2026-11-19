@@ -52,40 +52,73 @@ class FieldPathsTest {
 	}
 
 	@Test
-	void shouldParseDotSeparatedProperties() {
-		List<FieldPaths.Step> steps = FieldPaths.parse("inner.value");
+	void shouldRejectInvalidExpressions() {
+		WithContainers root = new WithContainers();
 
-		assertThat(steps.size(), equalTo(2));
-		assertThat(steps.get(0).kind(), equalTo(FieldPaths.StepKind.PROPERTY));
-		assertThat(steps.get(0).selector(), equalTo("inner"));
-		assertThat(steps.get(1).selector(), equalTo("value"));
+		for (String path : List.of(".entries", "entries.", "entries..name", "entries.[0]", "entries[0",
+				"entries[]", "entries[0]]", "entries[0]name", "entries[2147483648]", "entries[0].name,items[0].name")) {
+			assertThat(path, FieldPaths.resolveValue(root, path), nullValue());
+		}
 	}
 
 	@Test
-	void shouldParseArrayIndexAndProperty() {
-		List<FieldPaths.Step> steps = FieldPaths.parse("entries[0].name");
+	void shouldResolveAlternativesWithoutSplittingQuotedKeys() {
+		WithContainers root = new WithContainers();
 
-		assertThat(steps.size(), equalTo(3));
-		assertThat(steps.get(1).kind(), equalTo(FieldPaths.StepKind.INDEX));
-		assertThat(steps.get(1).selector(), equalTo("0"));
-		assertThat(steps.get(2).selector(), equalTo("name"));
+		assertThat(FieldPaths.resolveValues(root, " , missing.name, items[9].name, data['a,b'], entries[0].name, "),
+				equalTo("commaKey"));
+		assertThat(FieldPaths.resolveValues(root, "data['missing,key'], items[0].name"), equalTo("fromList"));
+		assertThat(FieldPaths.resolveValues(root, ", ,"), nullValue());
 	}
 
 	@Test
-	void shouldReturnNullForInvalidExpression() {
-		assertThat(FieldPaths.parse(".inner"), nullValue());
-		assertThat(FieldPaths.parse("entries[0"), nullValue());
-		assertThat(FieldPaths.parse("entries[]"), nullValue());
+	void shouldRecoverFromMalformedAlternatives() {
+		WithContainers root = new WithContainers();
+
+		assertThat(FieldPaths.resolveValues(root, ".bad,entries[],entries[0]] ,items[0].name"), equalTo("fromList"));
+		assertThat(FieldPaths.resolveValues(root, "entries[2147483648],items[0].name"), equalTo("fromList"));
+		assertThat(FieldPaths.resolveValues(root, "data['unterminated,items[0].name"), nullValue());
+		assertThat(FieldPaths.resolveValues(root, "items[0].name,entries["), equalTo("fromList"));
 	}
 
 	@Test
-	void shouldSplitCommaSeparatedPathsOutsideBrackets() {
-		List<String> paths = FieldPaths.split("entries[0].name,data['a,b'],items[1].name");
+	void shouldResolveEscapedKeysAndFollowingAlternatives() {
+		WithContainers root = new WithContainers();
+		root.data.put("a\\", "backslash");
+		root.data.put("a'b", "quote");
+		root.data.put("a]b", "bracket");
+		root.data.put("", "empty");
+		root.data.put("0", "zero");
+		root.data.put("a,b", "comma");
 
-		assertThat(paths.size(), equalTo(3));
-		assertThat(paths.get(0), equalTo("entries[0].name"));
-		assertThat(paths.get(1), equalTo("data['a,b']"));
-		assertThat(paths.get(2), equalTo("items[1].name"));
+		assertThat(FieldPaths.resolveValue(root, "data['a\\\\']"), equalTo("backslash"));
+		assertThat(FieldPaths.resolveValues(root, "data['missing\\\\'],items[0].name"), equalTo("fromList"));
+		assertThat(FieldPaths.resolveValues(root, "data['a\\\\'],items[0].name"), equalTo("backslash"));
+		assertThat(FieldPaths.resolveValue(root, "data['a\\'b']"), equalTo("quote"));
+		assertThat(FieldPaths.resolveValue(root, "data[\"a]b\"]"), equalTo("bracket"));
+		assertThat(FieldPaths.resolveValue(root, "data['']"), equalTo("empty"));
+		assertThat(FieldPaths.resolveValue(root, "data['0']"), equalTo("zero"));
+		assertThat(FieldPaths.resolveValue(root, "data[a,b]"), equalTo("comma"));
+		assertThat(FieldPaths.resolveValues(root, "data[a,b],items[0].name"), equalTo("comma"));
+	}
+
+	@Test
+	void shouldResolveRootContainersAndChainedIndices() {
+		assertThat(FieldPaths.resolveValue(new int[][] { { 10, 20 }, { 30, 40 } }, "[1][0]"), equalTo(30));
+		assertThat(FieldPaths.resolveValue(List.of(List.of("value")), "[0][0]"), equalTo("value"));
+		assertThat(FieldPaths.resolveValue(Map.of("a.b", "value"), "['a.b']"), equalTo("value"));
+		assertThat(FieldPaths.resolveValue(Map.of("a,b", "value"), "a,b"), equalTo("value"));
+	}
+
+	@Test
+	void shouldTrimOnlyCompleteAlternatives() {
+		WithContainers root = new WithContainers();
+
+		assertThat(FieldPaths.resolveValues(root, "  entries[0].name  "), equalTo("fromArray"));
+		assertThat(FieldPaths.resolveValues(root, "  data['key']  "), equalTo("fromMap"));
+		assertThat(FieldPaths.resolveValue(root, " entries[0].name"), nullValue());
+		assertThat(FieldPaths.resolveValue(root, "entries[0].name "), nullValue());
+		assertThat(FieldPaths.resolveValues(root, "entries[0]. name,items[0].name"), equalTo("fromList"));
 	}
 
 	@Test

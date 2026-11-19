@@ -822,8 +822,8 @@ public interface Fields {
 
 		/**
 		 * Variation of {@link Safe#getByPaths(Object, String...)} with paths given as a comma separated list of paths in a
-		 * single string. Each segment is {@linkplain String#trim() trimmed} after splitting on {@code ','}; empty segments are
-		 * ignored.
+		 * single string. Commas inside brackets are part of the selector. Each path is {@linkplain String#trim() trimmed}; empty
+		 * alternatives are ignored.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
@@ -835,14 +835,7 @@ public interface Fields {
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
 			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
-			if (paths.isEmpty()) {
-				return null;
-			}
-			List<String> trimmedPaths = FieldPaths.split(paths);
-			if (trimmedPaths.isEmpty()) {
-				return null;
-			}
-			return getByPaths(obj, trimmedPaths.toArray(String[]::new));
+			return FieldPaths.resolveValues(obj, paths);
 		}
 
 		/**
