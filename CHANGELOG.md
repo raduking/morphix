@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.1.2`
+
+---
+
 `1.1.1`
 
 - Kept `Fields.IgnoreAccess.get(Object, String)` throwing `ReflectionException` for null input while using unchecked lookup for valid input.
