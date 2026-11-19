@@ -822,8 +822,8 @@ public interface Fields {
 
 		/**
 		 * Variation of {@link Safe#getByPaths(Object, String...)} with paths given as a comma separated list of paths in a
-		 * single string. Commas inside brackets are part of the selector. Each path is {@linkplain String#trim() trimmed}; empty
-		 * alternatives are ignored.
+		 * single string. Commas inside brackets are part of the selector. Each path is {@linkplain String#trim() trimmed};
+		 * empty alternatives are ignored.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
