@@ -13,7 +13,6 @@
 package org.morphix.reflection;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -799,8 +798,7 @@ public interface Fields {
 		}
 
 		/**
-		 * Returns the field value for the given object. Field is searched with the field path.<br>
-		 * TODO: implement full functionality similar to JSON Path
+		 * Returns the field value for the given object. Field is searched with the field path.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
@@ -840,14 +838,7 @@ public interface Fields {
 			if (paths.isEmpty()) {
 				return null;
 			}
-			String[] parts = paths.split(",", -1);
-			List<String> trimmedPaths = new ArrayList<>(parts.length);
-			for (String part : parts) {
-				String path = part.trim();
-				if (!path.isEmpty()) {
-					trimmedPaths.add(path);
-				}
-			}
+			List<String> trimmedPaths = FieldPaths.split(paths);
 			if (trimmedPaths.isEmpty()) {
 				return null;
 			}
@@ -855,36 +846,28 @@ public interface Fields {
 		}
 
 		/**
-		 * Returns the field value given by its qualified path to the required field in the given object. The field is read
-		 * directly, without going through a getter method.
+		 * Returns the field value given by its path to the required field in the given object. The field is read directly,
+		 * without going through a getter method.
+		 * <p>
+		 * Paths use dot notation for properties (for example {@code inner.value}), bracket notation for array or list indices
+		 * (for example {@code items[0].name}), and quoted or unquoted map keys (for example {@code data['key']} or
+		 * {@code data[key]}). When a property is not declared on an object, a {@link java.util.Map} value is consulted.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
 		 *
 		 * @param obj object to get the field from
-		 * @param path qualified path to the field
-		 * @return field value or null if the field is not found or if the object is null
+		 * @param path path to the value
+		 * @return field or container value, or {@code null} if the path is empty, invalid, not found, or {@code obj} is
+		 * {@code null}
 		 * @throws ReflectionException if {@code path} is null
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
 			Reflection.requireNotNull(path, "Cannot resolve field path: path is null");
-			U result = null;
-			String[] fieldNames = path.split("\\.", -1);
-			if (fieldNames.length == 1) {
-				result = Safe.get(obj, fieldNames[0]);
-			} else {
-				Object value = obj;
-				for (String fieldName : fieldNames) {
-					value = Safe.get(value, fieldName);
-					if (null == value) {
-						break;
-					}
-				}
-				if (null != value) {
-					result = JavaObjects.cast(value);
-				}
+			if (null == obj) {
+				return null;
 			}
-			return result;
+			return FieldPaths.resolveValue(obj, path);
 		}
 	}
 

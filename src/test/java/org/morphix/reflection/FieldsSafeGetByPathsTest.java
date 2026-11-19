@@ -17,6 +17,9 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 /**
@@ -33,7 +36,10 @@ class FieldsSafeGetByPathsTest {
 	}
 
 	public static class B {
+
 		public A a;
+
+		public Map<String, A> keyed = new LinkedHashMap<>();
 	}
 
 	@Test
@@ -141,6 +147,21 @@ class FieldsSafeGetByPathsTest {
 
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, (String[]) null));
 		assertThat(e.getMessage(), equalTo("Cannot resolve field paths: paths are null"));
+	}
+
+	@Test
+	void shouldNotSplitOnCommaInsideBrackets() {
+		A fromMap = new A();
+		fromMap.x = "commaKey";
+		A fromDot = new A();
+		fromDot.x = "dotPath";
+		B b = new B();
+		b.keyed.put("a,b", fromMap);
+		b.a = fromDot;
+
+		String value = Fields.Safe.getByPaths(b, "keyed['a,b'].x,a.x");
+
+		assertThat(value, equalTo("commaKey"));
 	}
 
 }

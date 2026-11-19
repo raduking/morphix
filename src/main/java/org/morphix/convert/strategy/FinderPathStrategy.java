@@ -17,8 +17,14 @@ import static org.morphix.reflection.JavaModifier.STATIC;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 
+import org.morphix.lang.collections.Lists;
+import org.morphix.reflection.Classes;
 import org.morphix.reflection.ExtendedField;
+import org.morphix.reflection.FieldPaths;
+import org.morphix.reflection.FieldPaths.Step;
+import org.morphix.reflection.FieldPaths.StepKind;
 import org.morphix.reflection.Fields;
 
 /**
@@ -53,30 +59,48 @@ public class FinderPathStrategy implements FieldFinderStrategy {
 	 * @return field object pair
 	 */
 	public static <T> ExtendedField getConverterFieldByPathInHierarchy(final T obj, final String path) {
-		String[] fieldNames = path.split("\\.");
-
+		List<Step> steps = FieldPaths.parse(path);
+		if (Lists.isEmpty(steps)) {
+			return ExtendedField.EMPTY;
+		}
 		Field resultField = null;
 		Object resultObject = obj;
 		Class<?> currentClass = resultObject.getClass();
-
-		for (String fieldName : fieldNames) {
-			if (null != resultField && null != resultObject) {
-				resultObject = Fields.IgnoreAccess.get(resultObject, resultField);
-			}
-			resultField = Fields.getOneDeclaredInHierarchy(currentClass, fieldName);
-			if (null != resultField && STATIC.isPresentOn(resultField)) {
-				resultField = null;
-			}
-			if (null != resultField) {
-				currentClass = resultField.getType();
+		for (Step step : steps) {
+			if (StepKind.PROPERTY == step.kind()) {
+				if (null != resultField && null != resultObject) {
+					resultObject = Fields.IgnoreAccess.get(resultObject, resultField);
+				}
+				if (null == resultObject) {
+					return ExtendedField.EMPTY;
+				}
+				currentClass = Classes.getFrom(resultObject);
+				resultField = Fields.getOneDeclaredInHierarchy(currentClass, step.selector());
+				if (null != resultField && STATIC.isPresentOn(resultField)) {
+					return ExtendedField.EMPTY;
+				}
+				if (null == resultField && resultObject instanceof Map<?, ?> map) {
+					if (!map.containsKey(step.selector())) {
+						return ExtendedField.EMPTY;
+					}
+					resultObject = map.get(step.selector());
+					continue;
+				}
+				if (null == resultField) {
+					return ExtendedField.EMPTY;
+				}
 			} else {
-				resultObject = null;
-			}
-			if (null == resultField) {
-				break;
+				if (null != resultField && null != resultObject) {
+					resultObject = Fields.IgnoreAccess.get(resultObject, resultField);
+				}
+				resultObject = FieldPaths.navigate(resultObject, step);
+				resultField = null;
+				if (null == resultObject) {
+					return ExtendedField.EMPTY;
+				}
 			}
 		}
-		if (null == resultObject) {
+		if (null == resultObject || null == resultField) {
 			return ExtendedField.EMPTY;
 		}
 		return of(resultField, resultObject);

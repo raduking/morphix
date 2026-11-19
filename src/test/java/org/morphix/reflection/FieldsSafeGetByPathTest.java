@@ -17,7 +17,12 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
+import org.morphix.lang.collections.FastArrayList;
 
 /**
  * Test class for {@link Fields.Safe#getByPath(Object, String)}.
@@ -44,6 +49,20 @@ class FieldsSafeGetByPathTest {
 	public static class WithNestedField {
 
 		public WithTransformingGetter inner = new WithTransformingGetter();
+	}
+
+	public static class WithIndexedContainers {
+
+		public String[] tags = { "alpha", "beta" };
+
+		public List<String> codes = new FastArrayList<>(new String[] { "x", "y" });
+
+		public Map<String, String> attributes = new LinkedHashMap<>();
+
+		public WithIndexedContainers() {
+			attributes.put("color", "blue");
+			attributes.put("size", "large");
+		}
 	}
 
 	@Test
@@ -126,5 +145,43 @@ class FieldsSafeGetByPathTest {
 	void shouldThrowWhenPathIsNull() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPath(new WithNestedField(), null));
 		assertThat(e.getMessage(), equalTo("Cannot resolve field path: path is null"));
+	}
+
+	@Test
+	void shouldGetValueByArrayIndexPath() {
+		WithIndexedContainers obj = new WithIndexedContainers();
+
+		assertThat(Fields.Safe.getByPath(obj, "tags[1]"), equalTo("beta"));
+		assertThat(Fields.Safe.getByPath(obj, "tags[0]"), equalTo("alpha"));
+	}
+
+	@Test
+	void shouldGetValueByListIndexPath() {
+		WithIndexedContainers obj = new WithIndexedContainers();
+
+		assertThat(Fields.Safe.getByPath(obj, "codes[1]"), equalTo("y"));
+	}
+
+	@Test
+	void shouldGetValueByMapKeyPath() {
+		WithIndexedContainers obj = new WithIndexedContainers();
+
+		assertThat(Fields.Safe.getByPath(obj, "attributes['color']"), equalTo("blue"));
+		assertThat(Fields.Safe.getByPath(obj, "attributes[size]"), equalTo("large"));
+	}
+
+	@Test
+	void shouldGetNestedValueAfterIndexPath() {
+		WithIndexedContainers obj = new WithIndexedContainers();
+		obj.tags = new String[] { "outer" };
+		Wrapper wrapper = new Wrapper();
+		wrapper.row = obj;
+
+		assertThat(Fields.Safe.getByPath(wrapper, "row.tags[0]"), equalTo("outer"));
+	}
+
+	public static class Wrapper {
+
+		public WithIndexedContainers row;
 	}
 }
