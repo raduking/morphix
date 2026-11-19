@@ -890,12 +890,17 @@ public interface Fields {
 	}
 
 	/**
-	 * Namespace interface for field operations that assume valid input.
+	 * Namespace for field operations that mirror {@link IgnoreAccess} but perform no validation.
 	 * <p>
-	 * Methods in this interface do not perform explicit parameter validation. The caller is responsible for providing valid
-	 * input and handling exceptions.
+	 * {@link IgnoreAccess} delegates its core work here: {@link #get(Object, Field)} and
+	 * {@link #set(Object, Field, Object)} apply the same rules (including ignoring Java access modifiers) as
+	 * {@link IgnoreAccess#get(Object, Field) IgnoreAccess.get} and {@link IgnoreAccess#set(Object, Field, Object)
+	 * IgnoreAccess.set}, without checking that the field descriptor is non-null, resolving a field by name, or verifying
+	 * that a field is static. Static fields use a {@code null} target object, as with {@link IgnoreAccess}.
 	 * <p>
-	 * These methods are also used internally by the other field utility methods to avoid redundant validation.
+	 * This interface also exposes unchecked field lookup and enumeration helpers used by {@link Safe} and
+	 * {@link IgnoreAccess} so validation is not applied twice. Callers must supply valid arguments and handle
+	 * {@link ReflectionException} and other runtime failures; prefer {@link IgnoreAccess} in application code.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
