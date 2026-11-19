@@ -6,45 +6,7 @@
 
 Direct-array construction and bulk insertion are approximately 2.35–2.36× faster at 100,000 elements, with approximately half the allocation. Collection construction and traversal are comparable. Individual append is slower by about 0.47 ns per element in the original run. Retain the original append implementation and prioritize array-native bulk operations.
 
-```mermaid
----
-config:
-  xyChart:
-    width: 1000
-    height: 900
-  themeVariables:
-    xyChart:
-      plotColorPalette: '#0072B2, #D55E00'
----
-xychart-beta horizontal
-    title "Execution time at 100,000 elements"
-    x-axis ["Array constructor (ArrayList)","Array constructor (FastArrayList)","Collection constructor (ArrayList)","Collection constructor (FastArrayList)","Bulk add: array (ArrayList)","Bulk add: array (FastArrayList)","Bulk add: same type (ArrayList)","Bulk add: same type (FastArrayList)","Bulk add: array view (ArrayList)","Bulk add: array view (FastArrayList)","Append: preallocated (ArrayList)","Append: preallocated (FastArrayList)","Append: growth (ArrayList)","Append: growth (FastArrayList)","Indexed traversal (ArrayList)","Indexed traversal (FastArrayList)","Iterator traversal (ArrayList)","Iterator traversal (FastArrayList)"]
-    y-axis "Microseconds/op (lower is better)" 0 --> 250
-    bar [26.914452, 0, 11.016959, 0, 26.775096, 0, 26.762009, 0, 26.956367, 0, 157.824367, 0, 187.530536, 0, 54.268364, 0, 54.350319, 0]
-    bar [0, 11.460451, 0, 11.464594, 0, 11.414695, 0, 11.346213, 0, 26.749827, 0, 204.566567, 0, 241.344722, 0, 54.262427, 0, 54.477304]
-```
-
-Blue = ArrayList; orange = FastArrayList. Lower is better.
-
-```mermaid
----
-config:
-  xyChart:
-    width: 1000
-    height: 220
-  themeVariables:
-    xyChart:
-      plotColorPalette: '#0072B2, #D55E00'
----
-xychart-beta horizontal
-    title "Zero-copy wrap at 100,000 elements"
-    x-axis ["Zero-copy wrap (Arrays.asList)","Zero-copy wrap (FastArrayList)"]
-    y-axis "ns/op (lower is better)" 0 --> 1.5
-    bar [1.126, 0]
-    bar [0, 1.256]
-```
-
-Blue = Arrays.asList; orange = FastArrayList. Wrap is shown separately because its latency is orders of magnitude smaller.
+![Speedup summary](fastarraylist_charts/speedup_summary.svg)
 
 ## Methodology
 
@@ -398,27 +360,7 @@ Series: blue = `Arrays.asList`; orange = `FastArrayList`. Lower is better.
 
 ## Allocation profile
 
-```mermaid
----
-config:
-  xyChart:
-    width: 850
-    height: 650
-  themeVariables:
-    xyChart:
-      plotColorPalette: '#0072B2, #D55E00'
----
-xychart-beta horizontal
-    title "Allocation at 100,000 elements"
-    x-axis ["Array constructor (JDK)", "Array constructor (Fast)", "Collection constructor (JDK)", "Collection constructor (Fast)", "Bulk add: array (JDK)", "Bulk add: array (Fast)", "Bulk add: same type (JDK)", "Bulk add: same type (Fast)", "Bulk add: array view (JDK)", "Bulk add: array view (Fast)", "Append: preallocated (JDK)", "Append: preallocated (Fast)", "Append: growth (JDK)", "Append: growth (Fast)"]
-    y-axis "kB/op (decimal)" 0 --> 1400
-    bar [800.056186, 0, 400.040076, 0, 800.056185, 0, 800.056185, 0, 800.056186, 0, 400.041087, 0, 1280.953291, 0]
-    bar [0, 400.040079, 0, 400.040079, 0, 400.040079, 0, 400.040078, 0, 800.056185, 0, 400.041415, 0, 1280.953668]
-```
-
-Blue = JDK; orange = FastArrayList.
-
-Traversal and zero-copy wrapping allocations are too small to read at this scale; see the exact B/op values in the table.
+![Allocation at 100K](fastarraylist_charts/allocation_100k.svg)
 
 | Operation | JDK B/op | FastArrayList B/op |
 |---|---:|---:|
@@ -437,28 +379,7 @@ Normalized bytes per operation are the clearest allocation measure; GC counts, t
 
 ## Append optimization experiments
 
-```mermaid
----
-config:
-  xyChart:
-    width: 850
-    height: 470
-  themeVariables:
-    xyChart:
-      plotColorPalette: '#D55E00, #808080, #0072B2'
----
-xychart-beta horizontal
-    title "Append optimization experiments at 100,000 elements"
-    x-axis ["Original", "No compatibility check", "Capacity equality (clean rerun)", "Separate increment (approx.)", "Cached size", "modCount first", "JDK-style helper", "Reverted", "JDK, final rerun"]
-    y-axis "Microseconds/op" 0 --> 250
-    bar [204.566567, 0, 0, 0, 0, 0, 0, 207.941241, 0]
-    bar [0, 205.932046, 218.682149, 218.2, 218.880865, 209.736023, 218.886925, 0, 0]
-    bar [0, 0, 0, 0, 0, 0, 0, 0, 158.287666]
-```
-
-Orange = FastArrayList baseline and reverted implementation; gray = experimental variants; blue = JDK reference.
-
-The separate-increment value (approximately 218.2 µs/op) is recovered from the original chart because the corresponding exact measurement is absent from the available data. The final JDK rerun is included as a reference.
+![Append experiments](fastarraylist_charts/append_experiments.svg)
 
 | Variant | ns/op at 100K | vs original |
 |---|---:|---:|
@@ -564,7 +485,7 @@ Construct a destination of size n, reserve capacity 2n, insert n/2 elements from
 
 ## Reproducibility and limitations
 
-Use `mvn clean test-compile` to avoid stale bytecode. Record JDK version, VM flags, GC, hardware, OS and commit hash in future runs. These are not fully recorded in the supplied baseline. Results apply to tested workloads, not all JVMs or collection types. Mermaid charts use linear axes. For size-dependent workloads the latency chart shows ns/element (mean ns/op divided by the collection size), rounded to six decimal places; the size-independent wrap chart shows ns/op. Exact mean times and reported JMH errors remain in the tables, since Mermaid XY charts do not support error bars or logarithmic axes. The horizontal summary, allocation and append experiment charts retain their original units.
+Use `mvn clean test-compile` to avoid stale bytecode. Record JDK version, VM flags, GC, hardware, OS and commit hash in future runs. These are not fully recorded in the supplied baseline. Results apply to tested workloads, not all JVMs or collection types. Mermaid charts use linear axes. For size-dependent workloads the latency chart shows ns/element (mean ns/op divided by the collection size), rounded to six decimal places; the size-independent wrap chart shows ns/op. Exact mean times and reported JMH errors remain in the tables, since Mermaid XY charts do not support error bars or logarithmic axes. The summary, allocation and append experiment charts use the original SVG assets.
 
 ## Source data
 
