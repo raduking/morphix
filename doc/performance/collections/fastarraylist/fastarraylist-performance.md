@@ -10,23 +10,41 @@ Direct-array construction and bulk insertion are approximately 2.35–2.36× fas
 ---
 config:
   xyChart:
-    width: 850
-    height: 520
+    width: 1000
+    height: 900
   themeVariables:
     xyChart:
-      plotColorPalette: '#D55E00, #0072B2, #808080, #444444'
+      plotColorPalette: '#0072B2, #D55E00'
 ---
 xychart-beta horizontal
-    title "Speedup at 100,000 elements"
-    x-axis ["Array constructor", "Collection constructor", "Bulk add: array", "Bulk add: same type", "Bulk add: array view", "Append: preallocated", "Append: growth", "Indexed traversal", "Iterator traversal", "Zero-copy wrap"]
-    y-axis "JDK / FastArrayList (higher is better)" 0 --> 3
-    bar [2.35, 0, 2.35, 2.36, 1.01, 0, 0, 0, 0, 0]
-    bar [0, 0.96, 0, 0, 0, 0.77, 0.78, 0, 0, 0.9]
-    bar [0, 0, 0, 0, 0, 0, 0, 1, 1, 0]
-    line [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    title "Execution time at 100,000 elements"
+    x-axis ["Array constructor (ArrayList)","Array constructor (FastArrayList)","Collection constructor (ArrayList)","Collection constructor (FastArrayList)","Bulk add: array (ArrayList)","Bulk add: array (FastArrayList)","Bulk add: same type (ArrayList)","Bulk add: same type (FastArrayList)","Bulk add: array view (ArrayList)","Bulk add: array view (FastArrayList)","Append: preallocated (ArrayList)","Append: preallocated (FastArrayList)","Append: growth (ArrayList)","Append: growth (FastArrayList)","Indexed traversal (ArrayList)","Indexed traversal (FastArrayList)","Iterator traversal (ArrayList)","Iterator traversal (FastArrayList)"]
+    y-axis "Microseconds/op (lower is better)" 0 --> 250
+    bar [26.914452, 0, 11.016959, 0, 26.775096, 0, 26.762009, 0, 26.956367, 0, 157.824367, 0, 187.530536, 0, 54.268364, 0, 54.350319, 0]
+    bar [0, 11.460451, 0, 11.464594, 0, 11.414695, 0, 11.346213, 0, 26.749827, 0, 204.566567, 0, 241.344722, 0, 54.262427, 0, 54.477304]
 ```
 
-Orange = FastArrayList faster; blue = JDK faster; gray = parity. The dark gray line marks parity (1.0×).
+Blue = ArrayList; orange = FastArrayList. Lower is better.
+
+```mermaid
+---
+config:
+  xyChart:
+    width: 1000
+    height: 220
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#0072B2, #D55E00'
+---
+xychart-beta horizontal
+    title "Zero-copy wrap at 100,000 elements"
+    x-axis ["Zero-copy wrap (Arrays.asList)","Zero-copy wrap (FastArrayList)"]
+    y-axis "ns/op (lower is better)" 0 --> 1.5
+    bar [1.126, 0]
+    bar [0, 1.256]
+```
+
+Blue = Arrays.asList; orange = FastArrayList. Wrap is shown separately because its latency is orders of magnitude smaller.
 
 ## Methodology
 
