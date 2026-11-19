@@ -86,6 +86,8 @@ public interface Fields {
 	 * Returns a list with all the fields in the class given as parameter. This is different from
 	 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array. If the class is null it returns
 	 * an empty list.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param <T> type to get the fields from
 	 *
@@ -99,6 +101,8 @@ public interface Fields {
 	/**
 	 * Variation of {@link #getAllDeclared(Class)}. It will call the method with the class determined from the object
 	 * supplied as parameter.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param obj object on which the fields are needed
 	 * @return list of fields
@@ -109,6 +113,8 @@ public interface Fields {
 
 	/**
 	 * Returns a list with all the fields in the class, given as parameter and the field predicate.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param <T> type to get the fields from
 	 *
@@ -122,6 +128,8 @@ public interface Fields {
 
 	/**
 	 * Returns a list with all the fields in the class, given as parameter and the field predicate.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param obj object on which the fields are needed
 	 * @param predicate predicate for fields
@@ -135,6 +143,8 @@ public interface Fields {
 	 * Filters the given field list with the given predicate. This method could have been implemented with the stream API
 	 * but the benchmarking shows that with the stream API is 50% slower. These methods are implemented with performance
 	 * considerations first.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param fields the fields to filter
 	 * @param predicate predicate to filter with
@@ -164,6 +174,8 @@ public interface Fields {
 	/**
 	 * Returns a list with all the fields in the class, given as parameter and the field predicate, including the ones in
 	 * all it's super classes. The returned order of the fields are: class -> super class -> ... -> base class
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param <T> type to get the fields from
 	 *
@@ -178,6 +190,8 @@ public interface Fields {
 	/**
 	 * Variation of {@link #getAllDeclaredInHierarchy(Class)}. It will call the method with the class determined from the
 	 * object supplied as parameter.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param obj object on which the fields are needed
 	 * @return list of fields
@@ -189,6 +203,8 @@ public interface Fields {
 	/**
 	 * Variation of {@link #getAllDeclaredInHierarchy(Class, Predicate)}. It will call the method with the class determined
 	 * from the object supplied as parameter.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param obj object on which the fields are needed
 	 * @param predicate predicate for fields
@@ -550,6 +566,8 @@ public interface Fields {
 		 * Returns a list with all the fields in the class given as parameter. This is different from
 		 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array. If the class is null it returns
 		 * an empty list.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the fields from
 		 *
@@ -566,6 +584,8 @@ public interface Fields {
 		/**
 		 * Variation of {@link #getAllDeclared(Class)}. It will call the method with the class determined from the object
 		 * supplied as parameter.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param obj object on which the fields are needed
 		 * @return list of fields
@@ -580,6 +600,8 @@ public interface Fields {
 
 		/**
 		 * Returns a list with all the fields in the class, given as parameter and the field predicate.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the fields from
 		 *
@@ -596,6 +618,8 @@ public interface Fields {
 
 		/**
 		 * Returns a list with all the fields in the class, given as parameter and the field predicate.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param obj object on which the fields are needed
 		 * @param predicate predicate for fields
@@ -613,6 +637,8 @@ public interface Fields {
 		 * Filters the given field list with the given predicate. This method could have been implemented with the stream API
 		 * but the benchmarking shows that with the stream API is 50% slower. These methods are implemented with performance
 		 * considerations first.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param fields the fields to filter
 		 * @param predicate predicate to filter with
@@ -648,6 +674,8 @@ public interface Fields {
 		/**
 		 * Returns a list with all the fields in the class, given as parameter and the field predicate, including the ones in
 		 * all it's super classes. The returned order of the fields are: class -> super class -> ... -> base class
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the fields from
 		 *
@@ -665,6 +693,8 @@ public interface Fields {
 		/**
 		 * Variation of {@link #getAllDeclaredInHierarchy(Class)}. It will call the method with the class determined from the
 		 * object supplied as parameter.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param obj object on which the fields are needed
 		 * @return list of fields
@@ -680,6 +710,8 @@ public interface Fields {
 		/**
 		 * Variation of {@link #getAllDeclaredInHierarchy(Class, Predicate)}. It will call the method with the class determined
 		 * from the object supplied as parameter.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param obj object on which the fields are needed
 		 * @param predicate predicate for fields
@@ -961,6 +993,8 @@ public interface Fields {
 		 * <p>
 		 * This method wraps the array returned by {@link Class#getDeclaredFields()} in a {@link FastArrayList} without copying
 		 * the array again.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the fields from
 		 *
@@ -975,6 +1009,8 @@ public interface Fields {
 		 * Returns a list with all the fields in the class, given as parameter and the field predicate.
 		 * <p>
 		 * The caller must validate the class and predicate before calling this method.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the fields from
 		 *
@@ -998,6 +1034,8 @@ public interface Fields {
 		 * <p>
 		 * The caller must validate the class. This method throws {@link NullPointerException} if it is null. Use
 		 * {@link Fields#getAllDeclaredInHierarchy(Class)} if you want an empty list when the class is {@code null}.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the fields from
 		 *
@@ -1031,6 +1069,8 @@ public interface Fields {
 		 * <p>
 		 * No {@code null} checks are performed on the parameters. The caller must validate the class and predicate and handle
 		 * exceptions.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the fields from
 		 *
@@ -1060,6 +1100,8 @@ public interface Fields {
 		 * <p>
 		 * No {@code null} checks are performed on the parameters. The caller must validate the list and predicate and handle
 		 * exceptions.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param fields the fields to filter
 		 * @param predicate predicate to filter with
