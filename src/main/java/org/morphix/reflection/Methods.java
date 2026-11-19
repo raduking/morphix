@@ -18,7 +18,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +48,8 @@ public interface Methods {
 
 	/**
 	 * Returns a list with all the methods declared in the class given as parameter.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -61,6 +62,8 @@ public interface Methods {
 
 	/**
 	 * Returns a list with all the methods declared in the class given as parameter that verify the given method predicate.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -116,15 +119,10 @@ public interface Methods {
 	 * not the ones declared by its super interfaces, since those are interfaces as well. Use
 	 * {@link Complete#getAllDeclaredInHierarchy(Class)} for the full interface hierarchy.
 	 * <p>
-	 * {@link LinkedList} is used because:
-	 * <ul>
-	 * <li>it is more efficient in terms of memory consumption</li>
-	 * <li>accessing the first and last has O(1) complexity</li>
-	 * <li>more often than not, no random access is needed</li>
-	 * <li>profiling: ~2 times faster than using {@link java.util.ArrayList}</li>
-	 * </ul>
-	 * The returned order of the methods are: class -> super class -> ... -> base class, and all methods in each class are
-	 * returned in the declared order.
+	 * Methods are returned in hierarchy order, starting with the given class. Within each class, methods are returned in
+	 * the order provided by {@link Class#getDeclaredMethods()}.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -139,6 +137,8 @@ public interface Methods {
 	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes,
 	 * including {@link Object}, that verify the given method predicate. This method does not return methods from super
 	 * interfaces.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -529,6 +529,8 @@ public interface Methods {
 
 		/**
 		 * Returns a list with all the methods declared in the class given as parameter.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -544,6 +546,8 @@ public interface Methods {
 
 		/**
 		 * Returns a list with all the methods declared in the class given as parameter that verify the given method predicate.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -620,15 +624,10 @@ public interface Methods {
 		 * not the ones declared by its super interfaces, since those are interfaces as well. Use
 		 * {@link Complete#getAllDeclaredInHierarchy(Class)} for the full interface hierarchy.
 		 * <p>
-		 * {@link LinkedList} is used because:
-		 * <ul>
-		 * <li>it is more efficient in terms of memory consumption</li>
-		 * <li>accessing the first and last has O(1) complexity</li>
-		 * <li>more often than not, no random access is needed</li>
-		 * <li>profiling: ~2 times faster than using {@link java.util.ArrayList}</li>
-		 * </ul>
-		 * The returned order of the methods are: class -> super class -> ... -> base class, and all methods in each class are
-		 * returned in the declared order.
+		 * Methods are returned in hierarchy order, starting with the given class. Within each class, methods are returned in
+		 * the order provided by {@link Class#getDeclaredMethods()}.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -646,6 +645,8 @@ public interface Methods {
 		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes,
 		 * including {@link Object}, that verify the given method predicate. This method does not return methods from super
 		 * interfaces.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -701,6 +702,8 @@ public interface Methods {
 		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
 		 * interfaces. Pass classes in the excluded set of {@link #getAllDeclaredInHierarchy(Class, Set)} to leave a specific
 		 * class out of the walk.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -720,6 +723,8 @@ public interface Methods {
 		 * <p>
 		 * Note: a {@code null} class short-circuits the walk and returns an empty list, so in that case the excluded set is
 		 * never validated and no exception is thrown for it.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -771,8 +776,10 @@ public interface Methods {
 		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
 		 * {@link Methods#getAllDeclared(Class)} if you want to get an empty list when the class is {@code null}.
 		 * <p>
-		 * This method uses {@link Arrays#asList(Object...)} because it is faster than using {@link List#of(Object...)}. The
-		 * speed difference is because it does not require copying the array when creating the list.
+		 * This method wraps the array returned by {@link Class#getDeclaredMethods()} in a {@link FastArrayList} without copying
+		 * the array again.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -785,6 +792,8 @@ public interface Methods {
 
 		/**
 		 * Returns a list with all the methods declared in the class given as parameter that verify the given method predicate.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -822,7 +831,8 @@ public interface Methods {
 		 * Returns a method in the class given as parameter, also searching in all its super classes, and returns {@code null}
 		 * if method is not found.
 		 * <p>
-		 * This method does not validate input parameters, the caller is responsible to do it.
+		 * This method does not validate input parameters; the caller is responsible for them. It throws
+		 * {@link NullPointerException} if the class or method name is {@code null}.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -832,12 +842,14 @@ public interface Methods {
 		 * @return found method, {@code null} otherwise
 		 */
 		static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
-			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
+			Class<?> type = cls;
+			do {
 				Method method = Unchecked.getOneDeclared(methodName, type, parameterTypes);
 				if (null != method) {
 					return method;
 				}
-			}
+				type = type.getSuperclass();
+			} while (null != type);
 			return null;
 		}
 
@@ -850,6 +862,8 @@ public interface Methods {
 		 * <p>
 		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
 		 * {@link Methods#getAllDeclaredInHierarchy(Class)} if you want an empty list when the class is {@code null}.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -883,6 +897,8 @@ public interface Methods {
 		 * <p>
 		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
 		 * handle exceptions.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the methods from
 		 *

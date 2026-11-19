@@ -14,13 +14,15 @@ package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Test class for {@link Methods.Safe#getOneDeclaredInHierarchy(String, Class, Class...)}.
+ * Test class for {@link Methods.Safe#getOneDeclaredInHierarchy(String, Class, Class...)} and
+ * {@link Methods.Unchecked#getOneDeclaredInHierarchy(String, Class, Class...)}.
  *
  * @author Radu Sebastian LAZIN
  */
@@ -74,6 +76,11 @@ class MethodsSafeGetOneDeclaredInHierarchyTest {
 		Method method = Methods.Safe.getOneDeclaredInHierarchy("fooA", (Class<?>) null);
 
 		assertThat(method, equalTo(null));
+	}
+
+	@Test
+	void shouldThrowIfUncheckedClassIsNull() {
+		assertThrows(NullPointerException.class, () -> Methods.Unchecked.getOneDeclaredInHierarchy("fooA", null));
 	}
 
 	@Test
