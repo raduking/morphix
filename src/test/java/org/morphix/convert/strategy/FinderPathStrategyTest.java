@@ -35,6 +35,7 @@ class FinderPathStrategyTest {
 
 		public static String staticName = "static";
 
+		@SuppressWarnings("unused")
 		private String name;
 
 		private Entry(final String name) {
@@ -50,6 +51,7 @@ class FinderPathStrategyTest {
 
 		private final Map<String, Entry> keyed = Map.of("a,b", new Entry("map"), "key", new Entry("plain"));
 
+		@SuppressWarnings("unused")
 		private final Entry missing = null;
 	}
 

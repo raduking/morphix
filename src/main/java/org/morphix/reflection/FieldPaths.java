@@ -54,9 +54,9 @@ public interface FieldPaths {
 	}
 
 	/**
-	 * Finds the first non-static reflective field and its owning object in a comma-separated list of paths.
-	 * The final field is not read; a field with a null value can therefore be found. Paths ending at a container
-	 * element rather than a reflective field are not matches.
+	 * Finds the first non-static reflective field and its owning object in a comma-separated list of paths. The final field
+	 * is not read; a field with a null value can therefore be found. Paths ending at a container element rather than a
+	 * reflective field are not matches.
 	 *
 	 * @param root root object
 	 * @param paths alternative field paths
