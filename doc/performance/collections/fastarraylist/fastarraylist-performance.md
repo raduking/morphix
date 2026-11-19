@@ -6,6 +6,8 @@
 
 Direct-array construction and bulk insertion are approximately 2.35–2.36× faster at 100,000 elements, with approximately half the allocation. Collection construction and traversal are comparable. Individual append is slower by about 0.47 ns per element in the original run. Retain the original append implementation and prioritize array-native bulk operations.
 
+**Locally compiled JDK comparison:** In follow-up testing with a locally compiled copy of JDK `ArrayList` (`JDKArrayList`), the operations favoring the runtime-provided `ArrayList` moved into the comparable-performance category (within 5%). For preallocated append, the measured difference was approximately 4.2%. The charts below retain the original runtime-provided JDK baseline; the locally compiled comparison is discussed in the [follow-up analysis](#follow-up-append-performance-and-hotspot-compilation-16-november-2026). Zero-copy wrapping uses `Arrays.asList`, not `ArrayList`, and is outside this comparison.
+
 ![FastArrayList faster](fastarraylist_charts/fastarraylist_faster.svg)
 
 ![Comparable performance (within 5%)](fastarraylist_charts/comparable_performance.svg)
