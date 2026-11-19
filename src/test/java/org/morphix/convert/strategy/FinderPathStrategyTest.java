@@ -210,6 +210,19 @@ class FinderPathStrategyTest {
 		assertThat(Fields.Safe.getByPath(map, "threshold"), nullValue());
 	}
 
+	@Test
+	void shouldResolveMapKeysInsteadOfInternalFields() {
+		Map<String, Entry> map = new HashMap<>();
+		Entry entry = new Entry("map size");
+		map.put("size", entry);
+
+		assertField(FinderPathStrategy.getConverterFieldByPathInHierarchy(map, "size.name"), entry, "map size");
+		assertThat(FinderPathStrategy.getConverterFieldByPathInHierarchy(map, "size"),
+				sameInstance(ExtendedField.EMPTY));
+		assertThat(Fields.Safe.getByPath(map, "size.name"), equalTo("map size"));
+		assertThat(Fields.Safe.getByPath(map, "threshold"), nullValue());
+	}
+
 	private static void assertField(final ExtendedField field, final Entry owner, final String value) {
 		assertThat(field.getObject(), sameInstance(owner));
 		assertThat(field.getName(), equalTo("name"));
