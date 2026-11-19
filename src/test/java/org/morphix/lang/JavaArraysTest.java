@@ -67,7 +67,7 @@ class JavaArraysTest {
 	void shouldConvertNullInputToEmptyArray() {
 		Object[] result = JavaArrays.toArray(null);
 
-		assertThat(result, equalTo(new Object[] { }));
+		assertThat(result, sameInstance(JavaArrays.EMPTY));
 	}
 
 	@Test
@@ -104,6 +104,34 @@ class JavaArraysTest {
 		Object[] result = JavaArrays.toArray(inputArray);
 
 		assertThat(result, equalTo(new Object[] { "a", 1, true }));
+		assertThat(result, not(sameInstance(inputArray)));
+	}
+
+	@Test
+	void shouldReturnSharedEmptyForEmptyObjectArrayInput() {
+		assertThat(JavaArrays.toArray(new Object[0]), sameInstance(JavaArrays.EMPTY));
+	}
+
+	@Test
+	void shouldReturnSharedEmptyForEmptyPrimitiveArrayInput() {
+		assertThat(JavaArrays.toArray(new int[0]), sameInstance(JavaArrays.EMPTY));
+	}
+
+	@Test
+	void shouldReturnSharedEmptyForEmptyIterableInput() {
+		assertThat(JavaArrays.toArray(List.of()), sameInstance(JavaArrays.EMPTY));
+	}
+
+	@Test
+	void shouldCloneEmptyReferenceArrayWithComponentTypeOtherThanObject() {
+		String[] input = new String[0];
+
+		Object[] result = JavaArrays.toArray(input);
+
+		assertThat(result.length, equalTo(0));
+		assertThat(result.getClass().getComponentType(), equalTo(String.class));
+		assertThat(result, not(sameInstance(input)));
+		assertThat(result, not(sameInstance(JavaArrays.EMPTY)));
 	}
 
 	@Test
@@ -170,6 +198,11 @@ class JavaArraysTest {
 	}
 
 	@Test
+	void shouldReturnSharedEmptyForObjectComponentType() {
+		assertThat(JavaArrays.empty(Object.class), sameInstance(JavaArrays.EMPTY));
+	}
+
+	@Test
 	void shouldReturnEmptyArrayForCustomComponentType() {
 		JavaArraysTest[] result = JavaArrays.empty(JavaArraysTest.class);
 
@@ -189,5 +222,12 @@ class JavaArraysTest {
 	@Test
 	void shouldThrowWhenComponentTypeIsNull() {
 		assertThrows(NullPointerException.class, () -> JavaArrays.empty(null));
+	}
+
+	@Test
+	void shouldThrowWhenComponentTypeIsPrimitive() {
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> JavaArrays.empty(int.class));
+
+		assertThat(e.getMessage(), equalTo("Component type cannot be a primitive: int"));
 	}
 }

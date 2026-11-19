@@ -1,5 +1,51 @@
 ## Release Notes
 
+`1.1.1`
+
+- Kept `Fields.IgnoreAccess.get(Object, String)` throwing `ReflectionException` for null input while using unchecked lookup for valid input.
+- Changed `Fields.Unchecked.getOneDeclaredInHierarchy(Class, String)` to throw `NullPointerException` for a null class.
+- Changed `Methods.Unchecked.getOneDeclaredInHierarchy(String, Class, Class...)` to throw `NullPointerException` for a null class.
+- Fixed `Fields.Safe.getByPath(Object, String)` returning a field value for paths ending in a dot.
+- Added `Fields.Unchecked.getOneDeclared(Class, String)` for direct field lookup without parameter validation.
+- Added `Fields.Unchecked.getOneDeclaredInHierarchy(Class, String)` for direct field lookup throughout a class hierarchy.
+- Added `Fields.Unchecked.getAllDeclared(Class)` for direct retrieval of a class's declared fields.
+- Added `Fields.Unchecked.getAllDeclared(Class, Predicate)` for direct retrieval and filtering of declared fields.
+- Added `Fields.Unchecked.filter(List, Predicate)` for direct filtering of a field list without parameter validation.
+- Added `Fields.Unchecked.getAllDeclaredInHierarchy(Class)` for direct hierarchy field retrieval without parameter validation.
+- Added `Fields.Unchecked.getAllDeclaredInHierarchy(Class, Predicate)` for direct filtered hierarchy field retrieval without parameter validation.
+- Added `Fields.Unchecked.forEachMatching(Field[], Predicate, Consumer)` to pass matching declared fields to a consumer without allocating a result list.
+- Added `Fields.Safe.getAllDeclared(Class)` for null-safe retrieval of a class's declared fields.
+- Added `Fields.Safe.getAllDeclared(Object)` for null-safe retrieval of declared fields from an object's class.
+- Added `Fields.Safe.getAllDeclared(Class, Predicate)` for null-safe retrieval and filtering of declared fields.
+- Added `Fields.Safe.getAllDeclared(Object, Predicate)` for null-safe retrieval and filtering of declared fields from an object's class.
+- Added `Fields.Safe.filter(List, Predicate)` for null-safe filtering of a field list.
+- Added `Fields.Safe.getAllDeclaredInHierarchy(Class)` for null-safe hierarchy field retrieval.
+- Added `Fields.Safe.getAllDeclaredInHierarchy(Class, Predicate)` for null-safe filtered hierarchy field retrieval.
+- Added `Fields.Safe.getAllDeclaredInHierarchy(Object)` for null-safe hierarchy field retrieval from an object's class.
+- Added `Fields.Safe.getAllDeclaredInHierarchy(Object, Predicate)` for null-safe filtered hierarchy field retrieval from an object's class.
+- Added `Methods.Unchecked.getOneDeclared(String, Class, Class...)` for direct method lookup without parameter validation.
+- Added `Methods.Unchecked.getOneDeclaredInHierarchy(String, Class, Class...)` for direct method lookup throughout a class hierarchy.
+- Added `Methods.Unchecked.getAllDeclared(Class)` for direct retrieval of a class's declared methods.
+- Added `Methods.Unchecked.getAllDeclared(Class, Predicate)` for direct retrieval and filtering of declared methods.
+- Added `Methods.Unchecked.getAllDeclaredInHierarchy(Class)` for direct superclass-chain method retrieval without parameter validation.
+- Added `Methods.Unchecked.getAllDeclaredInHierarchy(Class, Predicate)` for direct filtered superclass-chain method retrieval without parameter validation.
+- Added `Methods.Unchecked.forEachMatching(Method[], Predicate, Consumer)` to pass matching declared methods to a consumer without allocating a result list.
+- Added `Methods.Safe.getAllDeclared(Class)` for null-safe retrieval of a class's declared methods.
+- Added `Methods.Safe.getAllDeclared(Class, Predicate)` for null-safe retrieval and filtering of declared methods.
+- Added `Methods.Safe.getAllDeclaredInHierarchy(Class)` for null-safe superclass-chain method retrieval.
+- Added `Methods.Safe.getAllDeclaredInHierarchy(Class, Predicate)` for null-safe filtered superclass-chain method retrieval.
+- Changed `Methods.getAllDeclared(Class, Predicate)` to return matching methods in declaration order.
+- Added `Classes.isArray(Class)` to check whether a class represents an array type.
+- Added `Classes.isNotArray(Class)` to check whether a class does not represent an array type.
+- Added `JavaArrays.EMPTY` as the shared empty `Object[]` instance.
+- Changed `JavaArrays.toArray` to return `JavaArrays.EMPTY` for empty `Object[]` results and to copy reference arrays with a non-`Object` component type.
+- Changed `JavaArrays.empty(Class)` to return `JavaArrays.EMPTY` for `Object.class` and to reject a primitive component type.
+- Changed `AlwaysEmptyList.toArray()` to return `JavaArrays.EMPTY`.
+- Changed `AlwaysEmptyList` to implement `equals` and `hashCode` consistent with other empty lists.
+- Added `FastArrayList` as a resizable array-backed list optimized for bulk operations on arrays.
+
+---
+
 `1.1.0`
 
 - Added `Reflection.requireNotNull(Object)` to throw `ReflectionException` when the reference is `null`.

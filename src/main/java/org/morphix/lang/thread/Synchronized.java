@@ -44,10 +44,7 @@ public interface Synchronized {
 	 * @param runnable code to execute
 	 */
 	static void with(final Lock lock, final Runnable runnable) {
-		with(lock, () -> {
-			runnable.run();
-			return null;
-		});
+		with(lock, Nullables.supplyNull(runnable));
 	}
 
 	/**

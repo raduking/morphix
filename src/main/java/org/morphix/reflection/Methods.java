@@ -23,11 +23,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.morphix.lang.JavaObjects;
+import org.morphix.lang.collections.FastArrayList;
 import org.morphix.reflection.predicates.MemberPredicates;
 
 /**
@@ -46,6 +48,8 @@ public interface Methods {
 
 	/**
 	 * Returns a list with all the methods declared in the class given as parameter.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -53,14 +57,13 @@ public interface Methods {
 	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclared(final Class<T> cls) {
-		if (null == cls) {
-			return List.of();
-		}
-		return List.of(cls.getDeclaredMethods());
+		return Safe.getAllDeclared(cls);
 	}
 
 	/**
 	 * Returns a list with all the methods declared in the class given as parameter that verify the given method predicate.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -69,20 +72,7 @@ public interface Methods {
 	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclared(final Class<T> cls, final Predicate<? super Method> predicate) {
-		if (null == cls || null == predicate) {
-			return List.of();
-		}
-		Method[] declared = cls.getDeclaredMethods();
-		if (declared.length == 0) {
-			return List.of();
-		}
-		List<Method> methods = new LinkedList<>();
-		for (int i = declared.length - 1; i >= 0; --i) {
-			if (predicate.test(declared[i])) {
-				methods.addFirst(declared[i]);
-			}
-		}
-		return methods;
+		return Safe.getAllDeclared(cls, predicate);
 	}
 
 	/**
@@ -129,15 +119,10 @@ public interface Methods {
 	 * not the ones declared by its super interfaces, since those are interfaces as well. Use
 	 * {@link Complete#getAllDeclaredInHierarchy(Class)} for the full interface hierarchy.
 	 * <p>
-	 * {@link LinkedList} is used because:
-	 * <ul>
-	 * <li>it is more efficient in terms of memory consumption</li>
-	 * <li>accessing the first and last has O(1) complexity</li>
-	 * <li>more often than not, no random access is needed</li>
-	 * <li>profiling: ~2 times faster than using {@link java.util.ArrayList}</li>
-	 * </ul>
-	 * The returned order of the methods are: class -> super class -> ... -> base class, and all methods in each class are
-	 * returned in the declared order.
+	 * Methods are returned in hierarchy order, starting with the given class. Within each class, methods are returned in
+	 * the order provided by {@link Class#getDeclaredMethods()}.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -145,23 +130,15 @@ public interface Methods {
 	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
-		if (null == cls) {
-			return List.of();
-		}
-		// an interface has no super class, but it does declare methods of its own
-		Class<?> superClass = cls.getSuperclass();
-		List<Method> methods = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass);
-		Method[] declared = cls.getDeclaredMethods();
-		for (int i = declared.length - 1; i >= 0; --i) {
-			methods.addFirst(declared[i]);
-		}
-		return methods;
+		return Safe.getAllDeclaredInHierarchy(cls);
 	}
 
 	/**
 	 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes,
 	 * including {@link Object}, that verify the given method predicate. This method does not return methods from super
 	 * interfaces.
+	 * <p>
+	 * The returned list must not be modified by the caller.
 	 *
 	 * @param <T> type to get the methods from
 	 *
@@ -170,19 +147,7 @@ public interface Methods {
 	 * @return list of methods
 	 */
 	static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
-		if (null == cls || null == predicate) {
-			return List.of();
-		}
-		// an interface has no super class, but it does declare methods of its own
-		Class<?> superClass = cls.getSuperclass();
-		List<Method> methods = null == superClass ? new LinkedList<>() : getAllDeclaredInHierarchy(superClass, predicate);
-		Method[] declared = cls.getDeclaredMethods();
-		for (int i = declared.length - 1; i >= 0; --i) {
-			if (predicate.test(declared[i])) {
-				methods.addFirst(declared[i]);
-			}
-		}
-		return methods;
+		return Safe.getAllDeclaredInHierarchy(cls, predicate);
 	}
 
 	/**
@@ -563,6 +528,41 @@ public interface Methods {
 	interface Safe {
 
 		/**
+		 * Returns a list with all the methods declared in the class given as parameter.
+		 * <p>
+		 * The returned list must not be modified by the caller.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclared(final Class<T> cls) {
+			if (null == cls) {
+				return List.of();
+			}
+			return Unchecked.getAllDeclared(cls);
+		}
+
+		/**
+		 * Returns a list with all the methods declared in the class given as parameter that verify the given method predicate.
+		 * <p>
+		 * The returned list must not be modified by the caller.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @param predicate filter predicate for methods
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclared(final Class<T> cls, final Predicate<? super Method> predicate) {
+			if (null == cls || null == predicate) {
+				return List.of();
+			}
+			return Unchecked.getAllDeclared(cls, predicate);
+		}
+
+		/**
 		 * Returns the method with the given name and given parameter types from the given class. If the method is not present
 		 * in the class it returns {@code null}.
 		 *
@@ -577,11 +577,7 @@ public interface Methods {
 			if (null == cls || null == methodName) {
 				return null;
 			}
-			try {
-				return cls.getDeclaredMethod(methodName, parameterTypes);
-			} catch (NoSuchMethodException e) {
-				return null;
-			}
+			return Unchecked.getOneDeclared(methodName, cls, parameterTypes);
 		}
 
 		/**
@@ -616,14 +612,53 @@ public interface Methods {
 			if (null == cls || null == methodName) {
 				return null;
 			}
-			try {
-				return cls.getDeclaredMethod(methodName, parameterTypes);
-			} catch (NoSuchMethodException e) {
-				if (null == cls.getSuperclass()) {
-					return null;
-				}
-				return Safe.getOneDeclaredInHierarchy(methodName, cls.getSuperclass(), parameterTypes);
+			return Unchecked.getOneDeclaredInHierarchy(methodName, cls, parameterTypes);
+		}
+
+		/**
+		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes,
+		 * including {@link Object}. This method does not return methods from super interfaces. This is a simpler version of
+		 * {@link Complete#getAllDeclaredInHierarchy(Class)}, which also walks interfaces and can exclude specific classes.
+		 * <p>
+		 * Note: if the class given as parameter is an interface then the methods declared by that interface are returned, but
+		 * not the ones declared by its super interfaces, since those are interfaces as well. Use
+		 * {@link Complete#getAllDeclaredInHierarchy(Class)} for the full interface hierarchy.
+		 * <p>
+		 * Methods are returned in hierarchy order, starting with the given class. Within each class, methods are returned in
+		 * the order provided by {@link Class#getDeclaredMethods()}.
+		 * <p>
+		 * The returned list must not be modified by the caller.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
+			if (null == cls) {
+				return List.of();
 			}
+			return Unchecked.getAllDeclaredInHierarchy(cls);
+		}
+
+		/**
+		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes,
+		 * including {@link Object}, that verify the given method predicate. This method does not return methods from super
+		 * interfaces.
+		 * <p>
+		 * The returned list must not be modified by the caller.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @param predicate filter predicate for methods
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
+			if (null == cls || null == predicate) {
+				return List.of();
+			}
+			return Unchecked.getAllDeclaredInHierarchy(cls, predicate);
 		}
 
 		/**
@@ -667,6 +702,8 @@ public interface Methods {
 		 * Returns a list with all the methods in the class given as parameter including the ones in all its super classes and
 		 * interfaces. Pass classes in the excluded set of {@link #getAllDeclaredInHierarchy(Class, Set)} to leave a specific
 		 * class out of the walk.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -686,6 +723,8 @@ public interface Methods {
 		 * <p>
 		 * Note: a {@code null} class short-circuits the walk and returns an empty list, so in that case the excluded set is
 		 * never validated and no exception is thrown for it.
+		 * <p>
+		 * The returned list must not be modified by the caller.
 		 *
 		 * @param <T> type to get the methods from
 		 *
@@ -729,6 +768,176 @@ public interface Methods {
 	 * @author Radu Sebastian LAZIN
 	 */
 	interface Unchecked {
+
+		/**
+		 * Returns a list with all the methods declared in the class given as parameter. This is different from
+		 * {@link Class#getDeclaredMethods()} as it returns a {@link List} instead of an array.
+		 * <p>
+		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
+		 * {@link Methods#getAllDeclared(Class)} if you want to get an empty list when the class is {@code null}.
+		 * <p>
+		 * This method wraps the array returned by {@link Class#getDeclaredMethods()} in a {@link FastArrayList} without copying
+		 * the array again.
+		 * <p>
+		 * The returned list must not be modified by the caller.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclared(final Class<T> cls) {
+			return FastArrayList.wrap(cls.getDeclaredMethods());
+		}
+
+		/**
+		 * Returns a list with all the methods declared in the class given as parameter that verify the given method predicate.
+		 * <p>
+		 * The returned list must not be modified by the caller.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @param predicate filter predicate for methods
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclared(final Class<T> cls, final Predicate<? super Method> predicate) {
+			Method[] methods = cls.getDeclaredMethods();
+			List<Method> result = new FastArrayList<>(methods.length);
+			Unchecked.forEachMatching(methods, predicate, result::add);
+			return result;
+		}
+
+		/**
+		 * Returns the method with the given name and given parameter types from the given class. If the method is not present
+		 * in the class it returns {@code null}.
+		 *
+		 * @param <T> type to get the method from
+		 *
+		 * @param methodName the name of the method
+		 * @param cls class containing the method
+		 * @param parameterTypes parameter types
+		 * @return the method with the given name
+		 */
+		static <T> Method getOneDeclared(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
+			try {
+				return cls.getDeclaredMethod(methodName, parameterTypes);
+			} catch (NoSuchMethodException e) {
+				return null;
+			}
+		}
+
+		/**
+		 * Returns a method in the class given as parameter, also searching in all its super classes, and returns {@code null}
+		 * if method is not found.
+		 * <p>
+		 * This method does not validate input parameters; the caller is responsible for them. It throws
+		 * {@link NullPointerException} if the class or method name is {@code null}.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param methodName name of the method to find
+		 * @param cls class from where to start the search
+		 * @param parameterTypes types of the method parameters
+		 * @return found method, {@code null} otherwise
+		 */
+		static <T> Method getOneDeclaredInHierarchy(final String methodName, final Class<T> cls, final Class<?>... parameterTypes) {
+			Class<?> type = cls;
+			do {
+				Method method = Unchecked.getOneDeclared(methodName, type, parameterTypes);
+				if (null != method) {
+					return method;
+				}
+				type = type.getSuperclass();
+			} while (null != type);
+			return null;
+		}
+
+		/**
+		 * Returns all methods declared by the given class and its super classes.
+		 * <p>
+		 * Methods are returned in hierarchy order, starting from the given class. Within each class, methods are returned in
+		 * the order provided by {@link Class#getDeclaredMethods()}. Super interfaces are not walked; only the class superclass
+		 * chain is included.
+		 * <p>
+		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
+		 * {@link Methods#getAllDeclaredInHierarchy(Class)} if you want an empty list when the class is {@code null}.
+		 * <p>
+		 * The returned list must not be modified by the caller.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
+			if (null == cls.getSuperclass()) {
+				return Unchecked.getAllDeclared(cls);
+			}
+			List<Method[]> arrays = new FastArrayList<>(FastArrayList.Default.CAPACITY);
+			int total = 0;
+			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
+				Method[] array = type.getDeclaredMethods();
+				total += array.length;
+				arrays.add(array);
+			}
+			FastArrayList<Method> methods = new FastArrayList<>(total);
+			for (Method[] array : arrays) {
+				methods.addAll(array);
+			}
+			return methods;
+		}
+
+		/**
+		 * Returns all methods declared by the given class and its super classes that match the given predicate.
+		 * <p>
+		 * Methods are returned in hierarchy order, starting from the given class. Within each class, methods are returned in
+		 * the order provided by {@link Class#getDeclaredMethods()}. Super interfaces are not walked; only the class superclass
+		 * chain is included.
+		 * <p>
+		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
+		 * handle exceptions.
+		 * <p>
+		 * The returned list must not be modified by the caller.
+		 *
+		 * @param <T> type to get the methods from
+		 *
+		 * @param cls class on which the methods are returned
+		 * @param predicate filter predicate for methods
+		 * @return list of methods
+		 */
+		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Predicate<? super Method> predicate) {
+			if (null == cls.getSuperclass()) {
+				return Unchecked.getAllDeclared(cls, predicate);
+			}
+			List<Method> methods = new FastArrayList<>();
+			Consumer<Method> action = methods::add;
+			for (Class<?> type = cls; null != type; type = type.getSuperclass()) {
+				Unchecked.forEachMatching(type.getDeclaredMethods(), predicate, action);
+			}
+			return methods;
+		}
+
+		/**
+		 * Invokes {@code action} for each declared method that matches {@code predicate}.
+		 * <p>
+		 * The caller collects matches by supplying a consumer, for example {@code methods::add} on a single {@link List} while
+		 * walking a class hierarchy.
+		 * <p>
+		 * No {@code null} checks are performed on the parameters. The caller is responsible to provide valid input and to
+		 * handle exceptions.
+		 *
+		 * @param methods the methods to test
+		 * @param predicate predicate to filter with
+		 * @param action receives each method that matches the predicate
+		 */
+		static void forEachMatching(final Method[] methods, final Predicate<? super Method> predicate, final Consumer<Method> action) {
+			for (Method method : methods) {
+				if (predicate.test(method)) {
+					action.accept(method);
+				}
+			}
+		}
 
 		/**
 		 * Invokes the given method on the given object with parameters, ignoring the access modifiers.

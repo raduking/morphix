@@ -24,7 +24,7 @@ import java.util.Set;
  * <li>unsupported source types cause {@link IllegalArgumentException}</li>
  * <li>loss of information causes {@link ArithmeticException}</li>
  * </ul>
- * Only the standard primitive wrappers are supported as numeric sources.
+ * Only the standard primitive wrappers are supported as numeric sources. (NaN - Not a Number).
  *
  * @author Radu Sebastian LAZIN
  */
@@ -67,7 +67,7 @@ public class PrimitiveValues {
 
 	/**
 	 * Returns whether the value can be converted exactly to the target type. Primitive wrapper targets support the same
-	 * conversions as their primitives. Null is accepted only for references. {@code void} is not a target type.
+	 * conversions as their primitives. is accepted only for references. {@code void} is not a target type.
 	 *
 	 * @param target target type
 	 * @param value source value
@@ -293,7 +293,9 @@ public class PrimitiveValues {
 		}
 		if (value instanceof Float || value instanceof Double) {
 			double number = ((Number) value).doubleValue();
-			if (!Double.isFinite(number) || number < -0x1.0p63 || number >= 0x1.0p63
+			if (!Double.isFinite(number)
+					|| number < -0x1.0p63
+					|| number >= 0x1.0p63
 					|| Double.doubleToRawLongBits(number) == Long.MIN_VALUE) {
 				throw inexact(target, value);
 			}

@@ -48,7 +48,6 @@ public class FieldsGetDeclaredFieldsWithPredicate {
 		public Long l;
 		public char c;
 		public Boolean b;
-
 	}
 
 	@Benchmark

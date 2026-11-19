@@ -251,7 +251,27 @@ public interface Classes {
 	 * @return true if the class is present in the classpath, false otherwise
 	 */
 	static boolean isPresent(final String className) {
-		return null != Classes.Safe.getOne(className);
+		return null != Safe.getOne(className);
+	}
+
+	/**
+	 * Checks whether the given class represents an array type.
+	 *
+	 * @param cls the class to check
+	 * @return true if the class represents an array type, false otherwise
+	 */
+	static boolean isArray(final Class<?> cls) {
+		return null != cls && cls.isArray();
+	}
+
+	/**
+	 * Checks whether the given class does not represent an array type.
+	 *
+	 * @param cls the class to check
+	 * @return true if the class does not represent an array type, false otherwise
+	 */
+	static boolean isNotArray(final Class<?> cls) {
+		return !isArray(cls);
 	}
 
 	/**

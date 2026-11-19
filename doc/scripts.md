@@ -65,7 +65,7 @@ From project root:
 ./scripts/jacoco-class-coverage.py org.example.MyClass
 ```
 
-From `scripts/` folder:
+From `scripts` folder:
 
 ```bash
 cd scripts
