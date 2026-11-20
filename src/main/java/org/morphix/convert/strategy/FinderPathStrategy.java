@@ -15,7 +15,7 @@ package org.morphix.convert.strategy;
 import java.util.List;
 
 import org.morphix.reflection.ExtendedField;
-import org.morphix.reflection.FieldPaths;
+import org.morphix.reflection.FieldPathParser;
 
 /**
  * Finds the field in the source by path.
@@ -49,6 +49,6 @@ public class FinderPathStrategy implements FieldFinderStrategy {
 	 * @return field object pair
 	 */
 	public static <T> ExtendedField getConverterFieldByPathInHierarchy(final T obj, final String path) {
-		return FieldPaths.resolveFirstField(obj, path);
+		return FieldPathParser.resolveFirstField(obj, path);
 	}
 }

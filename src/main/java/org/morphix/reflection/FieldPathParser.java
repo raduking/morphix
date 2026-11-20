@@ -26,7 +26,7 @@ import org.morphix.lang.JavaObjects;
  *
  * @author Radu Sebastian LAZIN
  */
-final class FieldPathParser {
+public final class FieldPathParser {
 
 	/**
 	 * Controls how many paths the expression may contain.
@@ -129,7 +129,7 @@ final class FieldPathParser {
 	 * @param path path to resolve
 	 * @return value, or null if the path cannot be resolved
 	 */
-	static <U> U resolveValue(final Object root, final String path) {
+	public static <U> U resolveValue(final Object root, final String path) {
 		return JavaObjects.cast(FieldPathParser.resolve(root, path, Syntax.SINGLE_PATH, Target.VALUE));
 	}
 
@@ -141,7 +141,7 @@ final class FieldPathParser {
 	 * @param paths alternative paths
 	 * @return first non-null value, or null if no path resolves
 	 */
-	static <U> U resolveFirstValue(final Object root, final String paths) {
+	public static <U> U resolveFirstValue(final Object root, final String paths) {
 		return JavaObjects.cast(FieldPathParser.resolve(root, paths, Syntax.ALTERNATIVE_PATHS, Target.VALUE));
 	}
 
@@ -153,7 +153,7 @@ final class FieldPathParser {
 	 * @param paths alternative paths
 	 * @return field and its owner, or {@link ExtendedField#EMPTY} if no path resolves to a field
 	 */
-	static ExtendedField resolveFirstField(final Object root, final String paths) {
+	public static ExtendedField resolveFirstField(final Object root, final String paths) {
 		ExtendedField field = JavaObjects.cast(FieldPathParser.resolve(root, paths, Syntax.ALTERNATIVE_PATHS, Target.FIELD));
 		return null == field ? ExtendedField.EMPTY : field;
 	}
