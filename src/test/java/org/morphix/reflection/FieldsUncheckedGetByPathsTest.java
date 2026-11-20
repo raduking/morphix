@@ -24,14 +24,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * Test class for {@link Fields.Unchecked#getByPaths(Object, String)} and
- * {@link Fields.Unchecked#getByPaths(Object, String...)}.
+ * Test class for
+ * <ul>
+ * <li>{@link Fields.Unchecked#getByPaths(Object, String)}</li>
+ * <li>{@link Fields.Unchecked#getByPaths(Object, String...)}</li>
+ * </ul>
  *
  * @author Radu Sebastian LAZIN
  */
 class FieldsUncheckedGetByPathsTest {
+
+	private final FieldsUncheckedGetByPathTest.WithContainers root = new FieldsUncheckedGetByPathTest.WithContainers();
 
 	@Test
 	void shouldResolveFirstPathFromCommaSeparatedAlternatives() {
@@ -71,5 +77,40 @@ class FieldsUncheckedGetByPathsTest {
 	@Test
 	void shouldThrowForNullVarargsArray() {
 		assertThrows(NullPointerException.class, () -> Fields.Unchecked.getByPaths(Map.of("name", "Alice"), (String[]) null));
+	}
+
+	@ParameterizedTest
+	@MethodSource("alternativePaths")
+	void shouldResolveFirstMatchingAlternative(final String paths, final String expected) {
+		var result = Fields.Unchecked.getByPaths(root, paths);
+
+		assertThat(result, equalTo(expected));
+	}
+
+	private static Stream<Arguments> alternativePaths() {
+		return Stream.of(
+				Arguments.of(" , missing.name, items[9].name, data['a,b'], entries[0].name, ", "commaKey"),
+				Arguments.of("data['missing,key'], items[0].name", "fromList"),
+				Arguments.of(".bad,entries[],entries[0]] ,items[0].name", "fromList"),
+				Arguments.of("entries[2147483648],items[0].name", "fromList"),
+				Arguments.of("items[0].name,entries[", "fromList"),
+				Arguments.of("data['missing\\\\'],items[0].name", "fromList"),
+				Arguments.of("data['a\\\\'],items[0].name", "backslash"),
+				Arguments.of("data[a,b],items[0].name", "commaKey"),
+				Arguments.of("  entries[0].name  ", "fromArray"),
+				Arguments.of("  data['key']  ", "fromMap"),
+				Arguments.of("entries[0]. name,items[0].name", "fromList"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(
+		strings = {
+				", ,",
+				"data['unterminated,items[0].name"
+		})
+	void shouldReturnNullWhenNoAlternativeMatches(final String paths) {
+		var result = Fields.Unchecked.getByPaths(root, paths);
+
+		assertThat(result, nullValue());
 	}
 }

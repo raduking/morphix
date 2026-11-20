@@ -20,8 +20,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.morphix.reflection.ExtendedField;
 import org.morphix.reflection.Fields;
 
@@ -79,6 +83,16 @@ class FinderPathStrategyTest {
 	}
 
 	@Test
+	void shouldFindFirstMatchingFieldAmongSkippingInvalidAlternatives() {
+		Source source = new Source();
+
+		ExtendedField field = FinderPathStrategy.getConverterFieldByPathInHierarchy(source,
+				" , missing.name, items[9].name, entries[0].name ");
+
+		assertField(field, source.entries[0], "array");
+	}
+
+	@Test
 	void shouldFindNullValuedFieldWithoutTryingFollowingAlternative() {
 		Source source = new Source();
 		String paths = "entries[1].name,items[0].name";
@@ -87,14 +101,63 @@ class FinderPathStrategyTest {
 
 		assertField(field, source.entries[1], null);
 		assertThat(Fields.Safe.getByPaths(source, paths), equalTo("list"));
+
+		FinderPathStrategy strategy = new FinderPathStrategy();
+		assertField(strategy.find(source, List.of(), "entries[1].name , items[0].name"), source.entries[1], null);
+	}
+
+	@ParameterizedTest
+	@MethodSource("fieldPathsWithTrailingPadding")
+	void shouldFindFieldWhenAlternativeAllowsTrailingPadding(final String paths) {
+		Source source = new Source();
+		FinderPathStrategy strategy = new FinderPathStrategy();
+
+		assertField(strategy.find(source, List.of(), paths), source.entries[0], "array");
+	}
+
+	private static Stream<String> fieldPathsWithTrailingPadding() {
+		return Stream.of(
+				"entries[0].name ",
+				"entries[0].name  ",
+				"entries[0].name\t",
+				"entries[0].name , items[0].name",
+				"  entries[0].name  ");
+	}
+
+	@ParameterizedTest
+	@ValueSource(
+		strings = {
+				"",
+				", ,",
+				"missing.name,items[9].name",
+				"items[0]",
+				"keyed['key']",
+				"keyed['key'] ",
+				"entries[0].staticName"
+		})
+	void shouldReturnEmptyWhenNoAlternativeMatches(final String paths) {
+		Source source = new Source();
+
+		ExtendedField field = FinderPathStrategy.getConverterFieldByPathInHierarchy(source, paths);
+
+		assertThat(field, sameInstance(ExtendedField.EMPTY));
+	}
+
+	@Test
+	void shouldReturnEmptyForNullPaths() {
+		Source source = new Source();
+
+		ExtendedField field = FinderPathStrategy.getConverterFieldByPathInHierarchy(source, null);
+
+		assertThat(field, sameInstance(ExtendedField.EMPTY));
 	}
 
 	@Test
 	void shouldRejectStaticFieldsAndContainerElementsAsTerminalFields() {
 		Source source = new Source();
 
-		for (String path : List.of("entries[0].staticName", "entries[0]", "keyed['a,b']", "keyed.key",
-				"missing.name", "entries[0].", "entries[0].name[0]")) {
+		for (String path : List.of("entries[0].staticName", "entries[0]", "keyed['a,b']", "keyed['a,b'] ",
+				"keyed.key", "missing.name", "entries[0].", "entries[0].name[0]")) {
 			assertThat(path, FinderPathStrategy.getConverterFieldByPathInHierarchy(source, path),
 					sameInstance(ExtendedField.EMPTY));
 		}
