@@ -2,7 +2,7 @@
 
 `1.1.2`
 
-- Added `FieldPaths` for JSON Path-style field path parsing and resolution (properties, indices, and map keys).
+- Added `FieldPathParser` for JSON Path-style field path parsing and resolution (properties, indices, and map keys).
 - Changed `Fields.Safe.getByPath` to resolve JSON Path-style expressions including array, list, and map selectors.
 - Changed `Fields.Safe.getByPaths(Object, String)` to split alternate paths on commas outside bracket segments.
 - Added `Fields.Unchecked.getByPath(Object, String)` for path lookup without argument validation.

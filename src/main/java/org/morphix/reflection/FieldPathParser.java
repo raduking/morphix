@@ -257,7 +257,10 @@ public final class FieldPathParser {
 		}
 		String name = paths.substring(start, end);
 		if (!findField) {
-			return FieldPaths.readProperty(obj, name);
+			if (obj instanceof Map<?, ?> map) {
+				return map.get(name);
+			}
+			return Fields.Safe.get(obj, name);
 		}
 		if (obj instanceof Map<?, ?> map) {
 			return atPathEnd() ? null : map.get(name);
@@ -307,7 +310,7 @@ public final class FieldPathParser {
 			skipBracket();
 			return fail();
 		}
-		return FieldPaths.readMapKey(obj, key);
+		return readMapKey(obj, key);
 	}
 
 	/**
@@ -340,7 +343,21 @@ public final class FieldPathParser {
 				return fail();
 			}
 		}
-		return FieldPaths.readMapKey(obj, paths.substring(start, end));
+		return readMapKey(obj, paths.substring(start, end));
+	}
+
+	/**
+	 * Reads a string key from a map. Any other container yields null.
+	 *
+	 * @param obj container
+	 * @param key map key
+	 * @return map value, or null if {@code obj} is not a map or the key is absent
+	 */
+	private static Object readMapKey(final Object obj, final String key) {
+		if (obj instanceof Map<?, ?> map) {
+			return map.get(key);
+		}
+		return null;
 	}
 
 	/**
