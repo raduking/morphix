@@ -170,7 +170,8 @@ class FieldsSafeGetByPathTest {
 	private static Stream<Arguments> rootPaths() {
 		return Stream.of(
 				Arguments.of(List.of(new Person("Alice")), "[0].name", "Alice"),
-				Arguments.of(Map.of("name", "Alice"), "['name']", "Alice"));
+				Arguments.of(Map.of("name", "Alice"), "['name']", "Alice"),
+				Arguments.of(Map.of("a,b", "Alice"), "a,b", "Alice"));
 	}
 
 	@ParameterizedTest
@@ -191,9 +192,12 @@ class FieldsSafeGetByPathTest {
 				"persons[2147483648]",
 				"persons[0]name",
 				"persons[0].",
+				"persons[[0]]",
 				"attributes['name]",
 				"attributes['name'",
+				"attributes['unfinished\\",
 				"attributes['name']name",
+				"attributes[a'b'c]",
 				"attributes[unknown]",
 				"missing.name",
 				"missing[0]",

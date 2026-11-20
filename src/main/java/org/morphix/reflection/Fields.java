@@ -835,7 +835,7 @@ public interface Fields {
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
 			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
-			return FieldPaths.resolveValues(obj, paths);
+			return Unchecked.getByPaths(obj, paths);
 		}
 
 		/**
@@ -857,10 +857,7 @@ public interface Fields {
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
 			Reflection.requireNotNull(path, "Cannot resolve field path: path is null");
-			if (null == obj) {
-				return null;
-			}
-			return FieldPaths.resolveValue(obj, path);
+			return Unchecked.getByPath(obj, path);
 		}
 	}
 
@@ -870,6 +867,7 @@ public interface Fields {
 	 * @author Radu Sebastian LAZIN
 	 */
 	interface Unsafe {
+
 		/**
 		 * Sets the field value using the {@link TheUnsafe} utility.
 		 * <p>
@@ -909,6 +907,8 @@ public interface Fields {
 	 * This interface also exposes unchecked field lookup and enumeration helpers used by {@link Safe} and
 	 * {@link IgnoreAccess} so validation is not applied twice. Callers must supply valid arguments and handle
 	 * {@link ReflectionException} and other runtime failures; prefer {@link IgnoreAccess} in application code.
+	 * <p>
+	 * Path lookup methods return {@code null} for a null root or path; the varargs form requires a non-null array.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
@@ -1159,6 +1159,55 @@ public interface Fields {
 					throw new ReflectionException(typeMismatch, "Cannot set field value for {}", field.getName());
 				}
 			});
+		}
+
+		/**
+		 * Returns the first non-null value from the given paths without validating the arguments.
+		 *
+		 * @param <T> object type
+		 * @param <U> field value type
+		 *
+		 * @param obj object to search
+		 * @param paths paths to try in order
+		 * @return first non-null value, or null if no path resolves
+		 * @throws NullPointerException if the paths array is null
+		 */
+		static <T, U> U getByPaths(final T obj, final String... paths) {
+			for (String path : paths) {
+				U result = getByPath(obj, path);
+				if (null != result) {
+					return result;
+				}
+			}
+			return null;
+		}
+
+		/**
+		 * Returns the first non-null value from comma-separated paths without validating the arguments.
+		 *
+		 * @param <T> object type
+		 * @param <U> field value type
+		 *
+		 * @param obj object to search
+		 * @param paths comma-separated paths
+		 * @return first non-null value, or null if the root or paths are null or no path resolves
+		 */
+		static <T, U> U getByPaths(final T obj, final String paths) {
+			return FieldPaths.resolveValues(obj, paths);
+		}
+
+		/**
+		 * Returns the value at a single path without validating the arguments.
+		 *
+		 * @param <T> object type
+		 * @param <U> field value type
+		 *
+		 * @param obj object to search
+		 * @param path path to resolve
+		 * @return value, or null if the root or path is null or the path cannot be resolved
+		 */
+		static <T, U> U getByPath(final T obj, final String path) {
+			return FieldPaths.resolveValue(obj, path);
 		}
 	}
 

@@ -65,7 +65,12 @@ class FieldsSafeGetByPathsTest {
 				"attributes['unknown,key'],person.name",
 				"unknown , person.name",
 				".bad,attributes[],person.name",
-				"attributes['missing\\\\'].name,person.name"
+				"attributes['missing\\\\'].name,person.name",
+				"attributes[foo[bar]],person.name",
+				"attributes[foo['a,b']],person.name",
+				"attributes[a'b'c],person.name",
+				"person.name] [skip],person.name",
+				"person.name] [foo[bar]],person.name"
 		})
 	void shouldResolveFirstNonNullPath(final String paths) {
 		var result = Fields.Safe.getByPaths(data, paths);
@@ -94,7 +99,8 @@ class FieldsSafeGetByPathsTest {
 				" , , ",
 				"unknown",
 				"missing.name",
-				"persons[100].name"
+				"persons[100].name",
+				"person.name] trailing"
 		})
 	void shouldReturnNullWhenNoPathResolves(final String paths) {
 		var result = Fields.Safe.getByPaths(data, paths);
