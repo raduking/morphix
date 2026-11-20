@@ -16,7 +16,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Map;
@@ -86,9 +85,10 @@ class FieldsSafeGetByPathTest {
 	}
 
 	@Test
-	void shouldThrowWhenPathIsNull() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPath(new WithNestedField(), null));
-		assertThat(e.getMessage(), equalTo("Cannot resolve field path: path is null"));
+	void shouldReturnNullWhenPathIsNull() {
+		var result = Fields.Safe.getByPath(new WithNestedField(), null);
+
+		assertThat(result, nullValue());
 	}
 
 	private record Person(String name) {

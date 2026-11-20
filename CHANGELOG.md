@@ -8,6 +8,8 @@
 - Added `Fields.Unchecked.getByPath(Object, String)` for path lookup without argument validation.
 - Added `Fields.Unchecked.getByPaths(Object, String)` for comma-separated path lookup without argument validation.
 - Added `Fields.Unchecked.getByPaths(Object, String...)` for ordered path lookup without argument validation.
+- Changed `Fields.IgnoreAccess.getByPaths(Object, String...)` to reject null arrays and skip null path entries.
+- Changed `Fields.Safe.getByPaths(Object, String...)` to return null for null arrays and skip null path entries.
 
 ---
 

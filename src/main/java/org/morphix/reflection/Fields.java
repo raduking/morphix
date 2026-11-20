@@ -451,9 +451,11 @@ public interface Fields {
 		 * @param obj object to search the field in
 		 * @param paths possible paths to the field
 		 * @return field value or null if the field is not found or the field value cannot be returned
+		 * @throws ReflectionException if {@code paths} is null
 		 */
 		static <T, U> U getByPaths(final T obj, final String... paths) {
-			return Safe.getByPaths(obj, paths);
+			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
+			return Unchecked.getByPaths(obj, paths);
 		}
 
 		/**
@@ -468,7 +470,8 @@ public interface Fields {
 		 * @return field value or null if the field is not found or the field value cannot be returned
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
-			return Safe.getByPaths(obj, paths);
+			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
+			return Unchecked.getByPaths(obj, paths);
 		}
 
 		/**
@@ -482,7 +485,8 @@ public interface Fields {
 		 * @return field value or null if the field is not found or the field value cannot be returned
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
-			return Safe.getByPath(obj, path);
+			Reflection.requireNotNull(path, "Cannot resolve field path: path is null");
+			return Unchecked.getByPath(obj, path);
 		}
 	}
 
@@ -806,18 +810,12 @@ public interface Fields {
 		 * @param obj object to search the field in
 		 * @param paths possible paths to the field
 		 * @return field value or null if the field is not found in none of the given paths
-		 * @throws ReflectionException if {@code paths} is null or a path is null
 		 */
 		static <T, U> U getByPaths(final T obj, final String... paths) {
-			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
-			U result = null;
-			for (String path : paths) {
-				result = getByPath(obj, path);
-				if (null != result) {
-					break;
-				}
+			if (null == obj || null == paths) {
+				return null;
 			}
-			return result;
+			return Unchecked.getByPaths(obj, paths);
 		}
 
 		/**
@@ -831,10 +829,11 @@ public interface Fields {
 		 * @param obj object to search the field in
 		 * @param paths comma separated possible paths to the field
 		 * @return field value or null if the field is not found in none of the given paths
-		 * @throws ReflectionException if the paths are null
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
-			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
+			if (null == obj || null == paths) {
+				return null;
+			}
 			return Unchecked.getByPaths(obj, paths);
 		}
 
@@ -853,45 +852,12 @@ public interface Fields {
 		 * @param path path to the value
 		 * @return field or container value, or {@code null} if the path is empty, invalid, not found, or {@code obj} is
 		 * {@code null}
-		 * @throws ReflectionException if {@code path} is null
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
-			Reflection.requireNotNull(path, "Cannot resolve field path: path is null");
-			return Unchecked.getByPath(obj, path);
-		}
-	}
-
-	/**
-	 * Unsafe utility methods.
-	 *
-	 * @author Radu Sebastian LAZIN
-	 */
-	interface Unsafe {
-
-		/**
-		 * Sets the field value using the {@link TheUnsafe} utility.
-		 * <p>
-		 * Primitive fields accept the same widening conversions as {@link Field#set(Object, Object)}. A reference field accepts
-		 * {@code null} or a value that is an instance of the field type. This is the path used for {@code final} fields, so
-		 * those fields accept the same values as non-final fields.
-		 *
-		 * @param obj object on which the represented field's value is to be set
-		 * @param field field on which to set the value
-		 * @param value value to be set on the field
-		 * @throws IllegalArgumentException if {@code value} is not assignable to the field
-		 */
-		static void set(final Object obj, final Field field, final Object value) {
-			boolean isStatic = JavaModifier.STATIC.isPresentOn(field);
-			Object instance = isStatic ? TheUnsafe.staticFieldBase(field) : obj;
-			long offset = isStatic ? TheUnsafe.staticFieldOffset(field) : TheUnsafe.objectFieldOffset(field);
-			Class<?> type = field.getType();
-			if (type.isPrimitive()) {
-				TheUnsafe.putPrimitive(instance, offset, type, value);
-			} else if (null == value || type.isInstance(value)) {
-				TheUnsafe.putObject(instance, offset, value);
-			} else {
-				throw TheUnsafe.incompatibleValue(type, value);
+			if (null == obj || null == path) {
+				return null;
 			}
+			return Unchecked.getByPath(obj, path);
 		}
 	}
 
@@ -1208,6 +1174,40 @@ public interface Fields {
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
 			return FieldPaths.resolveValue(obj, path);
+		}
+	}
+
+	/**
+	 * Unsafe utility methods.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Unsafe {
+
+		/**
+		 * Sets the field value using the {@link TheUnsafe} utility.
+		 * <p>
+		 * Primitive fields accept the same widening conversions as {@link Field#set(Object, Object)}. A reference field accepts
+		 * {@code null} or a value that is an instance of the field type. This is the path used for {@code final} fields, so
+		 * those fields accept the same values as non-final fields.
+		 *
+		 * @param obj object on which the represented field's value is to be set
+		 * @param field field on which to set the value
+		 * @param value value to be set on the field
+		 * @throws IllegalArgumentException if {@code value} is not assignable to the field
+		 */
+		static void set(final Object obj, final Field field, final Object value) {
+			boolean isStatic = JavaModifier.STATIC.isPresentOn(field);
+			Object instance = isStatic ? TheUnsafe.staticFieldBase(field) : obj;
+			long offset = isStatic ? TheUnsafe.staticFieldOffset(field) : TheUnsafe.objectFieldOffset(field);
+			Class<?> type = field.getType();
+			if (type.isPrimitive()) {
+				TheUnsafe.putPrimitive(instance, offset, type, value);
+			} else if (null == value || type.isInstance(value)) {
+				TheUnsafe.putObject(instance, offset, value);
+			} else {
+				throw TheUnsafe.incompatibleValue(type, value);
+			}
 		}
 	}
 

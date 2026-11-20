@@ -15,7 +15,6 @@ package org.morphix.reflection;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Map;
@@ -109,9 +108,10 @@ class FieldsSafeGetByPathsTest {
 	}
 
 	@Test
-	void shouldThrowWhenCommaSeparatedPathsAreNull() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(data, (String) null));
-		assertThat(e.getMessage(), equalTo("Cannot resolve field paths: paths are null"));
+	void shouldReturnNullWhenCommaSeparatedPathsAreNull() {
+		var result = Fields.Safe.getByPaths(data, (String) null);
+
+		assertThat(result, nullValue());
 	}
 
 	@Test
@@ -122,15 +122,24 @@ class FieldsSafeGetByPathsTest {
 	}
 
 	@Test
-	void shouldThrowWhenAPathIsNull() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(data, new String[] { null }));
-		assertThat(e.getMessage(), equalTo("Cannot resolve field path: path is null"));
+	void shouldSkipNullPathInVarargs() {
+		var result = Fields.Safe.getByPaths(data, null, "person.name");
+
+		assertThat(result, equalTo("Alice"));
 	}
 
 	@Test
-	void shouldThrowWhenPathsArrayIsNull() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(data, (String[]) null));
-		assertThat(e.getMessage(), equalTo("Cannot resolve field paths: paths are null"));
+	void shouldReturnNullWhenPathsArrayIsNull() {
+		var result = Fields.Safe.getByPaths(data, (String[]) null);
+
+		assertThat(result, nullValue());
+	}
+
+	@Test
+	void shouldReturnNullWhenOnlyPathIsNull() {
+		var result = Fields.Safe.getByPaths(data, new String[] { null });
+
+		assertThat(result, nullValue());
 	}
 
 	@ParameterizedTest
