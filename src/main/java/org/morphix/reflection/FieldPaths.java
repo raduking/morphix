@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.morphix.lang.JavaObjects;
+import org.morphix.reflection.FieldPathParser.Mode;
 
 /**
  * Resolves field paths using dot notation for properties and bracket notation for array/list indices and map keys.
@@ -36,7 +37,7 @@ public interface FieldPaths {
 	 * @return value or null if the path cannot be resolved
 	 */
 	static <U> U resolveValue(final Object root, final String path) {
-		return JavaObjects.cast(resolve(root, path, false, false));
+		return JavaObjects.cast(FieldPathParser.resolve(root, path, Mode.SINGLE_VALUE));
 	}
 
 	/**
@@ -49,7 +50,7 @@ public interface FieldPaths {
 	 * @return first non-null value or null
 	 */
 	static <U> U resolveValues(final Object root, final String paths) {
-		return JavaObjects.cast(resolve(root, paths, true, false));
+		return JavaObjects.cast(FieldPathParser.resolve(root, paths, Mode.ALTERNATIVE_VALUES));
 	}
 
 	/**
@@ -62,15 +63,8 @@ public interface FieldPaths {
 	 * @return field and its owning object, or {@link ExtendedField#EMPTY}
 	 */
 	static ExtendedField resolveField(final Object root, final String paths) {
-		ExtendedField field = JavaObjects.cast(resolve(root, paths, true, true));
+		ExtendedField field = JavaObjects.cast(FieldPathParser.resolve(root, paths, Mode.ALTERNATIVE_FIELD));
 		return null == field ? ExtendedField.EMPTY : field;
-	}
-
-	private static Object resolve(final Object root, final String paths, final boolean alternatives, final boolean findField) {
-		if (null == root || null == paths || paths.isEmpty()) {
-			return null;
-		}
-		return new FieldPathParser(paths, alternatives, findField).resolve(root);
 	}
 
 	/**
