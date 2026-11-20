@@ -145,4 +145,26 @@ public interface JavaArrays {
 		}
 		return JavaObjects.cast(Array.newInstance(componentType, 0));
 	}
+
+	/**
+	 * Returns the element at the given index, or {@code null} if the array is {@code null} or the index is out of range.
+	 * <p>
+	 * Will not throw a {@link NullPointerException} when the array is {@code null}, or an
+	 * {@link ArrayIndexOutOfBoundsException} when the index is out of range.
+	 *
+	 * @param <T> the component type of the array
+	 *
+	 * @param array the array to read, may be {@code null}
+	 * @param index zero-based element index
+	 * @return the element at {@code index}, or {@code null} when the array is {@code null} or the index is out of range
+	 */
+	static <T> T safeGet(final T[] array, final int index) {
+		if (null == array || index < 0) {
+			return null;
+		}
+		if (index >= array.length) {
+			return null;
+		}
+		return array[index];
+	}
 }

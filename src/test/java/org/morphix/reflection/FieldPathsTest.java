@@ -198,13 +198,6 @@ class FieldPathsTest {
 	}
 
 	@Test
-	void shouldReturnNullForNegativeIndex() {
-		var result = FieldPaths.readIndex(root.items, -1);
-
-		assertThat(result, nullValue());
-	}
-
-	@Test
 	void shouldReturnNullForNullMapKey() {
 		var result = FieldPaths.readMapKey(root.data, null);
 

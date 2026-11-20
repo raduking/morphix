@@ -15,6 +15,7 @@ package org.morphix.lang;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,6 +43,17 @@ class JavaObjectsTest {
 	private static final String CUCU = "Cucu";
 
 	@Nested
+	class ConstructorTests {
+
+		@Test
+		void shouldThrowExceptionWhenTryingToInstantiate() {
+			UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(JavaObjects.class);
+
+			assertThat(e.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
+		}
+	}
+
+	@Nested
 	class CastTests {
 
 		@Test
@@ -51,13 +64,6 @@ class JavaObjectsTest {
 
 			assertThat(bubu, notNullValue());
 			assertThat(bubu, equalTo(BUBU));
-		}
-
-		@Test
-		void shouldThrowExceptionWhenTryingToInstantiate() {
-			UnsupportedOperationException e = Tests.verifyDefaultConstructorThrows(JavaObjects.class);
-
-			assertThat(e.getMessage(), equalTo(Constructors.MESSAGE_THIS_CLASS_SHOULD_NOT_BE_INSTANTIATED));
 		}
 
 		@Test
@@ -334,6 +340,145 @@ class JavaObjectsTest {
 			assertTrue(result);
 			assertTrue(JavaObjects.notEquals(o2, o1));
 			assertFalse(JavaObjects.notEquals(null, null));
+		}
+	}
+
+	@Nested
+	class GetAtTests {
+
+		@Test
+		void shouldReturnNullForNullObject() {
+			Object result = JavaObjects.getAt(null, 0);
+
+			assertThat(result, nullValue());
+		}
+
+		@Test
+		void shouldReturnNullForNegativeIndex() {
+			Object result = JavaObjects.getAt(new String[] { "a" }, -1);
+
+			assertThat(result, nullValue());
+		}
+
+		@Test
+		void shouldReturnNullForNonContainer() {
+			Object result = JavaObjects.getAt("ab", 0);
+
+			assertThat(result, nullValue());
+		}
+
+		@Nested
+		class ListTests {
+
+			@Test
+			void shouldReturnElementAtFirstIndex() {
+				List<String> list = List.of("a", "b", "c");
+
+				String result = JavaObjects.getAt(list, 0);
+
+				assertThat(result, equalTo("a"));
+			}
+
+			@Test
+			void shouldReturnElementAtLastIndex() {
+				List<String> list = List.of("a", "b", "c");
+
+				String result = JavaObjects.getAt(list, list.size() - 1);
+
+				assertThat(result, equalTo("c"));
+			}
+
+			@Test
+			void shouldReturnNullWhenIndexEqualsSize() {
+				List<String> list = List.of("a", "b");
+
+				Object result = JavaObjects.getAt(list, list.size());
+
+				assertThat(result, nullValue());
+			}
+
+			@Test
+			void shouldReturnNullForEmptyList() {
+				Object result = JavaObjects.getAt(List.of(), 0);
+
+				assertThat(result, nullValue());
+			}
+		}
+
+		@Nested
+		class ObjectArrayTests {
+
+			@Test
+			void shouldReturnElementAtFirstIndex() {
+				String[] array = { "a", "b", "c" };
+
+				String result = JavaObjects.getAt(array, 0);
+
+				assertThat(result, equalTo("a"));
+			}
+
+			@Test
+			void shouldReturnElementAtLastIndex() {
+				String[] array = { "a", "b", "c" };
+
+				String result = JavaObjects.getAt(array, array.length - 1);
+
+				assertThat(result, equalTo("c"));
+			}
+
+			@Test
+			void shouldReturnNullWhenIndexEqualsLength() {
+				String[] array = { "a", "b" };
+
+				Object result = JavaObjects.getAt(array, array.length);
+
+				assertThat(result, nullValue());
+			}
+
+			@Test
+			void shouldReturnNullForEmptyArray() {
+				Object result = JavaObjects.getAt(new String[0], 0);
+
+				assertThat(result, nullValue());
+			}
+
+			@Test
+			void shouldReturnNullElementStoredInArray() {
+				String[] array = { null };
+
+				Object result = JavaObjects.getAt(array, 0);
+
+				assertThat(result, nullValue());
+			}
+		}
+
+		@Nested
+		class PrimitiveArrayTests {
+
+			@Test
+			void shouldReturnElementAtFirstIndex() {
+				int[] array = { 10, 20, 30 };
+
+				Integer result = JavaObjects.getAt(array, 0);
+
+				assertThat(result, equalTo(10));
+			}
+
+			@Test
+			void shouldReturnElementAtLastIndex() {
+				int[] array = { 10, 20, 30 };
+
+				Integer result = JavaObjects.getAt(array, array.length - 1);
+
+				assertThat(result, equalTo(30));
+			}
+
+			@Test
+			void shouldReturnNullForEmptyArray() {
+				Object result = JavaObjects.getAt(new int[0], 0);
+
+				assertThat(result, nullValue());
+			}
 		}
 	}
 }

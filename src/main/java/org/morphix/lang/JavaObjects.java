@@ -14,10 +14,13 @@ package org.morphix.lang;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.morphix.lang.collections.Lists;
+import org.morphix.reflection.Classes;
 import org.morphix.reflection.Constructors;
 
 /**
@@ -92,5 +95,34 @@ public final class JavaObjects {
 	 */
 	public static boolean notEquals(final Object o1, final Object o2) {
 		return !Objects.equals(o1, o2);
+	}
+
+	/**
+	 * Returns the element at a zero-based index in an array or {@link List}.
+	 * <p>
+	 * Returns {@code null} when {@code obj} is {@code null}, is neither a list nor an array, or the index is negative or
+	 * out of range. Primitive array elements are boxed.
+	 *
+	 * @param <T> element type
+	 *
+	 * @param obj array or list to read, may be {@code null}
+	 * @param index zero-based element index
+	 * @return the element at {@code index}, or {@code null} when it cannot be read
+	 */
+	public static <T> T getAt(final Object obj, final int index) {
+		if (null == obj || index < 0) {
+			return null;
+		}
+		if (obj instanceof List<?> list) {
+			return cast(Lists.safeGet(list, index));
+		}
+		if (Classes.isNotArray(obj.getClass())) {
+			return null;
+		}
+		int length = Array.getLength(obj);
+		if (length == 0 || index >= length) {
+			return null;
+		}
+		return cast(Array.get(obj, index));
 	}
 }

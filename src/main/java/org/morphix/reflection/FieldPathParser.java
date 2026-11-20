@@ -335,7 +335,7 @@ final class FieldPathParser {
 		if (numeric) {
 			try {
 				int elementIndex = Integer.parseInt(paths, start, end, 10);
-				return FieldPaths.readIndex(obj, elementIndex);
+				return JavaObjects.getAt(obj, elementIndex);
 			} catch (NumberFormatException e) {
 				return fail();
 			}

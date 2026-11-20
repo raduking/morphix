@@ -12,8 +12,6 @@
  */
 package org.morphix.reflection;
 
-import java.lang.reflect.Array;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -75,26 +73,6 @@ public interface FieldPaths {
 			return null;
 		}
 		return obj instanceof Map<?, ?> map ? map.get(name) : Fields.Safe.get(obj, name);
-	}
-
-	/**
-	 * Reads a zero-based array or list index.
-	 *
-	 * @param obj container
-	 * @param index element index
-	 * @return element or null
-	 */
-	static Object readIndex(final Object obj, final int index) {
-		if (null == obj || index < 0) {
-			return null;
-		}
-		if (obj instanceof List<?> list) {
-			return index < list.size() ? list.get(index) : null;
-		}
-		if (obj.getClass().isArray()) {
-			return index < Array.getLength(obj) ? Array.get(obj, index) : null;
-		}
-		return null;
 	}
 
 	/**

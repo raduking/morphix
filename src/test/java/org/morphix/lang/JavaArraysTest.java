@@ -14,6 +14,7 @@ package org.morphix.lang;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -31,203 +33,316 @@ import org.junit.jupiter.api.Test;
  */
 class JavaArraysTest {
 
-	@Test
-	void shouldReturnEmptyArrayWhenNullProvided() {
-		String[] result = JavaArrays.safe(null, String.class);
+	@Nested
+	class SafeTests {
 
-		assertNotNull(result);
-		assertThat(result.length, equalTo(0));
+		@Test
+		void shouldReturnEmptyArrayWhenNullProvided() {
+			String[] result = JavaArrays.safe(null, String.class);
+
+			assertNotNull(result);
+			assertThat(result.length, equalTo(0));
+		}
+
+		@Test
+		void shouldReturnSameArrayWhenNotNullProvided() {
+			String[] input = new String[] { "a", "b", "c" };
+			String[] result = JavaArrays.safe(input, String.class);
+
+			assertThat(result, equalTo(input));
+		}
 	}
 
-	@Test
-	void shouldReturnSameArrayWhenNotNullProvided() {
-		String[] input = new String[] { "a", "b", "c" };
-		String[] result = JavaArrays.safe(input, String.class);
+	@Nested
+	class NullIfEmptyTests {
 
-		assertThat(result, equalTo(input));
+		@Test
+		void shouldReturnNullWhenEmptyArrayProvided() {
+			Integer[] input = new Integer[] { };
+			Integer[] result = JavaArrays.nullIfEmpty(input);
+
+			assertThat(result, equalTo(null));
+		}
+
+		@Test
+		void shouldReturnSameArrayWhenNonEmptyArrayProvided() {
+			Integer[] input = new Integer[] { 1, 2, 3 };
+			Integer[] result = JavaArrays.nullIfEmpty(input);
+
+			assertThat(result, equalTo(input));
+		}
 	}
 
-	@Test
-	void shouldReturnNullWhenEmptyArrayProvided() {
-		Integer[] input = new Integer[] { };
-		Integer[] result = JavaArrays.nullIfEmpty(input);
+	@Nested
+	class ToArrayTests {
 
-		assertThat(result, equalTo(null));
+		@Test
+		void shouldConvertNullInputToEmptyArray() {
+			Object[] result = JavaArrays.toArray(null);
+
+			assertThat(result, sameInstance(JavaArrays.EMPTY));
+		}
+
+		@Test
+		void shouldConvertSingleObjectInputToObjectArray() {
+			Integer singleValue = 42;
+
+			Object[] result = JavaArrays.toArray(singleValue);
+
+			assertThat(result, equalTo(new Object[] { 42 }));
+		}
+
+		@Nested
+		class PrimitiveArrayTests {
+
+			@Test
+			void shouldConvertPrimitiveArrayToObjectArray() {
+				int[] intArray = new int[] { 1, 2, 3 };
+
+				Object[] result = JavaArrays.toArray(intArray);
+
+				assertThat(result, equalTo(new Object[] { 1, 2, 3 }));
+			}
+
+			@Test
+			void shouldReturnSharedEmptyForEmptyPrimitiveArray() {
+				Object[] result = JavaArrays.toArray(new int[0]);
+
+				assertThat(result, sameInstance(JavaArrays.EMPTY));
+			}
+		}
+
+		@Nested
+		class IterableTests {
+
+			@Test
+			void shouldConvertIterableToObjectArray() {
+				List<String> list = Arrays.asList("x", "y", "z");
+
+				Object[] result = JavaArrays.toArray(list);
+
+				assertThat(result, equalTo(new Object[] { "x", "y", "z" }));
+			}
+
+			@Test
+			void shouldReturnSharedEmptyForEmptyIterable() {
+				Object[] result = JavaArrays.toArray(List.of());
+
+				assertThat(result, sameInstance(JavaArrays.EMPTY));
+			}
+		}
+
+		@Nested
+		class ObjectArrayTests {
+
+			@Test
+			void shouldConvertObjectArrayInputToObjectArray() {
+				Object[] inputArray = new Object[] { "a", 1, true };
+
+				Object[] result = JavaArrays.toArray(inputArray);
+
+				assertThat(result, equalTo(new Object[] { "a", 1, true }));
+				assertThat(result, not(sameInstance(inputArray)));
+			}
+
+			@Test
+			void shouldReturnSharedEmptyForEmptyObjectArray() {
+				Object[] result = JavaArrays.toArray(new Object[0]);
+
+				assertThat(result, sameInstance(JavaArrays.EMPTY));
+			}
+		}
+
+		@Nested
+		class ReferenceArrayTests {
+
+			@Test
+			void shouldConvertStringArrayInputToObjectArray() {
+				String[] stringArray = new String[] { "a", "b", "c" };
+
+				Object[] result = JavaArrays.toArray(stringArray);
+
+				assertThat(result, equalTo(new Object[] { "a", "b", "c" }));
+			}
+
+			@Test
+			void shouldCloneEmptyReferenceArrayWithComponentTypeOtherThanObject() {
+				String[] input = new String[0];
+
+				Object[] result = JavaArrays.toArray(input);
+
+				assertThat(result.length, equalTo(0));
+				assertThat(result.getClass().getComponentType(), equalTo(String.class));
+				assertThat(result, not(sameInstance(input)));
+				assertThat(result, not(sameInstance(JavaArrays.EMPTY)));
+			}
+		}
 	}
 
-	@Test
-	void shouldReturnSameArrayWhenNonEmptyArrayProvided() {
-		Integer[] input = new Integer[] { 1, 2, 3 };
-		Integer[] result = JavaArrays.nullIfEmpty(input);
+	@Nested
+	class IsEmptyTests {
 
-		assertThat(result, equalTo(input));
+		@Test
+		void shouldReturnFalseForNonEmptyArray() {
+			String[] array = new String[] { "not", "empty" };
+
+			boolean result = JavaArrays.isEmpty(array);
+
+			assertThat(result, equalTo(false));
+		}
+
+		@Test
+		void shouldReturnTrueForEmptyArray() {
+			String[] array = new String[] { };
+
+			boolean result = JavaArrays.isEmpty(array);
+
+			assertThat(result, equalTo(true));
+		}
+
+		@Test
+		void shouldReturnTrueForNullArray() {
+			String[] array = null;
+
+			boolean result = JavaArrays.isEmpty(array);
+
+			assertThat(result, equalTo(true));
+		}
 	}
 
-	@Test
-	void shouldConvertNullInputToEmptyArray() {
-		Object[] result = JavaArrays.toArray(null);
+	@Nested
+	class IsNotEmptyTests {
 
-		assertThat(result, sameInstance(JavaArrays.EMPTY));
+		@Test
+		void shouldReturnTrueForNonEmptyArray() {
+			String[] array = new String[] { "not", "empty" };
+
+			boolean result = JavaArrays.isNotEmpty(array);
+
+			assertThat(result, equalTo(true));
+		}
+
+		@Test
+		void shouldReturnFalseForEmptyArray() {
+			String[] array = new String[] { };
+
+			boolean result = JavaArrays.isNotEmpty(array);
+
+			assertThat(result, equalTo(false));
+		}
 	}
 
-	@Test
-	void shouldConvertPrimitiveArrayToObjectArray() {
-		int[] intArray = new int[] { 1, 2, 3 };
+	@Nested
+	class EmptyTests {
 
-		Object[] result = JavaArrays.toArray(intArray);
+		@Test
+		void shouldReturnEmptyArrayForGivenComponentType() {
+			String[] result = JavaArrays.empty(String.class);
 
-		assertThat(result, equalTo(new Object[] { 1, 2, 3 }));
+			assertNotNull(result);
+			assertThat(result.length, equalTo(0));
+			assertThat(result.getClass().getComponentType(), equalTo(String.class));
+		}
+
+		@Test
+		void shouldReturnSharedEmptyForObjectComponentType() {
+			Object[] result = JavaArrays.empty(Object.class);
+
+			assertThat(result, sameInstance(JavaArrays.EMPTY));
+		}
+
+		@Test
+		void shouldReturnEmptyArrayForCustomComponentType() {
+			JavaArraysTest[] result = JavaArrays.empty(JavaArraysTest.class);
+
+			assertNotNull(result);
+			assertThat(result.length, equalTo(0));
+			assertThat(result.getClass().getComponentType(), equalTo(JavaArraysTest.class));
+		}
+
+		@Test
+		void shouldReturnNewEmptyArrayOnEachCall() {
+			String[] first = JavaArrays.empty(String.class);
+			String[] second = JavaArrays.empty(String.class);
+
+			assertThat(first, not(sameInstance(second)));
+		}
+
+		@Test
+		void shouldThrowWhenComponentTypeIsNull() {
+			assertThrows(NullPointerException.class, () -> JavaArrays.empty(null));
+		}
+
+		@Test
+		void shouldThrowWhenComponentTypeIsPrimitive() {
+			IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> JavaArrays.empty(int.class));
+
+			assertThat(e.getMessage(), equalTo("Component type cannot be a primitive: int"));
+		}
 	}
 
-	@Test
-	void shouldConvertIterableToObjectArray() {
-		List<String> list = Arrays.asList("x", "y", "z");
+	@Nested
+	class SafeGetTests {
 
-		Object[] result = JavaArrays.toArray(list);
+		@Test
+		void shouldReturnNullForNullArray() {
+			String result = JavaArrays.safeGet(null, 0);
 
-		assertThat(result, equalTo(new Object[] { "x", "y", "z" }));
-	}
+			assertThat(result, nullValue());
+		}
 
-	@Test
-	void shouldConvertSingleObjectInputToObjectArray() {
-		Integer singleValue = 42;
+		@Test
+		void shouldReturnNullForNegativeIndex() {
+			String[] array = { "a", "b" };
 
-		Object[] result = JavaArrays.toArray(singleValue);
+			String result = JavaArrays.safeGet(array, -1);
 
-		assertThat(result, equalTo(new Object[] { 42 }));
-	}
+			assertThat(result, nullValue());
+		}
 
-	@Test
-	void shouldConvertObjectArrayInputToObjectArray() {
-		Object[] inputArray = new Object[] { "a", 1, true };
+		@Test
+		void shouldReturnNullWhenIndexEqualsLength() {
+			String[] array = { "a", "b" };
 
-		Object[] result = JavaArrays.toArray(inputArray);
+			String result = JavaArrays.safeGet(array, array.length);
 
-		assertThat(result, equalTo(new Object[] { "a", 1, true }));
-		assertThat(result, not(sameInstance(inputArray)));
-	}
+			assertThat(result, nullValue());
+		}
 
-	@Test
-	void shouldReturnSharedEmptyForEmptyObjectArrayInput() {
-		assertThat(JavaArrays.toArray(new Object[0]), sameInstance(JavaArrays.EMPTY));
-	}
+		@Test
+		void shouldReturnNullForEmptyArray() {
+			String[] array = { };
 
-	@Test
-	void shouldReturnSharedEmptyForEmptyPrimitiveArrayInput() {
-		assertThat(JavaArrays.toArray(new int[0]), sameInstance(JavaArrays.EMPTY));
-	}
+			String result = JavaArrays.safeGet(array, 0);
 
-	@Test
-	void shouldReturnSharedEmptyForEmptyIterableInput() {
-		assertThat(JavaArrays.toArray(List.of()), sameInstance(JavaArrays.EMPTY));
-	}
+			assertThat(result, nullValue());
+		}
 
-	@Test
-	void shouldCloneEmptyReferenceArrayWithComponentTypeOtherThanObject() {
-		String[] input = new String[0];
+		@Test
+		void shouldReturnElementAtFirstIndex() {
+			String[] array = { "a", "b", "c" };
 
-		Object[] result = JavaArrays.toArray(input);
+			String result = JavaArrays.safeGet(array, 0);
 
-		assertThat(result.length, equalTo(0));
-		assertThat(result.getClass().getComponentType(), equalTo(String.class));
-		assertThat(result, not(sameInstance(input)));
-		assertThat(result, not(sameInstance(JavaArrays.EMPTY)));
-	}
+			assertThat(result, equalTo("a"));
+		}
 
-	@Test
-	void shouldConvertStringArrayInputToObjectArray() {
-		String[] stringArray = new String[] { "a", "b", "c" };
+		@Test
+		void shouldReturnElementAtLastIndex() {
+			String[] array = { "a", "b", "c" };
 
-		Object[] result = JavaArrays.toArray(stringArray);
+			String result = JavaArrays.safeGet(array, array.length - 1);
 
-		assertThat(result, equalTo(new Object[] { "a", "b", "c" }));
-	}
+			assertThat(result, equalTo("c"));
+		}
 
-	@Test
-	void shouldReturnFalseForNonEmptyArrayOnIsEmpty() {
-		String[] array = new String[] { "not", "empty" };
+		@Test
+		void shouldReturnNullElementStoredInArray() {
+			String[] array = { null };
 
-		boolean result = JavaArrays.isEmpty(array);
+			String result = JavaArrays.safeGet(array, 0);
 
-		assertThat(result, equalTo(false));
-	}
-
-	@Test
-	void shouldReturnTrueForEmptyArrayOnIsEmpty() {
-		String[] array = new String[] { };
-
-		boolean result = JavaArrays.isEmpty(array);
-
-		assertThat(result, equalTo(true));
-	}
-
-	@Test
-	void shouldReturnTrueForNullArrayOnIsEmpty() {
-		String[] array = null;
-
-		boolean result = JavaArrays.isEmpty(array);
-
-		assertThat(result, equalTo(true));
-	}
-
-	@Test
-	void shouldReturnTrueForNonEmptyArrayOnIsNotEmpty() {
-		String[] array = new String[] { "not", "empty" };
-
-		boolean result = JavaArrays.isNotEmpty(array);
-
-		assertThat(result, equalTo(true));
-	}
-
-	@Test
-	void shouldReturnFalseForEmptyArrayOnIsNotEmpty() {
-		String[] array = new String[] { };
-
-		boolean result = JavaArrays.isNotEmpty(array);
-
-		assertThat(result, equalTo(false));
-	}
-
-	@Test
-	void shouldReturnEmptyArrayForGivenComponentType() {
-		String[] result = JavaArrays.empty(String.class);
-
-		assertNotNull(result);
-		assertThat(result.length, equalTo(0));
-		assertThat(result.getClass().getComponentType(), equalTo(String.class));
-	}
-
-	@Test
-	void shouldReturnSharedEmptyForObjectComponentType() {
-		assertThat(JavaArrays.empty(Object.class), sameInstance(JavaArrays.EMPTY));
-	}
-
-	@Test
-	void shouldReturnEmptyArrayForCustomComponentType() {
-		JavaArraysTest[] result = JavaArrays.empty(JavaArraysTest.class);
-
-		assertNotNull(result);
-		assertThat(result.length, equalTo(0));
-		assertThat(result.getClass().getComponentType(), equalTo(JavaArraysTest.class));
-	}
-
-	@Test
-	void shouldReturnNewEmptyArrayOnEachCall() {
-		String[] first = JavaArrays.empty(String.class);
-		String[] second = JavaArrays.empty(String.class);
-
-		assertThat(first, not(sameInstance(second)));
-	}
-
-	@Test
-	void shouldThrowWhenComponentTypeIsNull() {
-		assertThrows(NullPointerException.class, () -> JavaArrays.empty(null));
-	}
-
-	@Test
-	void shouldThrowWhenComponentTypeIsPrimitive() {
-		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> JavaArrays.empty(int.class));
-
-		assertThat(e.getMessage(), equalTo("Component type cannot be a primitive: int"));
+			assertThat(result, nullValue());
+		}
 	}
 }
