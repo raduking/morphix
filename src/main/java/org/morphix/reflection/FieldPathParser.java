@@ -105,28 +105,44 @@ final class FieldPathParser {
 	}
 
 	/**
-	 * Resolves paths in order, stopping at the first match. A malformed alternative can be skipped if its end is
-	 * unambiguous. An unterminated bracket or quoted selector consumes the remainder of the expression.
+	 * Resolves the expression according to the configured mode.
 	 *
 	 * @param root root object
 	 * @return resolved value or extended field, or null
 	 */
 	Object resolve(final Object root) {
+		return alternatives ? resolveAlternatives(root) : resolveSinglePath(root);
+	}
+
+	/**
+	 * Resolves one path, requiring the entire expression to be valid.
+	 *
+	 * @param root root object
+	 * @return resolved value, or null if the path is invalid or cannot be resolved
+	 */
+	private Object resolveSinglePath(final Object root) {
+		Object result = readPath(root);
+		return !invalid && !hasNext() ? result : null;
+	}
+
+	/**
+	 * Resolves paths in order, stopping at the first match. A malformed alternative can be skipped if its end is
+	 * unambiguous. An unterminated bracket or quoted selector consumes the remainder of the expression.
+	 *
+	 * @param root root object
+	 * @return resolved value or extended field, or null if no alternative matches
+	 */
+	private Object resolveAlternatives(final Object root) {
 		while (hasNext()) {
-			if (alternatives) {
-				skipWhitespace();
-				if (consume(',')) {
-					continue;
-				}
+			skipWhitespace();
+			if (consume(',')) {
+				continue;
 			}
 			if (!hasNext()) {
-				break;
+				return null;
 			}
 			invalid = false;
 			Object result = readPath(root);
-			if (!alternatives) {
-				return !invalid && !hasNext() ? result : null;
-			}
 			skipWhitespace();
 			if (hasNext() && ',' != peek()) {
 				invalid = true;
@@ -192,7 +208,8 @@ final class FieldPathParser {
 		if (obj instanceof Map<?, ?> map) {
 			return atPathEnd() ? null : map.get(name);
 		}
-		Field field = Fields.Unchecked.getOneDeclaredInHierarchy(Classes.getFrom(obj), name);
+		Class<?> type = obj.getClass();
+		Field field = Fields.Unchecked.getOneDeclaredInHierarchy(type, name);
 		if (null == field) {
 			return null;
 		}
@@ -215,47 +232,61 @@ final class FieldPathParser {
 		if (!hasNext()) {
 			return fail();
 		}
-		char ch = peek();
-		Object value;
-		if (isQuote(ch)) {
-			++index;
-			String key = readQuoted(ch);
-			if (invalid) {
-				return null;
-			}
-			if (!consume(']')) {
+		Object value = isQuote(peek()) ? readQuotedKey(obj) : readUnquotedSelector(obj);
+		return findField && atPathEnd() ? null : value;
+	}
+
+	/**
+	 * Reads a quoted map key and its closing bracket.
+	 *
+	 * @param obj map containing the key
+	 * @return map value, or null if the selector is invalid or the key is absent
+	 */
+	private Object readQuotedKey(final Object obj) {
+		char quote = peek();
+		++index;
+		String key = readQuoted(quote);
+		if (invalid) {
+			return null;
+		}
+		if (!consume(']')) {
+			skipBracket();
+			return fail();
+		}
+		return FieldPaths.readMapKey(obj, key);
+	}
+
+	/**
+	 * Reads an unquoted array or list index, or a map key, and its closing bracket.
+	 *
+	 * @param obj container to read
+	 * @return selected value, or null if the selector is invalid or cannot be resolved
+	 */
+	private Object readUnquotedSelector(final Object obj) {
+		int start = index;
+		boolean numeric = true;
+		while (hasNext() && ']' != peek()) {
+			char ch = peek();
+			if ('[' == ch || isQuote(ch)) {
 				skipBracket();
 				return fail();
 			}
-			value = FieldPaths.readMapKey(obj, key);
-		} else {
-			int start = index;
-			boolean numeric = true;
-			while (hasNext() && ']' != peek()) {
-				ch = peek();
-				if ('[' == ch || isQuote(ch)) {
-					skipBracket();
-					return fail();
-				}
-				numeric &= Character.isDigit(ch);
-				++index;
-			}
-			int end = index;
-			if (!consume(']') || start == end) {
+			numeric &= Character.isDigit(ch);
+			++index;
+		}
+		int end = index;
+		if (!consume(']') || start == end) {
+			return fail();
+		}
+		if (numeric) {
+			try {
+				int elementIndex = Integer.parseInt(paths, start, end, 10);
+				return FieldPaths.readIndex(obj, elementIndex);
+			} catch (NumberFormatException e) {
 				return fail();
 			}
-			if (numeric) {
-				try {
-					int elementIndex = Integer.parseInt(paths, start, end, 10);
-					value = FieldPaths.readIndex(obj, elementIndex);
-				} catch (NumberFormatException e) {
-					return fail();
-				}
-			} else {
-				value = FieldPaths.readMapKey(obj, paths.substring(start, end));
-			}
 		}
-		return findField && atPathEnd() ? null : value;
+		return FieldPaths.readMapKey(obj, paths.substring(start, end));
 	}
 
 	/**

@@ -18,15 +18,15 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.morphix.lang.collections.FastArrayList;
 
 /**
  * Test class for {@link Fields.Safe#getByPath(Object, String)}.
@@ -38,8 +38,6 @@ class FieldsSafeGetByPathTest {
 	private static final String FIELD_VALUE = "fieldValue";
 
 	private static final String GETTER_VALUE = "getterValue";
-
-	private static final String NON_EXISTENT_FIELD = "$NonExistentField$";
 
 	private final Data data = new Data();
 
@@ -57,20 +55,6 @@ class FieldsSafeGetByPathTest {
 		public WithTransformingGetter inner = new WithTransformingGetter();
 	}
 
-	public static class WithIndexedContainers {
-
-		public String[] tags = { "alpha", "beta" };
-
-		public List<String> codes = new FastArrayList<>(new String[] { "x", "y" });
-
-		public Map<String, String> attributes = new LinkedHashMap<>();
-
-		public WithIndexedContainers() {
-			attributes.put("color", "blue");
-			attributes.put("size", "large");
-		}
-	}
-
 	@Test
 	void shouldGetFieldAtFirstLevel() {
 		WithNestedField obj = new WithNestedField();
@@ -80,64 +64,18 @@ class FieldsSafeGetByPathTest {
 		assertThat(result, equalTo(obj.inner));
 	}
 
-	@Test
-	void shouldGetNestedField() {
-		WithNestedField obj = new WithNestedField();
-
-		Object result = Fields.Safe.getByPath(obj, "inner.value");
-
-		assertThat(result, equalTo(FIELD_VALUE));
-	}
-
-	@Test
-	void shouldReturnNullIfFieldDoesNotExistAtFirstLevel() {
-		WithNestedField obj = new WithNestedField();
-
-		Object result = Fields.Safe.getByPath(obj, NON_EXISTENT_FIELD);
-
-		assertThat(result, nullValue());
-	}
-
-	@Test
-	void shouldReturnNullIfNestedFieldDoesNotExist() {
-		WithNestedField obj = new WithNestedField();
-
-		Object result = Fields.Safe.getByPath(obj, "inner." + NON_EXISTENT_FIELD);
-
-		assertThat(result, nullValue());
-	}
-
-	@Test
-	void shouldReturnNullIfIntermediateFieldIsNull() {
-		WithNestedField obj = new WithNestedField();
-		obj.inner = null;
-
-		Object result = Fields.Safe.getByPath(obj, "inner.value");
-
-		assertThat(result, nullValue());
-	}
-
-	@Test
-	void shouldReturnNullForEmptyPath() {
-		Object result = Fields.Safe.getByPath(new WithNestedField(), "");
-
-		assertThat(result, nullValue());
-	}
-
-	@Test
-	void shouldReturnNullForPathWithTrailingDot() {
-		Object result = Fields.Safe.getByPath(new WithNestedField(), "inner.");
-
-		assertThat(result, nullValue());
-	}
-
-	@Test
-	void shouldReadTheFieldAndNotTheGetterOnASingleSegmentPath() {
-		WithTransformingGetter obj = new WithTransformingGetter();
-
-		Object result = Fields.Safe.getByPath(obj, "value");
+	@ParameterizedTest
+	@MethodSource("getterPaths")
+	void shouldReadTheFieldAndNotTheGetter(final Object root, final String path) {
+		var result = Fields.Safe.getByPath(root, path);
 
 		assertThat(result, equalTo(FIELD_VALUE));
+	}
+
+	private static Stream<Arguments> getterPaths() {
+		return Stream.of(
+				Arguments.of(new WithTransformingGetter(), "value"),
+				Arguments.of(new WithNestedField(), "inner.value"));
 	}
 
 	@Test
@@ -151,44 +89,6 @@ class FieldsSafeGetByPathTest {
 	void shouldThrowWhenPathIsNull() {
 		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPath(new WithNestedField(), null));
 		assertThat(e.getMessage(), equalTo("Cannot resolve field path: path is null"));
-	}
-
-	@Test
-	void shouldGetValueByArrayIndexPath() {
-		WithIndexedContainers obj = new WithIndexedContainers();
-
-		assertThat(Fields.Safe.getByPath(obj, "tags[1]"), equalTo("beta"));
-		assertThat(Fields.Safe.getByPath(obj, "tags[0]"), equalTo("alpha"));
-	}
-
-	@Test
-	void shouldGetValueByListIndexPath() {
-		WithIndexedContainers obj = new WithIndexedContainers();
-
-		assertThat(Fields.Safe.getByPath(obj, "codes[1]"), equalTo("y"));
-	}
-
-	@Test
-	void shouldGetValueByMapKeyPath() {
-		WithIndexedContainers obj = new WithIndexedContainers();
-
-		assertThat(Fields.Safe.getByPath(obj, "attributes['color']"), equalTo("blue"));
-		assertThat(Fields.Safe.getByPath(obj, "attributes[size]"), equalTo("large"));
-	}
-
-	@Test
-	void shouldGetNestedValueAfterIndexPath() {
-		WithIndexedContainers obj = new WithIndexedContainers();
-		obj.tags = new String[] { "outer" };
-		Wrapper wrapper = new Wrapper();
-		wrapper.row = obj;
-
-		assertThat(Fields.Safe.getByPath(wrapper, "row.tags[0]"), equalTo("outer"));
-	}
-
-	public static class Wrapper {
-
-		public WithIndexedContainers row;
 	}
 
 	private record Person(String name) {
@@ -228,79 +128,49 @@ class FieldsSafeGetByPathTest {
 	}
 
 	@ParameterizedTest
-	@CsvSource({
-			"person.name, Alice",
-			"persons[0].name, Alice",
-			"persons[1].name, Bob",
-			"array[0], Alice",
-			"array[1], Bob",
-			"attributes.name, Alice",
-			"attributes[name], Alice",
-			"attributes['name'], Alice",
-			"attributes[\"name\"], Alice",
-			"attributes['first.name'], Bob",
-			"attributes['0'], zero",
-			"attributes[''], empty",
-			"attributes.size, map size",
-			"attributes['a]b'], bracket"
-	})
-	void shouldResolvePath(final String path, final String expected) {
+	@MethodSource("resolvedPaths")
+	void shouldResolvePath(final String path, final Object expected) {
 		var result = Fields.Safe.getByPath(data, path);
 
 		assertThat(result, equalTo(expected));
 	}
 
-	@Test
-	void shouldResolvePrimitiveArrayElement() {
-		Integer result = Fields.Safe.getByPath(data, "numbers[1]");
-
-		assertThat(result, equalTo(20));
+	private static Stream<Arguments> resolvedPaths() {
+		return Stream.of(
+				Arguments.of("person.name", "Alice"),
+				Arguments.of("persons[0]", new Person("Alice")),
+				Arguments.of("persons[0].name", "Alice"),
+				Arguments.of("persons[1].name", "Bob"),
+				Arguments.of("array[0]", "Alice"),
+				Arguments.of("array[1]", "Bob"),
+				Arguments.of("numbers[1]", 20),
+				Arguments.of("matrix[1][0]", 30),
+				Arguments.of("attributes.name", "Alice"),
+				Arguments.of("attributes[name]", "Alice"),
+				Arguments.of("attributes['name']", "Alice"),
+				Arguments.of("attributes[\"name\"]", "Alice"),
+				Arguments.of("attributes['first.name']", "Bob"),
+				Arguments.of("attributes['0']", "zero"),
+				Arguments.of("attributes['']", "empty"),
+				Arguments.of("attributes.size", "map size"),
+				Arguments.of("attributes['a]b']", "bracket"),
+				Arguments.of("attributes['a,b']", "comma"),
+				Arguments.of("attributes['a\\'b']", "quote"),
+				Arguments.of("attributes['a\\\\b']", "backslash"));
 	}
 
-	@Test
-	void shouldResolveNestedArrayElement() {
-		Integer result = Fields.Safe.getByPath(data, "matrix[1][0]");
+	@ParameterizedTest
+	@MethodSource("rootPaths")
+	void shouldResolveRootContainer(final Object root, final String path, final Object expected) {
+		var result = Fields.Safe.getByPath(root, path);
 
-		assertThat(result, equalTo(30));
+		assertThat(result, equalTo(expected));
 	}
 
-	@Test
-	void shouldResolveKeyContainingComma() {
-		var result = Fields.Safe.getByPath(data, "attributes['a,b']");
-
-		assertThat(result, equalTo("comma"));
-	}
-
-	@Test
-	void shouldResolveKeyContainingQuote() {
-		var result = Fields.Safe.getByPath(data, "attributes['a\\'b']");
-
-		assertThat(result, equalTo("quote"));
-	}
-
-	@Test
-	void shouldResolveKeyContainingBackslash() {
-		var result = Fields.Safe.getByPath(data, "attributes['a\\\\b']");
-
-		assertThat(result, equalTo("backslash"));
-	}
-
-	@Test
-	void shouldResolveRootList() {
-		List<Person> persons = List.of(new Person("Alice"));
-
-		var result = Fields.Safe.getByPath(persons, "[0].name");
-
-		assertThat(result, equalTo("Alice"));
-	}
-
-	@Test
-	void shouldResolveRootMap() {
-		Map<String, String> map = Map.of("name", "Alice");
-
-		var result = Fields.Safe.getByPath(map, "['name']");
-
-		assertThat(result, equalTo("Alice"));
+	private static Stream<Arguments> rootPaths() {
+		return Stream.of(
+				Arguments.of(List.of(new Person("Alice")), "[0].name", "Alice"),
+				Arguments.of(Map.of("name", "Alice"), "['name']", "Alice"));
 	}
 
 	@ParameterizedTest
