@@ -49,6 +49,6 @@ public class FinderPathStrategy implements FieldFinderStrategy {
 	 * @return field object pair
 	 */
 	public static <T> ExtendedField getConverterFieldByPathInHierarchy(final T obj, final String path) {
-		return FieldPaths.resolveField(obj, path);
+		return FieldPaths.resolveFirstField(obj, path);
 	}
 }

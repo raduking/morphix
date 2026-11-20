@@ -1159,7 +1159,7 @@ public interface Fields {
 		 * @return first non-null value, or null if the root or paths are null or no path resolves
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
-			return FieldPaths.resolveValues(obj, paths);
+			return FieldPaths.resolveFirstValue(obj, paths);
 		}
 
 		/**

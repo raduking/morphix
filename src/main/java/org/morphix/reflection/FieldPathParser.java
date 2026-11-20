@@ -15,35 +15,49 @@ package org.morphix.reflection;
 import java.lang.reflect.Field;
 import java.util.Map;
 
+import org.morphix.lang.JavaObjects;
+
 /**
  * Cursor-based field path parser. Each selector is resolved as it is consumed, without allocating tokens or splitting
  * the expression into strings.
  * <p>
- * The parser handles both single paths and comma-separated alternatives.
+ * {@link Syntax} selects a single path or comma-separated alternatives, while {@link Target} selects whether the result
+ * is a value or a reflective field with its owner.
  *
  * @author Radu Sebastian LAZIN
  */
 final class FieldPathParser {
 
 	/**
-	 * Selects how the parser interprets paths and what it returns.
+	 * Controls how many paths the expression may contain.
 	 */
-	enum Mode {
+	enum Syntax {
 
 		/**
-		 * Resolves one path to its value.
+		 * Parses the entire expression as one path.
 		 */
-		SINGLE_VALUE,
+		SINGLE_PATH,
 
 		/**
-		 * Resolves comma-separated paths to the first non-null value.
+		 * Parses comma-separated paths and stops at the first non-null value or matching field.
 		 */
-		ALTERNATIVE_VALUES,
+		ALTERNATIVE_PATHS
+	}
+
+	/**
+	 * Selects the kind of result produced by the parser.
+	 */
+	enum Target {
 
 		/**
-		 * Resolves comma-separated paths to the first non-static field and its owner, even if the field value is null.
+		 * Returns the value found at a path.
 		 */
-		ALTERNATIVE_FIELD
+		VALUE,
+
+		/**
+		 * Returns the final non-static field and its owner, even when the field value is null.
+		 */
+		FIELD
 	}
 
 	/**
@@ -77,35 +91,75 @@ final class FieldPathParser {
 	private boolean invalid;
 
 	/**
-	 * Creates a parser for the given expression and resolution mode.
+	 * Creates a parser for the given expression, path syntax, and result target.
 	 *
 	 * @param paths path expression
-	 * @param mode resolution mode
+	 * @param syntax whether the expression contains one path or comma-separated alternatives
+	 * @param target whether to resolve a value or a field with its owner
 	 */
-	private FieldPathParser(final String paths, final Mode mode) {
+	private FieldPathParser(final String paths, final Syntax syntax, final Target target) {
 		this.paths = paths;
 		this.length = paths.length();
-		this.alternatives = Mode.SINGLE_VALUE != mode;
-		this.findField = Mode.ALTERNATIVE_FIELD == mode;
+		this.alternatives = Syntax.ALTERNATIVE_PATHS == syntax;
+		this.findField = Target.FIELD == target;
 	}
 
 	/**
-	 * Resolves an expression using the requested mode.
+	 * Resolves an expression using the requested syntax and result target.
 	 *
 	 * @param root root object
 	 * @param paths path expression
-	 * @param mode resolution mode
-	 * @return resolved value or extended field, or null if the root is null, the expression is empty, or no path matches
+	 * @param syntax whether the expression contains one path or comma-separated alternatives
+	 * @param target whether to resolve a value or a field with its owner
+	 * @return resolved value or extended field, or null if the root or expression is null, the expression is empty, or no
+	 * path matches
 	 */
-	static Object resolve(final Object root, final String paths, final Mode mode) {
+	static Object resolve(final Object root, final String paths, final Syntax syntax, final Target target) {
 		if (null == root || null == paths || paths.isEmpty()) {
 			return null;
 		}
-		return new FieldPathParser(paths, mode).resolve(root);
+		return new FieldPathParser(paths, syntax, target).resolve(root);
 	}
 
 	/**
-	 * Resolves the expression according to the configured mode.
+	 * Resolves one path to its value.
+	 *
+	 * @param <U> value type
+	 * @param root root object
+	 * @param path path to resolve
+	 * @return value, or null if the path cannot be resolved
+	 */
+	static <U> U resolveValue(final Object root, final String path) {
+		return JavaObjects.cast(FieldPathParser.resolve(root, path, Syntax.SINGLE_PATH, Target.VALUE));
+	}
+
+	/**
+	 * Resolves comma-separated paths to the first non-null value.
+	 *
+	 * @param <U> value type
+	 * @param root root object
+	 * @param paths alternative paths
+	 * @return first non-null value, or null if no path resolves
+	 */
+	static <U> U resolveFirstValue(final Object root, final String paths) {
+		return JavaObjects.cast(FieldPathParser.resolve(root, paths, Syntax.ALTERNATIVE_PATHS, Target.VALUE));
+	}
+
+	/**
+	 * Resolves comma-separated paths to the first non-static field and its owner. A field may be returned even when its
+	 * value is null.
+	 *
+	 * @param root root object
+	 * @param paths alternative paths
+	 * @return field and its owner, or {@link ExtendedField#EMPTY} if no path resolves to a field
+	 */
+	static ExtendedField resolveFirstField(final Object root, final String paths) {
+		ExtendedField field = JavaObjects.cast(FieldPathParser.resolve(root, paths, Syntax.ALTERNATIVE_PATHS, Target.FIELD));
+		return null == field ? ExtendedField.EMPTY : field;
+	}
+
+	/**
+	 * Resolves the expression according to the configured syntax and target.
 	 *
 	 * @param root root object
 	 * @return resolved value or extended field, or null
