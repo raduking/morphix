@@ -31,7 +31,7 @@ public final class FieldPathParser {
 	/**
 	 * Controls how many paths the expression may contain.
 	 */
-	enum Syntax {
+	private enum Syntax {
 
 		/**
 		 * Parses the entire expression as one path.
@@ -47,7 +47,7 @@ public final class FieldPathParser {
 	/**
 	 * Selects the kind of result produced by the parser.
 	 */
-	enum Target {
+	private enum Target {
 
 		/**
 		 * Returns the value found at a path.
@@ -105,45 +105,29 @@ public final class FieldPathParser {
 	}
 
 	/**
-	 * Resolves an expression using the requested syntax and result target.
-	 *
-	 * @param root root object
-	 * @param paths path expression
-	 * @param syntax whether the expression contains one path or comma-separated alternatives
-	 * @param target whether to resolve a value or a field with its owner
-	 * @return resolved value or extended field, or null if the root or expression is null, the expression is empty, or no
-	 * path matches
-	 */
-	static <U> U resolve(final Object root, final String paths, final Syntax syntax, final Target target) {
-		if (null == root || null == paths || paths.isEmpty()) {
-			return null;
-		}
-		var parser = new FieldPathParser(paths, syntax, target);
-		return JavaObjects.cast(parser.resolve(root));
-	}
-
-	/**
 	 * Resolves one path to its value.
 	 *
 	 * @param <U> value type
+	 *
 	 * @param root root object
 	 * @param path path to resolve
 	 * @return value, or null if the path cannot be resolved
 	 */
 	public static <U> U resolveValue(final Object root, final String path) {
-		return FieldPathParser.resolve(root, path, Syntax.SINGLE_PATH, Target.VALUE);
+		return resolve(root, path, Syntax.SINGLE_PATH, Target.VALUE);
 	}
 
 	/**
 	 * Resolves comma-separated paths to the first non-null value.
 	 *
 	 * @param <U> value type
+	 *
 	 * @param root root object
 	 * @param paths alternative paths
 	 * @return first non-null value, or null if no path resolves
 	 */
 	public static <U> U resolveFirstValue(final Object root, final String paths) {
-		return FieldPathParser.resolve(root, paths, Syntax.ALTERNATIVE_PATHS, Target.VALUE);
+		return resolve(root, paths, Syntax.ALTERNATIVE_PATHS, Target.VALUE);
 	}
 
 	/**
@@ -155,8 +139,28 @@ public final class FieldPathParser {
 	 * @return field and its owner, or {@link ExtendedField#EMPTY} if no path resolves to a field
 	 */
 	public static ExtendedField resolveFirstField(final Object root, final String paths) {
-		ExtendedField field = JavaObjects.cast(FieldPathParser.resolve(root, paths, Syntax.ALTERNATIVE_PATHS, Target.FIELD));
+		ExtendedField field = resolve(root, paths, Syntax.ALTERNATIVE_PATHS, Target.FIELD);
 		return null == field ? ExtendedField.EMPTY : field;
+	}
+
+	/**
+	 * Resolves an expression using the requested syntax and result target.
+	 *
+	 * @param <U> result type
+	 *
+	 * @param root root object
+	 * @param paths path expression
+	 * @param syntax whether the expression contains one path or comma-separated alternatives
+	 * @param target whether to resolve a value or a field with its owner
+	 * @return resolved value or extended field, or null if the root or expression is null, the expression is empty, or no
+	 * path matches
+	 */
+	private static <U> U resolve(final Object root, final String paths, final Syntax syntax, final Target target) {
+		if (null == root || null == paths || paths.isEmpty()) {
+			return null;
+		}
+		FieldPathParser parser = new FieldPathParser(paths, syntax, target);
+		return JavaObjects.cast(parser.resolve(root));
 	}
 
 	/**
@@ -165,7 +169,7 @@ public final class FieldPathParser {
 	 * @param root root object
 	 * @return resolved value or extended field, or null
 	 */
-	Object resolve(final Object root) {
+	private Object resolve(final Object root) {
 		return alternatives ? resolveAlternatives(root) : resolveSinglePath(root);
 	}
 
@@ -177,7 +181,7 @@ public final class FieldPathParser {
 	 */
 	private Object resolveSinglePath(final Object root) {
 		Object result = readPath(root);
-		return !invalid && !hasNext() ? result : null;
+		return !invalid && index == length ? result : null;
 	}
 
 	/**
@@ -188,18 +192,18 @@ public final class FieldPathParser {
 	 * @return resolved value or extended field, or null if no alternative matches
 	 */
 	private Object resolveAlternatives(final Object root) {
-		while (hasNext()) {
+		while (index < length) {
 			skipWhitespace();
 			if (consume(',')) {
 				continue;
 			}
-			if (!hasNext()) {
+			if (index == length) {
 				return null;
 			}
 			invalid = false;
 			Object result = readPath(root);
 			skipWhitespace();
-			if (hasNext() && ',' != peek()) {
+			if (index < length && ',' != paths.charAt(index)) {
 				invalid = true;
 				skipInvalidPath();
 			}
@@ -219,10 +223,10 @@ public final class FieldPathParser {
 	 */
 	private Object readPath(final Object root) {
 		Object value = root;
-		if ('[' != peek()) {
+		if ('[' != paths.charAt(index)) {
 			value = readProperty(value);
 		}
-		while (hasNext() && !invalid) {
+		while (index < length && !invalid) {
 			if (consume('[')) {
 				value = readBracket(value);
 			} else if (consume('.')) {
@@ -242,36 +246,61 @@ public final class FieldPathParser {
 	 * @return property value or extended field, or null if it cannot be resolved
 	 */
 	private Object readProperty(final Object obj) {
+		String name = readPropertyName();
+		if (null == name || null == obj) {
+			return null;
+		}
+		return findField ? readFieldProperty(obj, name) : readValueProperty(obj, name);
+	}
+
+	/**
+	 * Reads the property name at the cursor. Trailing whitespace is ignored when the name ends an alternative.
+	 *
+	 * @return property name, or null when the name is empty
+	 */
+	private String readPropertyName() {
 		int start = index;
-		while (hasNext() && !isPropertyDelimiter(peek())) {
+		while (index < length && !isPropertyDelimiter(paths.charAt(index))) {
 			++index;
 		}
 		int end = index;
-		if (alternatives && (!hasNext() || ',' == peek())) {
+		if (alternatives && (index == length || ',' == paths.charAt(index))) {
 			end = trimEnd(start, end);
 		}
 		if (start == end) {
-			return fail();
-		}
-		if (null == obj) {
+			fail();
 			return null;
 		}
-		String name = paths.substring(start, end);
-		if (!findField) {
-			if (obj instanceof Map<?, ?> map) {
-				return map.get(name);
-			}
-			return Fields.Safe.get(obj, name);
+		return paths.substring(start, end);
+	}
+
+	/**
+	 * Reads a property value from an object or map.
+	 *
+	 * @param obj object containing the property
+	 * @param name property name
+	 * @return property value, or null when it cannot be read
+	 */
+	private static Object readValueProperty(final Object obj, final String name) {
+		if (obj instanceof Map<?, ?> map) {
+			return map.get(name);
 		}
+		return Fields.Safe.get(obj, name);
+	}
+
+	/**
+	 * Reads a non-static field and its owner, or the next map value when the path continues.
+	 *
+	 * @param obj object containing the property
+	 * @param name property name
+	 * @return extended field, next map value, or null when the property cannot be resolved as a field
+	 */
+	private Object readFieldProperty(final Object obj, final String name) {
 		if (obj instanceof Map<?, ?> map) {
 			return atPathEnd() ? null : map.get(name);
 		}
-		Class<?> type = obj.getClass();
-		Field field = Fields.Unchecked.getOneDeclaredInHierarchy(type, name);
-		if (null == field) {
-			return null;
-		}
-		if (JavaModifier.STATIC.isPresentOn(field)) {
+		Field field = Fields.Unchecked.getOneDeclaredInHierarchy(obj.getClass(), name);
+		if (null == field || JavaModifier.STATIC.isPresentOn(field)) {
 			return null;
 		}
 		if (atPathEnd()) {
@@ -287,11 +316,14 @@ public final class FieldPathParser {
 	 * @return selected value, or null if the selector is invalid or cannot be resolved
 	 */
 	private Object readBracket(final Object obj) {
-		if (!hasNext()) {
+		if (index == length) {
 			return fail();
 		}
-		Object value = isQuote(peek()) ? readQuotedKey(obj) : readUnquotedSelector(obj);
-		return findField && atPathEnd() ? null : value;
+		Object value = isQuote(paths.charAt(index)) ? readQuotedKey(obj) : readUnquotedSelector(obj);
+		if (findField && atPathEnd()) {
+			return null;
+		}
+		return value;
 	}
 
 	/**
@@ -301,11 +333,10 @@ public final class FieldPathParser {
 	 * @return map value, or null if the selector is invalid or the key is absent
 	 */
 	private Object readQuotedKey(final Object obj) {
-		char quote = peek();
+		char quote = paths.charAt(index);
 		++index;
 		String key = readQuoted(quote);
-		if (null == key) {
-			invalid = true;
+		if (invalid) {
 			return null;
 		}
 		if (!consume(']')) {
@@ -324,8 +355,8 @@ public final class FieldPathParser {
 	private Object readUnquotedSelector(final Object obj) {
 		int start = index;
 		boolean numeric = true;
-		while (hasNext() && ']' != peek()) {
-			char ch = peek();
+		while (index < length && ']' != paths.charAt(index)) {
+			char ch = paths.charAt(index);
 			if ('[' == ch || isQuote(ch)) {
 				skipBracket();
 				return fail();
@@ -337,15 +368,15 @@ public final class FieldPathParser {
 		if (!consume(']') || start == end) {
 			return fail();
 		}
-		if (numeric) {
-			try {
-				int elementIndex = Integer.parseInt(paths, start, end, 10);
-				return JavaObjects.getAt(obj, elementIndex);
-			} catch (NumberFormatException e) {
-				return fail();
-			}
+		if (!numeric) {
+			return readMapKey(obj, paths.substring(start, end));
 		}
-		return readMapKey(obj, paths.substring(start, end));
+		try {
+			int elementIndex = Integer.parseInt(paths, start, end, 10);
+			return JavaObjects.getAt(obj, elementIndex);
+		} catch (NumberFormatException e) {
+			return fail();
+		}
 	}
 
 	/**
@@ -372,10 +403,12 @@ public final class FieldPathParser {
 	private String readQuoted(final char quote) {
 		int start = index;
 		StringBuilder builder = null;
-		while (hasNext()) {
-			char ch = peek();
+		while (index < length) {
+			char ch = paths.charAt(index);
 			if (quote == ch) {
-				String key = null == builder ? paths.substring(start, index) : builder.append(paths, start, index).toString();
+				String key = null == builder
+						? paths.substring(start, index)
+						: builder.append(paths, start, index).toString();
 				++index;
 				return key;
 			}
@@ -385,14 +418,16 @@ public final class FieldPathParser {
 				}
 				builder.append(paths, start, index);
 				++index;
-				if (!hasNext()) {
+				if (index == length) {
+					invalid = true;
 					return null;
 				}
-				builder.append(peek());
+				builder.append(paths.charAt(index));
 				start = index + 1;
 			}
 			++index;
 		}
+		invalid = true;
 		return null;
 	}
 
@@ -400,7 +435,7 @@ public final class FieldPathParser {
 	 * Recovers at a top-level comma, using the same quote and bracket rules as normal parsing.
 	 */
 	private void skipInvalidPath() {
-		while (hasNext() && ',' != peek()) {
+		while (index < length && ',' != paths.charAt(index)) {
 			if (consume('[')) {
 				skipBracket();
 			} else {
@@ -414,8 +449,8 @@ public final class FieldPathParser {
 	 */
 	private void skipBracket() {
 		int depth = 1;
-		while (hasNext() && 0 < depth) {
-			char ch = peek();
+		while (index < length && 0 < depth) {
+			char ch = paths.charAt(index);
 			++index;
 			if (isQuote(ch)) {
 				readQuoted(ch);
@@ -433,10 +468,13 @@ public final class FieldPathParser {
 	 * @return true if the current path ends here
 	 */
 	private boolean atPathEnd() {
-		if (!hasNext()) {
+		if (index == length) {
 			return true;
 		}
-		int end = indexAfterWhitespace(index);
+		int end = index;
+		while (end < length && isWhitespace(paths.charAt(end))) {
+			++end;
+		}
 		return end == length || ',' == paths.charAt(end);
 	}
 
@@ -461,21 +499,13 @@ public final class FieldPathParser {
 	}
 
 	/**
-	 * Checks whether the cursor has another character to read.
+	 * Checks whether a character is whitespace as defined by {@link String#trim()}.
 	 *
-	 * @return true if the cursor is before the end of the expression
+	 * @param ch character to check
+	 * @return true when the character is at most {@code ' '}
 	 */
-	private boolean hasNext() {
-		return index < length;
-	}
-
-	/**
-	 * Returns the character at the cursor without advancing it.
-	 *
-	 * @return current character
-	 */
-	private char peek() {
-		return paths.charAt(index);
+	private static boolean isWhitespace(final char ch) {
+		return ch <= ' ';
 	}
 
 	/**
@@ -485,7 +515,7 @@ public final class FieldPathParser {
 	 * @return true if the character matched and was consumed
 	 */
 	private boolean consume(final char ch) {
-		if (hasNext() && ch == peek()) {
+		if (index < length && ch == paths.charAt(index)) {
 			++index;
 			return true;
 		}
@@ -493,26 +523,12 @@ public final class FieldPathParser {
 	}
 
 	/**
-	 * Skips whitespace at the cursor using the same character range as {@link String#trim()}.
+	 * Skips whitespace at the cursor.
 	 */
 	private void skipWhitespace() {
-		while (hasNext() && peek() <= ' ') {
+		while (index < length && isWhitespace(paths.charAt(index))) {
 			++index;
 		}
-	}
-
-	/**
-	 * Returns the index of the first non-whitespace character at or after {@code from}, without moving the cursor.
-	 *
-	 * @param from start index, inclusive
-	 * @return index after any leading whitespace
-	 */
-	private int indexAfterWhitespace(final int from) {
-		int end = from;
-		while (end < length && paths.charAt(end) <= ' ') {
-			++end;
-		}
-		return end;
 	}
 
 	/**
@@ -524,7 +540,7 @@ public final class FieldPathParser {
 	 */
 	private int trimEnd(final int start, final int end) {
 		int result = end;
-		while (start < result && paths.charAt(result - 1) <= ' ') {
+		while (start < result && isWhitespace(paths.charAt(result - 1))) {
 			--result;
 		}
 		return result;
