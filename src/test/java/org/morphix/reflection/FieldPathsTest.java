@@ -13,11 +13,8 @@
 package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -25,8 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.morphix.lang.collections.FastArrayList;
 
 /**
  * Test class for {@link FieldPaths}.
@@ -34,153 +29,6 @@ import org.morphix.lang.collections.FastArrayList;
  * @author Radu Sebastian LAZIN
  */
 class FieldPathsTest {
-
-	public static class Entry {
-
-		public String name;
-	}
-
-	public static class WithContainers {
-
-		public Entry[] entries = { new Entry(), new Entry() };
-
-		public List<Entry> items = new FastArrayList<>(new Entry[] { new Entry() });
-
-		public Map<String, String> data = new LinkedHashMap<>();
-
-		public WithContainers() {
-			entries[0].name = "fromArray";
-			entries[1].name = "second";
-			items.get(0).name = "fromList";
-			data.put("key", "fromMap");
-			data.put("a,b", "commaKey");
-			data.put("a\\", "backslash");
-			data.put("a'b", "quote");
-			data.put("a]b", "bracket");
-			data.put("", "empty");
-			data.put("0", "zero");
-			data.put("say \"hi\"", "quoted");
-		}
-	}
-
-	private final WithContainers root = new WithContainers();
-
-	@ParameterizedTest
-	@ValueSource(
-		strings = {
-				"",
-				".entries",
-				".bad",
-				"entries.",
-				"entries..name",
-				"entries.[0]",
-				"entries[0",
-				"entries[]",
-				"entries[0]]",
-				"entries[0]name",
-				"entries[2147483648]",
-				"entries[-1]",
-				"entries[notAnIndex]",
-				"entries[0].name,items[0].name",
-				"items[9].name",
-				" entries[0].name",
-				"entries[0].name "
-		})
-	void shouldReturnNullForInvalidOrUnresolvedSinglePath(final String path) {
-		var result = FieldPaths.resolveValue(root, path);
-
-		assertThat(path, result, nullValue());
-	}
-
-	@ParameterizedTest
-	@MethodSource("alternativePaths")
-	void shouldResolveFirstMatchingAlternative(final String paths, final String expected) {
-		var result = FieldPaths.resolveFirstValue(root, paths);
-
-		assertThat(result, equalTo(expected));
-	}
-
-	private static Stream<Arguments> alternativePaths() {
-		return Stream.of(
-				Arguments.of(" , missing.name, items[9].name, data['a,b'], entries[0].name, ", "commaKey"),
-				Arguments.of("data['missing,key'], items[0].name", "fromList"),
-				Arguments.of(".bad,entries[],entries[0]] ,items[0].name", "fromList"),
-				Arguments.of("entries[2147483648],items[0].name", "fromList"),
-				Arguments.of("items[0].name,entries[", "fromList"),
-				Arguments.of("data['missing\\\\'],items[0].name", "fromList"),
-				Arguments.of("data['a\\\\'],items[0].name", "backslash"),
-				Arguments.of("data[a,b],items[0].name", "commaKey"),
-				Arguments.of("  entries[0].name  ", "fromArray"),
-				Arguments.of("  data['key']  ", "fromMap"),
-				Arguments.of("entries[0]. name,items[0].name", "fromList"));
-	}
-
-	@ParameterizedTest
-	@ValueSource(
-		strings = {
-				", ,",
-				"data['unterminated,items[0].name"
-		})
-	void shouldReturnNullWhenNoAlternativeMatches(final String paths) {
-		var result = FieldPaths.resolveFirstValue(root, paths);
-
-		assertThat(result, nullValue());
-	}
-
-	@ParameterizedTest
-	@MethodSource("singlePaths")
-	void shouldResolveSinglePath(final String path, final String expected) {
-		var result = FieldPaths.resolveValue(root, path);
-
-		assertThat(result, equalTo(expected));
-	}
-
-	private static Stream<Arguments> singlePaths() {
-		return Stream.of(
-				Arguments.of("entries[0].name", "fromArray"),
-				Arguments.of("entries[1].name", "second"),
-				Arguments.of("items[0].name", "fromList"),
-				Arguments.of("data['key']", "fromMap"),
-				Arguments.of("data[key]", "fromMap"),
-				Arguments.of("data['a,b']", "commaKey"),
-				Arguments.of("data[a,b]", "commaKey"),
-				Arguments.of("data['a\\\\']", "backslash"),
-				Arguments.of("data['a\\'b']", "quote"),
-				Arguments.of("data[\"a]b\"]", "bracket"),
-				Arguments.of("data['']", "empty"),
-				Arguments.of("data['0']", "zero"),
-				Arguments.of("data['say \\\"hi\\\"']", "quoted"));
-	}
-
-	@ParameterizedTest
-	@MethodSource("rootPaths")
-	void shouldResolveRootContainer(final Object container, final String path, final Object expected) {
-		var result = FieldPaths.resolveValue(container, path);
-
-		assertThat(result, equalTo(expected));
-	}
-
-	private static Stream<Arguments> rootPaths() {
-		return Stream.of(
-				Arguments.of(new int[][] { { 10, 20 }, { 30, 40 } }, "[1][0]", 30),
-				Arguments.of(List.of(List.of("value")), "[0][0]", "value"),
-				Arguments.of(Map.of("a.b", "value"), "['a.b']", "value"),
-				Arguments.of(Map.of("a,b", "value"), "a,b", "value"));
-	}
-
-	@Test
-	void shouldReturnNullForNullRoot() {
-		var result = FieldPaths.resolveValue(null, "entries[0]");
-
-		assertThat(result, nullValue());
-	}
-
-	@Test
-	void shouldResolveTerminalListElement() {
-		var result = FieldPaths.resolveValue(root, "items[0]");
-
-		assertThat(result, equalTo(root.items.get(0)));
-	}
 
 	@ParameterizedTest
 	@MethodSource("invalidProperties")
@@ -193,13 +41,13 @@ class FieldPathsTest {
 	private static Stream<Arguments> invalidProperties() {
 		return Stream.of(
 				Arguments.of(null, "key"),
-				Arguments.of(new WithContainers(), null),
-				Arguments.of(new WithContainers(), ""));
+				Arguments.of(new Object(), null),
+				Arguments.of(new Object(), ""));
 	}
 
 	@Test
 	void shouldReturnNullForNullMapKey() {
-		var result = FieldPaths.readMapKey(root.data, null);
+		var result = FieldPaths.readMapKey(Map.of("key", "value"), null);
 
 		assertThat(result, nullValue());
 	}

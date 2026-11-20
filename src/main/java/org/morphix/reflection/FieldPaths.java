@@ -23,45 +23,6 @@ import java.util.Map;
 public interface FieldPaths {
 
 	/**
-	 * Resolves a single path to its value.
-	 *
-	 * @param <U> value type
-	 *
-	 * @param root root object
-	 * @param path field path
-	 * @return value or null if the path cannot be resolved
-	 */
-	static <U> U resolveValue(final Object root, final String path) {
-		return FieldPathParser.resolveValue(root, path);
-	}
-
-	/**
-	 * Resolves the first non-null value in a comma-separated list of paths. Empty alternatives are ignored.
-	 *
-	 * @param <U> value type
-	 *
-	 * @param root root object
-	 * @param paths alternative field paths
-	 * @return first non-null value or null
-	 */
-	static <U> U resolveFirstValue(final Object root, final String paths) {
-		return FieldPathParser.resolveFirstValue(root, paths);
-	}
-
-	/**
-	 * Finds the first non-static reflective field and its owning object in a comma-separated list of paths. The final field
-	 * is not read; a field with a null value can therefore be found. Paths ending at a container element rather than a
-	 * reflective field are not matches.
-	 *
-	 * @param root root object
-	 * @param paths alternative field paths
-	 * @return field and its owning object, or {@link ExtendedField#EMPTY}
-	 */
-	static ExtendedField resolveFirstField(final Object root, final String paths) {
-		return FieldPathParser.resolveFirstField(root, paths);
-	}
-
-	/**
 	 * Reads a property, treating maps as containers rather than reflective objects.
 	 *
 	 * @param obj owning object
