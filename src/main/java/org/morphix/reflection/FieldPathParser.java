@@ -304,7 +304,8 @@ public final class FieldPathParser {
 		char quote = peek();
 		++index;
 		String key = readQuoted(quote);
-		if (invalid) {
+		if (null == key) {
+			invalid = true;
 			return null;
 		}
 		if (!consume(']')) {
@@ -385,7 +386,6 @@ public final class FieldPathParser {
 				builder.append(paths, start, index);
 				++index;
 				if (!hasNext()) {
-					invalid = true;
 					return null;
 				}
 				builder.append(peek());
@@ -393,7 +393,6 @@ public final class FieldPathParser {
 			}
 			++index;
 		}
-		invalid = true;
 		return null;
 	}
 
@@ -437,13 +436,7 @@ public final class FieldPathParser {
 		if (!hasNext()) {
 			return true;
 		}
-		if (!alternatives) {
-			return false;
-		}
-		int end = index;
-		while (end < length && paths.charAt(end) <= ' ') {
-			++end;
-		}
+		int end = indexAfterWhitespace(index);
 		return end == length || ',' == paths.charAt(end);
 	}
 
@@ -506,6 +499,20 @@ public final class FieldPathParser {
 		while (hasNext() && peek() <= ' ') {
 			++index;
 		}
+	}
+
+	/**
+	 * Returns the index of the first non-whitespace character at or after {@code from}, without moving the cursor.
+	 *
+	 * @param from start index, inclusive
+	 * @return index after any leading whitespace
+	 */
+	private int indexAfterWhitespace(final int from) {
+		int end = from;
+		while (end < length && paths.charAt(end) <= ' ') {
+			++end;
+		}
+		return end;
 	}
 
 	/**
