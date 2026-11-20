@@ -17,10 +17,12 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Test class for {@link Fields.Safe#getByPaths(Object, String...)} and {@link Fields.Safe#getByPaths(Object, String)}.
@@ -29,156 +31,111 @@ import org.junit.jupiter.api.Test;
  */
 class FieldsSafeGetByPathsTest {
 
-	private static final String TEST_STRING = "testString";
-
-	public static class A {
-		public String x;
+	private record Person(String name) {
+		// empty
 	}
 
-	public static class B {
+	@SuppressWarnings("unused")
+	private static final class Data {
 
-		public A a;
+		private final Person person = new Person("Alice");
 
-		public Map<String, A> keyed = new LinkedHashMap<>();
+		private final List<Person> persons = List.of(new Person("Alice"));
+
+		private final Object missing = null;
+
+		private final Map<String, String> attributes = Map.of("a,b", "commaKey");
+
+		private final Map<String, Person> keyed = Map.of("a,b", new Person("commaKey"));
 	}
 
-	@Test
-	void shouldGetFieldByPaths() {
-		A a = new A();
-		a.x = TEST_STRING;
-		B b = new B();
-		b.a = a;
+	private final Data data = new Data();
 
-		String x = Fields.Safe.getByPaths(b, "x.y,a.x");
+	@ParameterizedTest
+	@ValueSource(
+		strings = {
+				"person.name",
+				"unknown,person.name",
+				"missing.name,person.name",
+				"missing[0].name,person.name",
+				"persons[100].name,person.name",
+				"unknown, persons[0].name",
+				",,,person.name,,,",
+				" , , person.name , ",
+				"attributes['unknown,key'],person.name",
+				"unknown , person.name",
+				".bad,attributes[],person.name",
+				"attributes['missing\\\\'].name,person.name"
+		})
+	void shouldResolveFirstNonNullPath(final String paths) {
+		var result = Fields.Safe.getByPaths(data, paths);
 
-		assertThat(x, equalTo(TEST_STRING));
-	}
-
-	@Test
-	void shouldGetFieldByPathsWhenCommaSeparatedPathsHaveWhitespace() {
-		A a = new A();
-		a.x = TEST_STRING;
-		B b = new B();
-		b.a = a;
-
-		String x = Fields.Safe.getByPaths(b, "x.y , a.x");
-
-		assertThat(x, equalTo(TEST_STRING));
-	}
-
-	@Test
-	void shouldGetFieldByPathsWithVarargs() {
-		A a = new A();
-		a.x = TEST_STRING;
-		B b = new B();
-		b.a = a;
-
-		String x = Fields.Safe.getByPaths(b, "x.y", "a.x");
-
-		assertThat(x, equalTo(TEST_STRING));
+		assertThat(result, equalTo("Alice"));
 	}
 
 	@Test
-	void shouldGetFieldByPathsAtFirstLevel() {
-		A a = new A();
-		a.x = TEST_STRING;
-		B b = new B();
-		b.a = a;
+	void shouldResolveFirstNonNullPathWithVarargs() {
+		var result = Fields.Safe.getByPaths(data, "unknown", "person.name");
 
-		A result = Fields.Safe.getByPaths(b, "a");
-
-		assertThat(result, equalTo(a));
+		assertThat(result, equalTo("Alice"));
 	}
 
 	@Test
-	void shouldReturnNullIfFieldDoesNotExist() {
-		A a = new A();
-		a.x = TEST_STRING;
-		B b = new B();
-		b.a = a;
+	void shouldResolveFieldAtFirstLevel() {
+		var result = Fields.Safe.getByPaths(data, "person");
 
-		A result = Fields.Safe.getByPaths(b, "z");
+		assertThat(result, equalTo(data.person));
+	}
+
+	@ParameterizedTest
+	@ValueSource(
+		strings = {
+				"",
+				" , , ",
+				"unknown",
+				"missing.name",
+				"persons[100].name"
+		})
+	void shouldReturnNullWhenNoPathResolves(final String paths) {
+		var result = Fields.Safe.getByPaths(data, paths);
 
 		assertThat(result, nullValue());
 	}
 
 	@Test
 	void shouldThrowWhenCommaSeparatedPathsAreNull() {
-		B b = new B();
-
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, (String) null));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(data, (String) null));
 		assertThat(e.getMessage(), equalTo("Cannot resolve field paths: paths are null"));
 	}
 
 	@Test
-	void shouldReturnNullForEmptySearch() {
-		A a = new A();
-		a.x = TEST_STRING;
-		B b = new B();
-		b.a = a;
-
-		A result = Fields.Safe.getByPaths(b, "");
-
-		assertThat(result, nullValue());
-
-		result = Fields.Safe.getByPaths(b, new String[] { });
-
-		assertThat(result, nullValue());
-
-		result = Fields.Safe.getByPaths(b, " , , ");
+	void shouldReturnNullForEmptyVarargs() {
+		var result = Fields.Safe.getByPaths(data, new String[] { });
 
 		assertThat(result, nullValue());
 	}
 
 	@Test
 	void shouldThrowWhenAPathIsNull() {
-		A a = new A();
-		a.x = TEST_STRING;
-		B b = new B();
-		b.a = a;
-
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, new String[] { null }));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(data, new String[] { null }));
 		assertThat(e.getMessage(), equalTo("Cannot resolve field path: path is null"));
 	}
 
 	@Test
 	void shouldThrowWhenPathsArrayIsNull() {
-		B b = new B();
-
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(b, (String[]) null));
+		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPaths(data, (String[]) null));
 		assertThat(e.getMessage(), equalTo("Cannot resolve field paths: paths are null"));
 	}
 
-	@Test
-	void shouldNotSplitOnCommaInsideBrackets() {
-		A fromMap = new A();
-		fromMap.x = "commaKey";
-		A fromDot = new A();
-		fromDot.x = "dotPath";
-		B b = new B();
-		b.keyed.put("a,b", fromMap);
-		b.a = fromDot;
+	@ParameterizedTest
+	@ValueSource(
+		strings = {
+				"attributes['a,b'],person.name",
+				"keyed['a,b'].name,person.name"
+		})
+	void shouldNotSplitOnCommaInsideBrackets(final String paths) {
+		var result = Fields.Safe.getByPaths(data, paths);
 
-		String value = Fields.Safe.getByPaths(b, "keyed['a,b'].x,a.x");
-
-		assertThat(value, equalTo("commaKey"));
-	}
-
-	@Test
-	void shouldResolveFallbackAfterMalformedAlternative() {
-		B b = new B();
-		b.a = new A();
-		b.a.x = TEST_STRING;
-
-		assertThat(Fields.Safe.getByPaths(b, ".bad,keyed[],a.x"), equalTo(TEST_STRING));
-	}
-
-	@Test
-	void shouldResolveFallbackAfterEscapedBackslash() {
-		B b = new B();
-		b.a = new A();
-		b.a.x = TEST_STRING;
-
-		assertThat(Fields.Safe.getByPaths(b, "keyed['missing\\\\'].x,a.x"), equalTo(TEST_STRING));
+		assertThat(result, equalTo("commaKey"));
 	}
 }
