@@ -95,7 +95,7 @@ class FieldPathsTest {
 	@ParameterizedTest
 	@MethodSource("alternativePaths")
 	void shouldResolveFirstMatchingAlternative(final String paths, final String expected) {
-		var result = FieldPaths.resolveValues(root, paths);
+		var result = FieldPaths.resolveFirstValue(root, paths);
 
 		assertThat(result, equalTo(expected));
 	}
@@ -122,7 +122,7 @@ class FieldPathsTest {
 				"data['unterminated,items[0].name"
 		})
 	void shouldReturnNullWhenNoAlternativeMatches(final String paths) {
-		var result = FieldPaths.resolveValues(root, paths);
+		var result = FieldPaths.resolveFirstValue(root, paths);
 
 		assertThat(result, nullValue());
 	}

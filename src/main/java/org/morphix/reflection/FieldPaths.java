@@ -16,9 +16,6 @@ import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
 
-import org.morphix.lang.JavaObjects;
-import org.morphix.reflection.FieldPathParser.Mode;
-
 /**
  * Resolves field paths using dot notation for properties and bracket notation for array/list indices and map keys.
  * Multiple paths can be separated by commas outside bracket selectors.
@@ -37,7 +34,7 @@ public interface FieldPaths {
 	 * @return value or null if the path cannot be resolved
 	 */
 	static <U> U resolveValue(final Object root, final String path) {
-		return JavaObjects.cast(FieldPathParser.resolve(root, path, Mode.SINGLE_VALUE));
+		return FieldPathParser.resolveValue(root, path);
 	}
 
 	/**
@@ -49,8 +46,8 @@ public interface FieldPaths {
 	 * @param paths alternative field paths
 	 * @return first non-null value or null
 	 */
-	static <U> U resolveValues(final Object root, final String paths) {
-		return JavaObjects.cast(FieldPathParser.resolve(root, paths, Mode.ALTERNATIVE_VALUES));
+	static <U> U resolveFirstValue(final Object root, final String paths) {
+		return FieldPathParser.resolveFirstValue(root, paths);
 	}
 
 	/**
@@ -62,9 +59,8 @@ public interface FieldPaths {
 	 * @param paths alternative field paths
 	 * @return field and its owning object, or {@link ExtendedField#EMPTY}
 	 */
-	static ExtendedField resolveField(final Object root, final String paths) {
-		ExtendedField field = JavaObjects.cast(FieldPathParser.resolve(root, paths, Mode.ALTERNATIVE_FIELD));
-		return null == field ? ExtendedField.EMPTY : field;
+	static ExtendedField resolveFirstField(final Object root, final String paths) {
+		return FieldPathParser.resolveFirstField(root, paths);
 	}
 
 	/**
