@@ -114,11 +114,12 @@ public final class FieldPathParser {
 	 * @return resolved value or extended field, or null if the root or expression is null, the expression is empty, or no
 	 * path matches
 	 */
-	static Object resolve(final Object root, final String paths, final Syntax syntax, final Target target) {
+	static <U> U resolve(final Object root, final String paths, final Syntax syntax, final Target target) {
 		if (null == root || null == paths || paths.isEmpty()) {
 			return null;
 		}
-		return new FieldPathParser(paths, syntax, target).resolve(root);
+		var parser = new FieldPathParser(paths, syntax, target);
+		return JavaObjects.cast(parser.resolve(root));
 	}
 
 	/**
@@ -130,7 +131,7 @@ public final class FieldPathParser {
 	 * @return value, or null if the path cannot be resolved
 	 */
 	public static <U> U resolveValue(final Object root, final String path) {
-		return JavaObjects.cast(FieldPathParser.resolve(root, path, Syntax.SINGLE_PATH, Target.VALUE));
+		return FieldPathParser.resolve(root, path, Syntax.SINGLE_PATH, Target.VALUE);
 	}
 
 	/**
@@ -142,7 +143,7 @@ public final class FieldPathParser {
 	 * @return first non-null value, or null if no path resolves
 	 */
 	public static <U> U resolveFirstValue(final Object root, final String paths) {
-		return JavaObjects.cast(FieldPathParser.resolve(root, paths, Syntax.ALTERNATIVE_PATHS, Target.VALUE));
+		return FieldPathParser.resolve(root, paths, Syntax.ALTERNATIVE_PATHS, Target.VALUE);
 	}
 
 	/**
