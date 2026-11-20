@@ -15,6 +15,7 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.LinkedHashMap;
@@ -22,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.morphix.lang.collections.FastArrayList;
 
 /**
@@ -36,6 +40,8 @@ class FieldsSafeGetByPathTest {
 	private static final String GETTER_VALUE = "getterValue";
 
 	private static final String NON_EXISTENT_FIELD = "$NonExistentField$";
+
+	private final Data data = new Data();
 
 	public static class WithTransformingGetter {
 
@@ -183,5 +189,150 @@ class FieldsSafeGetByPathTest {
 	public static class Wrapper {
 
 		public WithIndexedContainers row;
+	}
+
+	private record Person(String name) {
+		// empty
+	}
+
+	@SuppressWarnings("unused")
+	private static final class Data {
+
+		private final Person person = new Person("Alice");
+
+		private final List<Person> persons = List.of(
+				new Person("Alice"),
+				new Person("Bob"));
+
+		private final String[] array = { "Alice", "Bob" };
+
+		private final int[] numbers = { 10, 20, 30 };
+
+		private final int[][] matrix = {
+				{ 10, 20 },
+				{ 30, 40 }
+		};
+
+		private final Map<String, Object> attributes = Map.of(
+				"name", "Alice",
+				"first.name", "Bob",
+				"a,b", "comma",
+				"a]b", "bracket",
+				"a'b", "quote",
+				"a\\b", "backslash",
+				"0", "zero",
+				"", "empty",
+				"size", "map size");
+
+		private final Object missing = null;
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+			"person.name, Alice",
+			"persons[0].name, Alice",
+			"persons[1].name, Bob",
+			"array[0], Alice",
+			"array[1], Bob",
+			"attributes.name, Alice",
+			"attributes[name], Alice",
+			"attributes['name'], Alice",
+			"attributes[\"name\"], Alice",
+			"attributes['first.name'], Bob",
+			"attributes['0'], zero",
+			"attributes[''], empty",
+			"attributes.size, map size",
+			"attributes['a]b'], bracket"
+	})
+	void shouldResolvePath(final String path, final String expected) {
+		var result = Fields.Safe.getByPath(data, path);
+
+		assertThat(result, equalTo(expected));
+	}
+
+	@Test
+	void shouldResolvePrimitiveArrayElement() {
+		Integer result = Fields.Safe.getByPath(data, "numbers[1]");
+
+		assertThat(result, equalTo(20));
+	}
+
+	@Test
+	void shouldResolveNestedArrayElement() {
+		Integer result = Fields.Safe.getByPath(data, "matrix[1][0]");
+
+		assertThat(result, equalTo(30));
+	}
+
+	@Test
+	void shouldResolveKeyContainingComma() {
+		var result = Fields.Safe.getByPath(data, "attributes['a,b']");
+
+		assertThat(result, equalTo("comma"));
+	}
+
+	@Test
+	void shouldResolveKeyContainingQuote() {
+		var result = Fields.Safe.getByPath(data, "attributes['a\\'b']");
+
+		assertThat(result, equalTo("quote"));
+	}
+
+	@Test
+	void shouldResolveKeyContainingBackslash() {
+		var result = Fields.Safe.getByPath(data, "attributes['a\\\\b']");
+
+		assertThat(result, equalTo("backslash"));
+	}
+
+	@Test
+	void shouldResolveRootList() {
+		List<Person> persons = List.of(new Person("Alice"));
+
+		var result = Fields.Safe.getByPath(persons, "[0].name");
+
+		assertThat(result, equalTo("Alice"));
+	}
+
+	@Test
+	void shouldResolveRootMap() {
+		Map<String, String> map = Map.of("name", "Alice");
+
+		var result = Fields.Safe.getByPath(map, "['name']");
+
+		assertThat(result, equalTo("Alice"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(
+		strings = {
+				"",
+				".",
+				".person",
+				"person.",
+				"person..name",
+				"person.[0]",
+				"persons[]",
+				"persons[",
+				"persons[0",
+				"persons[0]]",
+				"persons[-1]",
+				"persons[100]",
+				"persons[2147483648]",
+				"persons[0]name",
+				"persons[0].",
+				"attributes['name]",
+				"attributes['name'",
+				"attributes['name']name",
+				"attributes[unknown]",
+				"missing.name",
+				"missing[0]",
+				"person.unknown",
+				"unknown"
+		})
+	void shouldReturnNullForInvalidOrUnresolvedPath(final String path) {
+		var result = Fields.Safe.getByPath(data, path);
+
+		assertNull(result);
 	}
 }
