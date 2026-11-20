@@ -12,36 +12,96 @@
  */
 package org.morphix.reflection;
 
-import static org.morphix.reflection.JavaModifier.STATIC;
-
 import java.lang.reflect.Field;
 import java.util.Map;
 
 /**
  * Cursor-based field path parser. Each selector is resolved as it is consumed, without allocating tokens or splitting
- * the expression into strings. The same parser handles single paths and comma-separated alternatives.
+ * the expression into strings.
+ * <p>
+ * The parser handles both single paths and comma-separated alternatives.
  *
  * @author Radu Sebastian LAZIN
  */
 final class FieldPathParser {
 
+	/**
+	 * Selects how the parser interprets paths and what it returns.
+	 */
+	enum Mode {
+
+		/**
+		 * Resolves one path to its value.
+		 */
+		SINGLE_VALUE,
+
+		/**
+		 * Resolves comma-separated paths to the first non-null value.
+		 */
+		ALTERNATIVE_VALUES,
+
+		/**
+		 * Resolves comma-separated paths to the first non-static field and its owner, even if the field value is null.
+		 */
+		ALTERNATIVE_FIELD
+	}
+
+	/**
+	 * Path expression being parsed.
+	 */
 	private final String paths;
 
+	/**
+	 * Length of the path expression.
+	 */
 	private final int length;
 
+	/**
+	 * Whether comma-separated alternative paths are accepted.
+	 */
 	private final boolean alternatives;
 
+	/**
+	 * Whether the result must be a reflective field and its owning object.
+	 */
 	private final boolean findField;
 
+	/**
+	 * Index of the next character to read from {@link #paths}.
+	 */
 	private int index;
 
+	/**
+	 * Whether the current alternative contains invalid syntax.
+	 */
 	private boolean invalid;
 
-	FieldPathParser(final String paths, final boolean alternatives, final boolean findField) {
+	/**
+	 * Creates a parser for the given expression and resolution mode.
+	 *
+	 * @param paths path expression
+	 * @param mode resolution mode
+	 */
+	private FieldPathParser(final String paths, final Mode mode) {
 		this.paths = paths;
 		this.length = paths.length();
-		this.alternatives = alternatives;
-		this.findField = findField;
+		this.alternatives = Mode.SINGLE_VALUE != mode;
+		this.findField = Mode.ALTERNATIVE_FIELD == mode;
+	}
+
+	/**
+	 * Resolves an expression using the requested mode.
+	 *
+	 * @param root root object
+	 * @param paths path expression
+	 * @param mode resolution mode
+	 * @return resolved value or extended field, or null if the root is null, the expression is empty, or no path matches
+	 */
+	static Object resolve(final Object root, final String paths, final Mode mode) {
+		if (null == root || null == paths || paths.isEmpty()) {
+			return null;
+		}
+		return new FieldPathParser(paths, mode).resolve(root);
 	}
 
 	/**
@@ -80,6 +140,12 @@ final class FieldPathParser {
 		return null;
 	}
 
+	/**
+	 * Reads one path, resolving each property or bracket selector as it is consumed.
+	 *
+	 * @param root root object
+	 * @return resolved value or extended field, or null if the path is invalid or cannot be resolved
+	 */
 	private Object readPath(final Object root) {
 		Object value = root;
 		if ('[' != peek()) {
@@ -97,6 +163,13 @@ final class FieldPathParser {
 		return invalid ? null : value;
 	}
 
+	/**
+	 * Reads a property name and resolves it against an object or map. In field mode, the final property produces an
+	 * extended field without reading its value.
+	 *
+	 * @param obj object containing the property
+	 * @return property value or extended field, or null if it cannot be resolved
+	 */
 	private Object readProperty(final Object obj) {
 		int start = index;
 		while (hasNext() && !isPropertyDelimiter(peek())) {
@@ -123,7 +196,7 @@ final class FieldPathParser {
 		if (null == field) {
 			return null;
 		}
-		if (STATIC.isPresentOn(field)) {
+		if (JavaModifier.STATIC.isPresentOn(field)) {
 			return null;
 		}
 		if (atPathEnd()) {
@@ -132,6 +205,12 @@ final class FieldPathParser {
 		return Fields.IgnoreAccess.get(obj, field);
 	}
 
+	/**
+	 * Reads a bracket selector as an array or list index, or as a map key. The opening bracket has already been consumed.
+	 *
+	 * @param obj container to read
+	 * @return selected value, or null if the selector is invalid or cannot be resolved
+	 */
 	private Object readBracket(final Object obj) {
 		if (!hasNext()) {
 			return fail();
@@ -179,6 +258,13 @@ final class FieldPathParser {
 		return findField && atPathEnd() ? null : value;
 	}
 
+	/**
+	 * Reads a quoted map key, replacing backslash escapes with the escaped characters. The opening quote has already been
+	 * consumed.
+	 *
+	 * @param quote quote character that closes the key
+	 * @return unescaped key, or null if the closing quote is missing
+	 */
 	private String readQuoted(final char quote) {
 		int start = index;
 		StringBuilder builder = null;
@@ -239,6 +325,11 @@ final class FieldPathParser {
 		}
 	}
 
+	/**
+	 * Checks whether the cursor is at the end of the current path, allowing trailing whitespace in alternative mode.
+	 *
+	 * @return true if the current path ends here
+	 */
 	private boolean atPathEnd() {
 		if (!hasNext()) {
 			return true;
@@ -253,22 +344,50 @@ final class FieldPathParser {
 		return end == length || ',' == paths.charAt(end);
 	}
 
+	/**
+	 * Checks whether a character terminates a property name in the current mode.
+	 *
+	 * @param ch character to check
+	 * @return true if the character terminates a property name
+	 */
 	private boolean isPropertyDelimiter(final char ch) {
 		return '.' == ch || '[' == ch || ']' == ch || (alternatives && ',' == ch);
 	}
 
+	/**
+	 * Checks whether a character can quote a map key.
+	 *
+	 * @param ch character to check
+	 * @return true for a single or double quote
+	 */
 	private static boolean isQuote(final char ch) {
 		return '\'' == ch || '"' == ch;
 	}
 
+	/**
+	 * Checks whether the cursor has another character to read.
+	 *
+	 * @return true if the cursor is before the end of the expression
+	 */
 	private boolean hasNext() {
 		return index < length;
 	}
 
+	/**
+	 * Returns the character at the cursor without advancing it.
+	 *
+	 * @return current character
+	 */
 	private char peek() {
 		return paths.charAt(index);
 	}
 
+	/**
+	 * Consumes the next character if it matches the expected character.
+	 *
+	 * @param ch expected character
+	 * @return true if the character matched and was consumed
+	 */
 	private boolean consume(final char ch) {
 		if (hasNext() && ch == peek()) {
 			++index;
@@ -277,12 +396,22 @@ final class FieldPathParser {
 		return false;
 	}
 
+	/**
+	 * Skips whitespace at the cursor using the same character range as {@link String#trim()}.
+	 */
 	private void skipWhitespace() {
 		while (hasNext() && peek() <= ' ') {
 			++index;
 		}
 	}
 
+	/**
+	 * Finds the end of a property name after removing trailing whitespace from the given range.
+	 *
+	 * @param start start of the property name, inclusive
+	 * @param end end of the property name, exclusive
+	 * @return end index after trailing whitespace is removed
+	 */
 	private int trimEnd(final int start, final int end) {
 		int result = end;
 		while (start < result && paths.charAt(result - 1) <= ' ') {
@@ -291,6 +420,11 @@ final class FieldPathParser {
 		return result;
 	}
 
+	/**
+	 * Marks the current alternative as invalid.
+	 *
+	 * @return null so callers can return the failed resolution
+	 */
 	private Object fail() {
 		invalid = true;
 		return null;
