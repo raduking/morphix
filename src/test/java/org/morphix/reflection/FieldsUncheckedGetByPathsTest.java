@@ -106,7 +106,8 @@ class FieldsUncheckedGetByPathsTest {
 	@ValueSource(
 		strings = {
 				", ,",
-				"data['unterminated,items[0].name"
+				"data['unterminated,items[0].name",
+				"data['a\\"
 		})
 	void shouldReturnNullWhenNoAlternativeMatches(final String paths) {
 		var result = Fields.Unchecked.getByPaths(root, paths);

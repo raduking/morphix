@@ -16,7 +16,6 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 import org.morphix.lang.JavaObjects;
-import org.morphix.lang.Nullables;
 
 /**
  * Resolves field paths one selector at a time. Alternative paths are separated before resolving each path, so an
@@ -82,7 +81,7 @@ public final class FieldPathParser {
 	 * @return first non-null value, or null if no path resolves
 	 */
 	public static <U> U resolveFirstValue(final Object root, final String paths) {
-		return resolveAlternatives(root, paths, Target.VALUE);
+		return resolveAlternatives(root, paths, Target.VALUE, null);
 	}
 
 	/**
@@ -94,8 +93,7 @@ public final class FieldPathParser {
 	 * @return field and its owner, or {@link ExtendedField#EMPTY} if none matches
 	 */
 	public static ExtendedField resolveFirstField(final Object root, final String paths) {
-		ExtendedField field = resolveAlternatives(root, paths, Target.FIELD);
-		return Nullables.nonNullOrDefault(field, ExtendedField.EMPTY);
+		return resolveAlternatives(root, paths, Target.FIELD, ExtendedField.EMPTY);
 	}
 
 	/**
@@ -104,11 +102,12 @@ public final class FieldPathParser {
 	 * @param root root object
 	 * @param paths alternative paths
 	 * @param target result type
-	 * @return first matching result, or null
+	 * @param defaultValue result when no path matches
+	 * @return first matching result, or {@code defaultValue}
 	 */
-	private static <U> U resolveAlternatives(final Object root, final String paths, final Target target) {
+	private static <U> U resolveAlternatives(final Object root, final String paths, final Target target, final U defaultValue) {
 		if (null == root || null == paths) {
-			return null;
+			return defaultValue;
 		}
 		int start = 0;
 		while (start < paths.length()) {
@@ -120,7 +119,7 @@ public final class FieldPathParser {
 			}
 			start = end + 1;
 		}
-		return null;
+		return defaultValue;
 	}
 
 	/**
@@ -133,7 +132,8 @@ public final class FieldPathParser {
 	private static int indexOfNextComma(final String paths, final int start) {
 		int depth = 0;
 		char quote = 0;
-		for (int i = start; i < paths.length(); ++i) {
+		int i = start;
+		while (i < paths.length()) {
 			char ch = paths.charAt(i);
 			if (0 != quote) {
 				if ('\\' == ch && i + 1 < paths.length()) {
@@ -150,6 +150,7 @@ public final class FieldPathParser {
 			} else if (',' == ch && 0 == depth) {
 				return i;
 			}
+			++i;
 		}
 		return paths.length();
 	}
@@ -290,14 +291,43 @@ public final class FieldPathParser {
 	 */
 	private Object readQuotedKey(final Object obj) {
 		char quote = path.charAt(index++);
-		StringBuilder key = new StringBuilder();
+		int start = index;
+
 		while (index < path.length()) {
 			char ch = path.charAt(index++);
 			if (ch == quote) {
-				if (!consume(']')) {
-					return null;
+				String key = path.substring(start, index - 1);
+				return consume(']') ? readMapKey(obj, key) : null;
+			}
+			if ('\\' == ch) {
+				return readQuotedEscapedKey(obj, quote, start);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Finishes a quoted map key after the first escape character, allocating a builder only for this case.
+	 *
+	 * @param obj map to read
+	 * @param quote quote character that closes the key
+	 * @param start start of the key, after its opening quote
+	 * @return map value, or null if the selector is invalid or the key is absent
+	 */
+	private Object readQuotedEscapedKey(final Object obj, final char quote, final int start) {
+		if (index == path.length()) {
+			return null;
+		}
+		StringBuilder key = new StringBuilder();
+		key.append(path, start, index - 1);
+		key.append(path.charAt(index++));
+		while (index < path.length()) {
+			char ch = path.charAt(index++);
+			if (ch == quote) {
+				if (consume(']')) {
+					return readMapKey(obj, key.toString());
 				}
-				return readMapKey(obj, key.toString());
+				return null;
 			}
 			if ('\\' == ch && index < path.length()) {
 				ch = path.charAt(index++);

@@ -156,7 +156,7 @@ class FinderPathStrategyTest {
 	void shouldRejectStaticFieldsAndContainerElementsAsTerminalFields() {
 		Source source = new Source();
 
-		for (String path : List.of("entries[0].staticName", "entries[0]", "keyed['a,b']", "keyed['a,b'] ",
+		for (String path : List.of("entries[0].staticName", "entries[0].unknown", "entries[0]", "keyed['a,b']", "keyed['a,b'] ",
 				"keyed.key", "missing.name", "entries[0].", "entries[0].name[0]")) {
 			assertThat(path, FinderPathStrategy.getConverterFieldByPathInHierarchy(source, path),
 					sameInstance(ExtendedField.EMPTY));

@@ -110,7 +110,18 @@ class FieldsUncheckedGetByPathTest {
 				"entries[0].name,items[0].name",
 				"items[9].name",
 				" entries[0].name",
-				"entries[0].name "
+				"entries[0].name ",
+				"entries]",
+				"entries[",
+				"data['key'",
+				"data['key'x]",
+				"data[foo[bar]]",
+				"data[a'b]",
+				"data['a\\",
+				"data['a\\x",
+				"data['a\\x'",
+				"data['a\\x'y]",
+				"data['a\\x\\"
 		})
 	void shouldReturnNullForInvalidOrUnresolvedSinglePath(final String path) {
 		var result = Fields.Unchecked.getByPath(root, path);
