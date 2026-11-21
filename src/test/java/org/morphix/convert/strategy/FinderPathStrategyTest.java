@@ -133,7 +133,14 @@ class FinderPathStrategyTest {
 				"items[0]",
 				"keyed['key']",
 				"keyed['key'] ",
-				"entries[0].staticName"
+				"entries[0].staticName",
+				"entries[0].unknown",
+				"keyed['a,b']",
+				"keyed['a,b'] ",
+				"keyed.key",
+				"missing.name",
+				"entries[0].",
+				"entries[0].name[0]"
 		})
 	void shouldReturnEmptyWhenNoAlternativeMatches(final String paths) {
 		Source source = new Source();
@@ -153,20 +160,24 @@ class FinderPathStrategyTest {
 	}
 
 	@Test
-	void shouldRejectStaticFieldsAndContainerElementsAsTerminalFields() {
+	void shouldReturnEmptyForNullRoot() {
+		var result = FinderPathStrategy.getConverterFieldByPathInHierarchy(null, "entries[0].name");
+
+		assertThat(result, sameInstance(ExtendedField.EMPTY));
+	}
+
+	@ParameterizedTest
+	@ValueSource(
+		strings = {
+				"entries[0].staticName,items[0].name",
+				"entries[0],items[0].name"
+		})
+	void shouldSkipNonFieldAlternative(final String paths) {
 		Source source = new Source();
 
-		for (String path : List.of("entries[0].staticName", "entries[0].unknown", "entries[0]", "keyed['a,b']", "keyed['a,b'] ",
-				"keyed.key", "missing.name", "entries[0].", "entries[0].name[0]")) {
-			assertThat(path, FinderPathStrategy.getConverterFieldByPathInHierarchy(source, path),
-					sameInstance(ExtendedField.EMPTY));
-		}
-		assertThat(FinderPathStrategy.getConverterFieldByPathInHierarchy(null, "entries[0].name"),
-				sameInstance(ExtendedField.EMPTY));
-		assertField(FinderPathStrategy.getConverterFieldByPathInHierarchy(source, "entries[0].staticName,items[0].name"),
-				source.items.get(0), "list");
-		assertField(FinderPathStrategy.getConverterFieldByPathInHierarchy(source, "entries[0],items[0].name"),
-				source.items.get(0), "list");
+		var result = FinderPathStrategy.getConverterFieldByPathInHierarchy(source, paths);
+
+		assertField(result, source.items.get(0), "list");
 	}
 
 	@Test
@@ -176,8 +187,7 @@ class FinderPathStrategyTest {
 		map.put("size", entry);
 
 		assertField(FinderPathStrategy.getConverterFieldByPathInHierarchy(map, "size.name"), entry, "map size");
-		assertThat(FinderPathStrategy.getConverterFieldByPathInHierarchy(map, "size"),
-				sameInstance(ExtendedField.EMPTY));
+		assertThat(FinderPathStrategy.getConverterFieldByPathInHierarchy(map, "size"), sameInstance(ExtendedField.EMPTY));
 		assertThat(Fields.Safe.getByPath(map, "size.name"), equalTo("map size"));
 		assertThat(Fields.Safe.getByPath(map, "threshold"), nullValue());
 	}
