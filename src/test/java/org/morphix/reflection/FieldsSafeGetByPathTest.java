@@ -15,9 +15,17 @@ package org.morphix.reflection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Test class for {@link Fields.Safe#getByPath(Object, String)}.
@@ -30,7 +38,7 @@ class FieldsSafeGetByPathTest {
 
 	private static final String GETTER_VALUE = "getterValue";
 
-	private static final String NON_EXISTENT_FIELD = "$NonExistentField$";
+	private final Data data = new Data();
 
 	public static class WithTransformingGetter {
 
@@ -55,64 +63,18 @@ class FieldsSafeGetByPathTest {
 		assertThat(result, equalTo(obj.inner));
 	}
 
-	@Test
-	void shouldGetNestedField() {
-		WithNestedField obj = new WithNestedField();
-
-		Object result = Fields.Safe.getByPath(obj, "inner.value");
-
-		assertThat(result, equalTo(FIELD_VALUE));
-	}
-
-	@Test
-	void shouldReturnNullIfFieldDoesNotExistAtFirstLevel() {
-		WithNestedField obj = new WithNestedField();
-
-		Object result = Fields.Safe.getByPath(obj, NON_EXISTENT_FIELD);
-
-		assertThat(result, nullValue());
-	}
-
-	@Test
-	void shouldReturnNullIfNestedFieldDoesNotExist() {
-		WithNestedField obj = new WithNestedField();
-
-		Object result = Fields.Safe.getByPath(obj, "inner." + NON_EXISTENT_FIELD);
-
-		assertThat(result, nullValue());
-	}
-
-	@Test
-	void shouldReturnNullIfIntermediateFieldIsNull() {
-		WithNestedField obj = new WithNestedField();
-		obj.inner = null;
-
-		Object result = Fields.Safe.getByPath(obj, "inner.value");
-
-		assertThat(result, nullValue());
-	}
-
-	@Test
-	void shouldReturnNullForEmptyPath() {
-		Object result = Fields.Safe.getByPath(new WithNestedField(), "");
-
-		assertThat(result, nullValue());
-	}
-
-	@Test
-	void shouldReturnNullForPathWithTrailingDot() {
-		Object result = Fields.Safe.getByPath(new WithNestedField(), "inner.");
-
-		assertThat(result, nullValue());
-	}
-
-	@Test
-	void shouldReadTheFieldAndNotTheGetterOnASingleSegmentPath() {
-		WithTransformingGetter obj = new WithTransformingGetter();
-
-		Object result = Fields.Safe.getByPath(obj, "value");
+	@ParameterizedTest
+	@MethodSource("getterPaths")
+	void shouldReadTheFieldAndNotTheGetter(final Object root, final String path) {
+		var result = Fields.Safe.getByPath(root, path);
 
 		assertThat(result, equalTo(FIELD_VALUE));
+	}
+
+	private static Stream<Arguments> getterPaths() {
+		return Stream.of(
+				Arguments.of(new WithTransformingGetter(), "value"),
+				Arguments.of(new WithNestedField(), "inner.value"));
 	}
 
 	@Test
@@ -123,8 +85,128 @@ class FieldsSafeGetByPathTest {
 	}
 
 	@Test
-	void shouldThrowWhenPathIsNull() {
-		ReflectionException e = assertThrows(ReflectionException.class, () -> Fields.Safe.getByPath(new WithNestedField(), null));
-		assertThat(e.getMessage(), equalTo("Cannot resolve field path: path is null"));
+	void shouldReturnNullWhenPathIsNull() {
+		var result = Fields.Safe.getByPath(new WithNestedField(), null);
+
+		assertThat(result, nullValue());
+	}
+
+	private record Person(String name) {
+		// empty
+	}
+
+	@SuppressWarnings("unused")
+	private static final class Data {
+
+		private final Person person = new Person("Alice");
+
+		private final List<Person> persons = List.of(
+				new Person("Alice"),
+				new Person("Bob"));
+
+		private final String[] array = { "Alice", "Bob" };
+
+		private final int[] numbers = { 10, 20, 30 };
+
+		private final int[][] matrix = {
+				{ 10, 20 },
+				{ 30, 40 }
+		};
+
+		private final Map<String, Object> attributes = Map.of(
+				"name", "Alice",
+				"first.name", "Bob",
+				"a,b", "comma",
+				"a]b", "bracket",
+				"a'b", "quote",
+				"a\\b", "backslash",
+				"0", "zero",
+				"", "empty",
+				"size", "map size");
+
+		private final Object missing = null;
+	}
+
+	@ParameterizedTest
+	@MethodSource("resolvedPaths")
+	void shouldResolvePath(final String path, final Object expected) {
+		var result = Fields.Safe.getByPath(data, path);
+
+		assertThat(result, equalTo(expected));
+	}
+
+	private static Stream<Arguments> resolvedPaths() {
+		return Stream.of(
+				Arguments.of("person.name", "Alice"),
+				Arguments.of("persons[0]", new Person("Alice")),
+				Arguments.of("persons[0].name", "Alice"),
+				Arguments.of("persons[1].name", "Bob"),
+				Arguments.of("array[0]", "Alice"),
+				Arguments.of("array[1]", "Bob"),
+				Arguments.of("numbers[1]", 20),
+				Arguments.of("matrix[1][0]", 30),
+				Arguments.of("attributes.name", "Alice"),
+				Arguments.of("attributes[name]", "Alice"),
+				Arguments.of("attributes['name']", "Alice"),
+				Arguments.of("attributes[\"name\"]", "Alice"),
+				Arguments.of("attributes['first.name']", "Bob"),
+				Arguments.of("attributes['0']", "zero"),
+				Arguments.of("attributes['']", "empty"),
+				Arguments.of("attributes.size", "map size"),
+				Arguments.of("attributes['a]b']", "bracket"),
+				Arguments.of("attributes['a,b']", "comma"),
+				Arguments.of("attributes['a\\'b']", "quote"),
+				Arguments.of("attributes['a\\\\b']", "backslash"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("rootPaths")
+	void shouldResolveRootContainer(final Object root, final String path, final Object expected) {
+		var result = Fields.Safe.getByPath(root, path);
+
+		assertThat(result, equalTo(expected));
+	}
+
+	private static Stream<Arguments> rootPaths() {
+		return Stream.of(
+				Arguments.of(List.of(new Person("Alice")), "[0].name", "Alice"),
+				Arguments.of(Map.of("name", "Alice"), "['name']", "Alice"),
+				Arguments.of(Map.of("a,b", "Alice"), "a,b", "Alice"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(
+		strings = {
+				"",
+				".",
+				".person",
+				"person.",
+				"person..name",
+				"person.[0]",
+				"persons[]",
+				"persons[",
+				"persons[0",
+				"persons[0]]",
+				"persons[-1]",
+				"persons[100]",
+				"persons[2147483648]",
+				"persons[0]name",
+				"persons[0].",
+				"persons[[0]]",
+				"attributes['name]",
+				"attributes['name'",
+				"attributes['unfinished\\",
+				"attributes['name']name",
+				"attributes[a'b'c]",
+				"attributes[unknown]",
+				"missing.name",
+				"missing[0]",
+				"person.unknown",
+				"unknown"
+		})
+	void shouldReturnNullForInvalidOrUnresolvedPath(final String path) {
+		var result = Fields.Safe.getByPath(data, path);
+
+		assertNull(result);
 	}
 }

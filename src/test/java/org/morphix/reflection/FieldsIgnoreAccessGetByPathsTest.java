@@ -15,6 +15,7 @@ package org.morphix.reflection;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -114,5 +115,59 @@ class FieldsIgnoreAccessGetByPathsTest {
 		result = Fields.IgnoreAccess.getByPaths(b, new String[] { });
 
 		assertThat(result, nullValue());
+	}
+
+	@Test
+	void shouldThrowWhenPathsArrayIsNull() {
+		B b = new B();
+
+		ReflectionException exception = assertThrows(ReflectionException.class,
+				() -> Fields.IgnoreAccess.getByPaths(b, (String[]) null));
+
+		assertThat(exception.getMessage(), equalTo("Cannot resolve field paths: paths are null"));
+	}
+
+	@Test
+	void shouldThrowWhenCommaSeparatedPathsAreNull() {
+		B b = new B();
+
+		ReflectionException exception = assertThrows(ReflectionException.class,
+				() -> Fields.IgnoreAccess.getByPaths(b, (String) null));
+
+		assertThat(exception.getMessage(), equalTo("Cannot resolve field paths: paths are null"));
+	}
+
+	@Test
+	void shouldThrowWhenSinglePathIsNull() {
+		B b = new B();
+
+		ReflectionException exception = assertThrows(ReflectionException.class,
+				() -> Fields.IgnoreAccess.getByPath(b, null));
+
+		assertThat(exception.getMessage(), equalTo("Cannot resolve field path: path is null"));
+	}
+
+	@Test
+	void shouldSkipNullVarargsPath() {
+		A a = new A();
+		a.x = TEST_STRING;
+		B b = new B();
+		b.a = a;
+
+		var result = Fields.IgnoreAccess.getByPaths(b, null, "a.x");
+
+		assertThat(result, equalTo(TEST_STRING));
+	}
+
+	@Test
+	void shouldResolveFirstNonNullVarargsPath() {
+		A a = new A();
+		a.x = TEST_STRING;
+		B b = new B();
+		b.a = a;
+
+		var result = Fields.IgnoreAccess.getByPaths(b, "missing", "a.x");
+
+		assertThat(result, equalTo(TEST_STRING));
 	}
 }

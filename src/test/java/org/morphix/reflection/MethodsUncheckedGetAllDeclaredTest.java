@@ -85,6 +85,11 @@ class MethodsUncheckedGetAllDeclaredTest {
 
 	@Test
 	void shouldThrowNullPointerExceptionForNullPredicate() {
+		assertThrows(NullPointerException.class, () -> Methods.Unchecked.getAllDeclared(A.class, null));
+	}
+
+	@Test
+	void shouldThrowNullPointerExceptionForNullPredicateAndNoMethods() {
 		assertThrows(NullPointerException.class, () -> Methods.Unchecked.getAllDeclared(C.class, null));
 	}
 

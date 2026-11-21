@@ -13,7 +13,6 @@
 package org.morphix.reflection;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -452,9 +451,11 @@ public interface Fields {
 		 * @param obj object to search the field in
 		 * @param paths possible paths to the field
 		 * @return field value or null if the field is not found or the field value cannot be returned
+		 * @throws ReflectionException if {@code paths} is null
 		 */
 		static <T, U> U getByPaths(final T obj, final String... paths) {
-			return Safe.getByPaths(obj, paths);
+			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
+			return Unchecked.getByPaths(obj, paths);
 		}
 
 		/**
@@ -469,7 +470,8 @@ public interface Fields {
 		 * @return field value or null if the field is not found or the field value cannot be returned
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
-			return Safe.getByPaths(obj, paths);
+			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
+			return Unchecked.getByPaths(obj, paths);
 		}
 
 		/**
@@ -483,7 +485,8 @@ public interface Fields {
 		 * @return field value or null if the field is not found or the field value cannot be returned
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
-			return Safe.getByPath(obj, path);
+			Reflection.requireNotNull(path, "Cannot resolve field path: path is null");
+			return Unchecked.getByPath(obj, path);
 		}
 	}
 
@@ -799,8 +802,7 @@ public interface Fields {
 		}
 
 		/**
-		 * Returns the field value for the given object. Field is searched with the field path.<br>
-		 * TODO: implement full functionality similar to JSON Path
+		 * Returns the field value for the given object. Field is searched with the field path.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
@@ -808,24 +810,18 @@ public interface Fields {
 		 * @param obj object to search the field in
 		 * @param paths possible paths to the field
 		 * @return field value or null if the field is not found in none of the given paths
-		 * @throws ReflectionException if {@code paths} is null or a path is null
 		 */
 		static <T, U> U getByPaths(final T obj, final String... paths) {
-			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
-			U result = null;
-			for (String path : paths) {
-				result = getByPath(obj, path);
-				if (null != result) {
-					break;
-				}
+			if (null == obj || null == paths) {
+				return null;
 			}
-			return result;
+			return Unchecked.getByPaths(obj, paths);
 		}
 
 		/**
 		 * Variation of {@link Safe#getByPaths(Object, String...)} with paths given as a comma separated list of paths in a
-		 * single string. Each segment is {@linkplain String#trim() trimmed} after splitting on {@code ','}; empty segments are
-		 * ignored.
+		 * single string. Commas inside brackets are part of the selector. Each path is {@linkplain String#trim() trimmed};
+		 * empty alternatives are ignored.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
@@ -833,91 +829,35 @@ public interface Fields {
 		 * @param obj object to search the field in
 		 * @param paths comma separated possible paths to the field
 		 * @return field value or null if the field is not found in none of the given paths
-		 * @throws ReflectionException if the paths are null
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
-			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
-			if (paths.isEmpty()) {
+			if (null == obj || null == paths) {
 				return null;
 			}
-			String[] parts = paths.split(",", -1);
-			List<String> trimmedPaths = new ArrayList<>(parts.length);
-			for (String part : parts) {
-				String path = part.trim();
-				if (!path.isEmpty()) {
-					trimmedPaths.add(path);
-				}
-			}
-			if (trimmedPaths.isEmpty()) {
-				return null;
-			}
-			return getByPaths(obj, trimmedPaths.toArray(String[]::new));
+			return Unchecked.getByPaths(obj, paths);
 		}
 
 		/**
-		 * Returns the field value given by its qualified path to the required field in the given object. The field is read
-		 * directly, without going through a getter method.
+		 * Returns the field value given by its path to the required field in the given object. The field is read directly,
+		 * without going through a getter method.
+		 * <p>
+		 * Paths use dot notation for properties (for example {@code inner.value}), bracket notation for array or list indices
+		 * (for example {@code items[0].name}), and quoted or unquoted map keys (for example {@code data['key']} or
+		 * {@code data[key]}). When a property is not declared on an object, a {@link java.util.Map} value is consulted.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
 		 *
 		 * @param obj object to get the field from
-		 * @param path qualified path to the field
-		 * @return field value or null if the field is not found or if the object is null
-		 * @throws ReflectionException if {@code path} is null
+		 * @param path path to the value
+		 * @return field or container value, or {@code null} if the path is empty, invalid, not found, or {@code obj} is
+		 * {@code null}
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
-			Reflection.requireNotNull(path, "Cannot resolve field path: path is null");
-			U result = null;
-			String[] fieldNames = path.split("\\.", -1);
-			if (fieldNames.length == 1) {
-				result = Safe.get(obj, fieldNames[0]);
-			} else {
-				Object value = obj;
-				for (String fieldName : fieldNames) {
-					value = Safe.get(value, fieldName);
-					if (null == value) {
-						break;
-					}
-				}
-				if (null != value) {
-					result = JavaObjects.cast(value);
-				}
+			if (null == obj || null == path) {
+				return null;
 			}
-			return result;
-		}
-	}
-
-	/**
-	 * Unsafe utility methods.
-	 *
-	 * @author Radu Sebastian LAZIN
-	 */
-	interface Unsafe {
-		/**
-		 * Sets the field value using the {@link TheUnsafe} utility.
-		 * <p>
-		 * Primitive fields accept the same widening conversions as {@link Field#set(Object, Object)}. A reference field accepts
-		 * {@code null} or a value that is an instance of the field type. This is the path used for {@code final} fields, so
-		 * those fields accept the same values as non-final fields.
-		 *
-		 * @param obj object on which the represented field's value is to be set
-		 * @param field field on which to set the value
-		 * @param value value to be set on the field
-		 * @throws IllegalArgumentException if {@code value} is not assignable to the field
-		 */
-		static void set(final Object obj, final Field field, final Object value) {
-			boolean isStatic = JavaModifier.STATIC.isPresentOn(field);
-			Object instance = isStatic ? TheUnsafe.staticFieldBase(field) : obj;
-			long offset = isStatic ? TheUnsafe.staticFieldOffset(field) : TheUnsafe.objectFieldOffset(field);
-			Class<?> type = field.getType();
-			if (type.isPrimitive()) {
-				TheUnsafe.putPrimitive(instance, offset, type, value);
-			} else if (null == value || type.isInstance(value)) {
-				TheUnsafe.putObject(instance, offset, value);
-			} else {
-				throw TheUnsafe.incompatibleValue(type, value);
-			}
+			return Unchecked.getByPath(obj, path);
 		}
 	}
 
@@ -933,6 +873,8 @@ public interface Fields {
 	 * This interface also exposes unchecked field lookup and enumeration helpers used by {@link Safe} and
 	 * {@link IgnoreAccess} so validation is not applied twice. Callers must supply valid arguments and handle
 	 * {@link ReflectionException} and other runtime failures; prefer {@link IgnoreAccess} in application code.
+	 * <p>
+	 * Path lookup methods return {@code null} for a null root or path; the varargs form requires a non-null array.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
@@ -1183,6 +1125,89 @@ public interface Fields {
 					throw new ReflectionException(typeMismatch, "Cannot set field value for {}", field.getName());
 				}
 			});
+		}
+
+		/**
+		 * Returns the first non-null value from the given paths without validating the arguments.
+		 *
+		 * @param <T> object type
+		 * @param <U> field value type
+		 *
+		 * @param obj object to search
+		 * @param paths paths to try in order
+		 * @return first non-null value, or null if no path resolves
+		 * @throws NullPointerException if the paths array is null
+		 */
+		static <T, U> U getByPaths(final T obj, final String... paths) {
+			for (String path : paths) {
+				U result = getByPath(obj, path);
+				if (null != result) {
+					return result;
+				}
+			}
+			return null;
+		}
+
+		/**
+		 * Returns the first non-null value from comma-separated paths without validating the arguments.
+		 *
+		 * @param <T> object type
+		 * @param <U> field value type
+		 *
+		 * @param obj object to search
+		 * @param paths comma-separated paths
+		 * @return first non-null value, or null if the root or paths are null or no path resolves
+		 */
+		static <T, U> U getByPaths(final T obj, final String paths) {
+			return FieldPathParser.resolveFirstValue(obj, paths);
+		}
+
+		/**
+		 * Returns the value at a single path without validating the arguments.
+		 *
+		 * @param <T> object type
+		 * @param <U> field value type
+		 *
+		 * @param obj object to search
+		 * @param path path to resolve
+		 * @return value, or null if the root or path is null or the path cannot be resolved
+		 */
+		static <T, U> U getByPath(final T obj, final String path) {
+			return FieldPathParser.resolveValue(obj, path);
+		}
+	}
+
+	/**
+	 * Unsafe utility methods.
+	 *
+	 * @author Radu Sebastian LAZIN
+	 */
+	interface Unsafe {
+
+		/**
+		 * Sets the field value using the {@link TheUnsafe} utility.
+		 * <p>
+		 * Primitive fields accept the same widening conversions as {@link Field#set(Object, Object)}. A reference field accepts
+		 * {@code null} or a value that is an instance of the field type. This is the path used for {@code final} fields, so
+		 * those fields accept the same values as non-final fields.
+		 *
+		 * @param obj object on which the represented field's value is to be set
+		 * @param field field on which to set the value
+		 * @param value value to be set on the field
+		 * @throws IllegalArgumentException if {@code value} is not assignable to the field
+		 */
+		static void set(final Object obj, final Field field, final Object value) {
+			boolean isStatic = JavaModifier.STATIC.isPresentOn(field);
+			Object instance = isStatic ? TheUnsafe.staticFieldBase(field) : obj;
+			long offset = isStatic ? TheUnsafe.staticFieldOffset(field) : TheUnsafe.objectFieldOffset(field);
+			Class<?> type = field.getType();
+			if (type.isPrimitive()) {
+				TheUnsafe.putPrimitive(instance, offset, type, value);
+			} else if (null == value || type.isInstance(value)) {
+				TheUnsafe.putObject(instance, offset, value);
+			} else {
+				throw TheUnsafe.incompatibleValue(type, value);
+			}
 		}
 	}
 

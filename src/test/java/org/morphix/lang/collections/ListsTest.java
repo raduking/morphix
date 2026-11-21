@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.sameInstance;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -340,6 +341,60 @@ class ListsTest {
 			List<List<Integer>> result = Lists.partition(List.of(1, 2, 3), -10);
 
 			assertThat(result, empty());
+		}
+	}
+
+	@Nested
+	class SafeGetTests {
+
+		@Test
+		void shouldReturnNullForNullList() {
+			String result = Lists.safeGet(null, 0);
+
+			assertThat(result, nullValue());
+		}
+
+		@Test
+		void shouldReturnNullForEmptyList() {
+			String result = Lists.safeGet(List.of(), 0);
+
+			assertThat(result, nullValue());
+		}
+
+		@Test
+		void shouldReturnNullForNegativeIndex() {
+			List<String> list = List.of("a", "b");
+
+			String result = Lists.safeGet(list, -1);
+
+			assertThat(result, nullValue());
+		}
+
+		@Test
+		void shouldReturnNullWhenIndexEqualsSize() {
+			List<String> list = List.of("a", "b");
+
+			String result = Lists.safeGet(list, list.size());
+
+			assertThat(result, nullValue());
+		}
+
+		@Test
+		void shouldReturnElementAtFirstAndLastIndex() {
+			List<String> list = List.of("a", "b", "c");
+
+			assertThat(Lists.safeGet(list, 0), equalTo("a"));
+			assertThat(Lists.safeGet(list, list.size() - 1), equalTo("c"));
+		}
+
+		@Test
+		void shouldReturnNullElementStoredInList() {
+			List<String> list = new ArrayList<>();
+			list.add(null);
+
+			String result = Lists.safeGet(list, 0);
+
+			assertThat(result, nullValue());
 		}
 	}
 }

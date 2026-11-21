@@ -17,6 +17,9 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.morphix.convert.Conversions.convertFrom;
 
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 /**
@@ -141,5 +144,37 @@ class DeepSourceTest {
 
 		assertThat(dst.l, nullValue());
 		assertThat(dst.x, equalTo(TEST_LONG));
+	}
+
+	public static class IndexedSource {
+
+		List<A> items;
+
+		Map<String, A> keyed;
+	}
+
+	public static class IndexedDestination {
+
+		@Src("items[0].s")
+		Long indexed;
+
+		@Src("items[9].s,keyed['a,b'].s")
+		Long alternative;
+	}
+
+	@Test
+	void shouldDeepConvertIndexedAndAlternativePaths() {
+		A first = new A();
+		first.s = "10";
+		A second = new A();
+		second.s = "20";
+		IndexedSource src = new IndexedSource();
+		src.items = List.of(first);
+		src.keyed = Map.of("a,b", second);
+
+		IndexedDestination dst = convertFrom(src, IndexedDestination::new);
+
+		assertThat(dst.indexed, equalTo(10L));
+		assertThat(dst.alternative, equalTo(20L));
 	}
 }
