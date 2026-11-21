@@ -159,10 +159,10 @@ public interface JavaArrays {
 	 * @return the element at {@code index}, or {@code null} when the array is {@code null} or the index is out of range
 	 */
 	static <T> T safeGet(final T[] array, final int index) {
-		if (null == array || index < 0) {
+		if (isEmpty(array)) {
 			return null;
 		}
-		if (index >= array.length) {
+		if (index < 0 || index >= array.length) {
 			return null;
 		}
 		return array[index];
