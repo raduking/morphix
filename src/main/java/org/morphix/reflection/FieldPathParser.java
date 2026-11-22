@@ -297,7 +297,10 @@ public final class FieldPathParser {
 			char ch = path.charAt(index++);
 			if (ch == quote) {
 				String key = path.substring(start, index - 1);
-				return consume(']') ? readMapKey(obj, key) : null;
+				if (consume(']')) {
+					return readMapKey(obj, key);
+				}
+				return null;
 			}
 			if ('\\' == ch) {
 				return readQuotedEscapedKey(obj, quote, start);
