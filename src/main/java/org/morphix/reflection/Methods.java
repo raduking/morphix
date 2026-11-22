@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -29,7 +30,7 @@ import java.util.stream.Stream;
 
 import org.morphix.lang.JavaObjects;
 import org.morphix.lang.collections.FastArrayList;
-import org.morphix.lang.collections.Lists;
+import org.morphix.lang.collections.Iterables;
 import org.morphix.reflection.predicates.MemberPredicates;
 
 /**
@@ -711,6 +712,9 @@ public interface Methods {
 		 * @return list of methods
 		 */
 		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
+			if (null == cls) {
+				return List.of();
+			}
 			return getAllDeclaredInHierarchy(cls, Classes.mutableSetOf());
 		}
 
@@ -738,11 +742,14 @@ public interface Methods {
 				return List.of();
 			}
 			Reflection.requireNotNull(excluded, "Cannot traverse method hierarchy for class {}: excluded set is null", cls);
+			if (excluded.contains(cls)) {
+				return List.of();
+			}
 			FastArrayList<Method> methods = new FastArrayList<>();
-			FastArrayList<Class<?>> pending = new FastArrayList<>();
-			pending.add(cls);
-			while (Lists.isNotEmpty(pending)) {
-				Class<?> type = pending.removeLast();
+			ArrayDeque<Class<?>> pending = new ArrayDeque<>();
+			pending.push(cls);
+			while (Iterables.isNotEmpty(pending)) {
+				Class<?> type = pending.pop();
 				if (excluded.contains(type)) {
 					continue;
 				}
@@ -754,11 +761,11 @@ public interface Methods {
 				methods.addAll(type.getDeclaredMethods());
 				Class<?>[] interfaces = type.getInterfaces();
 				for (int i = interfaces.length - 1; i >= 0; --i) {
-					pending.add(interfaces[i]);
+					pending.push(interfaces[i]);
 				}
 				Class<?> superclass = type.getSuperclass();
 				if (null != superclass) {
-					pending.add(superclass);
+					pending.push(superclass);
 				}
 			}
 			return methods;

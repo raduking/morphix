@@ -186,4 +186,11 @@ class MethodsCompleteGetAllDeclaredInHierarchyTest {
 		assertThat(methods, empty());
 	}
 
+	@Test
+	void shouldReturnEmptyListForNullClass() {
+		var result = Methods.Complete.getAllDeclaredInHierarchy((Class<?>) null);
+
+		assertThat(result, empty());
+	}
+
 }
