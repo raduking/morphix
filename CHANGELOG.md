@@ -1,5 +1,9 @@
 ## Release Notes
 
+`1.1.3`
+
+---
+
 `1.1.2`
 
 - Added `FieldPathParser` for JSON Path-style field path parsing and resolution (properties, indices, and map keys).
