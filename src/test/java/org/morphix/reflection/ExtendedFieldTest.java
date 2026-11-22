@@ -54,7 +54,8 @@ class ExtendedFieldTest {
 		A a = new A();
 		a.l = TEST_LONG;
 
-		ExtendedField fop = ExtendedField.of(Fields.getOneDeclared(A.class, "l"), a);
+		Field field = Fields.getOneDeclared(A.class, "l");
+		ExtendedField fop = ExtendedField.of(field, a);
 		String result = fop.toString();
 
 		assertThat(result, equalTo("Field: l" + EOL
@@ -79,7 +80,8 @@ class ExtendedFieldTest {
 		A a = new A();
 		a.l = TEST_LONG;
 
-		ExtendedField fop = ExtendedField.of(Fields.getOneDeclared(A.class, "l"));
+		Field field = Fields.getOneDeclared(A.class, "l");
+		ExtendedField fop = ExtendedField.of(field);
 		String result = fop.toString();
 
 		assertThat(result, equalTo("Field: l" + EOL
