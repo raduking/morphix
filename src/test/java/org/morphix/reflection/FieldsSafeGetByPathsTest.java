@@ -18,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -80,6 +81,17 @@ class FieldsSafeGetByPathsTest {
 	@Test
 	void shouldResolveFirstNonNullPathWithVarargs() {
 		var result = Fields.Safe.getByPaths(data, "unknown", "person.name");
+
+		assertThat(result, equalTo("Alice"));
+	}
+
+	@Test
+	void shouldTryNextAlternativeWhenMapRejectsStringKey() {
+		Map<Integer, String> numbered = new TreeMap<>();
+		numbered.put(1, "one");
+		Map<String, Object> root = Map.of("numbered", numbered, "name", "Alice");
+
+		var result = Fields.Safe.getByPaths(root, "numbered.missing,name");
 
 		assertThat(result, equalTo("Alice"));
 	}

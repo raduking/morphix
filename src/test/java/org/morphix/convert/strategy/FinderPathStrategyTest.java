@@ -20,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -178,6 +179,23 @@ class FinderPathStrategyTest {
 		var result = FinderPathStrategy.getConverterFieldByPathInHierarchy(source, paths);
 
 		assertField(result, source.items.get(0), "list");
+	}
+
+	@ParameterizedTest
+	@ValueSource(
+		strings = {
+				"numbered.missing,entry.name",
+				"numbered[missing],entry.name"
+		})
+	void shouldTryNextFieldWhenMapRejectsStringKey(final String paths) {
+		Map<Integer, Entry> numbered = new TreeMap<>();
+		numbered.put(1, new Entry("one"));
+		Entry fallback = new Entry("fallback");
+		Map<String, Object> source = Map.of("numbered", numbered, "entry", fallback);
+
+		var result = FinderPathStrategy.getConverterFieldByPathInHierarchy(source, paths);
+
+		assertField(result, fallback, "fallback");
 	}
 
 	@Test

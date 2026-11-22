@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -172,6 +173,22 @@ class FieldsSafeGetByPathTest {
 				Arguments.of(List.of(new Person("Alice")), "[0].name", "Alice"),
 				Arguments.of(Map.of("name", "Alice"), "['name']", "Alice"),
 				Arguments.of(Map.of("a,b", "Alice"), "a,b", "Alice"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(
+		strings = {
+				"missing",
+				"[missing]",
+				"['missing']"
+		})
+	void shouldReturnNullWhenMapRejectsStringKey(final String path) {
+		Map<Integer, String> root = new TreeMap<>();
+		root.put(1, "one");
+
+		var result = Fields.Safe.getByPath(root, path);
+
+		assertThat(result, nullValue());
 	}
 
 	@ParameterizedTest

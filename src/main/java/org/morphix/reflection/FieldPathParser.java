@@ -230,8 +230,8 @@ public final class FieldPathParser {
 	 * @return property value, or null
 	 */
 	private static Object readValueProperty(final Object obj, final String name) {
-		if (obj instanceof Map<?, ?> map) {
-			return map.get(name);
+		if (obj instanceof Map<?, ?>) {
+			return readMapKey(obj, name);
 		}
 		return Fields.Safe.get(obj, name);
 	}
@@ -244,11 +244,11 @@ public final class FieldPathParser {
 	 * @return field with owner, intermediate value, or null
 	 */
 	private Object readFieldProperty(final Object obj, final String name) {
-		if (obj instanceof Map<?, ?> map) {
+		if (obj instanceof Map<?, ?>) {
 			if (index == path.length()) {
 				return null;
 			}
-			return map.get(name);
+			return readMapKey(obj, name);
 		}
 		Field field = Fields.Unchecked.getOneDeclaredInHierarchy(obj.getClass(), name);
 		if (null == field || JavaModifier.STATIC.isPresentOn(field)) {
@@ -373,11 +373,15 @@ public final class FieldPathParser {
 	 *
 	 * @param obj container to read
 	 * @param key map key
-	 * @return map value, or null if the container is not a map or the key is absent
+	 * @return map value, or null if the container is not a map, the key is absent, or its type is not supported
 	 */
 	private static Object readMapKey(final Object obj, final String key) {
 		if (obj instanceof Map<?, ?> map) {
-			return map.get(key);
+			try {
+				return map.get(key);
+			} catch (ClassCastException e) {
+				return null;
+			}
 		}
 		return null;
 	}
