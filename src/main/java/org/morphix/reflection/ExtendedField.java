@@ -374,6 +374,16 @@ public class ExtendedField {
 	}
 
 	/**
+	 * Returns true if the field value is not {@code null}, false otherwise. Can be used as a predicate in
+	 * {@link ExtendedFields#findAllNonStatic(Object, Predicate)}.
+	 *
+	 * @return true if the field value is not {@code null}, false otherwise
+	 */
+	public boolean valueNotNull() {
+		return null != getFieldValue();
+	}
+
+	/**
 	 * Returns true if the annotation is present on the extended field.
 	 *
 	 * @param <T> annotation type

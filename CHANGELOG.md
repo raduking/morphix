@@ -2,6 +2,9 @@
 
 `1.1.3`
 
+- Added `ExtendedField.valueNotNull()` to check whether the field value is not `null`, usable as a predicate for `ExtendedFields.findAllNonStatic`.
+- Upgraded parent to `4.1.3`.
+
 ---
 
 `1.1.2`

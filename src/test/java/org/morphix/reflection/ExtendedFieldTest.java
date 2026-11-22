@@ -14,6 +14,8 @@ package org.morphix.reflection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -48,11 +50,11 @@ class ExtendedFieldTest {
 	}
 
 	@Test
-	void shouldBuildStringWithToString() throws Exception {
+	void shouldBuildStringWithToString() {
 		A a = new A();
 		a.l = TEST_LONG;
 
-		ExtendedField fop = ExtendedField.of(A.class.getDeclaredField("l"), a);
+		ExtendedField fop = ExtendedField.of(Fields.getOneDeclared(A.class, "l"), a);
 		String result = fop.toString();
 
 		assertThat(result, equalTo("Field: l" + EOL
@@ -73,11 +75,11 @@ class ExtendedFieldTest {
 	}
 
 	@Test
-	void shouldBuildStringWithToStringWithNoObject() throws Exception {
+	void shouldBuildStringWithToStringWithNoObject() {
 		A a = new A();
 		a.l = TEST_LONG;
 
-		ExtendedField fop = ExtendedField.of(A.class.getDeclaredField("l"));
+		ExtendedField fop = ExtendedField.of(Fields.getOneDeclared(A.class, "l"));
 		String result = fop.toString();
 
 		assertThat(result, equalTo("Field: l" + EOL
@@ -186,6 +188,38 @@ class ExtendedFieldTest {
 		Deprecated annotation = ef.getAnnotation(Deprecated.class);
 
 		assertThat(annotation, equalTo(method.getAnnotation(Deprecated.class)));
+	}
+
+	@Test
+	void shouldReturnTrueOnValueNotNullWhenFieldValueIsNotNull() {
+		A a = new A();
+		a.l = TEST_LONG;
+		Field field = Fields.getOneDeclared(A.class, "l");
+		ExtendedField ef = ExtendedField.of(field, a);
+
+		boolean result = ef.valueNotNull();
+
+		assertTrue(result);
+	}
+
+	@Test
+	void shouldReturnFalseOnValueNotNullWhenFieldValueIsNull() {
+		A a = new A();
+		Field field = Fields.getOneDeclared(A.class, "l");
+		ExtendedField ef = ExtendedField.of(field, a);
+
+		boolean result = ef.valueNotNull();
+
+		assertFalse(result);
+	}
+
+	@Test
+	void shouldReturnFalseOnValueNotNullWhenThereIsNoFieldOrObject() {
+		ExtendedField ef = ExtendedField.of(null);
+
+		boolean result = ef.valueNotNull();
+
+		assertFalse(result);
 	}
 
 	@Test
