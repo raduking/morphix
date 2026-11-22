@@ -125,4 +125,15 @@ public final class JavaObjects {
 		}
 		return cast(Array.get(obj, index));
 	}
+
+	/**
+	 * Returns true if the given object is an array, false otherwise.
+	 *
+	 * @param obj object to check
+	 * @return true if the given object is an array, false otherwise
+	 */
+	public static boolean isArray(final Object obj) {
+		Class<?> cls = Classes.getFrom(obj);
+		return Classes.isArray(cls);
+	}
 }

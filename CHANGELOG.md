@@ -3,6 +3,7 @@
 `1.1.3`
 
 - Added `ExtendedField.valueNotNull()` to check whether the field value is not `null`, usable as a predicate for `ExtendedFields.findAllNonStatic`.
+- Added `JavaObjects.isArray(Object)` to check whether an object is an array, returning `false` for `null`.
 - Upgraded parent to `4.1.3`.
 
 ---
