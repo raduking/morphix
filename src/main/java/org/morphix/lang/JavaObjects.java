@@ -136,4 +136,14 @@ public final class JavaObjects {
 		Class<?> cls = Classes.getFrom(obj);
 		return Classes.isArray(cls);
 	}
+
+	/**
+	 * Returns true if the given object is not an array, false otherwise.
+	 *
+	 * @param obj object to check
+	 * @return true if the given object is not an array, false otherwise
+	 */
+	public static boolean isNotArray(final Object obj) {
+		return !isArray(obj);
+	}
 }

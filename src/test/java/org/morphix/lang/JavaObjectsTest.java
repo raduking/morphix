@@ -397,6 +397,59 @@ class JavaObjectsTest {
 	}
 
 	@Nested
+	class IsNotArrayTests {
+
+		@Test
+		void shouldReturnTrueOnNull() {
+			boolean result = JavaObjects.isNotArray(null);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnNonArray() {
+			boolean result = JavaObjects.isNotArray(BUBU);
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnTrueOnList() {
+			boolean result = JavaObjects.isNotArray(List.of(BUBU));
+
+			assertTrue(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnObjectArray() {
+			boolean result = JavaObjects.isNotArray(new String[] { BUBU });
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnEmptyArray() {
+			boolean result = JavaObjects.isNotArray(new Object[] { });
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnPrimitiveArray() {
+			boolean result = JavaObjects.isNotArray(new int[] { 1 });
+
+			assertFalse(result);
+		}
+
+		@Test
+		void shouldReturnFalseOnMultiDimensionalArray() {
+			boolean result = JavaObjects.isNotArray(new int[][] { { 1 } });
+
+			assertFalse(result);
+		}
+	}
+
+	@Nested
 	class GetAtTests {
 
 		@Test
