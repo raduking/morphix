@@ -37,7 +37,7 @@ public interface Fields {
 	 *
 	 * @param cls class containing the field
 	 * @param fieldName the name of the field
-	 * @return the field with the given name or null if the field is not present in the class
+	 * @return the field with the given name or {@code null} if the field is not present in the class
 	 */
 	static <T> Field getOneDeclared(final Class<T> cls, final String fieldName) {
 		return Safe.getOneDeclared(cls, fieldName);
@@ -50,7 +50,7 @@ public interface Fields {
 	 *
 	 * @param obj object containing the field
 	 * @param fieldName the name of the field
-	 * @return the field with the given name or null if the field is not present in the class
+	 * @return the field with the given name or {@code null} if the field is not present in the class
 	 */
 	static Field getOneDeclared(final Object obj, final String fieldName) {
 		return Safe.getOneDeclared(obj, fieldName);
@@ -63,7 +63,7 @@ public interface Fields {
 	 *
 	 * @param cls class on which the fields are returned
 	 * @param fieldName the name of the fields to get
-	 * @return existing field, null otherwise
+	 * @return existing field, {@code null} otherwise
 	 */
 	static <T> Field getOneDeclaredInHierarchy(final Class<T> cls, final String fieldName) {
 		return Safe.getOneDeclaredInHierarchy(cls, fieldName);
@@ -75,7 +75,7 @@ public interface Fields {
 	 *
 	 * @param obj object on which the fields are needed
 	 * @param fieldName the name of the field to be retrieved
-	 * @return existing field, null otherwise
+	 * @return existing field, {@code null} otherwise
 	 */
 	static Field getOneDeclaredInHierarchy(final Object obj, final String fieldName) {
 		return Safe.getOneDeclaredInHierarchy(obj, fieldName);
@@ -83,8 +83,8 @@ public interface Fields {
 
 	/**
 	 * Returns a list with all the fields in the class given as parameter. This is different from
-	 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array. If the class is null it returns
-	 * an empty list.
+	 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array. If the class is {@code null} it
+	 * returns an empty list.
 	 * <p>
 	 * The returned list must not be modified by the caller.
 	 *
@@ -291,6 +291,9 @@ public interface Fields {
 
 	/**
 	 * Interface which groups all methods that ignore field access modifiers.
+	 * <p>
+	 * Path lookup methods can read private and static fields. Do not evaluate caller-supplied paths against objects
+	 * containing data that the caller must not access without validating the paths first.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
@@ -302,7 +305,7 @@ public interface Fields {
 		 * @param <T> field value type
 		 *
 		 * @param field field to query
-		 * @param obj object containing the field (null for static fields)
+		 * @param obj object containing the field ({@code null} for static fields)
 		 * @return field value
 		 * @throws ReflectionException if the field value cannot be returned
 		 */
@@ -334,7 +337,7 @@ public interface Fields {
 		 * @param <T> field value type
 		 *
 		 * @param field field to query
-		 * @param obj object containing the field (null for static fields)
+		 * @param obj object containing the field ({@code null} for static fields)
 		 * @param value value to set
 		 * @throws ReflectionException if the field value cannot be set
 		 */
@@ -450,8 +453,8 @@ public interface Fields {
 		 *
 		 * @param obj object to search the field in
 		 * @param paths possible paths to the field
-		 * @return field value or null if the field is not found or the field value cannot be returned
-		 * @throws ReflectionException if {@code paths} is null
+		 * @return field value or {@code null} if the field is not found or the field value cannot be returned
+		 * @throws ReflectionException if {@code paths} is {@code null}
 		 */
 		static <T, U> U getByPaths(final T obj, final String... paths) {
 			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
@@ -467,7 +470,7 @@ public interface Fields {
 		 *
 		 * @param obj object to search the field in
 		 * @param paths comma separated possible paths to the field
-		 * @return field value or null if the field is not found or the field value cannot be returned
+		 * @return field value or {@code null} if the field is not found or the field value cannot be returned
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
 			Reflection.requireNotNull(paths, "Cannot resolve field paths: paths are null");
@@ -482,7 +485,7 @@ public interface Fields {
 		 *
 		 * @param obj object to get the field from
 		 * @param path qualified path to the field
-		 * @return field value or null if the field is not found or the field value cannot be returned
+		 * @return field value or {@code null} if the field is not found or the field value cannot be returned
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
 			Reflection.requireNotNull(path, "Cannot resolve field path: path is null");
@@ -491,8 +494,11 @@ public interface Fields {
 	}
 
 	/**
-	 * Interface which groups all methods that ignore field access modifiers and also return null instead of throwing an
-	 * exception when the field is not found or the field value cannot be returned.
+	 * Interface which groups all methods that ignore field access modifiers and also return {@code null} instead of
+	 * throwing an exception when the field is not found or the field value cannot be returned.
+	 * <p>
+	 * Safe refers to {@code null} and error handling, not access control. Path lookup methods can read private and static
+	 * fields. Validate caller-supplied paths or restrict the root object to data the caller may access.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
@@ -507,7 +513,7 @@ public interface Fields {
 		 *
 		 * @param cls class containing the field
 		 * @param fieldName the name of the field
-		 * @return the field with the given name or null if the field is not present in the class
+		 * @return the field with the given name or {@code null} if the field is not present in the class
 		 */
 		static <T> Field getOneDeclared(final Class<T> cls, final String fieldName) {
 			if (null == cls || null == fieldName) {
@@ -523,7 +529,7 @@ public interface Fields {
 		 *
 		 * @param obj object containing the field
 		 * @param fieldName the name of the field
-		 * @return the field with the given name or null if the field is not present in the class
+		 * @return the field with the given name or {@code null} if the field is not present in the class
 		 */
 		static Field getOneDeclared(final Object obj, final String fieldName) {
 			if (null == obj || null == fieldName) {
@@ -540,7 +546,7 @@ public interface Fields {
 		 *
 		 * @param cls class on which the fields are returned
 		 * @param fieldName the name of the fields to get
-		 * @return existing field, null otherwise
+		 * @return existing field, {@code null} otherwise
 		 */
 		static <T> Field getOneDeclaredInHierarchy(final Class<T> cls, final String fieldName) {
 			if (null == cls || null == fieldName) {
@@ -555,7 +561,7 @@ public interface Fields {
 		 *
 		 * @param obj object on which the fields are needed
 		 * @param fieldName the name of the field to be retrieved
-		 * @return existing field, null otherwise
+		 * @return existing field, {@code null} otherwise
 		 */
 		static Field getOneDeclaredInHierarchy(final Object obj, final String fieldName) {
 			if (null == obj || null == fieldName) {
@@ -567,8 +573,8 @@ public interface Fields {
 
 		/**
 		 * Returns a list with all the fields in the class given as parameter. This is different from
-		 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array. If the class is null it returns
-		 * an empty list.
+		 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array. If the class is {@code null} it
+		 * returns an empty list.
 		 * <p>
 		 * The returned list must not be modified by the caller.
 		 *
@@ -735,8 +741,8 @@ public interface Fields {
 		 * @param <T> field value type
 		 *
 		 * @param field field to query
-		 * @param obj object containing the field (null for static fields)
-		 * @return field value or null if the field value cannot be returned
+		 * @param obj object containing the field ({@code null} for static fields)
+		 * @return field value or {@code null} if the field value cannot be returned
 		 */
 		static <T> T get(final Object obj, final Field field) {
 			if (null == field) {
@@ -755,9 +761,9 @@ public interface Fields {
 		 *
 		 * @param <T> field value type
 		 *
-		 * @param obj object containing the field (null for static fields)
+		 * @param obj object containing the field ({@code null} for static fields)
 		 * @param fieldName field name to query
-		 * @return field value, null if the field is not found
+		 * @return field value, {@code null} if the field is not found
 		 */
 		static <T> T get(final Object obj, final String fieldName) {
 			if (null == obj || null == fieldName) {
@@ -776,7 +782,7 @@ public interface Fields {
 		 *
 		 * @param cls the class that has the static field
 		 * @param fieldName the name of the static field
-		 * @return the value of the static field with the given name, null if the field is not found or is not static
+		 * @return the value of the static field with the given name, {@code null} if the field is not found or is not static
 		 */
 		static <T, U> T getStatic(final Class<U> cls, final String fieldName) {
 			if (null == cls || null == fieldName) {
@@ -792,7 +798,7 @@ public interface Fields {
 		 * @param <T> the type of the static field
 		 *
 		 * @param field the static field
-		 * @return the value of the static field with the given name, null if the field is null or is not static
+		 * @return the value of the static field with the given name, {@code null} if the field is {@code null} or is not static
 		 */
 		static <T> T getStatic(final Field field) {
 			if (null == field || JavaModifier.STATIC.isNotPresentOn(field)) {
@@ -809,7 +815,7 @@ public interface Fields {
 		 *
 		 * @param obj object to search the field in
 		 * @param paths possible paths to the field
-		 * @return field value or null if the field is not found in none of the given paths
+		 * @return field value or {@code null} if the field is not found in none of the given paths
 		 */
 		static <T, U> U getByPaths(final T obj, final String... paths) {
 			if (null == obj || null == paths) {
@@ -828,7 +834,7 @@ public interface Fields {
 		 *
 		 * @param obj object to search the field in
 		 * @param paths comma separated possible paths to the field
-		 * @return field value or null if the field is not found in none of the given paths
+		 * @return field value or {@code null} if the field is not found in none of the given paths
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
 			if (null == obj || null == paths) {
@@ -867,14 +873,16 @@ public interface Fields {
 	 * {@link IgnoreAccess} delegates its core work here: {@link #get(Object, Field)} and
 	 * {@link #set(Object, Field, Object)} apply the same rules (including ignoring Java access modifiers) as
 	 * {@link IgnoreAccess#get(Object, Field) IgnoreAccess.get} and {@link IgnoreAccess#set(Object, Field, Object)
-	 * IgnoreAccess.set}, without checking that the field descriptor is non-null, resolving a field by name, or verifying
-	 * that a field is static. Static fields use a {@code null} target object, as with {@link IgnoreAccess}.
+	 * IgnoreAccess.set}, without checking that the field descriptor is non-{@code null}, resolving a field by name, or
+	 * verifying that a field is static. Static fields use a {@code null} target object, as with {@link IgnoreAccess}.
 	 * <p>
 	 * This interface also exposes unchecked field lookup and enumeration helpers used by {@link Safe} and
 	 * {@link IgnoreAccess} so validation is not applied twice. Callers must supply valid arguments and handle
 	 * {@link ReflectionException} and other runtime failures; prefer {@link IgnoreAccess} in application code.
 	 * <p>
-	 * Path lookup methods return {@code null} for a null root or path; the varargs form requires a non-null array.
+	 * Path lookup methods return {@code null} for a {@code null} root or path. The varargs form requires a non-{@code null}
+	 * array. Path lookup methods can read private and static fields. Validate caller-supplied paths or restrict the root
+	 * object to data the caller may access.
 	 *
 	 * @author Radu Sebastian LAZIN
 	 */
@@ -884,15 +892,16 @@ public interface Fields {
 		 * Returns the field with the given name from the given class. This method does not search for fields in super classes,
 		 * use {@link #getOneDeclaredInHierarchy(Class, String)} for that.
 		 * <p>
-		 * This method does not check if the class or the field name is null and will throw a {@link NullPointerException} if
-		 * they are. The caller must validate the inputs. Use {@link Fields#getOneDeclared(Class, String)} if you want to get
-		 * null when the class or the field name is {@code null}.
+		 * This method does not check if the class or the field name is {@code null} and will throw a
+		 * {@link NullPointerException} if they are. The caller must validate the inputs. Use
+		 * {@link Fields#getOneDeclared(Class, String)} if you want to get {@code null} when the class or the field name is
+		 * {@code null}.
 		 *
 		 * @param <T> type to get the field from
 		 *
 		 * @param cls class containing the field
 		 * @param fieldName the name of the field
-		 * @return the field with the given name or null if the field is not present in the class
+		 * @return the field with the given name or {@code null} if the field is not present in the class
 		 */
 		static <T> Field getOneDeclared(final Class<T> cls, final String fieldName) {
 			try {
@@ -912,7 +921,7 @@ public interface Fields {
 		 *
 		 * @param cls class on which the fields are returned
 		 * @param fieldName the name of the fields to get
-		 * @return existing field, null otherwise
+		 * @return existing field, {@code null} otherwise
 		 */
 		static <T> Field getOneDeclaredInHierarchy(final Class<T> cls, final String fieldName) {
 			Class<?> type = cls;
@@ -930,7 +939,7 @@ public interface Fields {
 		 * Returns a list with all the fields in the class given as parameter. This is different from
 		 * {@link Class#getDeclaredFields()} as it returns a {@link List} instead of an array.
 		 * <p>
-		 * The caller must validate the class. This method throws {@link NullPointerException} if it is null. Use
+		 * The caller must validate the class. This method throws {@link NullPointerException} if it is {@code null}. Use
 		 * {@link Fields#getAllDeclared(Class)} if you want to get an empty list when the class is {@code null}.
 		 * <p>
 		 * This method wraps the array returned by {@link Class#getDeclaredFields()} in a {@link FastArrayList} without copying
@@ -974,7 +983,7 @@ public interface Fields {
 		 * order provided by {@link Class#getDeclaredFields()}. Super interfaces are not walked; only the class superclass chain
 		 * is included.
 		 * <p>
-		 * The caller must validate the class. This method throws {@link NullPointerException} if it is null. Use
+		 * The caller must validate the class. This method throws {@link NullPointerException} if it is {@code null}. Use
 		 * {@link Fields#getAllDeclaredInHierarchy(Class)} if you want an empty list when the class is {@code null}.
 		 * <p>
 		 * The returned list must not be modified by the caller.
@@ -1108,7 +1117,7 @@ public interface Fields {
 		 * @param <T> field value type
 		 *
 		 * @param field field to query
-		 * @param obj object containing the field (null for static fields)
+		 * @param obj object containing the field ({@code null} for static fields)
 		 * @param value value to set
 		 * @throws ReflectionException if the field value cannot be set
 		 * @see IgnoreAccess#set(Object, Field, Object)
@@ -1128,15 +1137,15 @@ public interface Fields {
 		}
 
 		/**
-		 * Returns the first non-null value from the given paths without validating the arguments.
+		 * Returns the first non-{@code null} value from the given paths without validating the arguments.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
 		 *
 		 * @param obj object to search
 		 * @param paths paths to try in order
-		 * @return first non-null value, or null if no path resolves
-		 * @throws NullPointerException if the paths array is null
+		 * @return first non-{@code null} value, or {@code null} if no path resolves
+		 * @throws NullPointerException if the paths array is {@code null}
 		 */
 		static <T, U> U getByPaths(final T obj, final String... paths) {
 			for (String path : paths) {
@@ -1149,14 +1158,14 @@ public interface Fields {
 		}
 
 		/**
-		 * Returns the first non-null value from comma-separated paths without validating the arguments.
+		 * Returns the first non-{@code null} value from comma-separated paths without validating the arguments.
 		 *
 		 * @param <T> object type
 		 * @param <U> field value type
 		 *
 		 * @param obj object to search
 		 * @param paths comma-separated paths
-		 * @return first non-null value, or null if the root or paths are null or no path resolves
+		 * @return first non-{@code null} value, or {@code null} if the root or paths are {@code null} or no path resolves
 		 */
 		static <T, U> U getByPaths(final T obj, final String paths) {
 			return FieldPathParser.resolveFirstValue(obj, paths);
@@ -1170,7 +1179,7 @@ public interface Fields {
 		 *
 		 * @param obj object to search
 		 * @param path path to resolve
-		 * @return value, or null if the root or path is null or the path cannot be resolved
+		 * @return value, or {@code null} if the root or path is {@code null} or the path cannot be resolved
 		 */
 		static <T, U> U getByPath(final T obj, final String path) {
 			return FieldPathParser.resolveValue(obj, path);

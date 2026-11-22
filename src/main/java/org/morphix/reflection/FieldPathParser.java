@@ -20,6 +20,9 @@ import org.morphix.lang.JavaObjects;
 /**
  * Resolves field paths one selector at a time. Alternative paths are separated before resolving each path, so an
  * invalid alternative does not affect the next one.
+ * <p>
+ * Value paths can read private and static fields. Treat path expressions as trusted input. If callers supply paths,
+ * validate them against an allowlist or provide a root object containing only data those callers may read.
  *
  * @author Radu Sebastian LAZIN
  */

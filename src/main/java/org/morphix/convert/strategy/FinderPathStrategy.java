@@ -40,7 +40,8 @@ public class FinderPathStrategy implements FieldFinderStrategy {
 	}
 
 	/**
-	 * Returns the first field and its owning object from comma-separated alternative paths.
+	 * Returns the first field and its owning object from comma-separated alternative paths. The returned field and owner
+	 * may refer to private data, so validate caller-supplied paths before using them here.
 	 *
 	 * @param <T> object type
 	 *

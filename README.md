@@ -60,6 +60,13 @@ Current release `1.1.2`
 - [Simple conversions](doc/simple.md)
 - [Auto conversions](doc/auto-conversions.md)
 
+### Reflection and Security
+
+Field path lookup uses reflection and can read private and static fields. If a path comes from outside your application,
+validate it against an allowlist or resolve it against an object containing only data the caller may access.
+
+`Fields.Safe` handles `null`s and expected lookup failures. It does not restrict field access.
+
 ### Examples
 
 See [examples](src/test/java/org/morphix/examples) folder in unit tests for examples.
