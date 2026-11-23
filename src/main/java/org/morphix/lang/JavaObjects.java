@@ -69,7 +69,7 @@ public final class JavaObjects {
 			case Collection<?> collection -> collection.isEmpty();
 			case Map<?, ?> map -> map.isEmpty();
 			case Optional<?> optional -> optional.isEmpty();
-			case Object object when object.getClass().isArray() -> Array.getLength(o) == 0;
+			case Object object when isArray(object) -> Array.getLength(o) == 0;
 			default -> false;
 		};
 	}
@@ -124,5 +124,26 @@ public final class JavaObjects {
 			return null;
 		}
 		return cast(Array.get(obj, index));
+	}
+
+	/**
+	 * Returns true if the given object is an array, false otherwise.
+	 *
+	 * @param obj object to check
+	 * @return true if the given object is an array, false otherwise
+	 */
+	public static boolean isArray(final Object obj) {
+		Class<?> cls = Classes.getFrom(obj);
+		return Classes.isArray(cls);
+	}
+
+	/**
+	 * Returns true if the given object is not an array, false otherwise.
+	 *
+	 * @param obj object to check
+	 * @return true if the given object is not an array, false otherwise
+	 */
+	public static boolean isNotArray(final Object obj) {
+		return !isArray(obj);
 	}
 }

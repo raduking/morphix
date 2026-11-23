@@ -38,6 +38,7 @@ class ExtendedFieldsTest {
 	private static final String WITH_GETTER = "withGetter";
 	private static final String COMPUTED = "computed";
 	private static final String BOXED = "boxed";
+	private static final String SET = "set";
 	private static final String ITEM = "item";
 	private static final String BASE_MAPPING = "baseMapping";
 	private static final String DERIVED_MAPPING = "derivedMapping";
@@ -154,6 +155,13 @@ class ExtendedFieldsTest {
 	@Test
 	void shouldNotReturnStaticGetterAsAProperty() {
 		assertThat(ExtendedFields.findAllNonStatic(new WithOnlyStaticGetter()), equalTo(List.of()));
+	}
+
+	@Test
+	void shouldReturnOnlyFieldsWithNotNullValueWhenUsingValueNotNullAsPredicate() {
+		List<ExtendedField> fields = ExtendedFields.findAllNonStatic(new WithNullableFields(), ExtendedField::valueNotNull);
+
+		assertThat(namesOf(fields), contains(SET));
 	}
 
 	private static List<String> namesOf(final List<ExtendedField> fields) {
@@ -278,6 +286,13 @@ class ExtendedFieldsTest {
 		public static Long getValue() {
 			return 2L;
 		}
+	}
+
+	public static class WithNullableFields {
+
+		Long set = 1L;
+
+		Long unset;
 	}
 
 	public static class WithOnlyStaticGetter {
