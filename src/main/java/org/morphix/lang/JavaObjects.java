@@ -69,7 +69,7 @@ public final class JavaObjects {
 			case Collection<?> collection -> collection.isEmpty();
 			case Map<?, ?> map -> map.isEmpty();
 			case Optional<?> optional -> optional.isEmpty();
-			case Object object when object.getClass().isArray() -> Array.getLength(o) == 0;
+			case Object object when isArray(object) -> Array.getLength(o) == 0;
 			default -> false;
 		};
 	}
