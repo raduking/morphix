@@ -208,6 +208,13 @@ class FieldsSafeGetTest {
 	}
 
 	@Test
+	void shouldReturnNullIfObjectIsNullOnCallWithFieldName() {
+		Object result = Fields.Safe.get(null, "s");
+
+		assertThat(result, equalTo(null));
+	}
+
+	@Test
 	void shouldReturnClassClassloaderField() {
 		Class<?> clazz = Class.class;
 
