@@ -189,6 +189,30 @@ public interface Lists {
 	}
 
 	/**
+	 * Returns the element at the given index, or {@code null} if the list is {@code null}, empty, or the index is out of
+	 * range.
+	 * <p>
+	 * Will not throw a {@link NullPointerException} when the list is {@code null}, or an {@link IndexOutOfBoundsException}
+	 * when the index is out of range.
+	 *
+	 * @param <T> element type
+	 *
+	 * @param list the list to read, may be {@code null}
+	 * @param index zero-based element index
+	 * @return the element at {@code index}, or {@code null} when the list is {@code null}, empty, or the index is out of
+	 * range
+	 */
+	static <T> T safeGet(final List<T> list, final int index) {
+		if (isEmpty(list)) {
+			return null;
+		}
+		if (index < 0 || index >= list.size()) {
+			return null;
+		}
+		return list.get(index);
+	}
+
+	/**
 	 * Merges two sorted lists returning a new mutable sorted list.
 	 * <ul>
 	 * <li>Both input lists must be sorted in ascending order.</li>

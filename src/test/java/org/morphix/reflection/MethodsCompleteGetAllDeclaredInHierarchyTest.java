@@ -53,6 +53,30 @@ class MethodsCompleteGetAllDeclaredInHierarchyTest {
 		// empty class
 	}
 
+	private interface Top {
+		void top();
+	}
+
+	private interface Left extends Top {
+		void left();
+	}
+
+	private interface Right extends Top {
+		void right();
+	}
+
+	private interface Diamond extends Left, Right {
+		void diamond();
+	}
+
+	private static final class WithInterface extends A implements Top {
+
+		@Override
+		public void top() {
+			// empty
+		}
+	}
+
 	@Test
 	void shouldGetAllMethodsInHierarchy() {
 		List<Method> methods = Methods.Complete.getAllDeclaredInHierarchy(B.class);
@@ -62,6 +86,25 @@ class MethodsCompleteGetAllDeclaredInHierarchyTest {
 		int sizeObject = Object.class.getDeclaredMethods().length;
 
 		assertThat(methods, hasSize(sizeA + sizeB + sizeObject));
+	}
+
+	@Test
+	void shouldKeepSuperclassBeforeInterfacesInTraversalOrder() {
+		var result = Methods.Complete.getAllDeclaredInHierarchy(WithInterface.class);
+
+		assertThat(result.stream().map(Method::getDeclaringClass).distinct().toList(),
+				equalTo(List.of(WithInterface.class, A.class, Object.class, Top.class)));
+	}
+
+	@Test
+	void shouldVisitSharedInterfaceOnlyOnce() {
+		Set<Class<?>> excluded = Classes.mutableSetOf();
+
+		var result = Methods.Complete.getAllDeclaredInHierarchy(Diamond.class, excluded);
+
+		assertThat(result.stream().map(Method::getDeclaringClass).toList(),
+				equalTo(List.of(Diamond.class, Left.class, Top.class, Right.class)));
+		assertThat(excluded, equalTo(Set.of(Diamond.class, Left.class, Top.class, Right.class)));
 	}
 
 	@Test
@@ -141,6 +184,13 @@ class MethodsCompleteGetAllDeclaredInHierarchyTest {
 		List<Method> methods = Methods.Complete.getAllDeclaredInHierarchy(null, null);
 
 		assertThat(methods, empty());
+	}
+
+	@Test
+	void shouldReturnEmptyListForNullClass() {
+		var result = Methods.Complete.getAllDeclaredInHierarchy((Class<?>) null);
+
+		assertThat(result, empty());
 	}
 
 }

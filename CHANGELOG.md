@@ -1,10 +1,26 @@
 ## Release Notes
 
+`1.1.2`
+
+- Added `FieldPathParser` for JSON Path-style field path parsing and resolution (properties, indices, and map keys).
+- Changed `Fields.Safe.getByPath` to resolve JSON Path-style expressions including array, list, and map selectors.
+- Changed `Fields.Safe.getByPaths(Object, String)` to split alternate paths on commas outside bracket segments.
+- Added `Fields.Unchecked.getByPath(Object, String)` for path lookup without argument validation.
+- Added `Fields.Unchecked.getByPaths(Object, String)` for comma-separated path lookup without argument validation.
+- Added `Fields.Unchecked.getByPaths(Object, String...)` for ordered path lookup without argument validation.
+- Changed `Fields.IgnoreAccess.getByPaths(Object, String...)` to reject `null` arrays and skip `null` path entries.
+- Changed `Fields.Safe.getByPaths(Object, String...)` to return `null` for `null` arrays and skip `null` path entries.
+- Added `JavaObjects.getAt(Object, int)` to read a zero-based index from an array or list, returning `null` when the value cannot be read.
+- Added `JavaArrays.safeGet(T[], int)` to return an array element at an index, or `null` when the array is `null` or the index is out of range.
+- Added `Lists.safeGet(List, int)` to return a list element at an index, or `null` when the list is `null`, empty, or the index is out of range.
+
+---
+
 `1.1.1`
 
-- Kept `Fields.IgnoreAccess.get(Object, String)` throwing `ReflectionException` for null input while using unchecked lookup for valid input.
-- Changed `Fields.Unchecked.getOneDeclaredInHierarchy(Class, String)` to throw `NullPointerException` for a null class.
-- Changed `Methods.Unchecked.getOneDeclaredInHierarchy(String, Class, Class...)` to throw `NullPointerException` for a null class.
+- Kept `Fields.IgnoreAccess.get(Object, String)` throwing `ReflectionException` for `null` input while using unchecked lookup for valid input.
+- Changed `Fields.Unchecked.getOneDeclaredInHierarchy(Class, String)` to throw `NullPointerException` for a `null` class.
+- Changed `Methods.Unchecked.getOneDeclaredInHierarchy(String, Class, Class...)` to throw `NullPointerException` for a `null` class.
 - Fixed `Fields.Safe.getByPath(Object, String)` returning a field value for paths ending in a dot.
 - Added `Fields.Unchecked.getOneDeclared(Class, String)` for direct field lookup without parameter validation.
 - Added `Fields.Unchecked.getOneDeclaredInHierarchy(Class, String)` for direct field lookup throughout a class hierarchy.
@@ -14,15 +30,15 @@
 - Added `Fields.Unchecked.getAllDeclaredInHierarchy(Class)` for direct hierarchy field retrieval without parameter validation.
 - Added `Fields.Unchecked.getAllDeclaredInHierarchy(Class, Predicate)` for direct filtered hierarchy field retrieval without parameter validation.
 - Added `Fields.Unchecked.forEachMatching(Field[], Predicate, Consumer)` to pass matching declared fields to a consumer without allocating a result list.
-- Added `Fields.Safe.getAllDeclared(Class)` for null-safe retrieval of a class's declared fields.
-- Added `Fields.Safe.getAllDeclared(Object)` for null-safe retrieval of declared fields from an object's class.
-- Added `Fields.Safe.getAllDeclared(Class, Predicate)` for null-safe retrieval and filtering of declared fields.
-- Added `Fields.Safe.getAllDeclared(Object, Predicate)` for null-safe retrieval and filtering of declared fields from an object's class.
-- Added `Fields.Safe.filter(List, Predicate)` for null-safe filtering of a field list.
-- Added `Fields.Safe.getAllDeclaredInHierarchy(Class)` for null-safe hierarchy field retrieval.
-- Added `Fields.Safe.getAllDeclaredInHierarchy(Class, Predicate)` for null-safe filtered hierarchy field retrieval.
-- Added `Fields.Safe.getAllDeclaredInHierarchy(Object)` for null-safe hierarchy field retrieval from an object's class.
-- Added `Fields.Safe.getAllDeclaredInHierarchy(Object, Predicate)` for null-safe filtered hierarchy field retrieval from an object's class.
+- Added `Fields.Safe.getAllDeclared(Class)` for `null`-safe retrieval of a class's declared fields.
+- Added `Fields.Safe.getAllDeclared(Object)` for `null`-safe retrieval of declared fields from an object's class.
+- Added `Fields.Safe.getAllDeclared(Class, Predicate)` for `null`-safe retrieval and filtering of declared fields.
+- Added `Fields.Safe.getAllDeclared(Object, Predicate)` for `null`-safe retrieval and filtering of declared fields from an object's class.
+- Added `Fields.Safe.filter(List, Predicate)` for `null`-safe filtering of a field list.
+- Added `Fields.Safe.getAllDeclaredInHierarchy(Class)` for `null`-safe hierarchy field retrieval.
+- Added `Fields.Safe.getAllDeclaredInHierarchy(Class, Predicate)` for `null`-safe filtered hierarchy field retrieval.
+- Added `Fields.Safe.getAllDeclaredInHierarchy(Object)` for `null`-safe hierarchy field retrieval from an object's class.
+- Added `Fields.Safe.getAllDeclaredInHierarchy(Object, Predicate)` for `null`-safe filtered hierarchy field retrieval from an object's class.
 - Added `Methods.Unchecked.getOneDeclared(String, Class, Class...)` for direct method lookup without parameter validation.
 - Added `Methods.Unchecked.getOneDeclaredInHierarchy(String, Class, Class...)` for direct method lookup throughout a class hierarchy.
 - Added `Methods.Unchecked.getAllDeclared(Class)` for direct retrieval of a class's declared methods.
@@ -30,10 +46,10 @@
 - Added `Methods.Unchecked.getAllDeclaredInHierarchy(Class)` for direct superclass-chain method retrieval without parameter validation.
 - Added `Methods.Unchecked.getAllDeclaredInHierarchy(Class, Predicate)` for direct filtered superclass-chain method retrieval without parameter validation.
 - Added `Methods.Unchecked.forEachMatching(Method[], Predicate, Consumer)` to pass matching declared methods to a consumer without allocating a result list.
-- Added `Methods.Safe.getAllDeclared(Class)` for null-safe retrieval of a class's declared methods.
-- Added `Methods.Safe.getAllDeclared(Class, Predicate)` for null-safe retrieval and filtering of declared methods.
-- Added `Methods.Safe.getAllDeclaredInHierarchy(Class)` for null-safe superclass-chain method retrieval.
-- Added `Methods.Safe.getAllDeclaredInHierarchy(Class, Predicate)` for null-safe filtered superclass-chain method retrieval.
+- Added `Methods.Safe.getAllDeclared(Class)` for `null`-safe retrieval of a class's declared methods.
+- Added `Methods.Safe.getAllDeclared(Class, Predicate)` for `null`-safe retrieval and filtering of declared methods.
+- Added `Methods.Safe.getAllDeclaredInHierarchy(Class)` for `null`-safe superclass-chain method retrieval.
+- Added `Methods.Safe.getAllDeclaredInHierarchy(Class, Predicate)` for `null`-safe filtered superclass-chain method retrieval.
 - Changed `Methods.getAllDeclared(Class, Predicate)` to return matching methods in declaration order.
 - Added `Classes.isArray(Class)` to check whether a class represents an array type.
 - Added `Classes.isNotArray(Class)` to check whether a class does not represent an array type.

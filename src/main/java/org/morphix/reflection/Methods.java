@@ -18,7 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import org.morphix.lang.JavaObjects;
 import org.morphix.lang.collections.FastArrayList;
+import org.morphix.lang.collections.Iterables;
 import org.morphix.reflection.predicates.MemberPredicates;
 
 /**
@@ -168,8 +169,8 @@ public interface Methods {
 	 * @param method method for which the generic return type is needed
 	 * @param index the zero-based index of the type needed (for a Map, the 2nd generic parameter has index 1)
 	 * @return generic return type
-	 * @throws ReflectionException if the method is null, if the method has a raw return type or if the generic return type
-	 *     cannot be found at the given index
+	 * @throws ReflectionException if the method is {@code null}, if the method has a raw return type or if the generic
+	 *     return type cannot be found at the given index
 	 */
 	static <T extends Type> T getGenericReturnType(final Method method, final int index) {
 		Reflection.requireNotNull(method, "Cannot get generic return type: method descriptor is null");
@@ -711,6 +712,9 @@ public interface Methods {
 		 * @return list of methods
 		 */
 		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls) {
+			if (null == cls) {
+				return List.of();
+			}
 			return getAllDeclaredInHierarchy(cls, Classes.mutableSetOf());
 		}
 
@@ -735,24 +739,34 @@ public interface Methods {
 		 */
 		static <T> List<Method> getAllDeclaredInHierarchy(final Class<T> cls, final Set<Class<?>> excluded) {
 			if (null == cls) {
-				return new LinkedList<>();
+				return List.of();
 			}
 			Reflection.requireNotNull(excluded, "Cannot traverse method hierarchy for class {}: excluded set is null", cls);
 			if (excluded.contains(cls)) {
-				return new LinkedList<>();
+				return List.of();
 			}
-			try {
-				excluded.add(cls);
-			} catch (UnsupportedOperationException e) {
-				throw new ReflectionException(e, "Cannot traverse method hierarchy for class {}: excluded set is unmodifiable", cls);
-			}
-			List<Method> methods = getAllDeclaredInHierarchy(cls.getSuperclass(), excluded);
-			for (Class<?> iface : cls.getInterfaces()) {
-				methods.addAll(getAllDeclaredInHierarchy(iface, excluded));
-			}
-			Method[] declared = cls.getDeclaredMethods();
-			for (int i = declared.length - 1; i >= 0; --i) {
-				methods.addFirst(declared[i]);
+			FastArrayList<Method> methods = new FastArrayList<>();
+			ArrayDeque<Class<?>> pending = new ArrayDeque<>();
+			pending.push(cls);
+			while (Iterables.isNotEmpty(pending)) {
+				Class<?> type = pending.pop();
+				if (excluded.contains(type)) {
+					continue;
+				}
+				try {
+					excluded.add(type);
+				} catch (UnsupportedOperationException e) {
+					throw new ReflectionException(e, "Cannot traverse method hierarchy for class {}: excluded set is unmodifiable", type);
+				}
+				methods.addAll(type.getDeclaredMethods());
+				Class<?>[] interfaces = type.getInterfaces();
+				for (int i = interfaces.length - 1; i >= 0; --i) {
+					pending.push(interfaces[i]);
+				}
+				Class<?> superclass = type.getSuperclass();
+				if (null != superclass) {
+					pending.push(superclass);
+				}
 			}
 			return methods;
 		}
@@ -773,7 +787,7 @@ public interface Methods {
 		 * Returns a list with all the methods declared in the class given as parameter. This is different from
 		 * {@link Class#getDeclaredMethods()} as it returns a {@link List} instead of an array.
 		 * <p>
-		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
+		 * This method does not check if the class is {@code null} and will throw a {@link NullPointerException} if it is. Use
 		 * {@link Methods#getAllDeclared(Class)} if you want to get an empty list when the class is {@code null}.
 		 * <p>
 		 * This method wraps the array returned by {@link Class#getDeclaredMethods()} in a {@link FastArrayList} without copying
@@ -860,7 +874,7 @@ public interface Methods {
 		 * the order provided by {@link Class#getDeclaredMethods()}. Super interfaces are not walked; only the class superclass
 		 * chain is included.
 		 * <p>
-		 * This method does not check if the class is null and will throw a {@link NullPointerException} if it is. Use
+		 * This method does not check if the class is {@code null} and will throw a {@link NullPointerException} if it is. Use
 		 * {@link Methods#getAllDeclaredInHierarchy(Class)} if you want an empty list when the class is {@code null}.
 		 * <p>
 		 * The returned list must not be modified by the caller.

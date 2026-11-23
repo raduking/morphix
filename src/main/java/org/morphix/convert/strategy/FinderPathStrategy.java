@@ -12,14 +12,10 @@
  */
 package org.morphix.convert.strategy;
 
-import static org.morphix.reflection.ExtendedField.of;
-import static org.morphix.reflection.JavaModifier.STATIC;
-
-import java.lang.reflect.Field;
 import java.util.List;
 
 import org.morphix.reflection.ExtendedField;
-import org.morphix.reflection.Fields;
+import org.morphix.reflection.FieldPathParser;
 
 /**
  * Finds the field in the source by path.
@@ -44,41 +40,16 @@ public class FinderPathStrategy implements FieldFinderStrategy {
 	}
 
 	/**
-	 * Returns the field and the object it corresponds to given its path.
+	 * Returns the first field and its owning object from comma-separated alternative paths. The returned field and owner
+	 * may refer to private data, so validate caller-supplied paths before using them here.
 	 *
 	 * @param <T> object type
 	 *
 	 * @param obj object on which to search
-	 * @param path path to the wanted field (object)
+	 * @param path alternative paths to the wanted field
 	 * @return field object pair
 	 */
 	public static <T> ExtendedField getConverterFieldByPathInHierarchy(final T obj, final String path) {
-		String[] fieldNames = path.split("\\.");
-
-		Field resultField = null;
-		Object resultObject = obj;
-		Class<?> currentClass = resultObject.getClass();
-
-		for (String fieldName : fieldNames) {
-			if (null != resultField && null != resultObject) {
-				resultObject = Fields.IgnoreAccess.get(resultObject, resultField);
-			}
-			resultField = Fields.getOneDeclaredInHierarchy(currentClass, fieldName);
-			if (null != resultField && STATIC.isPresentOn(resultField)) {
-				resultField = null;
-			}
-			if (null != resultField) {
-				currentClass = resultField.getType();
-			} else {
-				resultObject = null;
-			}
-			if (null == resultField) {
-				break;
-			}
-		}
-		if (null == resultObject) {
-			return ExtendedField.EMPTY;
-		}
-		return of(resultField, resultObject);
+		return FieldPathParser.resolveFirstField(obj, path);
 	}
 }
