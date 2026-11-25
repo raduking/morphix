@@ -2,6 +2,8 @@
 
 `1.1.4`
 
+- Added `Threads.safeJoin(Thread, Duration)` to join a thread with a timeout, with `InterruptedException` handling.
+
 ---
 
 `1.1.3`

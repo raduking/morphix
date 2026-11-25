@@ -405,6 +405,55 @@ class ThreadsTest {
 			assertFalse(countReached.get());
 			assertFalse(result);
 		}
+
+		@Test
+		void shouldSafelyJoinWithTimeoutWhenThreadTerminatesBeforeTimeout() {
+			AtomicBoolean ran = new AtomicBoolean(false);
+			Thread thread = Thread.ofPlatform().start(() -> ran.set(true));
+
+			boolean result = Threads.safeJoin(thread, Duration.ofSeconds(10));
+
+			assertTrue(result);
+			assertTrue(ran.get());
+			assertFalse(thread.isAlive());
+		}
+
+		@Test
+		void shouldSafelyJoinWithTimeoutAndReturnTrueWhenTimeoutElapsesAndThreadIsStillAlive() {
+			CountDownLatch latch = new CountDownLatch(1);
+			Thread thread = Thread.ofPlatform().start(() -> Threads.safeWait(latch));
+
+			try {
+				boolean result = Threads.safeJoin(thread, Duration.ofMillis(10));
+
+				assertTrue(result);
+				assertTrue(thread.isAlive());
+			} finally {
+				latch.countDown();
+				Threads.safeJoin(thread);
+			}
+		}
+
+		@Test
+		void shouldSafelyJoinWithTimeoutAndHandleInterruptedException() {
+			CountDownLatch latch = new CountDownLatch(1);
+			Thread thread = Thread.ofPlatform().start(() -> Threads.safeWait(latch));
+
+			try {
+				// interrupt the joining thread not the thread being joined
+				Thread.currentThread().interrupt();
+				boolean result = Threads.safeJoin(thread, Duration.ofSeconds(10));
+
+				assertFalse(result);
+				assertTrue(Thread.currentThread().isInterrupted());
+				assertTrue(thread.isAlive());
+			} finally {
+				// clear the interrupted flag so it does not leak into other tests
+				Thread.interrupted();
+				latch.countDown();
+				Threads.safeJoin(thread);
+			}
+		}
 	}
 
 	@Nested

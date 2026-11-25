@@ -249,6 +249,29 @@ public class Threads {
 	}
 
 	/**
+	 * Helper method that calls {@link Thread#join(long)} on the given thread with the given timeout, with
+	 * {@link InterruptedException} handling.
+	 * <p>
+	 * Returns when either the thread terminates or the timeout elapses, whichever comes first. The returned value does not
+	 * indicate whether the thread has terminated; check {@link Thread#isAlive()} for that. If the calling thread is
+	 * interrupted while waiting, the interrupt status is restored via {@link #handleInterruptedException()}.
+	 *
+	 * @param thread thread object
+	 * @param timeout the maximum time to wait for the thread to terminate
+	 * @return true if the join returned normally (the thread terminated or the timeout elapsed), false if the calling
+	 * thread was interrupted while waiting
+	 */
+	public static boolean safeJoin(final Thread thread, final Duration timeout) {
+		try {
+			thread.join(timeout.toMillis());
+			return true;
+		} catch (InterruptedException e) {
+			handleInterruptedException();
+			return false;
+		}
+	}
+
+	/**
 	 * Runs each runnable in the list with the given execution type. It only returns after all threads have completed.<br/>
 	 * By default, when using: {@code Threads.execute(runnables, ExecutionType.EXECUTOR)} the single thread executor will be
 	 * used.
