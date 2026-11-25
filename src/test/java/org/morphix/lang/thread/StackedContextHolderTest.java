@@ -210,6 +210,53 @@ class StackedContextHolderTest {
 	}
 
 	@Test
+	void shouldSetFunctionAndRemoveElementAroundFunctionCall() {
+		List<String> calls = new ArrayList<>();
+
+		String result = StackedContextHolder.on(TENANT_ID,
+				element -> calls.add("set:" + element),
+				element -> calls.add("remove:" + element),
+				(String arg) -> {
+					calls.add("run:" + arg);
+					return arg;
+				},
+				TEST_STRING);
+
+		assertThat(result, equalTo(TEST_STRING));
+		assertThat(calls, equalTo(List.of("set:" + TENANT_ID, "run:" + TEST_STRING, "remove:" + TENANT_ID)));
+	}
+
+	@Test
+	void shouldRemoveElementWhenFunctionThrows() {
+		List<String> calls = new ArrayList<>();
+
+		assertThrows(IllegalStateException.class, () -> StackedContextHolder.on(TENANT_ID,
+				element -> calls.add("set:" + element),
+				element -> calls.add("remove:" + element),
+				(String arg) -> {
+					throw new IllegalStateException();
+				},
+				TEST_STRING));
+
+		assertThat(calls, equalTo(List.of("set:" + TENANT_ID, "remove:" + TENANT_ID)));
+	}
+
+	@Test
+	void shouldClearThreadStackWhenRemovingElementFromEmptyStack() {
+		int removeCallsBefore = DummyTenantContextHolder.stack.removeCalls;
+
+		try {
+			DummyTenantContextHolder.INSTANCE.clearElement();
+
+			assertThat(DummyTenantContextHolder.stack.removeCalls, equalTo(removeCallsBefore + 1));
+			assertThat(DummyTenantContextHolder.getTenantId(), equalTo(null));
+		} finally {
+			// restore the shared counter so other tests asserting on it are not affected by execution order
+			DummyTenantContextHolder.stack.removeCalls = removeCallsBefore;
+		}
+	}
+
+	@Test
 	void shouldClearManuallySetTenantId() {
 		DummyTenantContextHolder.INSTANCE.setElement(TENANT_ID);
 		try {

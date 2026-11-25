@@ -116,6 +116,59 @@ class SynchronizedTest {
 	}
 
 	@Test
+	void shouldReleaseLockAfterTrySupplier() {
+		ReentrantLock lock = new ReentrantLock();
+
+		assertThat(Synchronized.tryWith(lock, 1, TimeUnit.SECONDS, () -> VALUE, () -> DEFAULT), equalTo(VALUE));
+
+		assertFalse(lock.isLocked());
+	}
+
+	@Test
+	void shouldReleaseLockAfterTrySupplierThrows() {
+		ReentrantLock lock = new ReentrantLock();
+
+		assertThrows(IllegalStateException.class, () -> Synchronized.tryWith(lock, 1, TimeUnit.SECONDS, () -> {
+			throw new IllegalStateException();
+		}));
+
+		assertFalse(lock.isLocked());
+	}
+
+	@Test
+	void shouldReleaseLockAfterTryRunnable() {
+		ReentrantLock lock = new ReentrantLock();
+
+		Synchronized.tryWith(lock, 1, TimeUnit.SECONDS, () -> {
+			// nothing to do
+		});
+
+		assertFalse(lock.isLocked());
+	}
+
+	@Test
+	void shouldRunRunnableWithDurationTimeout() {
+		ReentrantLock lock = new ReentrantLock();
+		AtomicBoolean ran = new AtomicBoolean();
+
+		Synchronized.tryWith(lock, Duration.ofSeconds(1), () -> ran.set(true));
+
+		assertTrue(ran.get());
+		assertFalse(lock.isLocked());
+	}
+
+	@Test
+	void shouldRunRunnableWithDefaultTimeout() {
+		ReentrantLock lock = new ReentrantLock();
+		AtomicBoolean ran = new AtomicBoolean();
+
+		Synchronized.tryWith(lock, () -> ran.set(true));
+
+		assertTrue(ran.get());
+		assertFalse(lock.isLocked());
+	}
+
+	@Test
 	void shouldReturnDefaultWhenInterrupted() throws InterruptedException {
 		ReentrantLock lock = new ReentrantLock();
 		AtomicReference<String> result = new AtomicReference<>();
