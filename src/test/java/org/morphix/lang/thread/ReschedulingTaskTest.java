@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -46,6 +47,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
@@ -58,12 +60,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.morphix.lang.function.ExecutionWrapper;
 import org.morphix.lang.function.LoggerAdapter;
+import org.morphix.lang.function.Predicates;
 import org.morphix.lang.function.Runnables;
 import org.morphix.lang.logging.JulLoggerAdapter;
 import org.morphix.lang.resource.ScopedResource;
 import org.morphix.lang.retry.Retry;
 import org.morphix.lang.retry.WaitCounter;
 import org.morphix.reflection.Constructors;
+import org.morphix.reflection.Fields;
 import org.morphix.reflection.Methods;
 import org.morphix.utils.Tests;
 
@@ -1034,28 +1038,27 @@ class ReschedulingTaskTest {
 			task.close();
 			executor.close();
 
-			// execution 1 (sync) schedules Future 1 (Execution 2).
-			// execution 2 runs, schedules Future 2 (Execution 3).
-			// execution 3 runs, disable() is called, skips further scheduling.
+			// execution 1 runs on the enable thread and schedules future 1
+			// execution 2 runs on the scheduler thread, schedules future 2, and may cancel future 1 on publish when still pending
+			// execution 3 runs, then disable() cancels the scheduled future and skips further scheduling
 			assertThat(scheduledFutures.size(), is(executionCount - 1));
 
-			// future 1 completed naturally and should NOT have been explicitly cancelled
-			// future 2 was active when disable() was invoked, so it MUST have been cancelled
-			// future 3 was never scheduled, so it should not be in the list of scheduled futures at all
-			// the order is not guaranteed, but we can check that one future was cancelled and the other was not
-			ScheduledFuture<?> firstFuture = scheduledFutures.stream()
-					.filter(f -> !f.isCancelled()) // The one that finished
-					.findFirst()
-					.orElseThrow();
-
-			ScheduledFuture<?> lastFuture = scheduledFutures.stream()
+			// 1. both futures are spied instances returned from executor.schedule(...)
+			// 2. publishing a newer future or calling disable() cancels an older one, so at least one must be marked cancelled
+			// 3. any future not marked cancelled must not have had cancel() called on it by the task
+			ScheduledFuture<?> cancelledFuture = scheduledFutures.stream()
 					.filter(Future::isCancelled)
 					.findFirst()
-					.orElseThrow();
+					.orElse(null);
+			assertNotNull(cancelledFuture);
+			verify(cancelledFuture, atLeastOnce()).cancel(anyBoolean());
 
-			// Now verify regardless of insertion order
-			verify(firstFuture, never()).cancel(anyBoolean());
-			verify(lastFuture, atLeastOnce()).cancel(anyBoolean());
+			List<ScheduledFuture<?>> notCancelledFutures = scheduledFutures.stream()
+					.filter(Predicates.not(Future::isCancelled))
+					.toList();
+			for (ScheduledFuture<?> notCancelledFuture : notCancelledFutures) {
+				verify(notCancelledFuture, never()).cancel(anyBoolean());
+			}
 
 			assertThat(completed, is(true));
 			assertThat(counter.get(), equalTo(executionCount));
@@ -1110,9 +1113,8 @@ class ReschedulingTaskTest {
 			continueScheduling.countDown();
 			cancelAttempted.await(5, TimeUnit.SECONDS);
 
-			verify(spyLogger, timeout(1000)).debug(
-					startsWith("[{}] Cancelling orphaned task."),
-					eq("test-task"));
+			verify(spyLogger, timeout(1000)).debug("[{}] Task was disabled during scheduling.", "test-task");
+			verify(spyLogger, timeout(1000)).debug(startsWith("[{}] Cancelling orphaned task."), eq("test-task"));
 			verify(mockFuture).cancel(anyBoolean());
 		}
 
@@ -1181,7 +1183,7 @@ class ReschedulingTaskTest {
 			task.close();
 
 			verify(spyLogger, timeout(1000)).debug("[{}] New task was already scheduled, cancelling not needed.", TASK_NAME);
-			verify(mockFuture1, never()).cancel(anyBoolean());
+			// a later publish may still supersede and cancel the earlier scheduled future
 			verify(mockFuture2).cancel(anyBoolean());
 		}
 	}
@@ -1356,9 +1358,149 @@ class ReschedulingTaskTest {
 			task.enable();
 			task.disable();
 
+			verify(logger).debug(eq("[{}] Scheduled new task: {}."), eq(TASK_NAME), any());
 			verify(logger).debug(eq("[{}] Called cancel scheduled task: {}."), eq(TASK_NAME), any());
 			verify(logger).debug(eq("[{}] Attempting to cancel scheduled task: {}."), eq(TASK_NAME), any());
 			verify(scheduledFuture).cancel(anyBoolean());
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldLogScheduledNewTaskWhenNextExecutionIsScheduled() throws Exception {
+			ScheduledFuture<?> scheduledFuture = mock(ScheduledFuture.class);
+			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
+			doReturn(scheduledFuture).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+			LoggerAdapter logger = mock(LoggerAdapter.class);
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(ScopedResource.unmanaged(scheduledExecutor))
+					.task(Runnables.doNothing())
+					.nextDelay(() -> Duration.ofSeconds(5))
+					.logger(logger)
+					.build();
+			((AtomicBoolean) Fields.IgnoreAccess.get(task, ReschedulingTask.class.getDeclaredField("enabled"))).set(true);
+
+			Method scheduleNextMethod = Methods.getOneDeclared("scheduleNext", ReschedulingTask.class);
+			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
+
+			verify(logger).debug("[{}] Scheduling next execution in {}ms.", TASK_NAME, Duration.ofSeconds(5).toMillis());
+			verify(logger).debug(eq("[{}] Scheduled new task: {}."), eq(TASK_NAME), any());
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldLogWhenReplacingPreviouslyScheduledTaskWithNewOne() throws Exception {
+			ScheduledFuture<?> future1 = mock(ScheduledFuture.class);
+			ScheduledFuture<?> future2 = mock(ScheduledFuture.class);
+			doReturn(true).when(future1).cancel(anyBoolean());
+			doReturn(false).when(future1).isDone();
+			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
+			doReturn(future1).doReturn(future2).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), any());
+
+			LoggerAdapter logger = mock(LoggerAdapter.class);
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(ScopedResource.unmanaged(scheduledExecutor))
+					.task(Runnables.doNothing())
+					.nextDelay(() -> Duration.ofSeconds(5))
+					.logger(logger)
+					.build();
+			((AtomicBoolean) Fields.IgnoreAccess.get(task, ReschedulingTask.class.getDeclaredField("enabled"))).set(true);
+
+			Method scheduleNextMethod = Methods.getOneDeclared("scheduleNext", ReschedulingTask.class);
+			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
+			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
+
+			verify(logger).debug(eq("[{}] Replacing previously scheduled task with a new one: cancelling {}."), eq(TASK_NAME),
+					any());
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldLogWhenTaskWasDisabledDuringSchedulingAndOrphanIsCancelled() throws Exception {
+			CountDownLatch taskIsSet = new CountDownLatch(1);
+			CountDownLatch continueScheduling = new CountDownLatch(1);
+
+			ScheduledExecutorService mockExecutor = mock(ScheduledExecutorService.class);
+			ScheduledFuture<?> mockFuture = mock(ScheduledFuture.class);
+			doReturn(true).when(mockFuture).cancel(anyBoolean());
+			doReturn(mockFuture).when(mockExecutor).schedule(any(Runnable.class), anyLong(), any());
+
+			LoggerAdapter logger = mock(LoggerAdapter.class);
+			doAnswer(invocation -> {
+				taskIsSet.countDown();
+				continueScheduling.await();
+				return null;
+			}).when(logger).debug(startsWith("[{}] Scheduled new task"), any(), any());
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(ScopedResource.unmanaged(mockExecutor))
+					.task(Runnables.doNothing())
+					.nextDelay(Duration.ofMillis(500))
+					.logger(logger)
+					.build();
+
+			Thread.ofVirtual().start(task::enable);
+			taskIsSet.await(5, TimeUnit.SECONDS);
+			task.disable();
+			continueScheduling.countDown();
+
+			verify(logger, timeout(1000)).debug("[{}] Task was disabled during scheduling.", TASK_NAME);
+			verify(logger, timeout(1000)).debug(startsWith("[{}] Cancelling orphaned task."), eq(TASK_NAME));
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldLogWhenNewTaskWasAlreadyScheduledCancellingNotNeeded() throws Exception {
+			CountDownLatch firstTaskIsSet = new CountDownLatch(1);
+			CountDownLatch secondTaskIsSet = new CountDownLatch(1);
+			CountDownLatch continueScheduling = new CountDownLatch(1);
+			CountDownLatch disableCalled = new CountDownLatch(1);
+			CountDownLatch enableCalled = new CountDownLatch(1);
+
+			ScheduledExecutorService mockExecutor = mock(ScheduledExecutorService.class);
+			ScheduledFuture<?> mockFuture1 = mock(ScheduledFuture.class);
+			ScheduledFuture<?> mockFuture2 = mock(ScheduledFuture.class);
+			doReturn(mockFuture1).doReturn(mockFuture2).when(mockExecutor).schedule(any(Runnable.class), anyLong(), any());
+
+			LoggerAdapter logger = mock(LoggerAdapter.class);
+			doAnswer(invocation -> {
+				if (firstTaskIsSet.getCount() > 0) {
+					firstTaskIsSet.countDown();
+				} else {
+					secondTaskIsSet.countDown();
+				}
+				continueScheduling.await();
+				return null;
+			}).when(logger).debug(startsWith("[{}] Scheduled new task"), any(), any());
+			doAnswer(invocation -> {
+				disableCalled.countDown();
+				enableCalled.await();
+				return null;
+			}).when(logger).debug(startsWith("[{}] Task was disabled during scheduling"), any());
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(ScopedResource.unmanaged(mockExecutor))
+					.task(Runnables.doNothing())
+					.nextDelay(Duration.ofMillis(500))
+					.logger(logger)
+					.build();
+
+			Thread.ofVirtual().start(task::enable);
+			firstTaskIsSet.await(5, TimeUnit.SECONDS);
+			task.disable();
+			continueScheduling.countDown();
+			disableCalled.await(5, TimeUnit.SECONDS);
+			task.enable();
+			secondTaskIsSet.await(5, TimeUnit.SECONDS);
+			enableCalled.countDown();
+			task.close();
+
+			verify(logger, timeout(1000)).debug("[{}] Task was disabled during scheduling.", TASK_NAME);
+			verify(logger, timeout(1000)).debug("[{}] New task was already scheduled, cancelling not needed.", TASK_NAME);
 		}
 
 		@Test
@@ -1418,6 +1560,64 @@ class ReschedulingTaskTest {
 
 			verify(logger).error("[{}] Error during task execution.", TASK_NAME, exception);
 		}
+
+	}
+
+	@Nested
+	class ConcurrentSchedulingTests {
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldCancelPreviouslyPublishedFutureWhenReschedulingWhileAnotherIsPending() throws Exception {
+			ScheduledFuture<?> future1 = mock(ScheduledFuture.class);
+			ScheduledFuture<?> future2 = mock(ScheduledFuture.class);
+			doReturn(true).when(future1).cancel(anyBoolean());
+			doReturn(true).when(future2).cancel(anyBoolean());
+			doReturn(false).when(future1).isDone();
+			ScheduledExecutorService mockExecutor = mock(ScheduledExecutorService.class);
+			doReturn(future1).doReturn(future2).when(mockExecutor).schedule(any(Runnable.class), anyLong(), any());
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(ScopedResource.unmanaged(mockExecutor))
+					.task(Runnables.doNothing())
+					.nextDelay(Duration.ofSeconds(5))
+					.build();
+			((AtomicBoolean) Fields.IgnoreAccess.get(task, ReschedulingTask.class.getDeclaredField("enabled"))).set(true);
+
+			Method scheduleNextMethod = Methods.getOneDeclared("scheduleNext", ReschedulingTask.class);
+			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
+			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
+
+			verify(future1).cancel(anyBoolean());
+			verify(future2, never()).cancel(anyBoolean());
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldNotCancelScheduledTaskWhenReplacingWithTheSameFutureReference() throws Exception {
+			ScheduledFuture<?> future = mock(ScheduledFuture.class);
+			ScheduledExecutorService mockExecutor = mock(ScheduledExecutorService.class);
+			doReturn(future).when(mockExecutor).schedule(any(Runnable.class), anyLong(), any());
+
+			ReschedulingTask task = ReschedulingTask.builder()
+					.name(TASK_NAME)
+					.scheduler(ScopedResource.unmanaged(mockExecutor))
+					.task(Runnables.doNothing())
+					.nextDelay(Duration.ofSeconds(5))
+					.build();
+			((AtomicBoolean) Fields.IgnoreAccess.get(task, ReschedulingTask.class.getDeclaredField("enabled"))).set(true);
+
+			Method scheduleNextMethod = Methods.getOneDeclared("scheduleNext", ReschedulingTask.class);
+			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
+			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
+
+			verify(future, never()).cancel(anyBoolean());
+		}
+	}
+
+	@Nested
+	class SchedulingWhileDisabledTests {
 
 		@Test
 		@SuppressWarnings("resource")
