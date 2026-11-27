@@ -21,10 +21,16 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -34,6 +40,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -249,6 +257,45 @@ class ThreadsTest {
 		void shouldNotThrowExeptionOnTimeoutWhenRunningRunnableWithTimeout() {
 			assertDoesNotThrow(() -> Threads.execute(Duration.ofSeconds(10), Runnables.doNothing()));
 		}
+
+		@Test
+		@SuppressWarnings({ "unchecked", "resource" })
+		void shouldCancelTaskWhenExecutionFails() throws Exception {
+			Future<String> task = mock(Future.class);
+			doThrow(new TimeoutException()).when(task).get(anyLong(), any(TimeUnit.class));
+			ExecutorService executor = mock(ExecutorService.class);
+			doReturn(task).when(executor).submit(any(Callable.class));
+
+			try (MockedStatic<Executors> executors = Mockito.mockStatic(Executors.class)) {
+				executors.when(Executors::newVirtualThreadPerTaskExecutor).thenReturn(executor);
+
+				assertThrows(TimeoutException.class, () -> Threads.execute(Duration.ofSeconds(10), () -> TEST_STRING));
+
+				verify(task).cancel(true);
+				verify(executor).shutdownNow();
+			}
+		}
+
+		@Test
+		@SuppressWarnings({ "unchecked", "resource" })
+		void shouldRestoreInterruptedStatusWhenInterruptedWhileWaitingForTaskTermination() throws InterruptedException {
+			ExecutorService executor = mock(ExecutorService.class);
+			doReturn(CompletableFuture.completedFuture(TEST_STRING)).when(executor).submit(any(Callable.class));
+			doThrow(new InterruptedException()).when(executor).awaitTermination(anyLong(), any(TimeUnit.class));
+
+			try (MockedStatic<Executors> executors = Mockito.mockStatic(Executors.class)) {
+				executors.when(Executors::newVirtualThreadPerTaskExecutor).thenReturn(executor);
+
+				String result = Threads.execute(Duration.ofSeconds(10), () -> TEST_STRING);
+
+				assertThat(result, equalTo(TEST_STRING));
+				verify(executor).shutdownNow();
+				assertTrue(Thread.currentThread().isInterrupted());
+			} finally {
+				// clear the interrupted flag so it does not leak into other tests
+				Thread.interrupted();
+			}
+		}
 	}
 
 	@Nested
@@ -404,6 +451,117 @@ class ThreadsTest {
 			assertThat(i.get(), equalTo(1));
 			assertFalse(countReached.get());
 			assertFalse(result);
+		}
+
+		@Test
+		void shouldRestoreInterruptedStatusWhenSafeWaitIsInterrupted() {
+			CountDownLatch latch = new CountDownLatch(1);
+
+			try {
+				Thread.currentThread().interrupt();
+				Threads.safeWait(latch);
+
+				assertTrue(Thread.currentThread().isInterrupted());
+			} finally {
+				// clear the interrupted flag so it does not leak into other tests
+				Thread.interrupted();
+			}
+		}
+
+		@Test
+		void shouldReturnFalseWhenSafeWaitWithDurationTimesOut() {
+			CountDownLatch latch = new CountDownLatch(1);
+
+			boolean result = Threads.safeWait(latch, Duration.ofMillis(10));
+
+			assertFalse(result);
+			assertFalse(Thread.currentThread().isInterrupted());
+		}
+
+		@Test
+		void shouldRestoreInterruptedStatusWhenSafeWaitWithDurationIsInterrupted() {
+			CountDownLatch latch = new CountDownLatch(1);
+
+			try {
+				Thread.currentThread().interrupt();
+				boolean result = Threads.safeWait(latch, Duration.ofSeconds(10));
+
+				assertFalse(result);
+				assertTrue(Thread.currentThread().isInterrupted());
+			} finally {
+				// clear the interrupted flag so it does not leak into other tests
+				Thread.interrupted();
+			}
+		}
+
+		@Test
+		void shouldRestoreInterruptedStatusWhenSafeJoinIsInterrupted() {
+			CountDownLatch latch = new CountDownLatch(1);
+			Thread thread = Thread.ofPlatform().start(() -> Threads.safeWait(latch));
+
+			try {
+				// interrupt the joining thread not the thread being joined
+				Thread.currentThread().interrupt();
+				boolean result = Threads.safeJoin(thread);
+
+				assertFalse(result);
+				assertTrue(Thread.currentThread().isInterrupted());
+				assertTrue(thread.isAlive());
+			} finally {
+				// clear the interrupted flag so it does not leak into other tests
+				Thread.interrupted();
+				latch.countDown();
+				Threads.safeJoin(thread);
+			}
+		}
+
+		@Test
+		void shouldSafelyJoinWithTimeoutWhenThreadTerminatesBeforeTimeout() {
+			AtomicBoolean ran = new AtomicBoolean(false);
+			Thread thread = Thread.ofPlatform().start(() -> ran.set(true));
+
+			boolean result = Threads.safeJoin(thread, Duration.ofSeconds(10));
+
+			assertTrue(result);
+			assertTrue(ran.get());
+			assertFalse(thread.isAlive());
+		}
+
+		@Test
+		void shouldSafelyJoinWithTimeoutAndReturnTrueWhenTimeoutElapsesAndThreadIsStillAlive() {
+			CountDownLatch latch = new CountDownLatch(1);
+			Thread thread = Thread.ofPlatform().start(() -> Threads.safeWait(latch));
+
+			try {
+				boolean result = Threads.safeJoin(thread, Duration.ofMillis(10));
+
+				assertTrue(result);
+				assertTrue(thread.isAlive());
+			} finally {
+				latch.countDown();
+				Threads.safeJoin(thread);
+			}
+		}
+
+		@Test
+		void shouldSafelyJoinWithTimeoutAndHandleInterruptedException() {
+			CountDownLatch latch = new CountDownLatch(1);
+			Thread thread = Thread.ofPlatform().start(() -> Threads.safeWait(latch));
+
+			try {
+				// interrupt the joining thread not the thread being joined
+				Thread.currentThread().interrupt();
+				boolean result = Threads.safeJoin(thread, Duration.ofSeconds(10));
+
+				assertFalse(result);
+				assertTrue(Thread.currentThread().isInterrupted());
+				assertTrue(thread.isAlive());
+			} finally {
+				// clear the interrupted flag so it does not leak into other tests
+				Thread.interrupted();
+				latch.countDown();
+				Threads.safeJoin(thread);
+			}
 		}
 	}
 
@@ -572,6 +730,66 @@ class ThreadsTest {
 
 			assertFalse(condition.get());
 		}
+
+		@Test
+		@Timeout(5)
+		void shouldReturnTrueWhenConditionIsMet() {
+			AtomicInteger checks = new AtomicInteger(0);
+
+			boolean result = Threads.waitUntil(() -> checks.incrementAndGet() >= 3);
+
+			assertTrue(result);
+		}
+
+		@Test
+		@Timeout(5)
+		void shouldReturnFalseWhenInterruptedWhileWaitingWithoutTimeout() {
+			try {
+				Thread.currentThread().interrupt();
+				boolean result = Threads.waitUntil(() -> false);
+
+				assertFalse(result);
+			} finally {
+				// clear the interrupted flag so it does not leak into other tests
+				Thread.interrupted();
+			}
+		}
+
+		@Test
+		@Timeout(5)
+		void shouldReturnTrueWhenConditionIsMetWithinTimeout() {
+			AtomicInteger checks = new AtomicInteger(0);
+
+			boolean result = Threads.waitUntil(() -> checks.incrementAndGet() >= 3, Duration.ofSeconds(3));
+
+			assertTrue(result);
+		}
+
+		@Test
+		@Timeout(5)
+		void shouldReturnFalseWhenConditionIsNotMetWithinTimeout() {
+			boolean result = Threads.waitUntil(() -> false, Duration.ofMillis(20));
+
+			assertFalse(result);
+		}
+
+		@Test
+		@Timeout(5)
+		void shouldReturnTrueWhenConditionIsMetWithinTimeoutAndPollInterval() {
+			AtomicInteger checks = new AtomicInteger(0);
+
+			boolean result = Threads.waitUntil(() -> checks.incrementAndGet() >= 3, Duration.ofSeconds(3), Duration.ofMillis(1));
+
+			assertTrue(result);
+		}
+
+		@Test
+		@Timeout(5)
+		void shouldReturnFalseWhenConditionIsNotMetWithinTimeoutAndPollInterval() {
+			boolean result = Threads.waitUntil(() -> false, Duration.ofMillis(20), Duration.ofMillis(1));
+
+			assertFalse(result);
+		}
 	}
 
 	@Nested
@@ -657,6 +875,53 @@ class ThreadsTest {
 			Threads.executeThrottled(runnables, 2, Duration.ofMillis(1), (Executor) null);
 
 			assertThat(executions.get(), equalTo(THREAD_COUNT));
+		}
+
+		@Test
+		void shouldNotWaitForIntervalAfterLastBatch() {
+			AtomicInteger executions = new AtomicInteger(0);
+			List<Runnable> runnables = IntStream.range(0, 4)
+					.mapToObj(i -> (Runnable) executions::incrementAndGet)
+					.toList();
+
+			// a single batch (exactly threadCount items) must not wait for the interval
+			assertTimeoutPreemptively(Duration.ofSeconds(2),
+					() -> Threads.execute(runnables, 4, Duration.ofSeconds(30), ExecutionType.SEQUENTIAL));
+
+			assertThat(executions.get(), equalTo(4));
+		}
+
+		@Test
+		void shouldExecuteExactBatchesWithoutEmptyBatch() {
+			List<Runnable> runnables = IntStream.range(0, 4)
+					.mapToObj(i -> (Runnable) new AtomicInteger(i)::incrementAndGet)
+					.toList();
+			Executor executor = Runnable::run;
+
+			try (MockedStatic<Threads> threadsMock = Mockito.mockStatic(Threads.class, Mockito.CALLS_REAL_METHODS)) {
+				Threads.execute(runnables, 2, Duration.ofMillis(1), executor);
+
+				threadsMock.verify(() -> Threads.execute(runnables.subList(0, 2), executor));
+				threadsMock.verify(() -> Threads.execute(runnables.subList(2, 4), executor));
+				threadsMock.verify(() -> Threads.execute(anyList(), eq(executor)), times(2));
+			}
+		}
+
+		@Test
+		void shouldExecuteLastPartialBatch() {
+			List<Runnable> runnables = IntStream.range(0, 5)
+					.mapToObj(i -> (Runnable) new AtomicInteger(i)::incrementAndGet)
+					.toList();
+			Executor executor = Runnable::run;
+
+			try (MockedStatic<Threads> threadsMock = Mockito.mockStatic(Threads.class, Mockito.CALLS_REAL_METHODS)) {
+				Threads.execute(runnables, 2, Duration.ofMillis(1), executor);
+
+				threadsMock.verify(() -> Threads.execute(runnables.subList(0, 2), executor));
+				threadsMock.verify(() -> Threads.execute(runnables.subList(2, 4), executor));
+				threadsMock.verify(() -> Threads.execute(runnables.subList(4, 5), executor));
+				threadsMock.verify(() -> Threads.execute(anyList(), eq(executor)), times(3));
+			}
 		}
 	}
 

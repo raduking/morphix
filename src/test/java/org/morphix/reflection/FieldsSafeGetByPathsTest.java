@@ -141,6 +141,20 @@ class FieldsSafeGetByPathsTest {
 	}
 
 	@Test
+	void shouldReturnNullWhenObjectIsNullOnCommaSeparatedPaths() {
+		var result = Fields.Safe.getByPaths(null, "person.name");
+
+		assertThat(result, nullValue());
+	}
+
+	@Test
+	void shouldReturnNullWhenObjectIsNullOnVarargs() {
+		var result = Fields.Safe.getByPaths(null, "unknown", "person.name");
+
+		assertThat(result, nullValue());
+	}
+
+	@Test
 	void shouldReturnNullWhenPathsArrayIsNull() {
 		var result = Fields.Safe.getByPaths(data, (String[]) null);
 
