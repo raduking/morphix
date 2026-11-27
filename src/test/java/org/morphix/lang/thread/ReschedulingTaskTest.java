@@ -47,7 +47,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
@@ -69,7 +68,6 @@ import org.morphix.lang.resource.ScopedResource;
 import org.morphix.lang.retry.Retry;
 import org.morphix.lang.retry.WaitCounter;
 import org.morphix.reflection.Constructors;
-import org.morphix.reflection.Fields;
 import org.morphix.reflection.Methods;
 import org.morphix.utils.Tests;
 
@@ -1445,10 +1443,8 @@ class ReschedulingTaskTest {
 					.nextDelay(() -> Duration.ofSeconds(5))
 					.logger(logger)
 					.build();
-			((AtomicBoolean) Fields.IgnoreAccess.get(task, ReschedulingTask.class.getDeclaredField("enabled"))).set(true);
 
-			Method scheduleNextMethod = Methods.getOneDeclared("scheduleNext", ReschedulingTask.class);
-			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
+			task.enable();
 
 			verify(logger).debug("[{}] Scheduling next execution in {}ms.", TASK_NAME, Duration.ofSeconds(5).toMillis());
 			verify(logger).debug(eq("[{}] Scheduled new task: {}."), eq(TASK_NAME), any());
@@ -1472,10 +1468,10 @@ class ReschedulingTaskTest {
 					.nextDelay(() -> Duration.ofSeconds(5))
 					.logger(logger)
 					.build();
-			((AtomicBoolean) Fields.IgnoreAccess.get(task, ReschedulingTask.class.getDeclaredField("enabled"))).set(true);
+
+			task.enable();
 
 			Method scheduleNextMethod = Methods.getOneDeclared("scheduleNext", ReschedulingTask.class);
-			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
 			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
 
 			verify(logger).debug(eq("[{}] Replacing previously scheduled task with a new one: cancelling {}."), eq(TASK_NAME),
@@ -1649,10 +1645,10 @@ class ReschedulingTaskTest {
 					.task(Runnables.doNothing())
 					.nextDelay(Duration.ofSeconds(5))
 					.build();
-			((AtomicBoolean) Fields.IgnoreAccess.get(task, ReschedulingTask.class.getDeclaredField("enabled"))).set(true);
+
+			task.enable();
 
 			Method scheduleNextMethod = Methods.getOneDeclared("scheduleNext", ReschedulingTask.class);
-			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
 			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
 
 			verify(future1).cancel(anyBoolean());
@@ -1672,10 +1668,10 @@ class ReschedulingTaskTest {
 					.task(Runnables.doNothing())
 					.nextDelay(Duration.ofSeconds(5))
 					.build();
-			((AtomicBoolean) Fields.IgnoreAccess.get(task, ReschedulingTask.class.getDeclaredField("enabled"))).set(true);
+
+			task.enable();
 
 			Method scheduleNextMethod = Methods.getOneDeclared("scheduleNext", ReschedulingTask.class);
-			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
 			Methods.IgnoreAccess.invoke(scheduleNextMethod, task);
 
 			verify(future, never()).cancel(anyBoolean());
