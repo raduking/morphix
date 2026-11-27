@@ -58,6 +58,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.morphix.lang.function.ExecutionWrapper;
 import org.morphix.lang.function.LoggerAdapter;
 import org.morphix.lang.function.Predicates;
@@ -672,6 +674,70 @@ class ReschedulingTaskTest {
 
 	@Nested
 	class CloseAndResourceManagementTests {
+
+		@ParameterizedTest
+		@CsvSource({
+				"true, true",
+				"true, false",
+				"false, true",
+				"false, false"
+		})
+		@SuppressWarnings("resource")
+		void shouldRejectEnableAfterClose(final boolean managed, final boolean initiallyEnabled) throws Exception {
+			Runnable refreshTask = mock(Runnable.class);
+			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
+			ScheduledFuture<?> scheduledFuture = mock(ScheduledFuture.class);
+			doReturn(scheduledFuture).when(scheduledExecutor).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+			doReturn(true).when(scheduledFuture).cancel(anyBoolean());
+			ScopedResource<ScheduledExecutorService> resource = managed
+					? ScopedResource.managed(scheduledExecutor)
+					: ScopedResource.unmanaged(scheduledExecutor);
+			ReschedulingTask task = ReschedulingTask.builder()
+					.scheduler(resource)
+					.task(refreshTask)
+					.nextDelay(DELAY)
+					.build();
+			if (initiallyEnabled) {
+				task.enable();
+			}
+
+			task.close();
+
+			assertThrows(IllegalStateException.class, task::enable);
+			assertThat(task.disable(), is(false));
+			task.close();
+			assertThrows(IllegalStateException.class, task::enable);
+			assertThat(task.isEnabled(), is(false));
+			assertThat(task.isDisabled(), is(true));
+			assertThat(task.isScheduled(), is(false));
+			verify(refreshTask, times(initiallyEnabled ? 1 : 0)).run();
+			verify(scheduledExecutor, times(initiallyEnabled ? 1 : 0))
+					.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+		}
+
+		@Test
+		@SuppressWarnings("resource")
+		void shouldRejectEnableWhileCloseIsCleaningUpEvenIfCleanupFails() {
+			ScheduledExecutorService scheduledExecutor = mock(ScheduledExecutorService.class);
+			Runnable refreshTask = mock(Runnable.class);
+			ReschedulingTask task = ReschedulingTask.builder()
+					.scheduler(ScopedResource.managed(scheduledExecutor))
+					.task(refreshTask)
+					.nextDelay(DELAY)
+					.build();
+			IllegalStateException failure = new IllegalStateException("Scheduler cleanup failed");
+			doAnswer(invocation -> {
+				assertThrows(IllegalStateException.class, task::enable);
+				throw failure;
+			}).when(scheduledExecutor).close();
+
+			assertThat(assertThrows(IllegalStateException.class, task::close), is(sameInstance(failure)));
+
+			assertThrows(IllegalStateException.class, task::enable);
+			assertThat(task.isDisabled(), is(true));
+			verify(refreshTask, never()).run();
+			verify(scheduledExecutor, never()).schedule(any(Runnable.class), anyLong(), any(TimeUnit.class));
+		}
 
 		@Test
 		@SuppressWarnings("resource")

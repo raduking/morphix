@@ -20,7 +20,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -54,6 +53,27 @@ import org.morphix.reflection.Constructors;
  * @author Radu Sebastian LAZIN
  */
 public class ReschedulingTask implements AutoCloseable {
+
+	/**
+	 * Lifecycle states. A closed task cannot be enabled again.
+	 */
+	private enum State {
+
+		/**
+		 * The task is inactive and can be enabled.
+		 */
+		DISABLED,
+
+		/**
+		 * The task is active and can execute and reschedule itself.
+		 */
+		ENABLED,
+
+		/**
+		 * The task is permanently inactive and cannot be enabled again.
+		 */
+		CLOSED
+	}
 
 	/**
 	 * Name space class for default values. Other defaults which are not constants:
@@ -168,10 +188,9 @@ public class ReschedulingTask implements AutoCloseable {
 	private final Duration terminationTimeout;
 
 	/**
-	 * Atomic flag to indicate whether the task is enabled or disabled. When disabled, the task will not execute or
-	 * reschedule itself.
+	 * Atomic lifecycle state. Only enabled tasks execute or reschedule themselves, and closing is permanent.
 	 */
-	private final AtomicBoolean enabled = new AtomicBoolean(false);
+	private final AtomicReference<State> state = new AtomicReference<>(State.DISABLED);
 
 	/**
 	 * Atomic reference to the currently scheduled task. This allows for safe cancellation and rescheduling across threads.
@@ -224,7 +243,7 @@ public class ReschedulingTask implements AutoCloseable {
 	}
 
 	/**
-	 * Closes the task, ensuring that any scheduled executions are cancelled and resources are released.
+	 * Permanently closes the task, ensuring that any scheduled executions are cancelled and resources are released.
 	 * <p>
 	 * Note: the scheduled task (future) and the scheduler will only be closed if the scheduler is managed by this instance.
 	 *
@@ -232,7 +251,7 @@ public class ReschedulingTask implements AutoCloseable {
 	 */
 	@Override
 	public void close() throws Exception {
-		enabled.set(false);
+		state.set(State.CLOSED);
 		boolean cancelled = cancelScheduledTask();
 		scheduler.closeIfManaged(() -> closeRefreshScheduler(cancelled));
 	}
@@ -350,9 +369,14 @@ public class ReschedulingTask implements AutoCloseable {
 	 * Starts the self-rescheduling task (if not already running).
 	 *
 	 * @return true if the task was started, false if it was already enabled
+	 * @throws IllegalStateException if the task has been closed
 	 */
 	public boolean enable() {
-		if (!enabled.compareAndSet(false, true)) {
+		State previous = state.compareAndExchange(State.DISABLED, State.ENABLED);
+		if (State.CLOSED == previous) {
+			throw new IllegalStateException("Cannot enable a closed rescheduling task");
+		}
+		if (State.ENABLED == previous) {
 			return false;
 		}
 		logger.debug("[{}] Enabling rescheduling task.", name);
@@ -366,7 +390,7 @@ public class ReschedulingTask implements AutoCloseable {
 	 * @return true if the task was disabled, false if it was already disabled
 	 */
 	public boolean disable() {
-		if (!enabled.compareAndSet(true, false)) {
+		if (!state.compareAndSet(State.ENABLED, State.DISABLED)) {
 			return false;
 		}
 		logger.debug("[{}] Disabling rescheduling task.", name);
@@ -394,7 +418,7 @@ public class ReschedulingTask implements AutoCloseable {
 	 * @return true if enabled, false if disabled
 	 */
 	public boolean isEnabled() {
-		return enabled.get();
+		return State.ENABLED == state.get();
 	}
 
 	/**

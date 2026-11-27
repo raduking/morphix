@@ -3,6 +3,8 @@
 `1.1.4`
 
 - Added `Threads.safeJoin(Thread, Duration)` to join a thread with a timeout, with `InterruptedException` handling.
+- Fixed `ReschedulingTask.enable()` to throw `IllegalStateException` after the task has been closed.
+- Changed `ReschedulingTask.close()` to mark the task permanently closed before cleaning up resources.
 
 ---
 
